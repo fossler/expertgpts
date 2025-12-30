@@ -1,0 +1,55 @@
+
+# Ignore all __pycache__ directories and their contents everywhere
+**/__pycache__/
+**/__pycache__/*
+__pycache__/
+
+# Ignore all .pyc (python cache) files anywhere (if desired)
+*.pyc
+
+# Ignore virtual environment directories
+venv/
+env/
+.virtualenv/
+.venv/
+
+
+# Log files
+*log.*
+
+# Ignore environment variable files
+.env
+.env.local
+.env/
+.env.*.local
+
+# Ignore IDE specific files
+.vscode/
+
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore Claude specific files
+.claude_config.json
+.claude/
+
+# Streamlit
+.streamlit/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# AI Generated content
+docs/llm_outputs/
+docs/llm_instructions/
+
+# Project specific - API keys and secrets
+*.key
+.secrets
+credentials.json

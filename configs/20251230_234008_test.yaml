@@ -1,0 +1,9 @@
+created_at: '2025-12-30T23:40:08.620761'
+description: test
+expert_id: 20251230_234008_test
+expert_name: test
+metadata:
+  model: deepseek-chat
+  version: '1.0'
+system_prompt: ''
+temperature: 1.0

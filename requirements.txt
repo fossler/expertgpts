@@ -1,0 +1,13 @@
+# DeepAgents Requirements
+
+# Core Framework
+streamlit>=1.31.0
+
+# DeepSeek API (uses OpenAI-compatible interface)
+openai>=1.12.0
+
+# YAML Configuration
+pyyaml>=6.0.1
+
+# Environment Variables
+python-dotenv>=1.0.0
