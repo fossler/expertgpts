@@ -56,13 +56,6 @@ def render_sidebar():
     - Footer with API key input and links
     """
     with st.sidebar:
-        st.title("🤖 DeepAgents")
-
-        st.caption(
-            "Chat with domain-specific expert AI agents. "
-            "Select an expert from the navigation above."
-        )
-
         st.divider()
 
         # Toolbox
@@ -73,44 +66,15 @@ def render_sidebar():
         st.divider()
 
         # Footer
-        st.caption("**Configuration**")
+        st.caption("**Status**")
 
-        # API Key management
-        env_api_key = os.getenv("DEEPSEEK_API_KEY")
-        has_env_key = bool(env_api_key)
-
-        if has_env_key:
-            st.success("✅ API key loaded from .env file")
-        else:
-            st.info("💡 Tip: Add a .env file with DEEPSEEK_API_KEY for automatic loading")
-
-        # Show current API key status
+        # API Key status
         if st.session_state.deepseek_api_key:
-            st.caption("🔑 API key is set and available to all experts")
+            st.success("✅ API key configured")
         else:
             st.caption("⚠️ API key not set")
 
-        api_key = st.text_input(
-            "DeepSeek API Key" + (" (optional)" if has_env_key else ""),
-            key="main_api_key",
-            type="password",
-            value=st.session_state.deepseek_api_key if st.session_state.deepseek_api_key else "",
-            help="Enter your API key. It will be shared across all expert pages.",
-            placeholder="Already loaded from .env" if has_env_key else "Enter your API key",
-        )
-
-        # Update session state if user entered/changed the key
-        if api_key and api_key != st.session_state.deepseek_api_key:
-            st.session_state.deepseek_api_key = api_key
-
         st.divider()
-
-        # Links
-        st.caption("**Resources**")
-        "[Get a DeepSeek API key](https://platform.deepseek.com/)"
-        "[DeepSeek API Documentation](https://api-docs.deepseek.com/)"
-        "[View the source code](https://github.com/yourusername/deepagents)"
-        "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yourusername/deepagents)"
 
     return st.session_state.deepseek_api_key
 

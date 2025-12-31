@@ -46,50 +46,6 @@ def load_expert_config() -> dict:
         return {}
 
 
-def render_sidebar() -> str:
-    """Render the sidebar with API key input and links.
-
-    Returns:
-        API key from session state
-    """
-    with st.sidebar:
-        st.title("⚙️ Settings")
-
-        # API Key status display
-        if st.session_state.deepseek_api_key:
-            st.success("✅ API key configured")
-            st.caption("🔑 Available to all experts")
-        else:
-            st.warning("⚠️ API key not set")
-            st.caption("Enter your API key below to use this expert")
-
-        # API Key input (can override existing key)
-        api_key = st.text_input(
-            "DeepSeek API Key",
-            key=f"api_key_{EXPERT_ID}",
-            type="password",
-            value=st.session_state.deepseek_api_key if st.session_state.deepseek_api_key else "",
-            help="Enter your API key. It will be shared across all expert pages.",
-            placeholder="Enter your API key",
-        )
-
-        # Update session state if user entered/changed the key
-        if api_key and api_key != st.session_state.deepseek_api_key:
-            st.session_state.deepseek_api_key = api_key
-            st.success("✅ API key updated!")
-            st.rerun()
-
-        st.divider()
-
-        # Footer links
-        st.caption("**Resources**")
-        "[Get a DeepSeek API key](https://platform.deepseek.com/)"
-        "[DeepSeek API Documentation](https://api-docs.deepseek.com/)"
-        "[View the source code](https://github.com/yourusername/deepagents)"
-
-        st.divider()
-
-    return st.session_state.deepseek_api_key
 
 
 def render_chat_interface(config: dict, messages_key: str):
@@ -123,7 +79,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     if prompt := st.chat_input("Ask the expert..."):
         # Check API key
         if not api_key:
-            st.error("Please enter your DeepSeek API key in the sidebar.")
+            st.error("Please enter your DeepSeek API key in the Settings page.")
             return
 
         # Add user message to chat history
@@ -196,8 +152,8 @@ def main():
         st.error("Failed to load expert configuration.")
         return
 
-    # Render sidebar
-    api_key = render_sidebar()
+    # Get API key from session state
+    api_key = st.session_state.deepseek_api_key
 
     # Clear chat button
     clear_chat_history(messages_key)

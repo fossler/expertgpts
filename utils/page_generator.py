@@ -82,23 +82,26 @@ class PageGenerator:
             base_filename: Base filename (e.g., "My_Expert.py")
 
         Returns:
-            Filename with ordering prefix (e.g., "3_My_Expert.py")
+            Filename with ordering prefix (e.g., "1003_My_Expert.py")
         """
         # Get existing page numbers
         existing_numbers = []
         for file in self.pages_dir.glob("*.py"):
-            if file.name.startswith("_") or file.name == "template.py":
+            # Skip hidden files, template, and Settings page
+            if (file.name.startswith("_") or
+                file.name == "template.py" or
+                file.name == "9999_Settings.py"):
                 continue
             try:
-                # Extract number prefix (e.g., "1_Coding_Expert.py" -> 1)
+                # Extract number prefix (e.g., "1003_Coding_Expert.py" -> 1003)
                 parts = file.name.split("_", 1)
                 if parts[0].isdigit():
                     existing_numbers.append(int(parts[0]))
             except (IndexError, ValueError):
                 continue
 
-        # Get next number
-        next_number = max(existing_numbers, default=0) + 1
+        # Get next number, starting from 1000
+        next_number = max(existing_numbers, default=999) + 1
 
         return f"{next_number}_{base_filename}"
 

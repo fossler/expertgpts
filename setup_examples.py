@@ -3,8 +3,22 @@
 Run this script to populate the app with example Domain Expert Agents.
 """
 
+import shutil
+from pathlib import Path
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
+
+
+def copy_settings_page():
+    """Copy the Settings page from templates to pages directory."""
+    template_settings = Path("templates/9999_Settings.py")
+    pages_settings = Path("pages/9999_Settings.py")
+
+    if template_settings.exists():
+        shutil.copy2(template_settings, pages_settings)
+        print(f"✅ Copied Settings page to pages/")
+    else:
+        print(f"⚠️  Warning: Settings template not found at {template_settings}")
 
 
 def create_example_experts():
@@ -88,7 +102,14 @@ def create_example_experts():
 
 if __name__ == "__main__":
     print("Creating example expert agents...\n")
+    print("-" * 60)
+
+    # Copy Settings page first
+    copy_settings_page()
+    print()
+
+    # Create example experts
     created = create_example_experts()
 
     print(f"\n✅ Successfully created {len(created)} expert(s)!")
-    print("\n🎉 You can now run the app with: streamlit run app.py")
+    print("\n🎉 You can now run the app with: streamlit run Home.py")

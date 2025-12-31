@@ -52,17 +52,17 @@ def delete_configs():
 
 
 def delete_pages():
-    """Delete all expert page files (excluding Home.py and hidden files)."""
+    """Delete all expert page files (excluding Home.py, Settings.py, and hidden files)."""
     pages_dir = Path("pages")
 
     if not pages_dir.exists():
         print("❌ Pages directory not found!")
         return False
 
-    # Get all Python files, excluding Home.py and hidden files (starting with _)
+    # Get all Python files, excluding Home.py, Settings.py, and hidden files (starting with _)
     page_files = [
         f for f in pages_dir.glob("*.py")
-        if not f.name.startswith("_") and f.name != "Home.py"
+        if not f.name.startswith("_") and f.name not in ["Home.py", "9999_Settings.py"]
     ]
 
     if not page_files:
