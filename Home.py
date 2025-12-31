@@ -59,7 +59,7 @@ def render_sidebar():
 
         # Toolbox
         st.caption("**Toolbox**")
-        if st.button("➕ Add Chat", use_container_width=True):
+        if st.button("➕ Add Chat", width="stretch"):
             st.session_state.show_add_chat_dialog = True
 
         st.divider()
@@ -107,12 +107,12 @@ def render_add_chat_dialog():
             "Agent Description *",
             placeholder="Describe the expert's domain, expertise, and capabilities...",
             help="Detailed description of what this expert specializes in",
-            height=150,
+            height="content",
             max_chars=1000,
         ).strip()
 
         # Temperature
-        temperature = st.slider(
+        temperature = st.number_input(
             "Temperature",
             min_value=0.0,
             max_value=2.0,
@@ -126,7 +126,7 @@ def render_add_chat_dialog():
             custom_system_prompt = st.text_area(
                 "Custom System Prompt (Optional)",
                 placeholder="Leave empty to auto-generate from description...",
-                height=150,
+                height="content",
                 help="Provide a custom system prompt for this expert",
                 max_chars=2000,
             ).strip()
@@ -137,10 +137,10 @@ def render_add_chat_dialog():
         col1, col2 = st.columns(2)
 
         with col1:
-            submit_button = st.form_submit_button("Create Expert", use_container_width=True, type="primary")
+            submit_button = st.form_submit_button("Create Expert", width="stretch", type="primary")
 
         with col2:
-            cancel_button = st.form_submit_button("Cancel", use_container_width=True)
+            cancel_button = st.form_submit_button("Cancel", width="stretch")
 
         # Handle form submission
         if submit_button:

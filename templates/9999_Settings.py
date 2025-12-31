@@ -128,7 +128,7 @@ def render_expert_management_section():
             with col3:
                 st.markdown("**Actions**")
                 delete_key = f"delete_{expert['expert_id']}"
-                if st.button("🗑️ Delete", key=delete_key, use_container_width=True):
+                if st.button("🗑️ Delete", key=delete_key, width="stretch"):
                     st.session_state[f"confirm_delete_{expert['expert_id']}"] = True
 
         # Confirmation dialog for deletion
@@ -174,7 +174,7 @@ def render_danger_zone_section():
     - Reset to the default example experts
     """)
 
-    if st.button("🔄 Reset Application to Factory Defaults", type="primary", use_container_width=True):
+    if st.button("🔄 Reset Application to Factory Defaults", type="primary", width="content"):
         st.session_state.confirm_reset = True
 
     if st.session_state.get("confirm_reset"):

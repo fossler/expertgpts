@@ -1,7 +1,7 @@
 # DeepAgents Requirements
 
 # Core Framework
-streamlit>=1.31.0
+streamlit>=1.52.0
 
 # DeepSeek API (uses OpenAI-compatible interface)
 openai>=1.12.0

@@ -105,7 +105,7 @@ class ConfigManager:
         """List all available experts.
 
         Returns:
-            List of expert configurations (basic info only)
+            List of expert configurations (including temperature and system_prompt)
         """
         experts = []
 
@@ -116,6 +116,9 @@ class ConfigManager:
                     "expert_id": config["expert_id"],
                     "expert_name": config["expert_name"],
                     "description": config["description"],
+                    "temperature": config.get("temperature", 1.0),
+                    "system_prompt": config.get("system_prompt", ""),
+                    "metadata": config.get("metadata", {}),
                     "created_at": config.get("created_at", "Unknown"),
                 })
             except Exception as e:
