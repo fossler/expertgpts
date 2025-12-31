@@ -6,6 +6,7 @@ Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 
 import os
 import streamlit as st
+import tiktoken
 from utils.config_manager import ConfigManager
 from utils.deepseek_client import DeepSeekClient
 
@@ -141,6 +142,75 @@ def clear_chat_history(messages_key: str):
         st.rerun()
 
 
+def count_tokens(text: str, encoding) -> int:
+    """Count tokens in a text string.
+
+    Args:
+        text: Text to count tokens for
+        encoding: Tiktoken encoding
+
+    Returns:
+        Number of tokens
+    """
+    return len(encoding.encode(text))
+
+
+def display_context_usage(config: dict, messages_key: str):
+    """Display context length usage in the sidebar.
+
+    Args:
+        config: Expert configuration dictionary
+        messages_key: Session state key for this expert's messages
+    """
+    # Get the encoding for DeepSeek (uses cl100k_base like GPT-3.5/4)
+    try:
+        encoding = tiktoken.get_encoding("cl100k_base")
+    except Exception:
+        # Fallback if tiktoken fails
+        st.sidebar.caption("ℹ️ Token counting unavailable")
+        return
+
+    # Count tokens in system prompt
+    system_prompt = config.get("system_prompt", "")
+    system_tokens = count_tokens(system_prompt, encoding) if system_prompt else 0
+
+    # Count tokens in chat messages
+    messages = st.session_state.get(messages_key, [])
+    messages_tokens = 0
+    for message in messages:
+        messages_tokens += count_tokens(message.get("content", ""), encoding)
+
+    # Total tokens
+    total_tokens = system_tokens + messages_tokens
+
+    # DeepSeek max context is 128K tokens
+    max_tokens = 128000
+    usage_percent = (total_tokens / max_tokens) * 100
+
+    # Display context usage
+    st.sidebar.markdown("### 📊 Context Usage")
+
+    # Choose color based on usage
+    if usage_percent < 50:
+        color = "🟢"
+    elif usage_percent < 75:
+        color = "🟡"
+    elif usage_percent < 90:
+        color = "🟠"
+    else:
+        color = "🔴"
+
+    st.sidebar.markdown(f"{color} **{usage_percent:.1f}%** of 128K tokens")
+    st.sidebar.caption(f"Total: {total_tokens:,} / {max_tokens:,} tokens")
+
+    # Show breakdown
+    with st.sidebar.expander("See breakdown"):
+        st.caption(f"📝 System Prompt: {system_tokens:,} tokens")
+        st.caption(f"💬 Chat Messages: {messages_tokens:,} tokens")
+
+    st.sidebar.divider()
+
+
 def main():
     """Main application entry point."""
     messages_key = initialize_session_state()
@@ -154,6 +224,9 @@ def main():
 
     # Get API key from session state
     api_key = st.session_state.deepseek_api_key
+
+    # Display context usage
+    display_context_usage(config, messages_key)
 
     # Clear chat button
     clear_chat_history(messages_key)
