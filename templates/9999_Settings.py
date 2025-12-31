@@ -2,6 +2,7 @@
 
 import io
 import os
+import re
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -145,6 +146,30 @@ def create_new_expert(
     return expert_id, page_path
 
 
+def validate_expert_name(name: str) -> tuple[bool, str]:
+    """Validate expert name contains only allowed characters.
+
+    Allowed characters: A-Z, a-z, 0-9, underscore (_), hyphen (-), dot (.), space ( )
+
+    Args:
+        name: The expert name to validate
+
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    if not name:
+        return False, "Expert name cannot be empty"
+
+    # Regex pattern for allowed characters
+    pattern = r'^[A-Za-z0-9_.\- ]+$'
+
+    if not re.match(pattern, name):
+        allowed = "letters (A-Z, a-z), numbers (0-9), underscore (_), hyphen (-), dot (.), and space"
+        return False, f"Expert name can only contain: {allowed}"
+
+    return True, ""
+
+
 def render_add_chat_dialog():
     """Render the Add Chat dialog.
 
@@ -210,8 +235,15 @@ def render_add_chat_dialog():
 
         # Handle form submission
         if submit_button:
+            # Validate required fields
             if not chat_name or not description:
                 st.error("Please fill in all required fields.")
+                return
+
+            # Validate expert name
+            is_valid, error_msg = validate_expert_name(chat_name)
+            if not is_valid:
+                st.error(f"❌ {error_msg}")
                 return
 
             try:
