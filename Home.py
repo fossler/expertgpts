@@ -56,7 +56,6 @@ def render_sidebar():
     - Footer with API key input and links
     """
     with st.sidebar:
-        st.divider()
 
         # Toolbox
         st.caption("**Toolbox**")
