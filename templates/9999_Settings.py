@@ -1,6 +1,9 @@
 """Settings page for DeepAgents application."""
 
+import io
 import os
+import zipfile
+from datetime import datetime
 from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
@@ -381,7 +384,15 @@ def render_expert_management_section():
 
             with col1:
                 st.markdown(f"**Expert ID:** `{expert['expert_id']}`")
-                st.markdown(f"**Description:** {expert['description']}")
+                st.markdown("**Description:**")
+                st.text_area(
+                    "Description",
+                    value=expert['description'],
+                    height=None,
+                    disabled=True,
+                    key=f"desc_preview_{expert['expert_id']}",
+                    label_visibility="collapsed",
+                )
 
                 # Show system prompt
                 system_prompt = expert.get('system_prompt', '')
@@ -389,7 +400,7 @@ def render_expert_management_section():
                     st.markdown("**System Prompt:**")
                     # Display as read-only text area preview
                     st.text_area(
-                        "",
+                        "System Prompt",
                         value=system_prompt,
                         height=None,
                         disabled=True,
@@ -451,11 +462,63 @@ def render_expert_management_section():
                     st.rerun()
 
 
+def get_configs_as_zip():
+    """Create a zip file containing all expert configurations.
+
+    Returns:
+        bytes: Zip file content as bytes
+    """
+    configs_dir = Path(__file__).parent.parent / "configs"
+
+    # Create a zip file in memory
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        if configs_dir.exists():
+            for config_file in configs_dir.glob("*.yaml"):
+                # Add each config file to the zip
+                zip_file.write(config_file, config_file.name)
+
+    # Reset buffer position to the beginning
+    zip_buffer.seek(0)
+
+    return zip_buffer.getvalue()
+
+
 def render_danger_zone_section():
     """Render the Danger Zone section for destructive actions."""
     st.subheader("⚠️ Danger Zone")
 
     st.warning("⚠️ **Warning**: Actions in this section are irreversible and will delete all your data!")
+
+    # Download configs section
+    st.markdown("---")
+    st.markdown("### 💾 Backup Expert Configurations")
+
+    st.markdown("""
+    **Download All Configurations** will:
+    - Download all expert configuration files as a ZIP archive
+    - Preserve your custom experts and their settings
+    - Allow you to restore configurations later (manual import required)
+    """)
+
+    # Get the zip file content
+    config_zip = get_configs_as_zip()
+
+    # Generate timestamped filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"deepagents_configs_{timestamp}.zip"
+
+    # Download button
+    st.download_button(
+        label="📥 Download All Configurations (ZIP)",
+        data=config_zip,
+        file_name=filename,
+        mime="application/zip",
+        width="content",
+    )
+
+    st.markdown("---")
 
     st.markdown("""
     **Reset Application** will:
@@ -550,7 +613,7 @@ def main():
     # Tab-based navigation for different settings sections (stateful)
     tabs = ["🔑 API Key", "🤖 Expert Management", "⚠️ Danger Zone", "ℹ️ About"]
     active_tab = st.segmented_control(
-        "",  # label (empty)
+        "Settings Sections",
         options=tabs,
         default=tabs[st.session_state.settings_active_tab],
         label_visibility="collapsed",
