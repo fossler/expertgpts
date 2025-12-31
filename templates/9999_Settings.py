@@ -139,6 +139,9 @@ def create_new_expert(
         expert_name=chat_name,
     )
 
+    # Invalidate cache for this expert
+    st.session_state[f"cache_version_{expert_id}"] = st.session_state.get(f"cache_version_{expert_id}", 0) + 1
+
     return expert_id, page_path
 
 
@@ -340,6 +343,9 @@ def render_edit_expert_dialog():
                     }
                 )
 
+                # Invalidate cache for this expert
+                st.session_state[f"cache_version_{editing_expert_id}"] = st.session_state.get(f"cache_version_{editing_expert_id}", 0) + 1
+
                 # Clear the editing state
                 st.session_state[f"editing_expert_{editing_expert_id}"] = False
 
@@ -368,6 +374,7 @@ def render_expert_management_section():
 
     st.divider()
 
+    # Load experts (not cached to avoid tab switching issues)
     config_manager = ConfigManager()
     experts = config_manager.list_experts()
 

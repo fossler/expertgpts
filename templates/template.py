@@ -31,8 +31,13 @@ def initialize_session_state():
     return messages_key
 
 
-def load_expert_config() -> dict:
-    """Load the expert configuration.
+@st.cache_data(ttl=300, show_spinner="Loading expert configuration...")
+def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
+    """Load and cache the expert configuration.
+
+    Args:
+        expert_id: Unique ID of the expert
+        cache_version: Version to invalidate cache when config is edited
 
     Returns:
         Configuration dictionary
@@ -40,11 +45,27 @@ def load_expert_config() -> dict:
     config_manager = ConfigManager()
 
     try:
-        config = config_manager.load_config(EXPERT_ID)
+        config = config_manager.load_config(expert_id)
         return config
     except FileNotFoundError:
-        st.error(f"Configuration not found for expert: {EXPERT_ID}")
         return {}
+
+
+def load_expert_config() -> dict:
+    """Load the expert configuration with cache support.
+
+    Returns:
+        Configuration dictionary
+    """
+    # Get cache version from session state (incremented when config is edited)
+    cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
+
+    config = load_expert_config_cached(EXPERT_ID, cache_version)
+
+    if not config:
+        st.error(f"Configuration not found for expert: {EXPERT_ID}")
+
+    return config
 
 
 
@@ -142,6 +163,18 @@ def clear_chat_history(messages_key: str):
         st.rerun()
 
 
+@st.cache_resource
+def get_encoding():
+    """Get and cache the tiktoken encoding for DeepSeek.
+
+    Uses cl100k_base encoding (same as GPT-3.5/4).
+
+    Returns:
+        Tiktoken encoding object
+    """
+    return tiktoken.get_encoding("cl100k_base")
+
+
 def count_tokens(text: str, encoding) -> int:
     """Count tokens in a text string.
 
@@ -162,9 +195,9 @@ def display_context_usage(config: dict, messages_key: str):
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
     """
-    # Get the encoding for DeepSeek (uses cl100k_base like GPT-3.5/4)
+    # Get the cached encoding for DeepSeek
     try:
-        encoding = tiktoken.get_encoding("cl100k_base")
+        encoding = get_encoding()
     except Exception:
         # Fallback if tiktoken fails
         st.sidebar.caption("ℹ️ Token counting unavailable")
