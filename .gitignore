@@ -53,3 +53,7 @@ docs/llm_instructions/
 *.key
 .secrets
 credentials.json
+
+# Auto-generated content - recreated by setup_examples.py or reset_application.py
+configs/
+pages/
