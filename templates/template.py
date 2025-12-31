@@ -143,6 +143,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     "content": response
                 })
 
+                # Rerun to update context usage with new message
+                st.rerun()
+
             except Exception as e:
                 error_msg = f"Error: {str(e)}"
                 message_placeholder.error(error_msg)
@@ -150,6 +153,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     "role": "assistant",
                     "content": error_msg
                 })
+                st.rerun()
 
 
 def clear_chat_history(messages_key: str):
@@ -220,7 +224,7 @@ def display_context_usage(config: dict, messages_key: str):
     max_tokens = 128000
     usage_percent = (total_tokens / max_tokens) * 100
 
-    # Display context usage
+    # Display context usage in sidebar
     st.sidebar.markdown("### 📊 Context Usage")
 
     # Choose color based on usage
@@ -258,10 +262,10 @@ def main():
     # Get API key from session state
     api_key = st.session_state.deepseek_api_key
 
-    # Display context usage
+    # Display context usage in sidebar (before clear button)
     display_context_usage(config, messages_key)
 
-    # Clear chat button
+    # Clear chat button (in sidebar)
     clear_chat_history(messages_key)
 
     # Render main interface
