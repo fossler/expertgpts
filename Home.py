@@ -96,7 +96,7 @@ def render_add_chat_dialog():
 
         # Chat Name
         chat_name = st.text_input(
-            "Chat Name *",
+            "Expert Name *",
             placeholder="e.g., Python Expert, Data Scientist, Legal Advisor",
             help="A descriptive name for the domain expert",
             max_chars=100,
@@ -121,15 +121,14 @@ def render_add_chat_dialog():
             help="Controls randomness in responses. Lower = more focused, Higher = more creative",
         )
 
-        # Optional: Custom System Prompt
-        with st.expander("Advanced: Custom System Prompt"):
-            custom_system_prompt = st.text_area(
-                "Custom System Prompt (Optional)",
-                placeholder="Leave empty to auto-generate from description...",
-                height="content",
-                help="Provide a custom system prompt for this expert",
-                max_chars=2000,
-            ).strip()
+        # System Prompt (not in expander, matching Edit Expert layout)
+        custom_system_prompt = st.text_area(
+            "System Prompt",
+            placeholder="Leave empty to auto-generate from description...",
+            height="content",
+            help="Provide a custom system prompt for this expert",
+            max_chars=2000,
+        ).strip()
 
         st.caption("* Required fields")
 
