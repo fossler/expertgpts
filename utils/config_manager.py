@@ -157,8 +157,11 @@ class ConfigManager:
         """
         return f"""You are {expert_name}, a domain-specific expert AI assistant.
 
-## Your Expertise
 {description}
+
+## Metadata
+- Version: 1.0
+- Model: deepseek-chat
 
 ## Guidelines
 - Provide accurate, expert-level information in your domain
