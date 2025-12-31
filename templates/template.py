@@ -89,10 +89,6 @@ def render_sidebar() -> str:
 
         st.divider()
 
-        # Expert info
-        st.caption("**Expert Info**")
-        st.info(f"**Current Expert:** {EXPERT_NAME}")
-
     return st.session_state.deepseek_api_key
 
 

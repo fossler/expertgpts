@@ -1,7 +1,7 @@
 """Domain Expert Agent Chat Template.
 
 This template is used to generate individual expert pages.
-Replace 20251230_234126_writing_assistant and Writing Assistant when generating new pages.
+Replace 20251231_010519_writing_assistant and Writing Assistant when generating new pages.
 """
 
 import os
@@ -11,7 +11,7 @@ from utils.deepseek_client import DeepSeekClient
 
 
 # Expert Configuration
-EXPERT_ID = "20251230_234126_writing_assistant"
+EXPERT_ID = "20251231_010519_writing_assistant"
 EXPERT_NAME = "Writing Assistant"
 
 
@@ -88,10 +88,6 @@ def render_sidebar() -> str:
         "[View the source code](https://github.com/yourusername/deepagents)"
 
         st.divider()
-
-        # Expert info
-        st.caption("**Expert Info**")
-        st.info(f"**Current Expert:** {EXPERT_NAME}")
 
     return st.session_state.deepseek_api_key
 

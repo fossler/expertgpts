@@ -1,8 +1,8 @@
-created_at: '2025-12-30T23:11:14.151754'
+created_at: '2025-12-31T01:05:19.205932'
 description: Expert in data analysis, machine learning, statistics, and data visualization.
   Helps with data preprocessing, model selection, feature engineering, and interpreting
   results.
-expert_id: 20251230_231114_data_scientist
+expert_id: 20251231_010519_data_scientist
 expert_name: Data Scientist
 metadata:
   model: deepseek-chat

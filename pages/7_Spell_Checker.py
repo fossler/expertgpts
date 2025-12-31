@@ -1,7 +1,7 @@
 """Domain Expert Agent Chat Template.
 
 This template is used to generate individual expert pages.
-Replace 20251231_002949_translator_en_de and Translator EN_DE when generating new pages.
+Replace 20251231_010519_spell_checker and Spell Checker when generating new pages.
 """
 
 import os
@@ -11,8 +11,8 @@ from utils.deepseek_client import DeepSeekClient
 
 
 # Expert Configuration
-EXPERT_ID = "20251231_002949_translator_en_de"
-EXPERT_NAME = "Translator EN_DE"
+EXPERT_ID = "20251231_010519_spell_checker"
+EXPERT_NAME = "Spell Checker"
 
 
 def initialize_session_state():
@@ -88,10 +88,6 @@ def render_sidebar() -> str:
         "[View the source code](https://github.com/yourusername/deepagents)"
 
         st.divider()
-
-        # Expert info
-        st.caption("**Expert Info**")
-        st.info(f"**Current Expert:** {EXPERT_NAME}")
 
     return st.session_state.deepseek_api_key
 

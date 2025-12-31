@@ -39,6 +39,16 @@ def create_example_experts():
             "description": "Expert in career guidance, resume writing, interview preparation, and professional development. Helps with career planning, job search strategies, and workplace advice.",
             "temperature": 1.2,
         },
+        {
+            "name": "Translation Expert",
+            "description": "Expert in translating texts between German and English. Automatically detects the source language and translates to the other language. Handles formal and informal texts, technical documents, and everyday conversations. Provides accurate translations while preserving context and meaning.",
+            "temperature": 0.3,
+        },
+        {
+            "name": "Spell Checker",
+            "description": "Expert in spell checking and text correction across multiple languages. Automatically detects the language of the input text and corrects spelling, grammar, and punctuation errors. After corrections, provides a clear summary listing all changes made with before/after examples. Supports English, German, and other major languages. Maintains the original writing style while improving accuracy.",
+            "temperature": 0.2,
+        },
     ]
 
     created = []

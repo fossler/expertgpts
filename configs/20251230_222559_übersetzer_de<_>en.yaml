@@ -1,9 +1,0 @@
-created_at: '2025-12-30T22:25:59.966377'
-description: Übersetze automatisch deutsche Texte ins englische und umgekehrt
-expert_id: 20251230_222559_übersetzer_de<_>en
-expert_name: Übersetzer DE<->EN
-metadata:
-  model: deepseek-chat
-  version: '1.0'
-system_prompt: ''
-temperature: 1.0
