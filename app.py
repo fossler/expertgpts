@@ -39,6 +39,14 @@ def initialize_session_state():
 def main():
     """Main application entry point using st.navigation()."""
 
+    # Set page configuration (must be first st command)
+    st.set_page_config(
+        page_title="ExpertGPTs",
+        page_icon="🤖",
+        layout="wide",
+        initial_sidebar_state="auto"
+    )
+
     # Initialize session state before navigation
     initialize_session_state()
 
