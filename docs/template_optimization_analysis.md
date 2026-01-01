@@ -243,9 +243,12 @@ system_tokens = count_system_prompt_tokens(config.get("system_prompt", ""))
 
 ---
 
-## 4. Structural Optimizations 🔵 Medium Priority
+## 4. Structural Optimizations ✅ **COMPLETED** 🔵 Medium Priority
 
-### Structure 4.1: Centralize Constants
+**Status:** Fixed in commit on 2026-01-01
+**Implemented:** Created centralized utilities for constants and token management
+
+### Structure 4.1: Centralize Constants ✅ **FIXED**
 
 **Current:** Magic numbers scattered throughout the code
 
@@ -310,7 +313,7 @@ elif usage_percent < CONTEXT_USAGE_WARNING_THRESHOLD:
 # ...
 ```
 
-### Structure 4.2: Extract Token Management to Utility
+### Structure 4.2: Extract Token Management to Utility ✅ **FIXED**
 
 **Current:** Token logic mixed with UI code (lines 176-254)
 

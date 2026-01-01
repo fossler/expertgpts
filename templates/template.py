@@ -5,10 +5,18 @@ Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 """
 
 import streamlit as st
-import tiktoken
 from utils.config_manager import ConfigManager
 from utils.deepseek_client import DeepSeekClient
 from utils.session_state import initialize_shared_session_state
+from utils.token_manager import TokenManager
+from utils.constants import (
+    DEEPSEEK_MAX_CONTEXT_TOKENS,
+    CONTEXT_USAGE_ALERT_THRESHOLD,
+    CONTEXT_USAGE_WARNING_THRESHOLD,
+    CONTEXT_USAGE_SAFE_THRESHOLD,
+    CONTEXT_USAGE_COLORS,
+    CONFIG_CACHE_TTL
+)
 
 
 # Expert Configuration
@@ -29,7 +37,7 @@ def initialize_session_state():
     return messages_key
 
 
-@st.cache_data(ttl=300, show_spinner="Loading expert configuration...")
+@st.cache_data(ttl=CONFIG_CACHE_TTL, show_spinner="Loading expert configuration...")
 def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
     """Load and cache the expert configuration.
 
@@ -165,74 +173,6 @@ def clear_chat_history(messages_key: str):
         st.rerun()
 
 
-@st.cache_resource
-def get_encoding():
-    """Get and cache the tiktoken encoding for DeepSeek.
-
-    Uses cl100k_base encoding (same as GPT-3.5/4).
-
-    Returns:
-        Tiktoken encoding object
-    """
-    return tiktoken.get_encoding("cl100k_base")
-
-
-def count_tokens(text: str, encoding) -> int:
-    """Count tokens in a text string.
-
-    Args:
-        text: Text to count tokens for
-        encoding: Tiktoken encoding
-
-    Returns:
-        Number of tokens
-    """
-    return len(encoding.encode(text))
-
-
-@st.cache_data(ttl=300, show_spinner=False)
-def count_system_prompt_tokens(system_prompt: str) -> int:
-    """Count tokens in system prompt (cached for 5 minutes).
-
-    Args:
-        system_prompt: System prompt text
-
-    Returns:
-        Token count (0 if empty)
-
-    This function is cached to avoid recounting the same system prompt
-    on every rerun, as system prompts rarely change during a session.
-    """
-    if not system_prompt:
-        return 0
-    encoding = get_encoding()
-    return count_tokens(system_prompt, encoding)
-
-
-@st.cache_data(ttl=60, show_spinner=False)
-def count_messages_tokens(messages_key: str, messages: list) -> int:
-    """Count tokens in chat messages (cached for 60 seconds).
-
-    Args:
-        messages_key: Session state key for this expert's messages
-        messages: List of chat messages
-
-    Returns:
-        Total token count
-
-    This function is cached to avoid recounting messages on every rerun.
-    The cache automatically invalidates when:
-    - 60 seconds pass
-    - messages_key changes (different expert)
-    - messages content changes
-    """
-    encoding = get_encoding()
-    return sum(
-        count_tokens(msg.get("content", ""), encoding)
-        for msg in messages
-    )
-
-
 def display_context_usage(config: dict, messages_key: str):
     """Display context length usage in the sidebar.
 
@@ -240,51 +180,39 @@ def display_context_usage(config: dict, messages_key: str):
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
     """
-    # Count tokens in system prompt (cached)
+    # Calculate usage statistics using TokenManager
     system_prompt = config.get("system_prompt", "")
-    try:
-        system_tokens = count_system_prompt_tokens(system_prompt)
-    except Exception:
-        # Fallback if caching fails
-        st.sidebar.caption("ℹ️ Token counting temporarily unavailable")
-        return
-
-    # Count tokens in chat messages (cached)
     messages = st.session_state.get(messages_key, [])
+
     try:
-        messages_tokens = count_messages_tokens(messages_key, messages)
-    except Exception:
-        # Fallback if caching fails
-        st.sidebar.caption("ℹ️ Token counting temporarily unavailable")
+        stats = TokenManager.calculate_usage_statistics(
+            system_prompt=system_prompt,
+            messages=messages
+        )
+    except Exception as e:
+        st.sidebar.caption(f"ℹ️ Token counting unavailable: {str(e)}")
         return
 
-    # Total tokens
-    total_tokens = system_tokens + messages_tokens
-
-    # DeepSeek max context is 128K tokens
-    max_tokens = 128000
-    usage_percent = (total_tokens / max_tokens) * 100
+    if "error" in stats:
+        st.sidebar.caption(f"ℹ️ {stats['error']}")
+        return
 
     # Display context usage in sidebar
     st.sidebar.markdown("### 📊 Context Usage")
 
-    # Choose color based on usage
-    if usage_percent < 50:
-        color = "🟢"
-    elif usage_percent < 75:
-        color = "🟡"
-    elif usage_percent < 90:
-        color = "🟠"
-    else:
-        color = "🔴"
-
-    st.sidebar.markdown(f"{color} **{usage_percent:.1f}%** of 128K tokens")
-    st.sidebar.caption(f"Total: {total_tokens:,} / {max_tokens:,} tokens")
+    # Display main stats
+    st.sidebar.markdown(
+        f"{stats['color']} **{stats['usage_percent']:.1f}%** "
+        f"of {stats['max_tokens']:,} tokens"
+    )
+    st.sidebar.caption(
+        f"Total: {stats['total_tokens']:,} / {stats['max_tokens']:,} tokens"
+    )
 
     # Show breakdown
     with st.sidebar.expander("See breakdown"):
-        st.caption(f"📝 System Prompt: {system_tokens:,} tokens")
-        st.caption(f"💬 Chat Messages: {messages_tokens:,} tokens")
+        st.caption(f"📝 System Prompt: {stats['system_tokens']:,} tokens")
+        st.caption(f"💬 Chat Messages: {stats['messages_tokens']:,} tokens")
 
     st.sidebar.divider()
 
