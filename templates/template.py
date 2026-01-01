@@ -190,6 +190,49 @@ def count_tokens(text: str, encoding) -> int:
     return len(encoding.encode(text))
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def count_system_prompt_tokens(system_prompt: str) -> int:
+    """Count tokens in system prompt (cached for 5 minutes).
+
+    Args:
+        system_prompt: System prompt text
+
+    Returns:
+        Token count (0 if empty)
+
+    This function is cached to avoid recounting the same system prompt
+    on every rerun, as system prompts rarely change during a session.
+    """
+    if not system_prompt:
+        return 0
+    encoding = get_encoding()
+    return count_tokens(system_prompt, encoding)
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def count_messages_tokens(messages_key: str, messages: list) -> int:
+    """Count tokens in chat messages (cached for 60 seconds).
+
+    Args:
+        messages_key: Session state key for this expert's messages
+        messages: List of chat messages
+
+    Returns:
+        Total token count
+
+    This function is cached to avoid recounting messages on every rerun.
+    The cache automatically invalidates when:
+    - 60 seconds pass
+    - messages_key changes (different expert)
+    - messages content changes
+    """
+    encoding = get_encoding()
+    return sum(
+        count_tokens(msg.get("content", ""), encoding)
+        for msg in messages
+    )
+
+
 def display_context_usage(config: dict, messages_key: str):
     """Display context length usage in the sidebar.
 
@@ -197,24 +240,23 @@ def display_context_usage(config: dict, messages_key: str):
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
     """
-    # Get the cached encoding for DeepSeek
+    # Count tokens in system prompt (cached)
+    system_prompt = config.get("system_prompt", "")
     try:
-        encoding = get_encoding()
+        system_tokens = count_system_prompt_tokens(system_prompt)
     except Exception:
-        # Fallback if tiktoken fails
-        st.sidebar.caption("ℹ️ Token counting unavailable")
+        # Fallback if caching fails
+        st.sidebar.caption("ℹ️ Token counting temporarily unavailable")
         return
 
-    # Count tokens in system prompt
-    system_prompt = config.get("system_prompt", "")
-    system_tokens = count_tokens(system_prompt, encoding) if system_prompt else 0
-
-    # Count tokens in chat messages
+    # Count tokens in chat messages (cached)
     messages = st.session_state.get(messages_key, [])
-    messages_tokens = sum(
-        count_tokens(msg.get("content", ""), encoding)
-        for msg in messages
-    )
+    try:
+        messages_tokens = count_messages_tokens(messages_key, messages)
+    except Exception:
+        # Fallback if caching fails
+        st.sidebar.caption("ℹ️ Token counting temporarily unavailable")
+        return
 
     # Total tokens
     total_tokens = system_tokens + messages_tokens

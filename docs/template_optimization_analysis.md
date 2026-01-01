@@ -160,9 +160,12 @@ if not config:
 
 ---
 
-## 3. Performance Optimizations 🟢 Low-Medium Priority
+## 3. Performance Optimizations ✅ **COMPLETED** 🟢 Low-Medium Priority
 
-### Performance 3.1: Token Counting on Every Rerun
+**Status:** Fixed in commit on 2026-01-01
+**Implemented:** Option A - Cache with @st.cache_data
+
+### Performance 3.1: Token Counting on Every Rerun ✅ **FIXED**
 
 **Current Behavior (lines 221-224):**
 Token counts are recalculated on every rerun, even when messages haven't changed.
@@ -213,7 +216,7 @@ messages_tokens = sum(
 
 **Recommendation:** Start with **Option A** for simplicity. Only implement Option B if profiling shows this is a bottleneck.
 
-### Performance 3.2: System Prompt Token Counting
+### Performance 3.2: System Prompt Token Counting ✅ **FIXED**
 
 **Current (line 218):**
 ```python
