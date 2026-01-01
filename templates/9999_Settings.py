@@ -13,14 +13,6 @@ from utils import secrets_manager
 from utils import config_toml_manager
 
 
-st.set_page_config(
-    page_title="Settings",
-    page_icon="⚙️",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-
 def initialize_session_state():
     """Initialize session state variables."""
     # Initialize add chat dialog state

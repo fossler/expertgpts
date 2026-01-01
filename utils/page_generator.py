@@ -87,9 +87,10 @@ class PageGenerator:
         # Get existing page numbers
         existing_numbers = []
         for file in self.pages_dir.glob("*.py"):
-            # Skip hidden files, template, and Settings page
+            # Skip hidden files, template, Home page, and Settings page
             if (file.name.startswith("_") or
                 file.name == "template.py" or
+                file.name == "1000_Home.py" or
                 file.name == "9999_Settings.py"):
                 continue
             try:
@@ -100,8 +101,8 @@ class PageGenerator:
             except (IndexError, ValueError):
                 continue
 
-        # Get next number, starting from 1000
-        next_number = max(existing_numbers, default=999) + 1
+        # Get next number, starting from 1001 (Home is 1000, Settings is 9999)
+        next_number = max(existing_numbers, default=1000) + 1
 
         return f"{next_number}_{base_filename}"
 

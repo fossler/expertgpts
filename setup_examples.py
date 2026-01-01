@@ -21,6 +21,18 @@ def copy_settings_page():
         print(f"⚠️  Warning: Settings template not found at {template_settings}")
 
 
+def copy_home_page():
+    """Copy the Home page from templates to pages directory."""
+    template_home = Path("templates/1000_Home.py")
+    pages_home = Path("pages/1000_Home.py")
+
+    if template_home.exists():
+        shutil.copy2(template_home, pages_home)
+        print(f"✅ Copied Home page to pages/")
+    else:
+        print(f"⚠️  Warning: Home template not found at {template_home}")
+
+
 def create_example_experts():
     """Create a set of example expert agents."""
 
@@ -104,7 +116,11 @@ if __name__ == "__main__":
     print("Creating example expert agents...\n")
     print("-" * 60)
 
-    # Copy Settings page first
+    # Copy Home page first (so experts start at 1001)
+    copy_home_page()
+    print()
+
+    # Copy Settings page
     copy_settings_page()
     print()
 
@@ -112,4 +128,4 @@ if __name__ == "__main__":
     created = create_example_experts()
 
     print(f"\n✅ Successfully created {len(created)} expert(s)!")
-    print("\n🎉 You can now run the app with: streamlit run Home.py")
+    print("\n🎉 You can now run the app with: streamlit run app.py")

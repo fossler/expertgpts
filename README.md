@@ -6,11 +6,12 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 
 - **Multiple Expert Agents**: Chat with domain-specific AI experts, each specialized in different areas
 - **Custom Expert Creation**: Easily create your own expert agents with custom domains and descriptions
-- **Streamlit-Powered**: Built with Streamlit for a clean, responsive interface
+- **Modern Navigation**: Material Design icons in navigation using Streamlit's `st.navigation()` API
+- **Wide Mode**: Expansive content layout enabled by default
 - **Theme Customization**: Customize colors through the Settings page with preset themes
 - **Secure Secrets Management**: API keys stored securely in `.streamlit/secrets.toml`
 - **File-Based Configuration**: Each expert has its own configuration file for easy management
-- **Template-Based Pages**: New experts are generated from a consistent template
+- **Template-Based Pages**: Home, Settings, and expert pages are generated from templates
 - **Chat History**: Maintain conversation context throughout your session
 - **Adjustable Temperature**: Control response creativity and focus for each expert
 
@@ -18,28 +19,32 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 
 ```
 expertgpts/
-├── Home.py                   # Main landing page
+├── app.py                         # Main entry point with st.navigation()
 ├── pages/
-│   ├── 1_Python_Expert.py    # Auto-generated expert pages
+│   ├── 1000_Home.py              # Home page (generated from template)
+│   ├── 1001_Python_Expert.py     # Expert pages (generated from template)
+│   ├── 1002_Data_Scientist.py
 │   └── ...
+│   └── 9999_Settings.py          # Settings page (generated from template)
 ├── templates/
-│   ├── template.py           # Template for all expert pages
-│   └── 9999_Settings.py      # Settings page
+│   ├── template.py               # Template for all expert pages
+│   ├── 1000_Home.py             # Home page template
+│   └── 9999_Settings.py         # Settings page template
 ├── configs/
-│   └── {expert_id}.yaml      # Config files for each expert
+│   └── {expert_id}.yaml          # Config files for each expert
 ├── utils/
-│   ├── config_manager.py     # Config file operations
-│   ├── page_generator.py     # Page generation logic
-│   ├── deepseek_client.py    # DeepSeek API wrapper
-│   ├── secrets_manager.py    # Streamlit secrets management
-│   └── config_toml_manager.py # Theme configuration management
+│   ├── config_manager.py         # Config file operations
+│   ├── page_generator.py         # Page generation logic
+│   ├── deepseek_client.py        # DeepSeek API wrapper
+│   ├── secrets_manager.py        # Streamlit secrets management
+│   └── config_toml_manager.py    # Theme configuration management
 ├── .streamlit/
-│   ├── secrets.toml          # API keys and secrets (gitignored)
-│   ├── secrets.toml.example  # Template for secrets file
-│   ├── config.toml           # Theme settings (gitignored)
-│   └── config.toml.example   # Template for theme settings
+│   ├── secrets.toml              # API keys and secrets (gitignored)
+│   ├── secrets.toml.example      # Template for secrets file
+│   ├── config.toml               # Theme settings (gitignored)
+│   └── config.toml.example       # Template for theme settings
 ├── requirements.txt
-├── setup_examples.py         # Script to create example experts
+├── setup_examples.py             # Script to create example experts
 └── README.md
 ```
 
@@ -74,12 +79,14 @@ expertgpts/
    python3 setup_examples.py
    ```
 
-This will create 5 example experts:
+This will create 7 example experts:
 - Python Expert
 - Data Scientist
 - Writing Assistant
 - Linux System Admin
 - Career Coach
+- Translation Expert
+- Spell Checker
 
 ## Usage
 
@@ -87,10 +94,12 @@ This will create 5 example experts:
 
 Start the application with:
 ```bash
-streamlit run Home.py
+streamlit run app.py
 ```
 
 The app will open in your browser at `http://localhost:8501`
+
+**Note**: ExpertGPTs uses Streamlit's modern `st.navigation()` API with Material Design icons for a polished user experience. Wide mode is enabled by default for maximum content visibility.
 
 ### Setting Your API Key
 
@@ -151,14 +160,15 @@ The theme settings are automatically saved to `.streamlit/config.toml` with secu
 
 ### Creating New Expert Agents
 
-1. Click the **"Add Chat"** button in the sidebar
-2. Fill in the form:
-   - **Chat Name**: A descriptive name for the expert (e.g., "Legal Advisor")
+1. Navigate to the **Home** page (the "Add Chat" button is only available there)
+2. Click the **"➕ Add Chat"** button in the sidebar
+3. Fill in the form:
+   - **Expert Name**: A descriptive name for the expert (e.g., "Legal Advisor")
    - **Agent Description**: Describe the expert's domain and capabilities
    - **Temperature**: Set response creativity (0.0 = focused, 2.0 = creative)
    - **Custom System Prompt** (optional): Provide a custom system prompt
-3. Click **"Create Expert"**
-4. You'll be automatically navigated to your new expert page and can start chatting immediately!
+4. Click **"Create Expert"**
+5. You'll be automatically navigated to your new expert page and can start chatting immediately!
 
 ## Configuration
 
@@ -256,16 +266,30 @@ For more information on the DeepSeek API, see the [official documentation](https
 
 ### Project Structure
 
-- **app.py**: Main application entry point, landing page, and "Add Chat" functionality
-- **pages/template.py**: Template used to generate all expert pages
+- **app.py**: Main application entry point using `st.navigation()` for modern navigation
+- **templates/**: Template files for Home, Settings, and expert pages
+- **pages/**: Auto-generated pages from templates (Home: 1000, Experts: 1001+, Settings: 9999)
 - **utils/**: Shared utilities and business logic
 - **configs/**: YAML configuration files for each expert
 
 ### Adding New Features
 
 1. **New Utility**: Add to `utils/` directory
-2. **UI Changes**: Modify `pages/template.py` for all experts, or specific expert pages
-3. **New Pages**: Create in `pages/` directory with numeric prefix for ordering
+2. **UI Changes**: Modify templates in `templates/` directory, then run `echo "yes" | python3 reset_application.py` to regenerate pages
+3. **New Pages**: Create template in `templates/` and generate via `setup_examples.py` or programmatically
+
+### Template-Based Architecture
+
+ExpertGPTs uses a template-based architecture for consistency:
+
+- **Home & Settings**: Generated from `templates/1000_Home.py` and `templates/9999_Settings.py`
+- **Expert Pages**: Generated from `templates/template.py` with placeholders replaced
+- **Numbering**: Home (1000) → Experts (1001+) → Settings (9999)
+
+When modifying templates:
+1. Edit the template file in `templates/`
+2. Run `echo "yes" | python3 reset_application.py` to regenerate all pages
+3. Changes will be reflected across all generated pages
 
 ### Testing
 

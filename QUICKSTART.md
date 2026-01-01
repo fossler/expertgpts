@@ -24,41 +24,51 @@ Get ExpertGPTs up and running in minutes!
    python3 setup_examples.py
    ```
 
-   This creates 5 pre-configured expert agents:
+   This creates 7 pre-configured expert agents:
    - Python Expert
    - Data Scientist
    - Writing Assistant
    - Linux System Admin
    - Career Coach
+   - Translation Expert
+   - Spell Checker
 
 ## Running the Application
 
 Start the app with:
 ```bash
-streamlit run Home.py
+streamlit run app.py
 ```
 
 The application will open at `http://localhost:8501`
 
+**Features**:
+- Modern navigation with Material Design icons
+- Wide mode enabled by default
+- All pages generated from templates for consistency
+
 ## First Use
 
-1. **Set up your API key** (choose one):
-   - **Recommended**: Create a `.env` file with `DEEPSEEK_API_KEY=your_key_here`
-   - **Or**: Paste your DeepSeek API key in the sidebar
+1. **Set up your API key**:
+   - Navigate to **Settings** → **API Key** tab
+   - Enter your DeepSeek API key
+   - Click **"Save API Key"**
+   - The key is automatically saved to `.streamlit/secrets.toml` with secure permissions
 2. **Select an expert**: Click on any expert in the navigation menu
 3. **Start chatting**: Type your question and get expert responses!
 
-> **Pro tip**: Copy `.env.example` to `.env` and add your API key there for automatic loading!
-
 ## Creating Your Own Expert
 
-1. Click **"Add Chat"** in the sidebar
-2. Fill in the details:
+1. Navigate to the **Home** page
+2. Click **"➕ Add Chat"** in the sidebar
+3. Fill in the details:
    - Name: e.g., "Legal Advisor"
    - Description: What this expert specializes in
    - Temperature: 0.7 (balanced) or customize
-3. Click **"Create Expert"**
-4. You'll automatically navigate to your new expert and can start chatting immediately!
+4. Click **"Create Expert"**
+5. You'll automatically navigate to your new expert and can start chatting immediately!
+
+> **Note**: The "Add Chat" button is only available on the Home page sidebar
 
 ## Temperature Guide
 

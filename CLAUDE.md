@@ -59,24 +59,27 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 # Then edit .streamlit/secrets.toml and add your DEEPSEEK_API_KEY
 
 # Run the app
-streamlit run Home.py
+streamlit run app.py
 ```
 
 ### Application Reset
 ```bash
 # Reset application to factory default state
 # WARNING: This deletes all configs and pages, then recreates example experts
-python3 reset_application.py
+# IMPORTANT: Always use echo "yes" | to auto-confirm (required for non-interactive environments)
+echo "yes" | python3 reset_application.py
 
 # Or make executable and run directly
 chmod +x reset_application.py
-./reset_application.py
+echo "yes" | ./reset_application.py
 ```
 
 **Use reset_application.py when:**
 - After modifying `templates/template.py` and need to regenerate all expert pages
 - Configs and pages become out of sync or corrupted
 - Starting fresh for development/testing
+
+**IMPORTANT:** Always use `echo "yes" |` prefix when running reset_application.py, as it requires interactive confirmation that won't work in non-interactive environments.
 - Restoring application to initial example state
 
 The script will:
