@@ -102,7 +102,7 @@ def run_setup_examples():
 def main():
     """Main reset function."""
     print("\n" + "=" * 60)
-    print("🔄 DeepAgents Application Reset")
+    print("🔄 ExpertGPTs Application Reset")
     print("=" * 60)
 
     # Confirm before proceeding

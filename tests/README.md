@@ -1,6 +1,6 @@
-# Test Suite for DeepAgents
+# Test Suite for ExpertGPTs
 
-This directory contains automated tests for the DeepAgents application.
+This directory contains automated tests for the ExpertGPTs application.
 
 ## Running Tests
 

@@ -1,1 +1,1 @@
-"""Test suite for DeepAgents application."""
+"""Test suite for ExpertGPTs application."""

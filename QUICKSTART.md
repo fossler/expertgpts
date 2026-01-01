@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get DeepAgents up and running in minutes!
+Get ExpertGPTs up and running in minutes!
 
 ## Prerequisites
 
@@ -89,4 +89,4 @@ The application will open at `http://localhost:8501`
 
 ## Support
 
-For issues or questions, visit the [GitHub repository](https://github.com/yourusername/deepagents).
+For issues or questions, visit the [GitHub repository](https://github.com/yourusername/expertgpts).

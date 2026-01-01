@@ -1,11 +1,11 @@
 #!/bin/bash
-# Script to run tests for DeepAgents
+# Script to run tests for ExpertGPTs
 
 # Activate virtual environment
 source .venv/bin/activate
 
 # Run tests with verbose output
-echo "Running DeepAgents test suite..."
+echo "Running ExpertGPTs test suite..."
 echo "=================================="
 
 python -m pytest -v

@@ -1,4 +1,4 @@
-"""DeepAgents - Multi-Expert AI Chat Application.
+"""ExpertGPTs - Multi-Expert AI Chat Application.
 
 A Streamlit application that provides access to multiple domain-specific
 expert AI agents powered by DeepSeek API.
@@ -23,7 +23,7 @@ if env_path.exists():
 
 
 st.set_page_config(
-    page_title="DeepAgents",
+    page_title="ExpertGPTs",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -264,12 +264,12 @@ def render_expert_list():
 
 def render_main_content():
     """Render the main page content."""
-    st.title("🤖 Welcome to DeepAgents")
+    st.title("🤖 Welcome to ExpertGPTs")
 
     st.markdown("""
     ## Your Multi-Expert AI Assistant Platform
 
-    DeepAgents provides access to multiple domain-specific expert AI agents, each specialized
+    ExpertGPTs provides access to multiple domain-specific expert AI agents, each specialized
     in different fields. Select an expert from the navigation menu above to start chatting!
 
     ### Getting Started

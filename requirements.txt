@@ -1,4 +1,4 @@
-# DeepAgents Requirements
+# ExpertGPTs Requirements
 
 # Core Framework
 streamlit>=1.52.0

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DeepAgents is a multi-expert AI chat application built with Streamlit, powered by the DeepSeek API. It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.
+ExpertGPTs is a multi-expert AI chat application built with Streamlit, powered by the DeepSeek API. It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.
 
 ## Key Architecture Concepts
 

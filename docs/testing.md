@@ -1,6 +1,6 @@
-# Testing Guide for DeepAgents
+# Testing Guide for ExpertGPTs
 
-This guide covers everything you need to know about testing the DeepAgents application.
+This guide covers everything you need to know about testing the ExpertGPTs application.
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ This guide covers everything you need to know about testing the DeepAgents appli
 
 ## Overview
 
-DeepAgents uses **pytest** as its testing framework. The test suite focuses on:
+ExpertGPTs uses **pytest** as its testing framework. The test suite focuses on:
 
 - ✅ Agent configuration management
 - ✅ Page file generation
@@ -375,7 +375,7 @@ pytest -m "not slow"  # Everything except slow tests
 pip install -e .
 
 # Or ensure you're in the project root
-cd /path/to/deepagents
+cd /path/to/expertgpts
 pytest
 ```
 

@@ -1,6 +1,6 @@
-# DeepAgents
+# ExpertGPTs
 
-A multi-expert AI chat application built with Streamlit and powered by the DeepSeek API. DeepAgents provides access to multiple domain-specific expert AI agents, each specialized in different fields.
+A multi-expert AI chat application built with Streamlit and powered by the DeepSeek API. ExpertGPTs provides access to multiple domain-specific expert AI agents, each specialized in different fields.
 
 ## Features
 
@@ -15,7 +15,7 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 ## Architecture
 
 ```
-deepagents/
+expertgpts/
 ├── Home.py                   # Main landing page
 ├── pages/
 │   ├── 1_Python_Expert.py    # Auto-generated expert pages
@@ -38,7 +38,7 @@ deepagents/
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd deepagents
+   cd expertgpts
    ```
 
 2. **Create a virtual environment** (recommended):
@@ -162,7 +162,7 @@ The modular structure makes it easy to add new features:
 
 ## API Integration
 
-DeepAgents uses the DeepSeek API, which is compatible with the OpenAI API format. The app uses the official OpenAI Python client with a custom base URL.
+ExpertGPTs uses the DeepSeek API, which is compatible with the OpenAI API format. The app uses the official OpenAI Python client with a custom base URL.
 
 **API Endpoint**: `https://api.deepseek.com`
 **Model**: `deepseek-chat`
@@ -242,4 +242,4 @@ This project is open source and available under the MIT License.
 
 ## Support
 
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/yourusername/deepagents).
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/yourusername/expertgpts).

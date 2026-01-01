@@ -1,4 +1,4 @@
-"""Settings page for DeepAgents application."""
+"""Settings page for ExpertGPTs application."""
 
 import io
 import os
@@ -101,8 +101,8 @@ def render_api_key_section():
     st.caption("**Useful Links**")
     "[Get a DeepSeek API key](https://platform.deepseek.com/)"
     "[DeepSeek API Documentation](https://api-docs.deepseek.com/)"
-    "[View the source code](https://github.com/yourusername/deepagents)"
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yourusername/deepagents)"
+    "[View the source code](https://github.com/yourusername/expertgpts)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yourusername/expertgpts)"
 
 
 def create_new_expert(
@@ -545,7 +545,7 @@ def render_danger_zone_section():
 
     # Generate timestamped filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"deepagents_configs_{timestamp}.zip"
+    filename = f"expertgpts_configs_{timestamp}.zip"
 
     # Download button
     st.download_button(
@@ -611,7 +611,7 @@ def render_about_section():
     st.subheader("ℹ️ About")
 
     st.markdown("""
-    ### DeepAgents
+    ### ExpertGPTs
 
     A multi-expert AI chat application built with Streamlit, powered by the DeepSeek API.
 
@@ -627,7 +627,7 @@ def render_about_section():
     **Resources:**
     - [Get a DeepSeek API key](https://platform.deepseek.com/)
     - [DeepSeek API Documentation](https://api-docs.deepseek.com/)
-    - [View the source code](https://github.com/yourusername/deepagents)
+    - [View the source code](https://github.com/yourusername/expertgpts)
     """)
 
 
