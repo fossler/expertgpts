@@ -27,8 +27,12 @@ def initialize_session_state():
     # Initialize API key in session state (from secrets or existing session)
     if "deepseek_api_key" not in st.session_state:
         # Try to get from st.secrets first (Streamlit's recommended way)
-        secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
-        st.session_state.deepseek_api_key = secrets_api_key or ""
+        try:
+            secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
+            st.session_state.deepseek_api_key = secrets_api_key or ""
+        except Exception:
+            # If secrets.toml doesn't exist or has errors, initialize as empty
+            st.session_state.deepseek_api_key = ""
 
     return messages_key
 
