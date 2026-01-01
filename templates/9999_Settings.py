@@ -11,10 +11,14 @@ from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 from utils import secrets_manager
 from utils import config_toml_manager
+from utils.session_state import initialize_shared_session_state, handle_pending_navigation
 
 
 def initialize_session_state():
     """Initialize session state variables."""
+    # Initialize shared session state (API key, navigation, etc.)
+    initialize_shared_session_state()
+
     # Initialize add chat dialog state
     if "show_add_chat_dialog" not in st.session_state:
         st.session_state.show_add_chat_dialog = False
@@ -23,22 +27,8 @@ def initialize_session_state():
     if "settings_active_tab" not in st.session_state:
         st.session_state.settings_active_tab = 0  # Default to first tab (API Key)
 
-    # Initialize API key in session state (from secrets if not set)
-    if "deepseek_api_key" not in st.session_state:
-        # Try to get from st.secrets first (Streamlit's recommended way)
-        try:
-            secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
-            st.session_state.deepseek_api_key = secrets_api_key or ""
-        except Exception:
-            # If secrets.toml doesn't exist or has errors, initialize as empty
-            st.session_state.deepseek_api_key = ""
-
     # Handle navigation to newly created expert (after rerun)
-    if st.session_state.get("pending_expert_page"):
-        page_path = st.session_state.pending_expert_page
-        # Clear the pending navigation to avoid infinite loop
-        st.session_state.pending_expert_page = None
-        st.switch_page(page_path)
+    handle_pending_navigation()
 
 
 def render_api_key_section():

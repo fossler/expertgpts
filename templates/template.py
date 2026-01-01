@@ -4,12 +4,11 @@ This template is used to generate individual expert pages.
 Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 """
 
-import os
 import streamlit as st
 import tiktoken
 from utils.config_manager import ConfigManager
 from utils.deepseek_client import DeepSeekClient
-from utils import secrets_manager
+from utils.session_state import initialize_shared_session_state
 
 
 # Expert Configuration
@@ -19,20 +18,13 @@ EXPERT_NAME = "{{EXPERT_NAME}}"
 
 def initialize_session_state():
     """Initialize session state variables."""
+    # Initialize shared state first (API key, navigation, etc.)
+    initialize_shared_session_state()
+
     # Initialize messages key for this specific expert
     messages_key = f"messages_{EXPERT_ID}"
     if messages_key not in st.session_state:
         st.session_state[messages_key] = []
-
-    # Initialize API key in session state (from secrets or existing session)
-    if "deepseek_api_key" not in st.session_state:
-        # Try to get from st.secrets first (Streamlit's recommended way)
-        try:
-            secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
-            st.session_state.deepseek_api_key = secrets_api_key or ""
-        except Exception:
-            # If secrets.toml doesn't exist or has errors, initialize as empty
-            st.session_state.deepseek_api_key = ""
 
     return messages_key
 

@@ -9,31 +9,17 @@ This is the main entry point using the newer st.navigation() approach.
 import streamlit as st
 from pathlib import Path
 from utils.page_generator import PageGenerator
-from utils import secrets_manager
+from utils.session_state import initialize_shared_session_state, handle_pending_navigation
 
 
 def initialize_session_state():
     """Initialize session state variables before navigation."""
+    # Initialize shared session state (API key, etc.)
+    initialize_shared_session_state()
+
     # Initialize add chat dialog state
     if "show_add_chat_dialog" not in st.session_state:
         st.session_state.show_add_chat_dialog = False
-
-    # Initialize API key in session state (from secrets if not set)
-    if "deepseek_api_key" not in st.session_state:
-        # Try to get from st.secrets first (Streamlit's recommended way)
-        try:
-            secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
-            st.session_state.deepseek_api_key = secrets_api_key or ""
-        except Exception:
-            # If secrets.toml doesn't exist or has errors, initialize as empty
-            st.session_state.deepseek_api_key = ""
-
-    # Handle navigation to newly created expert (after rerun)
-    if st.session_state.get("pending_expert_page"):
-        page_path = st.session_state.pending_expert_page
-        # Clear the pending navigation to avoid infinite loop
-        st.session_state.pending_expert_page = None
-        st.switch_page(page_path)
 
 
 def main():
@@ -85,6 +71,10 @@ def main():
 
     # Set up navigation
     pg = st.navigation(pages)
+
+    # Handle navigation to newly created expert (after rerun)
+    # Must be called after st.navigation() is set up
+    handle_pending_navigation()
 
     # Run the selected page
     pg.run()
