@@ -211,9 +211,10 @@ def display_context_usage(config: dict, messages_key: str):
 
     # Count tokens in chat messages
     messages = st.session_state.get(messages_key, [])
-    messages_tokens = 0
-    for message in messages:
-        messages_tokens += count_tokens(message.get("content", ""), encoding)
+    messages_tokens = sum(
+        count_tokens(msg.get("content", ""), encoding)
+        for msg in messages
+    )
 
     # Total tokens
     total_tokens = system_tokens + messages_tokens
@@ -254,8 +255,8 @@ def main():
     config = load_expert_config()
 
     if not config:
-        st.error("Failed to load expert configuration.")
-        return
+        st.error(f"Configuration not found for expert: {EXPERT_ID}")
+        st.stop()
 
     # Get API key from session state
     api_key = st.session_state.deepseek_api_key
