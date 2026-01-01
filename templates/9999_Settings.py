@@ -3,6 +3,8 @@
 import io
 import os
 import re
+import subprocess
+import sys
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -797,27 +799,44 @@ def render_danger_zone_section():
         with col1:
             if st.button("✅ Yes, Reset Everything", key="confirm_reset_button", type="primary"):
                 try:
-                    config_manager = ConfigManager()
-
                     # Delete all configs
                     configs_dir = Path(__file__).parent.parent / "configs"
                     if configs_dir.exists():
                         for config_file in configs_dir.glob("*.yaml"):
                             config_file.unlink()
 
-                    # Delete all expert pages (except Settings.py)
+                    # Delete all expert pages (except Home.py and Settings.py)
                     pages_dir = Path(__file__).parent
                     if pages_dir.exists():
                         for page_file in pages_dir.glob("*.py"):
-                            if page_file.name != "9999_Settings.py":
+                            # Keep core application files (Home and Settings)
+                            if page_file.name not in ["1000_Home.py", "9999_Settings.py"]:
                                 page_file.unlink()
 
+                    # Recreate example experts using setup_examples.py
+                    st.info("🔄 Recreating example experts...")
+
+                    # Run setup_examples.py as a subprocess
+                    result = subprocess.run(
+                        [sys.executable, "setup_examples.py"],
+                        check=True,
+                        capture_output=True,
+                        text=True,
+                        cwd=Path(__file__).parent.parent
+                    )
+
                     st.success("✅ Application reset successfully!")
-                    st.info("🔄 Please restart the application or run `python3 setup_examples.py` to recreate default experts.")
+                    st.info("🔄 Restarting application...")
 
                     st.session_state.confirm_reset = False
                     st.rerun()
 
+                except subprocess.CalledProcessError as e:
+                    st.error(f"❌ Error recreating experts: {e}")
+                    if e.stdout:
+                        st.error(f"Output: {e.stdout}")
+                    if e.stderr:
+                        st.error(f"Error: {e.stderr}")
                 except Exception as e:
                     st.error(f"❌ Error resetting application: {str(e)}")
 
