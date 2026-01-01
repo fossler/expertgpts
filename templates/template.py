@@ -37,6 +37,30 @@ def initialize_session_state():
     return messages_key
 
 
+def validate_api_key(api_key: str) -> tuple:
+    """Validate API key format before using.
+
+    Args:
+        api_key: API key to validate
+
+    Returns:
+        tuple: (is_valid, error_message)
+        - (True, "") if valid
+        - (False, error_message) if invalid
+    """
+    if not api_key:
+        return False, "API key is not set"
+
+    if len(api_key) < 20:
+        return False, "API key appears to be invalid (too short)"
+
+    # DeepSeek API keys typically start with "sk-"
+    if not api_key.startswith("sk-"):
+        return False, "API key format is invalid (should start with 'sk-')"
+
+    return True, ""
+
+
 @st.cache_data(ttl=CONFIG_CACHE_TTL, show_spinner="Loading expert configuration...")
 def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
     """Load and cache the expert configuration.
@@ -105,9 +129,10 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
         messages_key: Session state key for this expert's messages
     """
     if prompt := st.chat_input("Ask the expert..."):
-        # Check API key
-        if not api_key:
-            st.error("Please enter your DeepSeek API key in the Settings page.")
+        # Validate API key format
+        is_valid, error_msg = validate_api_key(api_key)
+        if not is_valid:
+            st.error(f"❌ {error_msg}. Please check your Settings.")
             return
 
         # Add user message to chat history
@@ -152,14 +177,28 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 # Rerun to update context usage with new message
                 st.rerun()
 
-            except Exception as e:
-                error_msg = f"Error: {str(e)}"
-                message_placeholder.error(error_msg)
+            except (ConnectionError, TimeoutError) as e:
+                error_msg = "Network error: Could not reach DeepSeek API. Please check your connection."
+                message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
-                    "content": error_msg
+                    "content": f"❌ {error_msg}"
                 })
-                st.rerun()
+            except ValueError as e:
+                error_msg = f"API response error: {str(e)}"
+                message_placeholder.error(f"❌ {error_msg}")
+                st.session_state[messages_key].append({
+                    "role": "assistant",
+                    "content": f"❌ {error_msg}"
+                })
+            except Exception as e:
+                error_msg = f"Unexpected error: {type(e).__name__}: {str(e)}"
+                message_placeholder.error(f"❌ {error_msg}")
+                st.session_state[messages_key].append({
+                    "role": "assistant",
+                    "content": f"❌ {error_msg}"
+                })
+            st.rerun()
 
 
 def clear_chat_history(messages_key: str):
@@ -189,8 +228,8 @@ def display_context_usage(config: dict, messages_key: str):
             system_prompt=system_prompt,
             messages=messages
         )
-    except Exception as e:
-        st.sidebar.caption(f"ℹ️ Token counting unavailable: {str(e)}")
+    except (ImportError, OSError, ValueError, TypeError) as e:
+        st.sidebar.caption(f"ℹ️ Token counting unavailable: {type(e).__name__}")
         return
 
     if "error" in stats:

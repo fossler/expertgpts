@@ -117,9 +117,9 @@ class TokenManager:
         """
         try:
             encoding = TokenManager.get_encoding()
-        except Exception:
+        except (ImportError, OSError, ValueError) as e:
             return {
-                "error": "Token counting unavailable",
+                "error": f"Token counting unavailable: {type(e).__name__}",
                 "total_tokens": 0,
                 "usage_percent": 0
             }
