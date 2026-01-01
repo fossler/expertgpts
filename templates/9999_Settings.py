@@ -10,6 +10,7 @@ import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 from utils import secrets_manager
+from utils import config_toml_manager
 
 
 st.set_page_config(
@@ -126,6 +127,221 @@ def render_api_key_section():
     "[DeepSeek API Documentation](https://api-docs.deepseek.com/)"
     "[View the source code](https://github.com/yourusername/expertgpts)"
     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yourusername/expertgpts)"
+
+
+def render_general_settings_section():
+    """Render the General Settings section for theme customization."""
+    st.subheader("🎨 Theme Customization")
+
+    st.caption("Customize the appearance of your ExpertGPTs application.")
+
+    st.divider()
+
+    # Define 7 complete themes with harmonious colors
+    themes = {
+        "Modern Red": {
+            "primary": "#FF6B6B",
+            "background": "#FFFFFF",
+            "secondary": "#F0F2F6",
+            "text": "#262730",
+            "icon": "🔴"
+        },
+        "Ocean Blue": {
+            "primary": "#4A90E2",
+            "background": "#FFFFFF",
+            "secondary": "#E8F0FE",
+            "text": "#1E3A8A",
+            "icon": "🔵"
+        },
+        "Forest Green": {
+            "primary": "#10B981",
+            "background": "#FFFFFF",
+            "secondary": "#ECFDF5",
+            "text": "#064E3B",
+            "icon": "🟢"
+        },
+        "Royal Purple": {
+            "primary": "#9B59B6",
+            "background": "#FFFFFF",
+            "secondary": "#F3E5F5",
+            "text": "#4A148C",
+            "icon": "🟣"
+        },
+        "Dark Blue": {
+            "primary": "#4A90E2",
+            "background": "#0E1117",
+            "secondary": "#262730",
+            "text": "#FAFAFA",
+            "icon": "🌑"
+        },
+        "Dark Gray": {
+            "primary": "#FF6B6B",
+            "background": "#1A1A1A",
+            "secondary": "#2D2D2D",
+            "text": "#FFFFFF",
+            "icon": "🖤"
+        },
+        "Custom": {
+            "primary": "#F59E0B",
+            "background": "#FFFBEB",
+            "secondary": "#FEF3C7",
+            "text": "#78350F",
+            "icon": "🎨"
+        }
+    }
+
+    # Create theme options with icons
+    theme_options = [f"{icon} {name}" for name, theme in themes.items() for icon in [theme["icon"]]]
+    theme_labels = {f"{theme['icon']} {name}": name for name, theme in themes.items()}
+
+    # Initialize session state for selected theme and colors
+    if "selected_theme_option" not in st.session_state:
+        st.session_state.selected_theme_option = theme_options[0]
+        # Initialize with first theme's colors
+        first_theme_name = theme_labels[theme_options[0]]
+        first_theme = themes[first_theme_name]
+        st.session_state.theme_primary_color = first_theme["primary"]
+        st.session_state.theme_background_color = first_theme["background"]
+        st.session_state.theme_secondary_background_color = first_theme["secondary"]
+        st.session_state.theme_text_color = first_theme["text"]
+
+    # Radio button for theme selection (outside form for reactivity)
+    selected_theme = st.radio(
+        "Select a theme to preview",
+        options=theme_options,
+        index=theme_options.index(st.session_state.selected_theme_option),
+        horizontal=True,
+        key="theme_radio_selector"
+    )
+
+    # Extract theme name from selected option
+    theme_name = theme_labels[selected_theme]
+    theme_colors = themes[theme_name]
+
+    # Update session state and rerun if selection changed
+    if selected_theme != st.session_state.selected_theme_option:
+        st.session_state.selected_theme_option = selected_theme
+        # Update color values in session state
+        st.session_state.theme_primary_color = theme_colors["primary"]
+        st.session_state.theme_background_color = theme_colors["background"]
+        st.session_state.theme_secondary_background_color = theme_colors["secondary"]
+        st.session_state.theme_text_color = theme_colors["text"]
+        st.rerun()
+
+    st.divider()
+
+    # Color Preview section (outside form for reactivity)
+    st.markdown("### Color Preview")
+
+    # Check if Custom theme is selected
+    is_custom_theme = (theme_name == "Custom")
+
+    # Create columns for color inputs in one row
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        primary_color = st.color_picker(
+            "Buttons and interactive Elements",
+            value=st.session_state.theme_primary_color,
+            help="Color for buttons and interactive elements",
+            key=f"primary_{st.session_state.selected_theme_option}",
+            disabled=not is_custom_theme
+        )
+
+    with col2:
+        background_color = st.color_picker(
+            "Background Color",
+            value=st.session_state.theme_background_color,
+            help="Main background color of the app",
+            key=f"background_{st.session_state.selected_theme_option}",
+            disabled=not is_custom_theme
+        )
+
+    with col3:
+        secondary_background_color = st.color_picker(
+            "Secondary Background",
+            value=st.session_state.theme_secondary_background_color,
+            help="Background color for sidebar and other secondary areas",
+            key=f"secondary_{st.session_state.selected_theme_option}",
+            disabled=not is_custom_theme
+        )
+
+    with col4:
+        text_color = st.color_picker(
+            "Text Color",
+            value=st.session_state.theme_text_color,
+            help="Main text color throughout the app",
+            key=f"text_{st.session_state.selected_theme_option}",
+            disabled=not is_custom_theme
+        )
+
+    # Update session state with current color picker values
+    st.session_state.theme_primary_color = primary_color
+    st.session_state.theme_background_color = background_color
+    st.session_state.theme_secondary_background_color = secondary_background_color
+    st.session_state.theme_text_color = text_color
+
+    st.divider()
+
+    st.caption("💡 Changes will be visible after you click 'Apply Theme'")
+
+    # Initialize session state for tracking if settings have been saved
+    if "settings_saved" not in st.session_state:
+        st.session_state.settings_saved = False
+
+    # Check if we need to rerun (from Apply Theme button)
+    if st.session_state.get("trigger_rerun", False):
+        st.session_state.trigger_rerun = False
+        st.rerun()
+
+    # Buttons - closer together with 4-column layout
+    col1, col2, col3, col4 = st.columns([1.5, 1.5, 2, 2])
+
+    def save_settings():
+        """Callback to save theme settings to config.toml."""
+        try:
+            # Read current values directly from the color picker widgets
+            primary_key = f"primary_{st.session_state.selected_theme_option}"
+            background_key = f"background_{st.session_state.selected_theme_option}"
+            secondary_key = f"secondary_{st.session_state.selected_theme_option}"
+            text_key = f"text_{st.session_state.selected_theme_option}"
+
+            config_toml_manager.save_theme_settings(
+                primaryColor=st.session_state[primary_key],
+                backgroundColor=st.session_state[background_key],
+                secondaryBackgroundColor=st.session_state[secondary_key],
+                textColor=st.session_state[text_key]
+            )
+            st.session_state.settings_saved = True
+            st.session_state.just_saved = True
+        except Exception as e:
+            st.error(f"❌ Error: {str(e)}")
+
+    def apply_theme():
+        """Callback to apply the saved theme."""
+        st.session_state.trigger_rerun = True
+
+    with col1:
+        if st.button("Save Settings", key="save_settings_button", on_click=save_settings):
+            pass
+
+    with col2:
+        st.button("Apply Theme", key="apply_theme_button", on_click=apply_theme, disabled=not st.session_state.settings_saved)
+
+    with col3:
+        st.empty()  # Spacer
+
+    with col4:
+        st.empty()  # Spacer
+
+    # Show success message if settings were just saved
+    if st.session_state.get("just_saved", False):
+        st.toast("✅ Settings saved! Click 'Apply Theme' to apply.", icon="💾")
+        st.session_state.just_saved = False
+
+    # Reset settings_saved after applying
+    if st.session_state.get("trigger_rerun", False):
+        st.session_state.settings_saved = False
 
 
 def create_new_expert(
@@ -672,7 +888,7 @@ def main():
     st.title("⚙️ Settings")
 
     # Tab-based navigation for different settings sections (stateful)
-    tabs = ["🔑 API Key", "🤖 Expert Management", "⚠️ Danger Zone", "ℹ️ About"]
+    tabs = ["🎨 General", "🔑 API Key", "🤖 Expert Management", "⚠️ Danger Zone", "ℹ️ About"]
     active_tab = st.segmented_control(
         "Settings Sections",
         options=tabs,
@@ -685,17 +901,18 @@ def main():
 
     # Render the appropriate section based on active tab
     if tabs.index(active_tab) == 0:
-        render_api_key_section()
+        render_general_settings_section()
     elif tabs.index(active_tab) == 1:
-        render_expert_management_section()
+        render_api_key_section()
     elif tabs.index(active_tab) == 2:
-        render_danger_zone_section()
+        render_expert_management_section()
     elif tabs.index(active_tab) == 3:
+        render_danger_zone_section()
+    elif tabs.index(active_tab) == 4:
         render_about_section()
 
     # Footer
     st.divider()
-    st.caption("💡 **Tip:** Changes made here are applied immediately across all expert pages.")
 
 
 if __name__ == "__main__":

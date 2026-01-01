@@ -7,6 +7,7 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 - **Multiple Expert Agents**: Chat with domain-specific AI experts, each specialized in different areas
 - **Custom Expert Creation**: Easily create your own expert agents with custom domains and descriptions
 - **Streamlit-Powered**: Built with Streamlit for a clean, responsive interface
+- **Theme Customization**: Customize colors through the Settings page with preset themes
 - **Secure Secrets Management**: API keys stored securely in `.streamlit/secrets.toml`
 - **File-Based Configuration**: Each expert has its own configuration file for easy management
 - **Template-Based Pages**: New experts are generated from a consistent template
@@ -30,10 +31,13 @@ expertgpts/
 │   ├── config_manager.py     # Config file operations
 │   ├── page_generator.py     # Page generation logic
 │   ├── deepseek_client.py    # DeepSeek API wrapper
-│   └── secrets_manager.py    # Streamlit secrets management
+│   ├── secrets_manager.py    # Streamlit secrets management
+│   └── config_toml_manager.py # Theme configuration management
 ├── .streamlit/
 │   ├── secrets.toml          # API keys and secrets (gitignored)
-│   └── secrets.toml.example  # Template for secrets file
+│   ├── secrets.toml.example  # Template for secrets file
+│   ├── config.toml           # Theme settings (gitignored)
+│   └── config.toml.example   # Template for theme settings
 ├── requirements.txt
 ├── setup_examples.py         # Script to create example experts
 └── README.md
@@ -113,6 +117,32 @@ Get your API key from [https://platform.deepseek.com/](https://platform.deepseek
 
 > **Security Note**: The `.streamlit/secrets.toml` file is gitignored and will never be committed to version control. The file is automatically set to 600 permissions (read/write for owner only) when created or modified.
 
+### Customizing the Theme
+
+ExpertGPTs allows you to customize the app's appearance through the Settings page:
+
+1. Go to **Settings** → **General** tab
+2. Use the color pickers to adjust:
+   - **Buttons and interactive Elements**: Color for buttons and interactive elements
+   - **Background Color**: Main background color
+   - **Secondary Background**: Sidebar and secondary areas
+   - **Text Color**: Main text color
+3. Click **"Apply Changes"** to save your theme
+
+**Preset Themes:**
+- 🎨 **Light Themes**: Red, Blue, Green, Purple
+- 🌙 **Dark Themes**: Dark Blue, Dark Gray
+- Click any preset to instantly apply the theme
+
+**Default Theme:**
+The app comes with a modern Indigo theme by default:
+- Buttons: Indigo (#6366F1)
+- Background: White (#FFFFFF)
+- Sidebar: Light Gray (#F3F4F6)
+- Text: Dark Gray (#1F2937)
+
+The theme settings are automatically saved to `.streamlit/config.toml` with secure permissions.
+
 ### Chatting with Experts
 
 1. **Select an Expert**: Choose an expert from the navigation menu in the sidebar
@@ -176,6 +206,7 @@ The modular structure makes it easy to add new features:
 - **PageGenerator** (`utils/page_generator.py`): Generate new expert pages
 - **DeepSeekClient** (`utils/deepseek_client.py`): Handle API interactions
 - **SecretsManager** (`utils/secrets_manager.py`): Manage Streamlit secrets file
+- **ConfigTomlManager** (`utils/config_toml_manager.py`): Manage theme configuration
 
 ## API Integration
 
