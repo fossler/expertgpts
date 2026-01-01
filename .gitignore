@@ -23,6 +23,9 @@ env/
 .env/
 .env.*.local
 
+# Ignore Streamlit secrets file
+.streamlit/secrets.toml
+
 # Ignore IDE specific files
 .vscode/
 

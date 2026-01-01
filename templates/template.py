@@ -9,6 +9,7 @@ import streamlit as st
 import tiktoken
 from utils.config_manager import ConfigManager
 from utils.deepseek_client import DeepSeekClient
+from utils import secrets_manager
 
 
 # Expert Configuration
@@ -23,10 +24,11 @@ def initialize_session_state():
     if messages_key not in st.session_state:
         st.session_state[messages_key] = []
 
-    # Initialize API key in session state (from environment or existing session)
+    # Initialize API key in session state (from secrets or existing session)
     if "deepseek_api_key" not in st.session_state:
-        env_api_key = os.getenv("DEEPSEEK_API_KEY")
-        st.session_state.deepseek_api_key = env_api_key or ""
+        # Try to get from st.secrets first (Streamlit's recommended way)
+        secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
+        st.session_state.deepseek_api_key = secrets_api_key or ""
 
     return messages_key
 

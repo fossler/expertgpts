@@ -10,16 +10,7 @@ from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
-
-
-# Load environment variables from .env file if it exists
-env_path = Path(__file__).parent / ".env"
-if env_path.exists():
-    try:
-        from dotenv import load_dotenv
-        load_dotenv(env_path)
-    except ImportError:
-        pass  # python-dotenv not installed, continue without it
+from utils import secrets_manager
 
 
 st.set_page_config(
@@ -35,10 +26,11 @@ def initialize_session_state():
     if "show_add_chat_dialog" not in st.session_state:
         st.session_state.show_add_chat_dialog = False
 
-    # Initialize API key in session state (from environment if not set)
+    # Initialize API key in session state (from secrets if not set)
     if "deepseek_api_key" not in st.session_state:
-        env_api_key = os.getenv("DEEPSEEK_API_KEY")
-        st.session_state.deepseek_api_key = env_api_key or ""
+        # Try to get from st.secrets first (Streamlit's recommended way)
+        secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
+        st.session_state.deepseek_api_key = secrets_api_key or ""
 
     # Handle navigation to newly created expert (after rerun)
     if st.session_state.get("pending_expert_page"):
@@ -70,7 +62,8 @@ def render_sidebar():
 
         # API Key status
         if st.session_state.deepseek_api_key:
-            st.success("✅ API key configured")
+            source = "secrets.toml" if secrets_manager.has_api_key_file() else "session"
+            st.success(f"✅ API key configured ({source})")
         else:
             st.caption("⚠️ API key not set")
 
@@ -274,7 +267,7 @@ def render_main_content():
 
     ### Getting Started
 
-    1. **Set your API Key**: Enter your DeepSeek API key in the sidebar
+    1. **Set your API Key**: Enter your DeepSeek API key in Settings (it will be saved securely)
     2. **Choose an Expert**: Select an expert agent from the navigation menu
     3. **Start Chatting**: Ask questions and get expert-level responses
 
@@ -291,6 +284,7 @@ def render_main_content():
     - 🔧 **Customizable**: Create experts tailored to your needs
     - 🌡️ **Adjustable Temperature**: Control response creativity and focus
     - 💾 **Chat History**: Maintain conversation context throughout your session
+    - 🔐 **Secure Secrets**: API keys stored in `.streamlit/secrets.toml`
     """)
 
     st.divider()

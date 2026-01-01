@@ -7,6 +7,7 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 - **Multiple Expert Agents**: Chat with domain-specific AI experts, each specialized in different areas
 - **Custom Expert Creation**: Easily create your own expert agents with custom domains and descriptions
 - **Streamlit-Powered**: Built with Streamlit for a clean, responsive interface
+- **Secure Secrets Management**: API keys stored securely in `.streamlit/secrets.toml`
 - **File-Based Configuration**: Each expert has its own configuration file for easy management
 - **Template-Based Pages**: New experts are generated from a consistent template
 - **Chat History**: Maintain conversation context throughout your session
@@ -21,13 +22,18 @@ expertgpts/
 │   ├── 1_Python_Expert.py    # Auto-generated expert pages
 │   └── ...
 ├── templates/
-│   └── template.py           # Template for all expert pages
+│   ├── template.py           # Template for all expert pages
+│   └── 9999_Settings.py      # Settings page
 ├── configs/
 │   └── {expert_id}.yaml      # Config files for each expert
 ├── utils/
 │   ├── config_manager.py     # Config file operations
 │   ├── page_generator.py     # Page generation logic
-│   └── deepseek_client.py    # DeepSeek API wrapper
+│   ├── deepseek_client.py    # DeepSeek API wrapper
+│   └── secrets_manager.py    # Streamlit secrets management
+├── .streamlit/
+│   ├── secrets.toml          # API keys and secrets (gitignored)
+│   └── secrets.toml.example  # Template for secrets file
 ├── requirements.txt
 ├── setup_examples.py         # Script to create example experts
 └── README.md
@@ -84,18 +90,28 @@ The app will open in your browser at `http://localhost:8501`
 
 ### Setting Your API Key
 
-You can set your DeepSeek API key in two ways:
+ExpertGPTs uses Streamlit's secure secrets management system. You can set your DeepSeek API key in two ways:
 
-**Option 1: Using .env file (Recommended)**
-1. Copy `.env.example` to `.env`
-2. Add your API key: `DEEPSEEK_API_KEY=your_key_here`
-3. The app will automatically load it on startup
+**Option 1: Via Settings Page (Recommended)**
+1. Navigate to **Settings** in the app
+2. Go to the **API Key** tab
+3. Enter your DeepSeek API key
+4. Click **"Save API Key"**
+5. The key will be automatically saved to `.streamlit/secrets.toml`
 
-**Option 2: Manual Input**
-1. Get a DeepSeek API key from [https://platform.deepseek.com/](https://platform.deepseek.com/)
-2. Enter your API key in the sidebar under "Configuration"
+**Option 2: Manual Configuration**
+1. Copy the example file:
+   ```bash
+   cp .streamlit/secrets.toml.example .streamlit/secrets.toml
+   ```
+2. Edit `.streamlit/secrets.toml` and add your API key:
+   ```toml
+   DEEPSEEK_API_KEY = "your_actual_api_key_here"
+   ```
 
-> **Note**: The .env file method is more secure and convenient. The .env file is already excluded from version control.
+Get your API key from [https://platform.deepseek.com/](https://platform.deepseek.com/)
+
+> **Security Note**: The `.streamlit/secrets.toml` file is gitignored and will never be committed to version control. The file is automatically set to 600 permissions (read/write for owner only) when created or modified.
 
 ### Chatting with Experts
 
@@ -159,6 +175,7 @@ The modular structure makes it easy to add new features:
 - **ConfigManager** (`utils/config_manager.py`): Manage expert configurations
 - **PageGenerator** (`utils/page_generator.py`): Generate new expert pages
 - **DeepSeekClient** (`utils/deepseek_client.py`): Handle API interactions
+- **SecretsManager** (`utils/secrets_manager.py`): Manage Streamlit secrets file
 
 ## API Integration
 
@@ -183,8 +200,10 @@ For more information on the DeepSeek API, see the [official documentation](https
 ### Security Considerations
 
 - **API Keys**: Never commit API keys to version control
-- **Environment Variables**: Consider using `DEEPSEEK_API_KEY` environment variable
-- **File Permissions**: Ensure config files have appropriate permissions
+- **Streamlit Secrets**: API keys are stored in `.streamlit/secrets.toml` which is gitignored
+- **UI Management**: Use the Settings page to manage API keys securely
+- **Automatic File Permissions**: The app automatically sets 600 permissions (owner read/write only) on `secrets.toml` when created or modified
+- **Manual Verification**: You can verify permissions with `ls -la .streamlit/secrets.toml` (should show `-rw-------`)
 
 ## Troubleshooting
 

@@ -9,16 +9,7 @@ from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
-
-
-# Load environment variables from .env file if it exists
-env_path = Path(__file__).parent.parent / ".env"
-if env_path.exists():
-    try:
-        from dotenv import load_dotenv
-        load_dotenv(env_path)
-    except ImportError:
-        pass
+from utils import secrets_manager
 
 
 st.set_page_config(
@@ -39,10 +30,11 @@ def initialize_session_state():
     if "settings_active_tab" not in st.session_state:
         st.session_state.settings_active_tab = 0  # Default to first tab (API Key)
 
-    # Initialize API key in session state (from environment if not set)
+    # Initialize API key in session state (from secrets if not set)
     if "deepseek_api_key" not in st.session_state:
-        env_api_key = os.getenv("DEEPSEEK_API_KEY")
-        st.session_state.deepseek_api_key = env_api_key or ""
+        # Try to get from st.secrets first (Streamlit's recommended way)
+        secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
+        st.session_state.deepseek_api_key = secrets_api_key or ""
 
     # Handle navigation to newly created expert (after rerun)
     if st.session_state.get("pending_expert_page"):
@@ -56,17 +48,16 @@ def render_api_key_section():
     """Render the API Key management section."""
     st.subheader("🔑 API Key Configuration")
 
-    env_api_key = os.getenv("DEEPSEEK_API_KEY")
-    has_env_key = bool(env_api_key)
+    has_file_key = secrets_manager.has_api_key_file()
 
     # Current status
     col1, col2 = st.columns(2)
 
     with col1:
-        if has_env_key:
-            st.success("✅ API key loaded from .env file")
+        if has_file_key:
+            st.success("✅ API key saved in secrets.toml")
         else:
-            st.info("💡 No .env file found")
+            st.info("💡 No API key in secrets.toml")
 
     with col2:
         if st.session_state.deepseek_api_key:
@@ -81,18 +72,46 @@ def render_api_key_section():
         "DeepSeek API Key",
         key="settings_api_key",
         type="password",
-        value=st.session_state.deepseek_api_key if st.session_state.deepseek_api_key else "",
-        help="Enter your API key. It will be shared across all expert pages.",
+        value="",  # Always show empty for security
+        help="Enter your API key. It will be saved to .streamlit/secrets.toml and shared across all expert pages.",
         placeholder="Enter your API key here",
     )
 
-    # Update session state if user entered/changed the key
-    if api_key and api_key != st.session_state.deepseek_api_key:
-        st.session_state.deepseek_api_key = api_key
-        st.success("✅ API key updated successfully!")
-        st.rerun()
+    # Save button
+    col1, col2 = st.columns(2)
 
-    st.caption("💡 **Tip**: For automatic loading, create a `.env` file in the project root with: `DEEPSEEK_API_KEY=your_key_here`")
+    with col1:
+        if st.button("💾 Save API Key", type="primary", disabled=not api_key):
+            try:
+                # Save to secrets.toml file
+                secrets_manager.save_api_key(api_key)
+
+                # Update session state
+                st.session_state.deepseek_api_key = api_key
+
+                st.success("✅ API key saved successfully to .streamlit/secrets.toml!")
+                st.info("🔄 The application will now rerun to load the new key.")
+
+                # Rerun to load the new key from st.secrets
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Error saving API key: {str(e)}")
+
+    with col2:
+        if st.button("🗑️ Clear API Key", disabled=not has_file_key):
+            try:
+                # Delete the secrets.toml file
+                secrets_path = secrets_manager.get_secrets_path()
+                if secrets_path.exists():
+                    secrets_path.unlink()
+
+                # Clear session state
+                st.session_state.deepseek_api_key = ""
+
+                st.success("✅ API key cleared successfully!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Error clearing API key: {str(e)}")
 
     st.divider()
 

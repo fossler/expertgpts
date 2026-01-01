@@ -1,19 +1,7 @@
 """DeepSeek API client for chat functionality."""
 
-import os
-from pathlib import Path
 from typing import List, Dict, Optional
 from dataclasses import dataclass
-
-
-# Load environment variables from .env file if it exists
-env_path = Path(__file__).parent.parent / ".env"
-if env_path.exists():
-    try:
-        from dotenv import load_dotenv
-        load_dotenv(env_path)
-    except ImportError:
-        pass  # python-dotenv not installed, continue without it
 
 
 try:
@@ -34,19 +22,18 @@ class Message:
 class DeepSeekClient:
     """Client for interacting with DeepSeek API."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str):
         """Initialize the DeepSeek client.
 
         Args:
-            api_key: DeepSeek API key. If None, will try to get from environment
-        """
-        if api_key is None:
-            api_key = os.getenv("DEEPSEEK_API_KEY")
+            api_key: DeepSeek API key (required)
 
+        Raises:
+            ValueError: If api_key is None or empty
+        """
         if not api_key:
             raise ValueError(
-                "DeepSeek API key must be provided either as parameter or "
-                "through DEEPSEEK_API_KEY environment variable"
+                "DeepSeek API key must be provided as a parameter"
             )
 
         # DeepSeek uses OpenAI-compatible API
