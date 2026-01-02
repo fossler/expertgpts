@@ -159,10 +159,6 @@ class ConfigManager:
 
 {description}
 
-## Metadata
-- Version: 1.0
-- Model: deepseek-chat
-
 ## Guidelines
 - Provide accurate, expert-level information in your domain
 - If you're unsure about something, acknowledge it honestly
