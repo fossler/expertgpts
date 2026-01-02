@@ -9,7 +9,6 @@ import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.constants import EXPERT_BEHAVIOR_DOCS
 from utils.page_generator import PageGenerator
-from utils import debug_logger
 
 
 def validate_expert_name(name: str) -> tuple[bool, str]:
@@ -243,24 +242,8 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
                 st.rerun()
 
             except Exception as e:
-                # Log detailed error to file
-                debug_logger.log_exception(
-                    exception=e,
-                    context={
-                        "function": "create_new_expert",
-                        "chat_name": chat_name,
-                        "description": description[:100] if description else None,
-                        "temperature": temperature,
-                        "custom_system_prompt_provided": custom_system_prompt is not None,
-                        "api_key_available": bool(st.session_state.get("deepseek_api_key", "")),
-                        "show_modules": True  # Show loaded modules for import debugging
-                    },
-                    log_file="expert_creation_errors.log"
-                )
-
                 # Show user-friendly error in UI
                 st.error(f"❌ Error creating expert: {str(e)}")
-                st.info("📝 Detailed error has been logged to `logs/expert_creation_errors.log`")
 
         if cancel_button:
             st.session_state.show_add_chat_dialog = False
