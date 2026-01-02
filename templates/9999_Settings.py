@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
+from utils.constants import EXPERT_BEHAVIOR_DOCS, EXPERT_BEHAVIOR_DOCS_EDIT
 from utils.dialogs import create_new_expert, render_add_chat_dialog
 from utils import secrets_manager
 from utils import config_toml_manager
@@ -463,47 +464,7 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
 
         # Add expander with examples
         with st.expander("📖 Why is this important? + Examples"):
-            st.markdown("""
-            ### 🎯 Why This Field Matters Most
-
-            The behavior instructions define your expert's entire approach:
-            - **Tone**: Friendly, professional, casual, formal?
-            - **Expertise**: General overview or deep technical details?
-            - **Format**: Code examples, step-by-step, conversational?
-            - **Constraints**: What should the expert NOT do?
-            - **Guidelines**: Specific requirements for responses
-
-            ### 📝 Example: Python Expert
-
-            ```
-            You are a Python expert with 15 years of experience.
-            - Provide clean, PEP 8-compliant code with type hints and docstrings
-            - Explain concepts clearly with practical examples
-            - Warn about common pitfalls and best practices
-            - Suggest helpful libraries when appropriate
-            ```
-
-            ### 📝 Example: Legal Advisor
-
-            ```
-            You are a legal assistant providing general legal information.
-            - Always include a disclaimer: "I am not a lawyer, this is not legal advice"
-            - Be thorough but cautious in recommendations
-            - Suggest consulting a qualified attorney for specific legal matters
-            - Provide general legal concepts and frameworks
-            ```
-
-            ### 📝 Example: Writing Coach
-
-            ```
-            You are an encouraging writing coach.
-            - Ask questions to understand the writer's goals
-            - Provide specific, actionable feedback
-            - Balance praise with constructive criticism
-            - Suggest resources for improvement
-            - Be patient and supportive
-            ```
-            """)
+            st.markdown(EXPERT_BEHAVIOR_DOCS)
 
         st.caption("* Required fields")
 
@@ -638,19 +599,7 @@ def render_edit_expert_dialog():
 
         # Add expander with examples
         with st.expander("📖 Why is this important? + Examples"):
-            st.markdown("""
-            ### 🎯 Why This Field Matters Most
-
-            The behavior instructions define your expert's entire approach:
-            - **Tone**: Friendly, professional, casual, formal?
-            - **Expertise**: General overview or deep technical details?
-            - **Format**: Code examples, step-by-step, conversational?
-            - **Constraints**: What should the expert NOT do?
-            - **Guidelines**: Specific requirements for responses
-
-            ### 💡 Tip
-            Leaving this empty will keep the expert's current behavior. Only edit if you want to change how they respond!
-            """)
+            st.markdown(EXPERT_BEHAVIOR_DOCS_EDIT)
 
         st.caption("* Required fields")
 
