@@ -440,14 +440,70 @@ def render_add_chat_dialog():
             help="Controls randomness in responses. Lower = more focused, Higher = more creative",
         )
 
-        # System Prompt (not in expander, matching Edit Expert layout)
+        st.divider()
+
+        # Expert Behavior (Advanced) - The most important field!
+        st.markdown("### 🧠 Expert Behavior (Advanced)")
+        st.caption(
+            "💡 **This is the most important field!** It defines how your expert responds, thinks, and acts. "
+            "Leave empty to auto-generate from description."
+        )
+
         custom_system_prompt = st.text_area(
-            "System Prompt",
-            placeholder="Leave empty to auto-generate from description...",
-            height="content",
-            help="Provide a custom system prompt for this expert",
-            max_chars=2000,
+            "Customize Expert Behavior",
+            placeholder="""How should this expert respond? (Optional)
+
+Leave empty to auto-generate from description.
+
+Example: "Provide clear, step-by-step explanations with code examples..." """,
+            help="🎯 This defines everything about your expert - tone, expertise, style, and constraints",
+            height=250,
+            max_chars=3000,
         ).strip()
+
+        # Add expander with examples
+        with st.expander("📖 Why is this important? + Examples"):
+            st.markdown("""
+            ### 🎯 Why This Field Matters Most
+
+            The behavior instructions define your expert's entire approach:
+            - **Tone**: Friendly, professional, casual, formal?
+            - **Expertise**: General overview or deep technical details?
+            - **Format**: Code examples, step-by-step, conversational?
+            - **Constraints**: What should the expert NOT do?
+            - **Guidelines**: Specific requirements for responses
+
+            ### 📝 Example: Python Expert
+
+            ```
+            You are a Python expert with 15 years of experience.
+            - Provide clean, PEP 8-compliant code with type hints and docstrings
+            - Explain concepts clearly with practical examples
+            - Warn about common pitfalls and best practices
+            - Suggest helpful libraries when appropriate
+            ```
+
+            ### 📝 Example: Legal Advisor
+
+            ```
+            You are a legal assistant providing general legal information.
+            - Always include a disclaimer: "I am not a lawyer, this is not legal advice"
+            - Be thorough but cautious in recommendations
+            - Suggest consulting a qualified attorney for specific legal matters
+            - Provide general legal concepts and frameworks
+            ```
+
+            ### 📝 Example: Writing Coach
+
+            ```
+            You are an encouraging writing coach.
+            - Ask questions to understand the writer's goals
+            - Provide specific, actionable feedback
+            - Balance praise with constructive criticism
+            - Suggest resources for improvement
+            - Be patient and supportive
+            ```
+            """)
 
         st.caption("* Required fields")
 
@@ -563,14 +619,38 @@ def render_edit_expert_dialog():
             help="Controls randomness in responses. Lower = more focused, Higher = more creative",
         )
 
-        # System Prompt
+        st.divider()
+
+        # Expert Behavior (Advanced) - The most important field!
+        st.markdown("### 🧠 Expert Behavior (Advanced)")
+        st.caption(
+            "💡 **This is the most important field!** It defines how your expert responds, thinks, and acts. "
+            "Leave empty to use the existing behavior."
+        )
+
         custom_system_prompt = st.text_area(
-            "System Prompt",
+            "Customize Expert Behavior",
             value=expert_config.get('system_prompt', ''),
-            height="content",
-            help="The system prompt for this expert",
-            max_chars=2000,
+            height=250,
+            help="🎯 This defines everything about your expert - tone, expertise, style, and constraints",
+            max_chars=3000,
         ).strip()
+
+        # Add expander with examples
+        with st.expander("📖 Why is this important? + Examples"):
+            st.markdown("""
+            ### 🎯 Why This Field Matters Most
+
+            The behavior instructions define your expert's entire approach:
+            - **Tone**: Friendly, professional, casual, formal?
+            - **Expertise**: General overview or deep technical details?
+            - **Format**: Code examples, step-by-step, conversational?
+            - **Constraints**: What should the expert NOT do?
+            - **Guidelines**: Specific requirements for responses
+
+            ### 💡 Tip
+            Leaving this empty will keep the expert's current behavior. Only edit if you want to change how they respond!
+            """)
 
         st.caption("* Required fields")
 
@@ -659,13 +739,13 @@ def render_expert_management_section():
                     label_visibility="collapsed",
                 )
 
-                # Show system prompt
+                # Show expert behavior
                 system_prompt = expert.get('system_prompt', '')
                 if system_prompt:
-                    st.markdown("**System Prompt:**")
+                    st.markdown("**🧠 Expert Behavior:**")
                     # Display as read-only text area preview
                     st.text_area(
-                        "System Prompt",
+                        "Expert Behavior",
                         value=system_prompt,
                         height=None,
                         disabled=True,
@@ -673,7 +753,7 @@ def render_expert_management_section():
                         label_visibility="collapsed",
                     )
                 else:
-                    st.markdown("**System Prompt:** Auto-generated")
+                    st.markdown("**🧠 Expert Behavior:** Auto-generated from description")
 
             with col2:
                 st.markdown("**Settings**")
