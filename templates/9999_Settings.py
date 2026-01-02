@@ -899,6 +899,7 @@ def main():
         options=tabs,
         default=tabs[st.session_state.settings_active_tab],
         label_visibility="collapsed",
+        key="settings_tabs",
     )
 
     # Update session state with the current tab
