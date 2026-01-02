@@ -57,7 +57,10 @@ docs/llm_instructions/
 .secrets
 credentials.json
 
-# Auto-generated content - recreated by setup_examples.py or reset_application.py
+# Auto-generated content - recreated by scripts/setup_examples.py or scripts/reset_application.py
 configs/
 pages/
 logs/
+
+# Setup state marker
+.setup_complete

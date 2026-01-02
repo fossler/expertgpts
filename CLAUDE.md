@@ -51,15 +51,12 @@ source .venv/bin/activate
 pip install -r requirements-dev.txt  # Development (includes watchdog, pytest, black)
 pip install -r requirements.txt        # Production only
 
-# Create example experts
-python3 setup_examples.py
-
 # Set up API key (optional - can also do via UI)
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 # Then edit .streamlit/secrets.toml and add your DEEPSEEK_API_KEY
 
-# Run the app
-streamlit run app.py
+# Run the app (first run will automatically create example experts)
+./start_app.sh
 ```
 
 ### Application Reset
@@ -67,26 +64,26 @@ streamlit run app.py
 # Reset application to factory default state
 # WARNING: This deletes all configs and pages, then recreates example experts
 # IMPORTANT: Always use echo "yes" | to auto-confirm (required for non-interactive environments)
-echo "yes" | python3 reset_application.py
+echo "yes" | python3 scripts/reset_application.py
 
 # Or make executable and run directly
-chmod +x reset_application.py
-echo "yes" | ./reset_application.py
+chmod +x scripts/reset_application.py
+echo "yes" | ./scripts/reset_application.py
 ```
 
-**Use reset_application.py when:**
+**Use scripts/reset_application.py when:**
 - After modifying `templates/template.py` and need to regenerate all expert pages
 - Configs and pages become out of sync or corrupted
 - Starting fresh for development/testing
 
-**IMPORTANT:** Always use `echo "yes" |` prefix when running reset_application.py, as it requires interactive confirmation that won't work in non-interactive environments.
+**IMPORTANT:** Always use `echo "yes" |` prefix when running scripts/reset_application.py, as it requires interactive confirmation that won't work in non-interactive environments.
 - Restoring application to initial example state
 
 The script will:
 1. Ask for confirmation (type "yes" to proceed)
 2. Delete all YAML configs from `configs/`
 3. Delete all expert pages from `pages/` (keeps Home.py)
-4. Run `setup_examples.py` to recreate 7 default experts
+4. Run `scripts/setup_examples.py` to recreate 7 default experts
 
 ### Testing
 ```bash
@@ -106,7 +103,7 @@ pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
 pytest --cov=utils --cov-report=html
 
 # Quick test run
-./run_tests.sh
+./scripts/run_tests.sh
 ```
 
 ### Code Quality
@@ -158,7 +155,7 @@ page_path = page_generator.generate_page(
 - **Temperature**: Edit YAML config file or use UI when creating
 - **System Prompt**: Provide custom prompt via "Advanced: Custom System Prompt" field
 - **All Experts**: Edit `templates/template.py` (changes require regenerating pages)
-  - After modifying template, run `python3 reset_application.py` to regenerate all experts
+  - After modifying template, run `python3 scripts/reset_application.py` to regenerate all experts
 - **Single Expert**: Edit specific page file directly (but loses template consistency)
 
 ## File Structure Notes
@@ -170,15 +167,15 @@ page_path = page_generator.generate_page(
   - **`utils/secrets_manager.py`**: Manages `.streamlit/secrets.toml` for API key storage
   - **`utils/config_toml_manager.py`**: Manages `.streamlit/config.toml` for theme settings
 - **`tests/`**: Test suite using pytest with temporary directories for isolation
-- **`setup_examples.py`**: Creates the 7 default example experts
-- **`reset_application.py`**: Resets app to factory state (deletes all, then runs setup_examples.py)
+- **`scripts/setup_examples.py`**: Creates the 7 default example experts
+- **`scripts/reset_application.py`**: Resets app to factory state (deletes all, then runs setup_examples.py)
 - **`.streamlit/`**: Streamlit configuration directory
   - **`secrets.toml`**: API keys and secrets - **gitignored** (auto-created by app)
   - **`secrets.toml.example`**: Template file for manual setup
   - **`config.toml`**: Theme and appearance settings - **gitignored** (managed through Settings page)
   - **`config.toml.example`**: Template file for theme settings
 
-**Important**: Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated. To recreate them, run `setup_examples.py` or `reset_application.py`.
+**Important**: Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated. To recreate them, run `scripts/setup_examples.py` or `scripts/reset_application.py`.
 
 ## Key Implementation Details
 
@@ -273,7 +270,7 @@ ExpertGPTs supports full theme customization through the Settings page:
 4. **Shared session state keys** - Chat history contaminates between experts
 5. **Hardcoding paths** - Use `Path(__file__).parent` for relative paths
 6. **Not regenerating pages** after template changes - Old pages use outdated code
-   - Solution: Run `python3 reset_application.py` after modifying template
+   - Solution: Run `python3 scripts/reset_application.py` after modifying template
 
 ## Testing Approach
 

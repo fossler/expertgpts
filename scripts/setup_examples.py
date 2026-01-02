@@ -4,7 +4,13 @@ Run this script to populate the app with example Domain Expert Agents.
 """
 
 import shutil
+import sys
 from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 

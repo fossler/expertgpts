@@ -79,16 +79,22 @@ def delete_pages():
 
 def run_setup_examples():
     """Run the setup_examples.py script to recreate example experts."""
-    print("\n🔄 Running setup_examples.py to recreate example experts...\n")
+    print("\n🔄 Running scripts/setup_examples.py to recreate example experts...\n")
     print("-" * 60)
 
     try:
+        # Get the script location relative to this file
+        script_dir = Path(__file__).parent
+        setup_script = script_dir / "setup_examples.py"
+        project_root = script_dir.parent
+
         # Run setup_examples.py as a subprocess
         result = subprocess.run(
-            [sys.executable, "setup_examples.py"],
+            [sys.executable, str(setup_script)],
             check=True,
             capture_output=False,
-            text=True
+            text=True,
+            cwd=project_root  # Set working directory to project root
         )
         return result.returncode == 0
     except subprocess.CalledProcessError as e:
@@ -111,6 +117,12 @@ def main():
         return 1
 
     print("\n✅ Reset confirmed. Proceeding...\n")
+
+    # Delete setup marker so next run will trigger setup
+    marker_file = Path(".setup_complete")
+    if marker_file.exists():
+        marker_file.unlink()
+        print("🗑️  Deleted setup marker file")
 
     # Delete configs
     if not delete_configs():

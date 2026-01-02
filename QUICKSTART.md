@@ -19,28 +19,25 @@ Get ExpertGPTs up and running in minutes!
    pip install -r requirements.txt
    ```
 
-2. **Create example experts** (optional but recommended):
-   ```bash
-   python3 setup_examples.py
-   ```
-
-   This creates 7 pre-configured expert agents:
-   - Python Expert
-   - Data Scientist
-   - Writing Assistant
-   - Linux System Admin
-   - Career Coach
-   - Translation Expert
-   - Spell Checker
-
 ## Running the Application
 
 Start the app with:
 ```bash
-streamlit run app.py
+./start_app.sh
 ```
 
+**First run?** The script will automatically create 7 example expert agents:
+- Python Expert
+- Data Scientist
+- Writing Assistant
+- Linux System Admin
+- Career Coach
+- Translation Expert
+- Spell Checker
+
 The application will open at `http://localhost:8501`
+
+> **Note:** You can also run `streamlit run app.py` directly, but the wrapper script is recommended as it handles automatic setup.
 
 **Features**:
 - Modern navigation with Material Design icons

@@ -42,7 +42,7 @@ pip install pytest pytest-cov
 The easiest way to run all tests:
 
 ```bash
-./run_tests.sh
+./scripts/run_tests.sh
 ```
 
 This activates the virtual environment and runs tests with verbose output.
@@ -407,7 +407,7 @@ When adding new features:
 Run the test suite before committing:
 
 ```bash
-./run_tests.sh
+./scripts/run_tests.sh
 ```
 
 ---

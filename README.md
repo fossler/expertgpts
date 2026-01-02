@@ -44,7 +44,9 @@ expertgpts/
 │   ├── config.toml               # Theme settings (gitignored)
 │   └── config.toml.example       # Template for theme settings
 ├── requirements.txt
-├── setup_examples.py             # Script to create example experts
+├── scripts/                      # Administrative scripts
+│   ├── setup_examples.py        # Script to create example experts
+│   └── reset_application.py     # Script to reset application
 └── README.md
 ```
 
@@ -76,7 +78,7 @@ expertgpts/
 
 4. **Create example expert agents** (optional):
    ```bash
-   python3 setup_examples.py
+   python3 scripts/setup_examples.py
    ```
 
 This will create 7 example experts:
@@ -94,10 +96,14 @@ This will create 7 example experts:
 
 Start the application with:
 ```bash
-streamlit run app.py
+./start_app.sh
 ```
 
+**First run?** The script will automatically create 7 example expert agents before launching.
+
 The app will open in your browser at `http://localhost:8501`
+
+> **Note:** You can also run `streamlit run app.py` directly, but it will skip the automatic setup. Use the wrapper script for the best experience.
 
 **Note**: ExpertGPTs uses Streamlit's modern `st.navigation()` API with Material Design icons for a polished user experience. Wide mode is enabled by default for maximum content visibility.
 
@@ -251,7 +257,7 @@ For more information on the DeepSeek API, see the [official documentation](https
 ### Common Issues
 
 **Issue**: "Configuration not found" error
-- **Solution**: Run `python3 setup_examples.py` to create example experts
+- **Solution**: Run `python3 scripts/setup_examples.py` to create example experts
 
 **Issue**: API key errors
 - **Solution**: Verify your DeepSeek API key is valid and has sufficient credits
@@ -275,8 +281,8 @@ For more information on the DeepSeek API, see the [official documentation](https
 ### Adding New Features
 
 1. **New Utility**: Add to `utils/` directory
-2. **UI Changes**: Modify templates in `templates/` directory, then run `echo "yes" | python3 reset_application.py` to regenerate pages
-3. **New Pages**: Create template in `templates/` and generate via `setup_examples.py` or programmatically
+2. **UI Changes**: Modify templates in `templates/` directory, then run `echo "yes" | python3 scripts/reset_application.py` to regenerate pages
+3. **New Pages**: Create template in `templates/` and generate via `scripts/setup_examples.py` or programmatically
 
 ### Template-Based Architecture
 
@@ -288,7 +294,7 @@ ExpertGPTs uses a template-based architecture for consistency:
 
 When modifying templates:
 1. Edit the template file in `templates/`
-2. Run `echo "yes" | python3 reset_application.py` to regenerate all pages
+2. Run `echo "yes" | python3 scripts/reset_application.py` to regenerate all pages
 3. Changes will be reflected across all generated pages
 
 ### Testing
@@ -297,7 +303,7 @@ The project includes automated tests using pytest. For detailed testing instruct
 
 Quick test run:
 ```bash
-./run_tests.sh
+./scripts/run_tests.sh
 ```
 
 ### Contributing

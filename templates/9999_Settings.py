@@ -885,12 +885,12 @@ def render_danger_zone_section():
                             if page_file.name not in ["1000_Home.py", "9999_Settings.py"]:
                                 page_file.unlink()
 
-                    # Recreate example experts using setup_examples.py
+                    # Recreate example experts using scripts/setup_examples.py
                     st.info("🔄 Recreating example experts...")
 
-                    # Run setup_examples.py as a subprocess
+                    # Run scripts/setup_examples.py as a subprocess
                     result = subprocess.run(
-                        [sys.executable, "setup_examples.py"],
+                        [sys.executable, "scripts/setup_examples.py"],
                         check=True,
                         capture_output=True,
                         text=True,
