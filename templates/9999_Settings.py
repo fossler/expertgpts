@@ -708,13 +708,6 @@ def render_expert_management_section():
                 st.markdown("**Settings**")
                 st.caption(f"🌡️ Temperature: {expert.get('temperature', 'N/A')}")
 
-                # Show metadata if available
-                metadata = expert.get('metadata', {})
-                if metadata:
-                    st.markdown("**Metadata:**")
-                    for key, value in metadata.items():
-                        st.caption(f"• {key}: {value}")
-
             with col3:
                 st.markdown("**Actions**")
                 edit_key = f"edit_{expert['expert_id']}"
