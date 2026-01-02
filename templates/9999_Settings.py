@@ -11,7 +11,7 @@ from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.constants import EXPERT_BEHAVIOR_DOCS, EXPERT_BEHAVIOR_DOCS_EDIT
-from utils.dialogs import create_new_expert, render_add_chat_dialog
+from utils.dialogs import create_new_expert, render_add_chat_dialog, render_temperature_input
 from utils import secrets_manager
 from utils import config_toml_manager
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
@@ -432,14 +432,7 @@ def render_add_chat_dialog():
         ).strip()
 
         # Temperature
-        temperature = st.number_input(
-            "Temperature",
-            min_value=0.0,
-            max_value=2.0,
-            value=1.0,
-            step=0.1,
-            help="Controls randomness in responses. Lower = more focused, Higher = more creative",
-        )
+        temperature = render_temperature_input()
 
         st.divider()
 
@@ -571,14 +564,7 @@ def render_edit_expert_dialog():
         ).strip()
 
         # Temperature
-        temperature = st.number_input(
-            "Temperature",
-            min_value=0.0,
-            max_value=2.0,
-            value=float(expert_config.get('temperature', 1.0)),
-            step=0.1,
-            help="Controls randomness in responses. Lower = more focused, Higher = more creative",
-        )
+        temperature = render_temperature_input(value=float(expert_config.get('temperature', 1.0)))
 
         st.divider()
 

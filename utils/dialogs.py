@@ -33,6 +33,32 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     return True, ""
 
 
+def render_temperature_input(value: float = 1.0) -> float:
+    """Render temperature input field with reduced width (1/8 of normal).
+
+    Args:
+        value: Current temperature value (default: 1.0)
+
+    Returns:
+        float: Temperature value from user input
+    """
+    # Create columns to control width (1/8 of normal) - temperature on LEFT
+    temp_col, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+
+    with temp_col:
+        temperature = st.number_input(
+            "Temperature",
+            min_value=0.0,
+            max_value=2.0,
+            value=value,
+            step=0.1,
+            help="Controls randomness in responses. Lower = more focused, Higher = more creative",
+            label_visibility="visible",
+        )
+
+    return temperature
+
+
 def create_new_expert(
     chat_name: str,
     description: str,
@@ -112,14 +138,7 @@ def render_add_chat_dialog():
         ).strip()
 
         # Temperature
-        temperature = st.number_input(
-            "Temperature",
-            min_value=0.0,
-            max_value=2.0,
-            value=1.0,
-            step=0.1,
-            help="Controls randomness in responses. Lower = more focused, Higher = more creative",
-        )
+        temperature = render_temperature_input()
 
         st.divider()
 
