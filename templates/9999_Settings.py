@@ -281,22 +281,19 @@ def render_general_settings_section():
 
     st.divider()
 
-    st.caption("💡 Changes will be visible after you click 'Apply Theme'")
+    # Check if we need to reload page (from Save & Apply button)
+    # Note: We use switch_page() instead of rerun() because Streamlit only reads
+    # config.toml on page load, not on rerun. This forces a complete page reload.
+    if st.session_state.get("trigger_page_reload", False):
+        st.session_state.trigger_page_reload = False
+        # Switch to current page to force complete reload (re-reads config.toml)
+        st.switch_page("pages/9999_Settings.py")
 
-    # Initialize session state for tracking if settings have been saved
-    if "settings_saved" not in st.session_state:
-        st.session_state.settings_saved = False
+    # Single button to save and apply theme settings
+    col1, col2, col3 = st.columns([2, 2, 4])
 
-    # Check if we need to rerun (from Apply Theme button)
-    if st.session_state.get("trigger_rerun", False):
-        st.session_state.trigger_rerun = False
-        st.rerun()
-
-    # Buttons - closer together with 4-column layout
-    col1, col2, col3, col4 = st.columns([1.5, 1.5, 2, 2])
-
-    def save_settings():
-        """Callback to save theme settings to config.toml."""
+    def save_and_apply_theme():
+        """Callback to save theme settings to config.toml and force page reload."""
         try:
             # Read current values directly from the color picker widgets
             primary_key = f"primary_{st.session_state.selected_theme_option}"
@@ -307,6 +304,7 @@ def render_general_settings_section():
             # Get the current theme name (extract from radio selection)
             current_theme_name = theme_labels[st.session_state.selected_theme_option]
 
+            # Save to config.toml
             config_toml_manager.save_theme_settings(
                 theme_name=current_theme_name,
                 primaryColor=st.session_state[primary_key],
@@ -314,36 +312,24 @@ def render_general_settings_section():
                 secondaryBackgroundColor=st.session_state[secondary_key],
                 textColor=st.session_state[text_key]
             )
-            st.session_state.settings_saved = True
-            st.session_state.just_saved = True
+
+            # Set flag to trigger page reload (not rerun!)
+            st.session_state.trigger_page_reload = True
+
+            # Show success toast
+            st.toast("✅ Theme saved! Reloading page...", icon="🎨")
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
 
-    def apply_theme():
-        """Callback to apply the saved theme."""
-        st.session_state.trigger_rerun = True
-
     with col1:
-        if st.button("Save Settings", key="save_settings_button", on_click=save_settings):
+        if st.button("💾 Save & Apply Theme", key="save_apply_button", on_click=save_and_apply_theme, type="primary"):
             pass
 
     with col2:
-        st.button("Apply Theme", key="apply_theme_button", on_click=apply_theme, disabled=not st.session_state.settings_saved)
+        st.empty()  # Spacer
 
     with col3:
         st.empty()  # Spacer
-
-    with col4:
-        st.empty()  # Spacer
-
-    # Show success message if settings were just saved
-    if st.session_state.get("just_saved", False):
-        st.toast("✅ Settings saved! Click 'Apply Theme' to apply.", icon="💾")
-        st.session_state.just_saved = False
-
-    # Reset settings_saved after applying
-    if st.session_state.get("trigger_rerun", False):
-        st.session_state.settings_saved = False
 
 
 def create_new_expert(
