@@ -180,14 +180,36 @@ def render_general_settings_section():
 
     # Initialize session state for selected theme and colors
     if "selected_theme_option" not in st.session_state:
-        st.session_state.selected_theme_option = theme_options[0]
-        # Initialize with first theme's colors
-        first_theme_name = theme_labels[theme_options[0]]
-        first_theme = themes[first_theme_name]
-        st.session_state.theme_primary_color = first_theme["primary"]
-        st.session_state.theme_background_color = first_theme["background"]
-        st.session_state.theme_secondary_background_color = first_theme["secondary"]
-        st.session_state.theme_text_color = first_theme["text"]
+        # Read current theme from config file
+        current_config = config_toml_manager.get_theme_settings()
+
+        # Try to match current config with predefined themes
+        matched_theme = None
+        for theme_name, theme_colors in themes.items():
+            if theme_name == "Custom":
+                continue
+            if (theme_colors["primary"] == current_config.get("primaryColor") and
+                theme_colors["background"] == current_config.get("backgroundColor") and
+                theme_colors["secondary"] == current_config.get("secondaryBackgroundColor") and
+                theme_colors["text"] == current_config.get("textColor")):
+                matched_theme = theme_name
+                break
+
+        # Set the selected theme
+        if matched_theme:
+            # Found a matching predefined theme
+            st.session_state.selected_theme_option = f"{themes[matched_theme]['icon']} {matched_theme}"
+            st.session_state.theme_primary_color = themes[matched_theme]["primary"]
+            st.session_state.theme_background_color = themes[matched_theme]["background"]
+            st.session_state.theme_secondary_background_color = themes[matched_theme]["secondary"]
+            st.session_state.theme_text_color = themes[matched_theme]["text"]
+        else:
+            # No match found, use Custom theme with current config values
+            st.session_state.selected_theme_option = f"{themes['Custom']['icon']} Custom"
+            st.session_state.theme_primary_color = current_config.get("primaryColor", "#F59E0B")
+            st.session_state.theme_background_color = current_config.get("backgroundColor", "#FFFBEB")
+            st.session_state.theme_secondary_background_color = current_config.get("secondaryBackgroundColor", "#FEF3C7")
+            st.session_state.theme_text_color = current_config.get("textColor", "#78350F")
 
     # Radio button for theme selection (outside form for reactivity)
     selected_theme = st.radio(
