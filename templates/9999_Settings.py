@@ -570,10 +570,22 @@ def render_edit_expert_dialog():
 
         # Expert Behavior (Advanced) - The most important field!
         st.markdown("### 🧠 Expert Behavior (Advanced)")
-        st.caption(
-            "💡 **This is the most important field!** It defines how your expert responds, thinks, and acts. "
-            "Leave empty to use the existing behavior."
-        )
+
+        # Check if API key available
+        api_key_available = bool(st.session_state.get("deepseek_api_key", ""))
+
+        if api_key_available:
+            caption_text = (
+                "💡 **AI-powered generation!** Leave empty to regenerate a customized "
+                "system prompt using AI. Provide your own for complete control."
+            )
+        else:
+            caption_text = (
+                "💡 **Manual mode**: API key not set, so AI generation is unavailable. "
+                "Leave empty to keep the existing behavior, or provide your own."
+            )
+
+        st.caption(caption_text)
 
         custom_system_prompt = st.text_area(
             "Customize Expert Behavior",
@@ -605,6 +617,22 @@ def render_edit_expert_dialog():
                 return
 
             try:
+                # Determine if we need AI generation
+                # Empty string means "regenerate with AI" (if API key available)
+                # None means "keep existing"
+                final_system_prompt = custom_system_prompt
+
+                if custom_system_prompt == "" and api_key_available:
+                    # User cleared the field - trigger AI regeneration
+                    final_system_prompt = None
+
+                elif custom_system_prompt == "" and not api_key_available:
+                    # No API key - keep existing prompt
+                    final_system_prompt = expert_config.get('system_prompt', '')
+
+                # Get API key for AI generation
+                api_key = st.session_state.get("deepseek_api_key", None) if api_key_available else None
+
                 # Update the config
                 config_manager.update_config(
                     editing_expert_id,
@@ -612,7 +640,8 @@ def render_edit_expert_dialog():
                         "expert_name": chat_name,
                         "description": description,
                         "temperature": temperature,
-                        "system_prompt": custom_system_prompt,
+                        "system_prompt": final_system_prompt,
+                        "api_key": api_key,
                     }
                 )
 
@@ -640,10 +669,22 @@ def render_expert_management_section():
     """Render the Expert Management section."""
     st.subheader("🤖 Expert Management")
 
-    # Add new chat button
-    if st.button("➕ Add new Chat", type="primary", width="content"):
-        st.session_state.show_add_chat_dialog = True
-        st.rerun()
+    # Check API key availability
+    api_key_available = st.session_state.get("deepseek_api_key", "")
+
+    if api_key_available:
+        if st.button("➕ Add new Chat", type="primary", width="content"):
+            st.session_state.show_add_chat_dialog = True
+            st.rerun()
+    else:
+        st.button(
+            "➕ Add new Chat",
+            type="primary",
+            width="content",
+            disabled=True,
+            help="API key must be set to create new chats"
+        )
+        st.caption("⚠️ Set API key above to create experts")
 
     st.divider()
 
@@ -714,13 +755,32 @@ def render_expert_management_section():
             with col1:
                 if st.button("✅ Yes, Delete", key=f"confirm_{expert['expert_id']}", type="primary"):
                     try:
-                        # Delete the config file
-                        config_file = Path(__file__).parent.parent / "configs" / f"{expert['expert_id']}.yaml"
-                        if config_file.exists():
-                            config_file.unlink()
+                        # Import PageGenerator
+                        from utils.page_generator import PageGenerator
 
-                        # Delete the page file
-                        page_file = Path(__file__).parent / f"*_{expert['safe_name']}.py"
+                        # Delete the config file using ConfigManager
+                        config_manager = ConfigManager()
+                        config_manager.delete_config(expert['expert_id'])
+
+                        # Delete the page file using PageGenerator
+                        page_generator = PageGenerator()
+                        page_generator.delete_page(expert['expert_id'])
+
+                        # Clear all cache for this expert
+                        expert_id = expert['expert_id']
+
+                        # Clear cache version
+                        if f"cache_version_{expert_id}" in st.session_state:
+                            del st.session_state[f"cache_version_{expert_id}"]
+
+                        # Clear chat history for this expert
+                        if f"messages_{expert_id}" in st.session_state:
+                            del st.session_state[f"messages_{expert_id}"]
+
+                        # Clear any other expert-specific state
+                        keys_to_delete = [key for key in st.session_state.keys() if expert_id in str(key)]
+                        for key in keys_to_delete:
+                            del st.session_state[key]
 
                         st.success(f"✅ Expert '{expert['expert_name']}' deleted successfully!")
                         st.session_state[f"confirm_delete_{expert['expert_id']}"] = False

@@ -3,3 +3,92 @@ Accountant GPT
 General Purpose
 Web Search - for up-to-date Infos
 
+
+
+
+Dieser Ansatz soll viel anspruchsvoller werden.
+
+Anforderung:
+- Das erstellen eines neuen Experten soll nur möglich sein, wenn ein API Key defniert ist.
+- Der benutzer soll informiert werden, dass man nur neue Chats erstellen kann wenn ein API Key definiert ist. 
+- Solange kein API Key definiert ist, soll die Schaltflache "Add Chat" deaktiviert sein
+
+
+
+Workflow (betrifft nur das erstellen von neuen Chats)
+- Wenn der Benutzer system_prompt leer lässt beim anlegen einen neuen Chats oder im edit modus den system_prompt löscht und dann mit einem leeren system_prompt speichert, dann:
+- Mach einen API Call gegen deepseek und beauftrage ihn, einen system_prompt zu generieren. Für die Anfrage soll folgender system_prompt benutzt werden:
+"""You are {expert_name}, a domain-specific expert AI assistant.
+
+  {description}
+
+  ## Guidelines
+  - Provide accurate, expert-level information in your domain
+  - If you're unsure about something, acknowledge it honestly
+  - Use clear, professional language appropriate for your domain
+  - Ask clarifying questions when needed to provide better assistance
+  - Provide practical, actionable advice when applicable
+
+  Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information."""
+  (Dieser Input enstpricht unserem Template)
+- Die gelieferte Antwort soll dann als system_prompt verwendet werden.
+- Sollte die API Fehler liefern, dann wenden wir als standard unsere bestehende Lösung an:
+"""You are {expert_name}, a domain-specific expert AI assistant.
+
+  {description}
+
+  ## Guidelines
+  - Provide accurate, expert-level information in your domain
+  - If you're unsure about something, acknowledge it honestly
+  - Use clear, professional language appropriate for your domain
+  - Ask clarifying questions when needed to provide better assistance
+  - Provide practical, actionable advice when applicable
+
+  Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information."""
+
+
+
+EN Versions
+
+This approach is intended to be much more sophisticated.
+
+Requirement:
+
+- Creating a new expert should only be possible if an API key is defined.
+
+- The user should be informed that new chats can only be created if an API key is defined.
+
+- As long as no API key is defined, the "Add Chat" button should be disabled.
+
+Workflow (only applies to creating new chats):
+
+- If the user leaves the system_prompt blank when creating a new chat, or deletes the system_prompt in edit mode and then saves with a blank system_prompt, then:
+
+- Make an API call to deepseek and instruct it to generate a system_prompt. The following system_prompt should be used for the request:
+"""You are {expert_name}, a domain-specific expert AI assistant. 
+
+{description} 
+
+## Guidelines 
+- Provide accurate, expert-level information in your domain 
+- If you're unsure about something, acknowledge it honestly 
+- Use clear, professional language appropriate for your domain 
+- Ask clarifying questions when needed to provide better assistance 
+- Provide practical, actionable advice when applicable 
+
+Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information.""" 
+(This input corresponds to our template)
+- The response provided should then be used as system_prompt.
+- If the API returns errors, we will use our existing solution as standard:
+"""You are {expert_name}, a domain-specific expert AI assistant. 
+
+{description} 
+
+## Guidelines 
+- Provide accurate, expert-level information in your domain 
+- If you're unsure about something, acknowledge it honestly 
+- Use clear, professional language appropriate for your domain 
+- Ask clarifying questions when needed to provide better assistance 
+- Provide practical, actionable advice when applicable 
+
+Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information."""

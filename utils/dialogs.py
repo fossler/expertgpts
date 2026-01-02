@@ -9,6 +9,7 @@ import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.constants import EXPERT_BEHAVIOR_DOCS
 from utils.page_generator import PageGenerator
+from utils import debug_logger
 
 
 def validate_expert_name(name: str) -> tuple[bool, str]:
@@ -77,18 +78,39 @@ def create_new_expert(
         tuple: (expert_id, page_path)
     """
     config_manager = ConfigManager()
-    page_generator = PageGenerator()
+    page_generator_obj = PageGenerator()
 
-    # Create configuration
-    expert_id = config_manager.create_config(
-        expert_name=chat_name,
-        description=description,
-        temperature=temperature,
-        system_prompt=custom_system_prompt,
+    # Get API key from session state for AI generation
+    api_key = st.session_state.get("deepseek_api_key", None)
+
+    # Check if AI generation will be used
+    needs_ai_generation = (
+        (custom_system_prompt is None or custom_system_prompt.strip() == "")
+        and api_key
     )
 
+    if needs_ai_generation:
+        # Show spinner during AI generation
+        with st.spinner("🤖 Generating AI-powered system prompt..."):
+            expert_id = config_manager.create_config(
+                expert_name=chat_name,
+                description=description,
+                temperature=temperature,
+                system_prompt=custom_system_prompt,
+                api_key=api_key,
+            )
+    else:
+        # No AI generation, create directly
+        expert_id = config_manager.create_config(
+            expert_name=chat_name,
+            description=description,
+            temperature=temperature,
+            system_prompt=custom_system_prompt,
+            api_key=api_key,
+        )
+
     # Generate page
-    page_path = page_generator.generate_page(
+    page_path = page_generator_obj.generate_page(
         expert_id=expert_id,
         expert_name=chat_name,
     )
@@ -116,6 +138,23 @@ def render_add_chat_dialog():
         return
 
     st.title("➕ Add New Expert Chat")
+
+    # Check for API key - required for expert creation
+    api_key_available = bool(st.session_state.get("deepseek_api_key", ""))
+
+    if not api_key_available:
+        st.warning("""
+        ⚠️ **API Key Required**
+
+        New chats can only be created when an API key is defined.
+
+        Please set your DeepSeek API key in **Settings → API Key** tab first.
+        """)
+
+        if st.button("🔧 Go to Settings", type="primary"):
+            st.switch_page("pages/9999_Settings.py")
+
+        return
 
     with st.form("add_chat_form"):
         st.subheader("Expert Configuration")
@@ -145,8 +184,9 @@ def render_add_chat_dialog():
         # Expert Behavior (Advanced) - The most important field!
         st.markdown("### 🧠 Expert Behavior (Advanced)")
         st.caption(
-            "💡 **This is the most important field!** It defines how your expert responds, thinks, and acts. "
-            "Leave empty to auto-generate from description."
+            "💡 **AI-powered generation!** Leave empty to auto-generate a customized "
+            "system prompt based on the description above. "
+            "Provide your own for complete control."
         )
 
         custom_system_prompt = st.text_area(
@@ -203,7 +243,24 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
                 st.rerun()
 
             except Exception as e:
+                # Log detailed error to file
+                debug_logger.log_exception(
+                    exception=e,
+                    context={
+                        "function": "create_new_expert",
+                        "chat_name": chat_name,
+                        "description": description[:100] if description else None,
+                        "temperature": temperature,
+                        "custom_system_prompt_provided": custom_system_prompt is not None,
+                        "api_key_available": bool(st.session_state.get("deepseek_api_key", "")),
+                        "show_modules": True  # Show loaded modules for import debugging
+                    },
+                    log_file="expert_creation_errors.log"
+                )
+
+                # Show user-friendly error in UI
                 st.error(f"❌ Error creating expert: {str(e)}")
+                st.info("📝 Detailed error has been logged to `logs/expert_creation_errors.log`")
 
         if cancel_button:
             st.session_state.show_add_chat_dialog = False
