@@ -3,7 +3,7 @@
 This script completely resets the application by:
 1. Deleting all expert configurations from configs/
 2. Deleting all expert pages from pages/
-3. Running setup_examples.py to recreate the example experts
+3. Running setup.py to recreate the example experts
 
 Use this script when you want to start fresh or restore the application to its
 initial state with the default example experts.
@@ -77,18 +77,18 @@ def delete_pages():
     return True
 
 
-def run_setup_examples():
-    """Run the setup_examples.py script to recreate example experts."""
-    print("\n🔄 Running scripts/setup_examples.py to recreate example experts...\n")
+def run_setup():
+    """Run the setup.py script to perform application setup."""
+    print("\n🔄 Running scripts/setup.py to set up the application...\n")
     print("-" * 60)
 
     try:
         # Get the script location relative to this file
         script_dir = Path(__file__).parent
-        setup_script = script_dir / "setup_examples.py"
+        setup_script = script_dir / "setup.py"
         project_root = script_dir.parent
 
-        # Run setup_examples.py as a subprocess
+        # Run setup.py as a subprocess
         result = subprocess.run(
             [sys.executable, str(setup_script)],
             check=True,
@@ -98,10 +98,10 @@ def run_setup_examples():
         )
         return result.returncode == 0
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error running setup_examples.py: {e}")
+        print(f"❌ Error running setup.py: {e}")
         return False
     except FileNotFoundError:
-        print("❌ setup_examples.py not found!")
+        print("❌ setup.py not found!")
         return False
 
 
@@ -118,12 +118,6 @@ def main():
 
     print("\n✅ Reset confirmed. Proceeding...\n")
 
-    # Delete setup marker so next run will trigger setup
-    marker_file = Path(".setup_complete")
-    if marker_file.exists():
-        marker_file.unlink()
-        print("🗑️  Deleted setup marker file")
-
     # Delete configs
     if not delete_configs():
         print("\n❌ Failed to delete configs. Aborting.")
@@ -135,7 +129,7 @@ def main():
         return 1
 
     # Recreate example experts
-    if not run_setup_examples():
+    if not run_setup():
         print("\n❌ Failed to recreate example experts.")
         return 1
 

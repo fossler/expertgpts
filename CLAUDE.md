@@ -83,7 +83,7 @@ The script will:
 1. Ask for confirmation (type "yes" to proceed)
 2. Delete all YAML configs from `configs/`
 3. Delete all expert pages from `pages/` (keeps Home.py)
-4. Run `scripts/setup_examples.py` to recreate 7 default experts
+4. Run `scripts/setup.py` to recreate 7 default experts
 
 ### Testing
 ```bash
@@ -167,15 +167,15 @@ page_path = page_generator.generate_page(
   - **`utils/secrets_manager.py`**: Manages `.streamlit/secrets.toml` for API key storage
   - **`utils/config_toml_manager.py`**: Manages `.streamlit/config.toml` for theme settings
 - **`tests/`**: Test suite using pytest with temporary directories for isolation
-- **`scripts/setup_examples.py`**: Creates the 7 default example experts
-- **`scripts/reset_application.py`**: Resets app to factory state (deletes all, then runs setup_examples.py)
+- **`scripts/setup.py`**: Sets up the application (Home, Settings, and 7 default example experts)
+- **`scripts/reset_application.py`**: Resets app to factory state (deletes all, then runs setup.py)
 - **`.streamlit/`**: Streamlit configuration directory
   - **`secrets.toml`**: API keys and secrets - **gitignored** (auto-created by app)
   - **`secrets.toml.example`**: Template file for manual setup
   - **`config.toml`**: Theme and appearance settings - **gitignored** (managed through Settings page)
   - **`config.toml.example`**: Template file for theme settings
 
-**Important**: Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated. To recreate them, run `scripts/setup_examples.py` or `scripts/reset_application.py`.
+**Important**: Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated. To recreate them, run `scripts/setup.py` or `scripts/reset_application.py`.
 
 ## Key Implementation Details
 
