@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
-from utils.page_generator import PageGenerator
+from utils.dialogs import create_new_expert, render_add_chat_dialog
 from utils import secrets_manager
 from utils import config_toml_manager
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
