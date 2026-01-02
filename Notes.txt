@@ -1,13 +1,5 @@
 Finance GPT
 Accountant GPT
 General Purpose
-
-
-
-
-"ELEMEN"  "Theme 1"         "Theme 2"         "Theme 3"         "Theme 4"
-"Buttons and interactive Elements" "color 1" "color 2" "color 3" "color 4"
-"Background Color" "color 1" "color 2" "color 3" "color 4"
-"Secondary Background" "color 1" "color 2" "color 3" "color 4"
-"Text Color" "color 1" "color 2" "color 3" "color 4"
+Web Search - for up-to-date Infos
 

@@ -70,13 +70,14 @@ def get_theme_settings() -> dict:
     """Get current theme settings from config.toml.
 
     Returns:
-        dict: Dictionary with theme settings (primaryColor, backgroundColor, etc.)
+        dict: Dictionary with theme settings including theme_name and colors
     """
     config_path = get_config_path()
 
     if not config_path.exists():
         # Return default values if config doesn't exist
         return {
+            "theme_name": "Custom",
             "primaryColor": "#6366F1",
             "backgroundColor": "#FFFFFF",
             "secondaryBackgroundColor": "#F3F4F6",
@@ -87,6 +88,7 @@ def get_theme_settings() -> dict:
 
     # Parse the config file to extract theme settings
     theme_settings = {
+        "theme_name": "Custom",
         "primaryColor": "#FF6B6B",
         "backgroundColor": "#FFFFFF",
         "secondaryBackgroundColor": "#F0F2F6",
@@ -111,13 +113,15 @@ def get_theme_settings() -> dict:
             key = key.strip()
             value = value.strip().strip('"').strip("'")
 
-            if key in theme_settings:
+            # Store all theme settings including theme_name
+            if key in theme_settings or key == "theme_name":
                 theme_settings[key] = value
 
     return theme_settings
 
 
 def save_theme_settings(
+    theme_name: str = None,
     primaryColor: str = None,
     backgroundColor: str = None,
     secondaryBackgroundColor: str = None,
@@ -126,13 +130,14 @@ def save_theme_settings(
     """Save theme settings to config.toml file.
 
     Args:
+        theme_name: Name of the theme (e.g., "Royal Purple", "Custom")
         primaryColor: Color for buttons and interactive elements
         backgroundColor: Main background color
         secondaryBackgroundColor: Background color for sidebar
         textColor: Main text color
 
     Note:
-        Only updates the colors that are provided (not None).
+        Only updates the fields that are provided (not None).
         Preserves other settings in the config file.
     """
     config_path = ensure_config_file_exists()
@@ -147,7 +152,7 @@ def save_theme_settings(
     theme_found = False
 
     # Track which theme settings we've seen
-    theme_keys = {"primaryColor", "backgroundColor", "secondaryBackgroundColor", "textColor"}
+    theme_keys = {"theme_name", "primaryColor", "backgroundColor", "secondaryBackgroundColor", "textColor"}
     seen_theme_settings = set()
 
     for i, line in enumerate(lines):
@@ -171,7 +176,10 @@ def save_theme_settings(
             if key in theme_keys:
                 seen_theme_settings.add(key)
 
-                if key == "primaryColor" and primaryColor is not None:
+                if key == "theme_name" and theme_name is not None:
+                    new_lines.append(f'{key} = "{theme_name}"')
+                    continue
+                elif key == "primaryColor" and primaryColor is not None:
                     new_lines.append(f'{key} = "{primaryColor}"')
                     continue
                 elif key == "backgroundColor" and backgroundColor is not None:
@@ -201,6 +209,10 @@ def save_theme_settings(
         # Insert new settings after [theme] header
         insert_position = theme_section_index + 1
         settings_to_add = []
+
+        if "theme_name" not in seen_theme_settings and theme_name is not None:
+            settings_to_add.append(f'theme_name = "{theme_name}"')
+            seen_theme_settings.add("theme_name")
 
         if "primaryColor" not in seen_theme_settings and primaryColor is not None:
             settings_to_add.append(f'primaryColor = "{primaryColor}"')

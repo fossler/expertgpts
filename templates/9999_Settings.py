@@ -180,31 +180,23 @@ def render_general_settings_section():
 
     # Initialize session state for selected theme and colors
     if "selected_theme_option" not in st.session_state:
-        # Read current theme from config file
+        # Read current theme from config file (now includes theme_name!)
         current_config = config_toml_manager.get_theme_settings()
 
-        # Try to match current config with predefined themes
-        matched_theme = None
-        for theme_name, theme_colors in themes.items():
-            if theme_name == "Custom":
-                continue
-            if (theme_colors["primary"] == current_config.get("primaryColor") and
-                theme_colors["background"] == current_config.get("backgroundColor") and
-                theme_colors["secondary"] == current_config.get("secondaryBackgroundColor") and
-                theme_colors["text"] == current_config.get("textColor")):
-                matched_theme = theme_name
-                break
+        # Get the saved theme name directly (defaults to "Custom" if not set)
+        saved_theme_name = current_config.get("theme_name", "Custom")
 
-        # Set the selected theme
-        if matched_theme:
-            # Found a matching predefined theme
-            st.session_state.selected_theme_option = f"{themes[matched_theme]['icon']} {matched_theme}"
-            st.session_state.theme_primary_color = themes[matched_theme]["primary"]
-            st.session_state.theme_background_color = themes[matched_theme]["background"]
-            st.session_state.theme_secondary_background_color = themes[matched_theme]["secondary"]
-            st.session_state.theme_text_color = themes[matched_theme]["text"]
+        # Validate that the saved theme name exists in our predefined themes
+        if saved_theme_name in themes and saved_theme_name != "Custom":
+            # Use the saved theme directly - no color comparison needed!
+            theme_data = themes[saved_theme_name]
+            st.session_state.selected_theme_option = f"{theme_data['icon']} {saved_theme_name}"
+            st.session_state.theme_primary_color = theme_data["primary"]
+            st.session_state.theme_background_color = theme_data["background"]
+            st.session_state.theme_secondary_background_color = theme_data["secondary"]
+            st.session_state.theme_text_color = theme_data["text"]
         else:
-            # No match found, use Custom theme with current config values
+            # Use Custom theme with current config values
             st.session_state.selected_theme_option = f"{themes['Custom']['icon']} Custom"
             st.session_state.theme_primary_color = current_config.get("primaryColor", "#F59E0B")
             st.session_state.theme_background_color = current_config.get("backgroundColor", "#FFFBEB")
@@ -312,7 +304,11 @@ def render_general_settings_section():
             secondary_key = f"secondary_{st.session_state.selected_theme_option}"
             text_key = f"text_{st.session_state.selected_theme_option}"
 
+            # Get the current theme name (extract from radio selection)
+            current_theme_name = theme_labels[st.session_state.selected_theme_option]
+
             config_toml_manager.save_theme_settings(
+                theme_name=current_theme_name,
                 primaryColor=st.session_state[primary_key],
                 backgroundColor=st.session_state[background_key],
                 secondaryBackgroundColor=st.session_state[secondary_key],
