@@ -35,7 +35,7 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
 
 
 def render_temperature_input(value: float = 1.0) -> float:
-    """Render temperature input field with reduced width (1/4 of normal).
+    """Render temperature input field with full width.
 
     Args:
         value: Current temperature value (default: 1.0)
@@ -43,32 +43,28 @@ def render_temperature_input(value: float = 1.0) -> float:
     Returns:
         float: Temperature value from user input
     """
-    # Create columns to control width (1/4 of normal) - temperature on LEFT
-    temp_col, col2, col3, col4 = st.columns(4)
+    temperature = st.number_input(
+        "Temperature",
+        min_value=0.0,
+        max_value=2.0,
+        value=value,
+        step=0.1,
+        help="Controls response creativity and focus",
+        label_visibility="visible",
+    )
 
-    with temp_col:
-        temperature = st.number_input(
-            "Temperature",
-            min_value=0.0,
-            max_value=2.0,
-            value=value,
-            step=0.1,
-            help="Controls response creativity and focus",
-            label_visibility="visible",
-        )
+    # Add expander with detailed temperature guidance
+    with st.expander("📖 Recommended values", expanded=False):
+        st.markdown("""
+        **Use Case Guidelines:**
 
-        # Add expander with detailed temperature guidance
-        with st.expander("📖 Recommended values", expanded=False):
-            st.markdown("""
-            **Use Case Guidelines:**
+        • **0.0** - Coding/Math (precision required)
+        • **1.0** - Data Analysis (balanced interpretation)
+        • **1.3** - Conversation/Translation (natural communication)
+        • **1.5** - Creative Writing/Poetry (maximum creativity)
 
-            • **0.0** - Coding/Math (precision required)
-            • **1.0** - Data Analysis (balanced interpretation)
-            • **1.3** - Conversation/Translation (natural communication)
-            • **1.5** - Creative Writing/Poetry (maximum creativity)
-
-            *Based on official DeepSeek documentation*
-            """)
+        *Based on official DeepSeek documentation*
+        """)
 
     return temperature
 
