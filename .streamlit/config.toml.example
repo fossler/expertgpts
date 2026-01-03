@@ -1,0 +1,20 @@
+[theme]
+
+# Buttons and interactive Elements - color for buttons and interactive elements
+primaryColor = "#6366F1"
+
+# Background color - main background color of the application
+backgroundColor = "#FFFFFF"
+
+# Secondary background color - used for sidebar and other secondary areas
+secondaryBackgroundColor = "#F3F4F6"
+
+# Text color - main text color throughout the application
+textColor = "#1F2937"
+
+# Base font size - default font size for the application (reduced from default 16px)
+baseFontSize = "14px"
+
+[layout]
+# Use wide mode by default (expands main content area)
+wideMode = true
