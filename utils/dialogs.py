@@ -53,17 +53,22 @@ def render_temperature_input(value: float = 1.0) -> float:
             max_value=2.0,
             value=value,
             step=0.1,
-            help="Controls response creativity and focus. See recommended values below.",
+            help="Controls response creativity and focus",
             label_visibility="visible",
         )
 
-    # Add caption with use cases
-    with temp_col:
-        st.caption("**Recommended values:**")
-        st.caption("• 0.0 - Coding/Math")
-        st.caption("• 1.0 - Data Analysis")
-        st.caption("• 1.3 - Conversation/Translation")
-        st.caption("• 1.5 - Creative Writing")
+        # Add expander with detailed temperature guidance
+        with st.expander("📖 Recommended values", expanded=False):
+            st.markdown("""
+            **Use Case Guidelines:**
+
+            • **0.0** - Coding/Math (precision required)
+            • **1.0** - Data Analysis (balanced interpretation)
+            • **1.3** - Conversation/Translation (natural communication)
+            • **1.5** - Creative Writing/Poetry (maximum creativity)
+
+            *Based on official DeepSeek documentation*
+            """)
 
     return temperature
 
