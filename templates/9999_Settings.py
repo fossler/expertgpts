@@ -383,6 +383,9 @@ def render_add_chat_dialog():
             max_chars=100,
         ).strip()
 
+        # Add caption with allowed characters
+        st.caption("💡 **Allowed characters:** Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)")
+
         # Agent Description
         description = st.text_area(
             "Agent Description *",
@@ -520,6 +523,9 @@ def render_edit_expert_dialog():
             help="A descriptive name for the domain expert",
             max_chars=100,
         ).strip()
+
+        # Add caption with allowed characters
+        st.caption("💡 **Allowed characters:** Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)")
 
         # Agent Description
         description = st.text_area(

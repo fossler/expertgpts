@@ -197,6 +197,9 @@ def render_add_chat_dialog():
             max_chars=100,
         ).strip()
 
+        # Add caption with allowed characters
+        st.caption("💡 **Allowed characters:** Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)")
+
         # Agent Description
         description = st.text_area(
             "Agent Description *",
