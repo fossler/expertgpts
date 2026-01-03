@@ -35,7 +35,7 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
 
 
 def render_temperature_input(value: float = 1.0) -> float:
-    """Render temperature input field with full width.
+    """Render temperature slider input field with full width.
 
     Args:
         value: Current temperature value (default: 1.0)
@@ -43,14 +43,13 @@ def render_temperature_input(value: float = 1.0) -> float:
     Returns:
         float: Temperature value from user input
     """
-    temperature = st.number_input(
+    temperature = st.slider(
         "Temperature",
         min_value=0.0,
         max_value=2.0,
         value=value,
         step=0.1,
         help="Controls response creativity and focus",
-        label_visibility="visible",
     )
 
     # Add expander with detailed temperature guidance
