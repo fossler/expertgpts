@@ -697,7 +697,6 @@ def render_expert_management_section():
 
             with col2:
                 st.markdown("**Settings**")
-                st.caption(f"🌡️ Temperature: {expert.get('temperature', 'N/A')}")
 
             with col3:
                 st.markdown("**Actions**")
