@@ -35,7 +35,7 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
 
 
 def render_temperature_input(value: float = 1.0) -> float:
-    """Render temperature slider input field with full width.
+    """Render temperature slider input field with half width.
 
     Args:
         value: Current temperature value (default: 1.0)
@@ -43,23 +43,27 @@ def render_temperature_input(value: float = 1.0) -> float:
     Returns:
         float: Temperature value from user input
     """
-    temperature = st.slider(
-        "Temperature",
-        min_value=0.0,
-        max_value=2.0,
-        value=value,
-        step=0.1,
-        help="Controls response creativity and focus",
-    )
+    # Use half width (1/2) for temperature field
+    col1, col2 = st.columns(2)
 
-    # Add expander with detailed temperature guidance
-    with st.expander("📖 Recommended values", expanded=False):
-        st.markdown("**Use Case Guidelines:**\n")
-        st.markdown("• **0.0** - Coding/Math (precision required)")
-        st.markdown("• **1.0** - Data Analysis (balanced interpretation)")
-        st.markdown("• **1.3** - Conversation/Translation (natural communication)")
-        st.markdown("• **1.5** - Creative Writing/Poetry (maximum creativity)")
-        st.caption("\n*Based on official DeepSeek documentation*")
+    with col1:
+        temperature = st.slider(
+            "Temperature",
+            min_value=0.0,
+            max_value=2.0,
+            value=value,
+            step=0.1,
+            help="Controls response creativity and focus",
+        )
+
+        # Add expander with detailed temperature guidance
+        with st.expander("📖 Recommended values", expanded=False):
+            st.markdown("**Use Case Guidelines:**\n")
+            st.markdown("• **0.0** - Coding/Math (precision required)")
+            st.markdown("• **1.0** - Data Analysis (balanced interpretation)")
+            st.markdown("• **1.3** - Conversation/Translation (natural communication)")
+            st.markdown("• **1.5** - Creative Writing/Poetry (maximum creativity)")
+            st.caption("\n*Based on official DeepSeek documentation*")
 
     return temperature
 
