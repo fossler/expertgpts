@@ -668,7 +668,7 @@ def render_expert_management_section():
             col1, col2, col3 = st.columns([3, 1, 1])
 
             with col1:
-                st.markdown(f"**Expert ID:** `{expert['expert_id']}`")
+                st.markdown(f"**Temperature:** `{expert['temperature']}`")
                 st.markdown("**Description:**")
                 st.text_area(
                     "Description",
