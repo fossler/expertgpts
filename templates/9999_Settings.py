@@ -422,8 +422,8 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
 
         st.caption("* Required fields")
 
-        # Form buttons
-        col1, col2 = st.columns(2)
+        # Form buttons (1/8 width each, left-aligned like Temperature input)
+        col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
 
         with col1:
             submit_button = st.form_submit_button("Create Expert", width="stretch", type="primary")
@@ -565,8 +565,8 @@ def render_edit_expert_dialog():
 
         st.caption("* Required fields")
 
-        # Form buttons
-        col1, col2 = st.columns(2)
+        # Form buttons (1/8 width each, left-aligned like Temperature input)
+        col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
 
         with col1:
             submit_button = st.form_submit_button("Save Changes", width="stretch", type="primary")
