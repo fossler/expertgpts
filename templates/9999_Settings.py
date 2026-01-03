@@ -339,7 +339,8 @@ def create_new_expert(
     chat_name: str,
     description: str,
     temperature: float,
-    custom_system_prompt: str = None
+    custom_system_prompt: str = None,
+    api_key: str = None
 ):
     """Create a new expert agent.
 
@@ -348,6 +349,7 @@ def create_new_expert(
         description: Description of expertise
         temperature: Temperature setting
         custom_system_prompt: Optional custom system prompt
+        api_key: DeepSeek API key for AI system prompt generation
 
     Returns:
         tuple: (expert_id, page_path)
@@ -368,6 +370,7 @@ def create_new_expert(
         description=description,
         temperature=temperature,
         system_prompt=custom_system_prompt,
+        api_key=api_key,
         page_number=page_number,
     )
 
@@ -493,7 +496,10 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
                 return
 
             try:
-                expert_id, page_path = create_new_expert(chat_name, description, temperature, custom_system_prompt)
+                # Get API key for system prompt generation
+                api_key = st.session_state.get("deepseek_api_key", None)
+
+                expert_id, page_path = create_new_expert(chat_name, description, temperature, custom_system_prompt, api_key)
 
                 # Store the page path for navigation after rerun
                 st.session_state.pending_expert_page = page_path
