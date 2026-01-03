@@ -665,7 +665,7 @@ def render_expert_management_section():
     # Display experts in a table
     for idx, expert in enumerate(experts):
         with st.expander(f"📝 {expert['expert_name']}", expanded=False):
-            col1, col2, col3 = st.columns([3, 1, 1])
+            col1, col2 = st.columns([3, 1])
 
             with col1:
                 st.markdown(f"**Temperature:** `{expert['temperature']}`")
@@ -696,9 +696,6 @@ def render_expert_management_section():
                     st.markdown("**🧠 Expert Behavior:** Auto-generated from description")
 
             with col2:
-                st.markdown("**Settings**")
-
-            with col3:
                 st.markdown("**Actions**")
                 edit_key = f"edit_{expert['expert_id']}"
                 if st.button("✏️ Edit", key=edit_key, width="stretch"):
