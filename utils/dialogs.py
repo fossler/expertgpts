@@ -54,16 +54,12 @@ def render_temperature_input(value: float = 1.0) -> float:
 
     # Add expander with detailed temperature guidance
     with st.expander("📖 Recommended values", expanded=False):
-        st.markdown("""
-        **Use Case Guidelines:**
-
-        • **0.0** - Coding/Math (precision required)
-        • **1.0** - Data Analysis (balanced interpretation)
-        • **1.3** - Conversation/Translation (natural communication)
-        • **1.5** - Creative Writing/Poetry (maximum creativity)
-
-        *Based on official DeepSeek documentation*
-        """)
+        st.markdown("**Use Case Guidelines:**\n")
+        st.markdown("• **0.0** - Coding/Math (precision required)")
+        st.markdown("• **1.0** - Data Analysis (balanced interpretation)")
+        st.markdown("• **1.3** - Conversation/Translation (natural communication)")
+        st.markdown("• **1.5** - Creative Writing/Poetry (maximum creativity)")
+        st.caption("\n*Based on official DeepSeek documentation*")
 
     return temperature
 
