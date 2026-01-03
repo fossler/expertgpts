@@ -335,57 +335,6 @@ def render_general_settings_section():
         st.empty()  # Spacer
 
 
-def create_new_expert(
-    chat_name: str,
-    description: str,
-    temperature: float,
-    custom_system_prompt: str = None,
-    api_key: str = None
-):
-    """Create a new expert agent.
-
-    Args:
-        chat_name: Name of the expert
-        description: Description of expertise
-        temperature: Temperature setting
-        custom_system_prompt: Optional custom system prompt
-        api_key: DeepSeek API key for AI system prompt generation
-
-    Returns:
-        tuple: (expert_id, page_path)
-    """
-    # Initialize managers
-    config_manager = ConfigManager()
-    page_generator = PageGenerator()
-
-    # Get next page number (doesn't create file)
-    page_number = page_generator.get_next_page_number()
-
-    # Calculate expert_id
-    expert_id = f"{page_number}_{sanitize_name(chat_name)}"
-
-    # Create configuration with page number (generates expert_id = {page_number}_{name})
-    config_manager.create_config(
-        expert_name=chat_name,
-        description=description,
-        temperature=temperature,
-        system_prompt=custom_system_prompt,
-        api_key=api_key,
-        page_number=page_number,
-    )
-
-    # Create page with correct expert_id from the start (no workaround needed!)
-    page_path, _ = page_generator.generate_page(
-        expert_id=expert_id,
-        expert_name=chat_name,
-    )
-
-    # Invalidate cache for this expert
-    st.session_state[f"cache_version_{expert_id}"] = st.session_state.get(f"cache_version_{expert_id}", 0) + 1
-
-    return expert_id, page_path
-
-
 def validate_expert_name(name: str) -> tuple[bool, str]:
     """Validate expert name contains only allowed characters.
 
