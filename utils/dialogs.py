@@ -53,9 +53,17 @@ def render_temperature_input(value: float = 1.0) -> float:
             max_value=2.0,
             value=value,
             step=0.1,
-            help="Controls randomness in responses. Lower = more focused, Higher = more creative",
+            help="Controls response creativity and focus. See recommended values below.",
             label_visibility="visible",
         )
+
+    # Add caption with use cases
+    with temp_col:
+        st.caption("**Recommended values:**")
+        st.caption("• 0.0 - Coding/Math")
+        st.caption("• 1.0 - Data Analysis")
+        st.caption("• 1.3 - Conversation/Translation")
+        st.caption("• 1.5 - Creative Writing")
 
     return temperature
 
