@@ -10,8 +10,10 @@ from datetime import datetime
 from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
+from utils.page_generator import PageGenerator
 from utils.constants import EXPERT_BEHAVIOR_DOCS, EXPERT_BEHAVIOR_DOCS_EDIT
 from utils.dialogs import create_new_expert, render_add_chat_dialog, render_temperature_input
+from utils.helpers import sanitize_name
 from utils import secrets_manager
 from utils import config_toml_manager
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
@@ -354,16 +356,23 @@ def create_new_expert(
     config_manager = ConfigManager()
     page_generator = PageGenerator()
 
-    # Create configuration
-    expert_id = config_manager.create_config(
+    # Get next page number (doesn't create file)
+    page_number = page_generator.get_next_page_number()
+
+    # Calculate expert_id
+    expert_id = f"{page_number}_{sanitize_name(chat_name)}"
+
+    # Create configuration with page number (generates expert_id = {page_number}_{name})
+    config_manager.create_config(
         expert_name=chat_name,
         description=description,
         temperature=temperature,
         system_prompt=custom_system_prompt,
+        page_number=page_number,
     )
 
-    # Generate page
-    page_path = page_generator.generate_page(
+    # Create page with correct expert_id from the start (no workaround needed!)
+    page_path, _ = page_generator.generate_page(
         expert_id=expert_id,
         expert_name=chat_name,
     )

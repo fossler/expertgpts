@@ -1,10 +1,11 @@
 """Configuration manager for Domain Expert Agents."""
 
-import os
 import yaml
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
+
+from utils.helpers import sanitize_name
 
 
 class ConfigManager:
@@ -23,6 +24,7 @@ class ConfigManager:
         self,
         expert_name: str,
         description: str,
+        page_number: int,
         temperature: float = 1.0,
         system_prompt: Optional[str] = None,
         api_key: Optional[str] = None,
@@ -32,17 +34,17 @@ class ConfigManager:
         Args:
             expert_name: Name of the expert agent
             description: Description of the expert's domain
+            page_number: Page number for filename (matches page numbering)
             temperature: Temperature for AI responses (0.0-2.0)
             system_prompt: Optional custom system prompt (None triggers AI generation)
             api_key: DeepSeek API key (required for AI generation)
 
         Returns:
-            expert_id: Unique ID for the created expert
+            expert_id: Unique ID for the created expert (matches filename without extension)
         """
-        # Generate unique ID based on timestamp and name
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_name = expert_name.lower().replace(" ", "_").replace("-", "_")
-        expert_id = f"{timestamp}_{safe_name}"
+        # Generate expert_id based on page number and name (matches filename)
+        safe_name = sanitize_name(expert_name)
+        expert_id = f"{page_number}_{safe_name}"
 
         # Create system prompt if not provided or empty
         if system_prompt is None or system_prompt.strip() == "":
@@ -63,7 +65,7 @@ class ConfigManager:
             },
         }
 
-        # Save config file
+        # Config filename matches expert_id
         config_path = self.config_dir / f"{expert_id}.yaml"
         with open(config_path, "w", encoding="utf-8") as f:
             yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
@@ -74,7 +76,7 @@ class ConfigManager:
         """Load configuration for an expert.
 
         Args:
-            expert_id: Unique ID of the expert
+            expert_id: Unique ID of the expert (matches filename without extension)
 
         Returns:
             Configuration dictionary
@@ -118,6 +120,7 @@ class ConfigManager:
         config.update(updates)
         config["updated_at"] = datetime.now().isoformat()
 
+        # Save config file
         config_path = self.config_dir / f"{expert_id}.yaml"
         with open(config_path, "w", encoding="utf-8") as f:
             yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
@@ -154,7 +157,7 @@ class ConfigManager:
         """Delete a configuration file.
 
         Args:
-            expert_id: Unique ID of the expert
+            expert_id: Unique ID of the expert (matches filename without extension)
 
         Returns:
             True if deleted, False if not found

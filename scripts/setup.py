@@ -13,6 +13,7 @@ sys.path.insert(0, str(project_root))
 
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
+from utils.helpers import sanitize_name
 
 
 def copy_settings_page():
@@ -87,15 +88,22 @@ def create_example_experts():
 
     for example in examples:
         try:
-            # Create config
-            expert_id = config_manager.create_config(
+            # Get next page number (doesn't create file)
+            page_number = page_generator.get_next_page_number()
+
+            # Calculate expert_id
+            expert_id = f"{page_number}_{sanitize_name(example['name'])}"
+
+            # Create configuration (uses page_number for naming)
+            config_manager.create_config(
                 expert_name=example["name"],
                 description=example["description"],
                 temperature=example["temperature"],
+                page_number=page_number,
             )
 
-            # Generate page
-            page_path = page_generator.generate_page(
+            # Create page with correct expert_id from the start (no workaround needed!)
+            page_path, _ = page_generator.generate_page(
                 expert_id=expert_id,
                 expert_name=example["name"],
             )

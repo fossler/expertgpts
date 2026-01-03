@@ -1,8 +1,9 @@
 """Page generator for creating new Domain Expert Agent pages."""
 
-import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple, Dict, List
+
+from utils.helpers import sanitize_name
 
 
 class PageGenerator:
@@ -27,12 +28,48 @@ class PageGenerator:
 
         self.template_path = Path(template_path)
 
+    def get_next_page_number(self) -> int:
+        """Get the next available page number without creating a file.
+
+        This method scans existing pages to determine the next available page number,
+        but does not create any files. Useful for determining page numbers before
+        creating configs.
+
+        Returns:
+            Next available page number (e.g., 1001, 1002, etc.)
+
+        Examples:
+            >>> pg = PageGenerator()
+            >>> pg.get_next_page_number()
+            1001
+        """
+        existing_numbers = []
+
+        for file in self.pages_dir.glob("*.py"):
+            # Skip system pages
+            if (file.name.startswith("_") or
+                file.name == "template.py" or
+                file.name == "1000_Home.py" or
+                file.name == "9999_Settings.py"):
+                continue
+
+            try:
+                # Extract number prefix (e.g., "1003_Coding_Expert.py" -> 1003)
+                parts = file.name.split("_", 1)
+                if parts[0].isdigit():
+                    existing_numbers.append(int(parts[0]))
+            except (IndexError, ValueError):
+                continue
+
+        # Get next number, starting from 1001 (Home is 1000, Settings is 9999)
+        return max(existing_numbers, default=1000) + 1
+
     def generate_page(
         self,
         expert_id: str,
         expert_name: str,
         overwrite: bool = False
-    ) -> str:
+    ) -> Tuple[str, int]:
         """Generate a new page from the template.
 
         Args:
@@ -41,12 +78,15 @@ class PageGenerator:
             overwrite: Whether to overwrite existing page
 
         Returns:
-            Path to the generated page file
+            Tuple of (page_path, page_number) for the generated page
         """
         # Generate safe filename with ordering prefix
-        safe_name = expert_name.replace(" ", "_").replace("-", "_")
+        safe_name = sanitize_name(expert_name)
         page_filename = self._get_next_filename(f"{safe_name}.py")
         page_path = self.pages_dir / page_filename
+
+        # Extract page number from filename
+        page_number = int(page_filename.split("_")[0])
 
         # Check if page exists
         if page_path.exists() and not overwrite:
@@ -73,7 +113,7 @@ class PageGenerator:
         with open(page_path, "w", encoding="utf-8") as f:
             f.write(page_content)
 
-        return str(page_path)
+        return str(page_path), page_number
 
     def _get_next_filename(self, base_filename: str) -> str:
         """Get the next available filename with proper ordering prefix.
@@ -134,7 +174,7 @@ class PageGenerator:
 
         return False
 
-    def list_pages(self) -> list:
+    def list_pages(self) -> List[Dict]:
         """List all existing expert pages.
 
         Returns:
