@@ -510,6 +510,9 @@ def render_edit_expert_dialog():
             help="Expert ID cannot be changed",
         )
 
+        # Temperature
+        temperature = render_temperature_input(value=float(expert_config.get('temperature', 1.0)))
+
         # Expert Name
         chat_name = st.text_input(
             "Expert Name *",
@@ -526,9 +529,6 @@ def render_edit_expert_dialog():
             height="content",
             max_chars=1000,
         ).strip()
-
-        # Temperature
-        temperature = render_temperature_input(value=float(expert_config.get('temperature', 1.0)))
 
         st.divider()
 
