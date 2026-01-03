@@ -78,9 +78,24 @@ def create_new_expert(
 
     Returns:
         tuple: (expert_id, page_path)
+
+    Raises:
+        ValueError: If an expert with the same name already exists
     """
     config_manager = ConfigManager()
     page_generator = PageGenerator()
+
+    # Check for duplicate expert name (case-insensitive)
+    existing_experts = config_manager.list_experts()
+    sanitized_input = sanitize_name(chat_name).lower()
+
+    for expert in existing_experts:
+        existing_sanitized = sanitize_name(expert["expert_name"]).lower()
+        if existing_sanitized == sanitized_input:
+            raise ValueError(
+                f"An expert named '{chat_name}' already exists. "
+                f"Please use a different name or delete the existing expert first."
+            )
 
     # Get next page number (doesn't create file)
     page_number = page_generator.get_next_page_number()
