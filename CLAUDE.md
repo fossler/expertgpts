@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Working Guidelines
+
+### Commit Policy
+**IMPORTANT: Do NOT commit changes automatically.**
+
+When making changes to the codebase:
+1. Make the requested changes
+2. Show what was modified
+3. Wait for user review
+4. Only commit when user explicitly requests it with "commit" or similar command
+
+This allows the user to review changes before they're committed to the repository.
+
 ## Project Overview
 
 ExpertGPTs is a multi-expert AI chat application built with Streamlit, powered by the DeepSeek API. It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.

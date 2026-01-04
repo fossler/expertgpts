@@ -12,8 +12,8 @@ secondaryBackgroundColor = "#F3F4F6"
 # Text color - main text color throughout the application
 textColor = "#1F2937"
 
-# Base font size - default font size for the application (reduced from default 16px)
-baseFontSize = "14px"
+# Base font size - default font size for the application (reduced from default 16)
+baseFontSize = 14
 
 [layout]
 # Use wide mode by default (expands main content area)
