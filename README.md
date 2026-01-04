@@ -181,7 +181,7 @@ The theme settings are automatically saved to `.streamlit/config.toml` with secu
 Each expert agent is configured via a YAML file in the `configs/` directory. Example configuration:
 
 ```yaml
-expert_id: "20251230_221325_python_expert"
+expert_id: "1001_python_expert"
 expert_name: "Python Expert"
 description: "Expert in Python programming, software development..."
 temperature: 0.7
