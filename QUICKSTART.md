@@ -96,4 +96,4 @@ The application will open at `http://localhost:8501`
 
 ## Support
 
-For issues or questions, visit the [GitHub repository](https://github.com/yourusername/expertgpts).
+For issues or questions, visit the [GitHub repository](https://github.com/fossler/expertgpts).

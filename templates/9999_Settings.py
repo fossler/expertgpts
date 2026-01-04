@@ -112,8 +112,8 @@ def render_api_key_section():
     st.caption("**Useful Links**")
     "[Get a DeepSeek API key](https://platform.deepseek.com/)"
     "[DeepSeek API Documentation](https://api-docs.deepseek.com/)"
-    "[View the source code](https://github.com/yourusername/expertgpts)"
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yourusername/expertgpts)"
+    "[View the source code](https://github.com/fossler/expertgpts)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)"
 
 
 def render_general_settings_section():
@@ -905,7 +905,7 @@ def render_about_section():
     **Resources:**
     - [Get a DeepSeek API key](https://platform.deepseek.com/)
     - [DeepSeek API Documentation](https://api-docs.deepseek.com/)
-    - [View the source code](https://github.com/yourusername/expertgpts)
+    - [View the source code](https://github.com/fossler/expertgpts)
     """)
 
 

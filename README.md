@@ -322,4 +322,4 @@ This project is open source and available under the MIT License.
 
 ## Support
 
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/yourusername/expertgpts).
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/fossler/expertgpts).
