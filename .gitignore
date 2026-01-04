@@ -64,3 +64,6 @@ logs/
 
 # Setup state marker
 .setup_complete
+
+# Notes files
+Notes.txt
