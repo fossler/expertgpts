@@ -89,7 +89,15 @@ def main():
     # Forward all arguments to streamlit
     streamlit_cmd = ["streamlit", "run", "app.py"] + sys.argv[1:]
 
-    subprocess.run(streamlit_cmd, cwd=project_root)
+    try:
+        subprocess.run(streamlit_cmd, cwd=project_root)
+    except KeyboardInterrupt:
+        print("\n")
+        print("👋 ExpertGPTs stopped by user.")
+        sys.exit(0)
+    except SystemExit:
+        # Streamlit exited normally (e.g., via browser close)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
