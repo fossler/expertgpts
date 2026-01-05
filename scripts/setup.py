@@ -130,6 +130,9 @@ if __name__ == "__main__":
     print("Creating example expert agents...\n")
     print("-" * 60)
 
+    # Ensure pages directory exists before any file operations
+    Path("pages").mkdir(exist_ok=True)
+
     # Copy Home page first (so experts start at 1001)
     copy_home_page()
     print()
