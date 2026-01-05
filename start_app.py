@@ -9,6 +9,12 @@ import sys
 import subprocess
 from pathlib import Path
 
+# Add project root to Python path
+project_root_for_imports = Path(__file__).parent.resolve()
+sys.path.insert(0, str(project_root_for_imports))
+
+from utils.constants import EXAMPLE_EXPERTS_COUNT
+
 
 def main():
     """Main entry point for the application launcher."""
@@ -24,7 +30,7 @@ def main():
     if not marker_file.exists():
         print("")
         print("🚀 First run detected - setting up ExpertGPTs...")
-        print("   This will create 7 example expert agents.")
+        print(f"   This will create {EXAMPLE_EXPERTS_COUNT} example expert agents.")
         print("")
 
         # Check for existing auto-generated files and clean them up

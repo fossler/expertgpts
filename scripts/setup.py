@@ -14,6 +14,7 @@ sys.path.insert(0, str(project_root))
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 from utils.helpers import sanitize_name
+from utils.constants import EXAMPLE_EXPERTS_COUNT
 
 
 def copy_settings_page():
@@ -143,6 +144,11 @@ if __name__ == "__main__":
 
     # Create example experts
     created = create_example_experts()
+
+    # Verify we created the expected number of experts
+    if len(created) != EXAMPLE_EXPERTS_COUNT:
+        print(f"⚠️  Warning: Expected {EXAMPLE_EXPERTS_COUNT} experts, but created {len(created)}")
+        print("   Please update EXAMPLE_EXPERTS_COUNT in utils/constants.py")
 
     print(f"\n✅ Successfully created {len(created)} expert(s)!")
     print("\n🎉 You can now run the app with: streamlit run app.py")

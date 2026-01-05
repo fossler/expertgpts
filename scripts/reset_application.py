@@ -14,6 +14,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from utils.constants import EXAMPLE_EXPERTS_COUNT
+
 
 def confirm_reset():
     """Ask user to confirm the reset operation."""
@@ -22,10 +28,10 @@ def confirm_reset():
     print("This action will:")
     print("  • Delete all YAML config files in configs/")
     print("  • Delete all expert page files in pages/")
-    print("  • Recreate 7 example experts from scratch")
+    print(f"  • Recreate {EXAMPLE_EXPERTS_COUNT} example experts from scratch")
     print("-" * 60)
 
-    response = input("\nType 'yes' to confirm, or anything else to cancel: ")
+    response = input(f"\nType 'yes' to confirm, or anything else to cancel: ")
     return response.lower() == 'yes'
 
 

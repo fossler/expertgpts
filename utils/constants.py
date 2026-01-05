@@ -9,6 +9,9 @@ DEEPSEEK_MAX_CONTEXT_TOKENS = 128000
 DEFAULT_MODEL = "deepseek-chat"
 DEFAULT_TEMPERATURE = 1.0
 
+# Example Experts Configuration
+EXAMPLE_EXPERTS_COUNT = 7  # Number of default/example experts created during setup
+
 # Context Usage Thresholds (percentages)
 CONTEXT_USAGE_SAFE_THRESHOLD = 50
 CONTEXT_USAGE_WARNING_THRESHOLD = 75
