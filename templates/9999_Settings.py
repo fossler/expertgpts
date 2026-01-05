@@ -552,7 +552,7 @@ def render_edit_expert_dialog():
         else:
             caption_text = (
                 "💡 **Manual mode**: API key not set, so AI generation is unavailable. "
-                "Leave empty to keep the existing behavior, or provide your own."
+                "Keep the existing behavior, or provide your own."
             )
 
         st.caption(caption_text)
