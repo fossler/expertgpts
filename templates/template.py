@@ -6,11 +6,14 @@ Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 
 import streamlit as st
 from utils.config_manager import ConfigManager
-from utils.deepseek_client import DeepSeekClient
+from utils.llm_client import LLMClient
 from utils.session_state import initialize_shared_session_state
 from utils.token_manager import TokenManager
 from utils.constants import (
-    DEEPSEEK_MAX_CONTEXT_TOKENS,
+    LLM_PROVIDERS,
+    get_provider_display_name,
+    get_model_display_name,
+    get_max_tokens,
     CONTEXT_USAGE_ALERT_THRESHOLD,
     CONTEXT_USAGE_WARNING_THRESHOLD,
     CONTEXT_USAGE_SAFE_THRESHOLD,
@@ -54,10 +57,7 @@ def validate_api_key(api_key: str) -> tuple:
     if len(api_key) < 20:
         return False, "API key appears to be invalid (too short)"
 
-    # DeepSeek API keys typically start with "sk-"
-    if not api_key.startswith("sk-"):
-        return False, "API key format is invalid (should start with 'sk-')"
-
+    # Generic validation - different providers have different formats
     return True, ""
 
 
@@ -124,10 +124,16 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     """Handle user input and generate assistant response.
 
     Args:
-        api_key: DeepSeek API key
+        api_key: Provider-specific API key
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
     """
+    # Get provider and model from config metadata
+    metadata = config.get("metadata", {})
+    provider = metadata.get("provider", "deepseek")
+    model = metadata.get("model", "deepseek-chat")
+    thinking_level = metadata.get("thinking_level", "none")
+
     if prompt := st.chat_input("Ask the expert..."):
         # Validate API key format
         is_valid, error_msg = validate_api_key(api_key)
@@ -147,8 +153,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
             message_placeholder = st.empty()
 
             try:
-                # Initialize DeepSeek client
-                client = DeepSeekClient(api_key=api_key)
+                # Initialize LLM client with provider-specific config
+                client = LLMClient(provider=provider, api_key=api_key)
 
                 # Convert messages to format expected by API
                 api_messages = [
@@ -156,12 +162,19 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     for msg in st.session_state[messages_key]
                 ]
 
-                # Stream response
+                # Stream response with provider/model-specific settings
+                # OpenAI models only support temperature=1.0
+                api_temperature = config.get("temperature", 1.0)
+                if provider == "openai":
+                    api_temperature = 1.0
+
                 response = ""
                 for chunk in client.chat_stream(
                     messages=api_messages,
-                    temperature=config.get("temperature", 1.0),
+                    temperature=api_temperature,
+                    model=model,
                     system_prompt=config.get("system_prompt"),
+                    thinking_level=thinking_level
                 ):
                     response += chunk
                     message_placeholder.markdown(response + "▌")
@@ -178,7 +191,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 st.rerun()
 
             except (ConnectionError, TimeoutError) as e:
-                error_msg = "Network error: Could not reach DeepSeek API. Please check your connection."
+                provider_name = get_provider_display_name(provider)
+                error_msg = f"Network error: Could not reach {provider_name} API. Please check your connection."
                 message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
@@ -212,6 +226,110 @@ def clear_chat_history(messages_key: str):
         st.rerun()
 
 
+def display_model_settings(config: dict, messages_key: str):
+    """Display editable model settings in the sidebar.
+
+    Args:
+        config: Expert configuration dictionary
+        messages_key: Session state key for this expert's messages
+    """
+    # Get provider and model from config metadata
+    metadata = config.get("metadata", {})
+    provider = metadata.get("provider", "deepseek")
+    model = metadata.get("model", "deepseek-chat")
+    thinking_level = metadata.get("thinking_level", "none")
+
+    # Get cache version for dynamic widget keys (ensures fresh state after save)
+    cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
+
+    # Display model settings (editable)
+    st.sidebar.markdown("### ⚙️ Model Settings")
+
+    # Model selection (filtered by current provider)
+    from utils.constants import LLM_PROVIDERS, get_default_model_for_provider
+    model_options = list(LLM_PROVIDERS[provider]["models"].keys())
+    current_model_index = model_options.index(model) if model in model_options else 0
+
+    new_model = st.sidebar.selectbox(
+        "Model",
+        options=model_options,
+        index=current_model_index,
+        format_func=lambda x: get_model_display_name(provider, x),
+        key=f"{EXPERT_ID}_model_selector_v{cache_version}"
+    )
+
+    # Thinking Mode Level (provider-specific)
+    new_thinking_level = thinking_level
+    if provider == "openai":
+        effort_options = ["none", "low", "medium", "high", "xhigh"]
+        effort_index = effort_options.index(thinking_level) if thinking_level in effort_options else 0
+        new_thinking_level = st.sidebar.selectbox(
+            "Thinking Mode",
+            options=effort_options,
+            index=effort_index,
+            format_func=lambda x: x.capitalize(),
+            key=f"{EXPERT_ID}_thinking_selector_v{cache_version}"
+        )
+    elif provider == "zai":
+        thinking_options = ["Disabled", "Enabled"]
+        option_index = 1 if thinking_level and thinking_level != "none" else 0
+        selected_option = st.sidebar.selectbox(
+            "Thinking Mode",
+            options=thinking_options,
+            index=option_index,
+            key=f"{EXPERT_ID}_thinking_selector_v{cache_version}"
+        )
+        new_thinking_level = "medium" if selected_option == "Enabled" else "none"
+    # DeepSeek: no thinking mode control
+
+    # Temperature (editable, but disabled for OpenAI)
+    current_temperature = config.get("temperature", 1.0)
+    if provider == "openai":
+        new_temperature = st.sidebar.number_input(
+            "Temperature",
+            min_value=0.0,
+            max_value=2.0,
+            value=1.0,
+            step=0.01,
+            disabled=True,
+            format="%.2f",
+            key=f"{EXPERT_ID}_temperature_input_v{cache_version}"
+        )
+    else:
+        new_temperature = st.sidebar.number_input(
+            "Temperature",
+            min_value=0.0,
+            max_value=2.0,
+            value=float(current_temperature),
+            step=0.1,
+            format="%.1f",
+            key=f"{EXPERT_ID}_temperature_input_v{cache_version}"
+        )
+
+    # Save button if any setting changed
+    if (new_model != model or
+        new_thinking_level != thinking_level or
+        new_temperature != float(current_temperature)):
+        if st.sidebar.button("💾 Save Settings", key=f"{EXPERT_ID}_save_settings_v{cache_version}", type="primary"):
+            try:
+                config_manager = ConfigManager()
+                config_manager.update_config(
+                    expert_id=EXPERT_ID,
+                    updates={
+                        "model": new_model,
+                        "thinking_level": new_thinking_level,
+                        "temperature": new_temperature
+                    }
+                )
+                # Invalidate cache to force reload
+                cache_key = f"cache_version_{EXPERT_ID}"
+                st.session_state[cache_key] = st.session_state.get(cache_key, 0) + 1
+                st.success("✅ Settings saved successfully!")
+                st.rerun()
+            except Exception as e:
+                st.sidebar.error(f"❌ Error saving settings: {str(e)}")
+
+
 def display_context_usage(config: dict, messages_key: str):
     """Display context length usage in the sidebar.
 
@@ -219,6 +337,14 @@ def display_context_usage(config: dict, messages_key: str):
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
     """
+    # Get provider and model from config metadata
+    metadata = config.get("metadata", {})
+    provider = metadata.get("provider", "deepseek")
+    model = metadata.get("model", "deepseek-chat")
+
+    # Get provider/model-specific max tokens
+    max_tokens = get_max_tokens(provider, model)
+
     # Calculate usage statistics using TokenManager
     system_prompt = config.get("system_prompt", "")
     messages = st.session_state.get(messages_key, [])
@@ -226,7 +352,8 @@ def display_context_usage(config: dict, messages_key: str):
     try:
         stats = TokenManager.calculate_usage_statistics(
             system_prompt=system_prompt,
-            messages=messages
+            messages=messages,
+            max_tokens=max_tokens
         )
     except (ImportError, OSError, ValueError, TypeError) as e:
         st.sidebar.caption(f"ℹ️ Token counting unavailable: {type(e).__name__}")
@@ -237,7 +364,7 @@ def display_context_usage(config: dict, messages_key: str):
         return
 
     # Display context usage in sidebar
-    st.sidebar.markdown("### 📊 Context Usage")
+    st.sidebar.markdown(f"### 📊 Context Usage")
 
     # Display main stats
     st.sidebar.markdown(
@@ -253,8 +380,6 @@ def display_context_usage(config: dict, messages_key: str):
         st.caption(f"📝 System Prompt: {stats['system_tokens']:,} tokens")
         st.caption(f"💬 Chat Messages: {stats['messages_tokens']:,} tokens")
 
-    st.sidebar.divider()
-
 
 def main():
     """Main application entry point."""
@@ -267,14 +392,29 @@ def main():
         st.error(f"Configuration not found for expert: {EXPERT_ID}")
         st.stop()
 
-    # Get API key from session state
-    api_key = st.session_state.deepseek_api_key
+    # Get provider and model from config metadata
+    metadata = config.get("metadata", {})
+    provider = metadata.get("provider", "deepseek")
 
-    # Display context usage in sidebar (before clear button)
-    display_context_usage(config, messages_key)
+    # Get provider-specific API key from session state
+    api_keys = st.session_state.get("api_keys", {})
+    api_key = api_keys.get(provider, "")
+
+    if not api_key:
+        st.warning(f"⚠️ No API key found for {get_provider_display_name(provider)}. Please add it in Settings.")
+        st.info(f"Go to **Settings → 🔑 API Key** and select {get_provider_display_name(provider)} to add your API key.")
+        st.stop()
+
+    # Display model settings (at the top of sidebar)
+    display_model_settings(config, messages_key)
+
+    st.sidebar.divider()
 
     # Clear chat button (in sidebar)
     clear_chat_history(messages_key)
+
+    # Display context usage in sidebar (at the bottom)
+    display_context_usage(config, messages_key)
 
     # Render main interface
     render_chat_interface(config, messages_key)

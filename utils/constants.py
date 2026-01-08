@@ -4,8 +4,81 @@ This module centralizes all magic numbers, thresholds, and configuration
 values used throughout the application.
 """
 
-# DeepSeek API Constants
+# LLM Provider Configuration
+LLM_PROVIDERS = {
+    "deepseek": {
+        "name": "DeepSeek",
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url": "https://api.deepseek.com",
+        "default_model": "deepseek-chat",
+        "icon_path": "icons/deepseek_icon_blue.png",
+        "models": {
+            "deepseek-chat": {
+                "display_name": "DeepSeek Chat",
+                "max_tokens": 128000,
+                "thinking_param": {"thinking": {"type": "disabled"}},
+            },
+            "deepseek-reasoner": {
+                "display_name": "DeepSeek Reasoner",
+                "max_tokens": 128000,
+                "thinking_param": {"thinking": {"type": "enabled"}},
+            }
+        }
+    },
+    "openai": {
+        "name": "OpenAI",
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url": "https://api.openai.com/v1",
+        "default_model": "gpt-5",
+        "icon_path": "icons/openai_logo.png",
+        "models": {
+            "gpt-5": {
+                "display_name": "GPT-5",
+                "max_tokens": 400000,
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            },
+            "gpt-5-mini": {
+                "display_name": "GPT-5 Mini",
+                "max_tokens": 200000,
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            },
+            "gpt-5-nano": {
+                "display_name": "GPT-5 Nano",
+                "max_tokens": 400000,
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            }
+        }
+    },
+    "zai": {
+        "name": "Z.AI",
+        "api_key_env": "ZAI_API_KEY",
+        "base_url": "https://api.z.ai/api/paas/v4",
+        "default_model": "glm-4.7",
+        "icon_path": "icons/zai_logo.svg",
+        "models": {
+            "glm-4.7": {
+                "display_name": "GLM-4.7",
+                "max_tokens": 200000,
+                "thinking_param": {"thinking": {"type": "disabled"}},
+            }
+        }
+    }
+}
+
+# Global Defaults (stored in session state)
+DEFAULT_LLM_PROVIDER = "deepseek"
+DEFAULT_LLM_MODEL = "deepseek-chat"
+DEFAULT_THINKING_ENABLED = False
+
+# OpenAI Reasoning Effort Levels
+OPENAI_REASONING_EFFORTS = ["none", "low", "medium", "high", "xhigh"]
+OPENAI_REASONING_EFFORT_DEFAULT = "none"
+
+# Model Context Limits
 DEEPSEEK_MAX_CONTEXT_TOKENS = 128000
+DEEPSEEK_DEFAULT_MODEL = "deepseek-chat"
+OPENAI_DEFAULT_MODEL = "gpt-5"
+ZAI_DEFAULT_MODEL = "glm-4.7"
 DEFAULT_MODEL = "deepseek-chat"
 DEFAULT_TEMPERATURE = 1.0
 
@@ -87,3 +160,119 @@ The behavior instructions define your expert's entire approach:
 ### 💡 Tip
 Leaving this empty will keep the expert's current behavior. Only edit if you want to change how they respond!
 """
+
+
+# LLM Provider Helper Functions
+
+def get_provider_config(provider: str) -> dict:
+    """Get configuration for a specific LLM provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        dict: Provider configuration dictionary
+
+    Raises:
+        ValueError: If provider is not found
+    """
+    if provider not in LLM_PROVIDERS:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(LLM_PROVIDERS.keys())}")
+    return LLM_PROVIDERS[provider]
+
+
+def get_model_config(provider: str, model: str) -> dict:
+    """Get configuration for a specific model within a provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+        model: Model ID (e.g., "deepseek-chat", "gpt-5", "glm-4.7")
+
+    Returns:
+        dict: Model configuration with display_name, max_tokens, thinking_param
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    provider_config = get_provider_config(provider)
+    if model not in provider_config["models"]:
+        available = list(provider_config["models"].keys())
+        raise ValueError(f"Unknown model: {model} for provider {provider}. Available: {available}")
+    return provider_config["models"][model]
+
+
+def get_max_tokens(provider: str, model: str) -> int:
+    """Get maximum context tokens for a specific model.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+        model: Model ID (e.g., "deepseek-chat", "gpt-5", "glm-4.7")
+
+    Returns:
+        int: Maximum context length for the model
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    return get_model_config(provider, model)["max_tokens"]
+
+
+def get_provider_display_name(provider: str) -> str:
+    """Get display name for a provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str: Display name (e.g., "DeepSeek", "OpenAI", "Z.AI")
+    """
+    return get_provider_config(provider)["name"]
+
+
+def get_model_display_name(provider: str, model: str) -> str:
+    """Get display name for a model.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+        model: Model ID (e.g., "deepseek-chat", "gpt-5", "glm-4.7")
+
+    Returns:
+        str: Display name (e.g., "DeepSeek Chat", "GPT-5", "GLM-4.7")
+    """
+    return get_model_config(provider, model)["display_name"]
+
+
+def get_provider_base_url(provider: str) -> str:
+    """Get base URL for a provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str: Base URL for the provider's API
+    """
+    return get_provider_config(provider)["base_url"]
+
+
+def get_provider_api_key_env(provider: str) -> str:
+    """Get environment variable name for a provider's API key.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str: Environment variable name (e.g., "DEEPSEEK_API_KEY")
+    """
+    return get_provider_config(provider)["api_key_env"]
+
+
+def get_default_model_for_provider(provider: str) -> str:
+    """Get default model for a provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str: Default model ID for the provider
+    """
+    return get_provider_config(provider)["default_model"]

@@ -12,22 +12,45 @@ def initialize_shared_session_state():
 
     This function should be called once at app startup to initialize
     session state variables that are shared across all pages, such as:
-    - API key configuration
+    - API keys for all providers
     - Navigation state
     - Dialog states
+    - Default LLM settings
 
     The function uses a try-except pattern to gracefully handle cases
     where secrets.toml doesn't exist or has errors.
     """
-    # Initialize API key in session state (from secrets if not set)
+    # Import LLM_PROVIDERS to get all provider keys
+    from utils.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
+
+    # Initialize API keys dictionary in session state (from secrets if not set)
+    if "api_keys" not in st.session_state:
+        st.session_state.api_keys = {}
+
+        # Try to load all provider API keys from st.secrets
+        for provider_key, provider_config in LLM_PROVIDERS.items():
+            env_var = provider_config["api_key_env"]  # e.g., "DEEPSEEK_API_KEY"
+            try:
+                secrets_api_key = st.secrets.get(env_var, "")
+                if secrets_api_key:
+                    st.session_state.api_keys[provider_key] = secrets_api_key
+            except Exception:
+                # If secrets.toml doesn't exist or has errors, continue
+                pass
+
+    # Backward compatibility: Initialize deepseek_api_key for legacy code
     if "deepseek_api_key" not in st.session_state:
-        # Try to get from st.secrets first (Streamlit's recommended way)
-        try:
-            secrets_api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
-            st.session_state.deepseek_api_key = secrets_api_key or ""
-        except Exception:
-            # If secrets.toml doesn't exist or has errors, initialize as empty
-            st.session_state.deepseek_api_key = ""
+        st.session_state.deepseek_api_key = st.session_state.api_keys.get("deepseek", "")
+
+    # Initialize default LLM settings in session state
+    if "default_provider" not in st.session_state:
+        st.session_state.default_provider = DEFAULT_LLM_PROVIDER
+
+    if "default_model" not in st.session_state:
+        st.session_state.default_model = DEFAULT_LLM_MODEL
+
+    if "default_thinking_enabled" not in st.session_state:
+        st.session_state.default_thinking_enabled = DEFAULT_THINKING_ENABLED
 
 
 def handle_pending_navigation():

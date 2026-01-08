@@ -79,7 +79,26 @@ def save_api_key(api_key: str) -> None:
         This will overwrite any existing DEEPSEEK_API_KEY in secrets.toml.
         The application will need to rerun for the new key to be loaded via st.secrets.
         Secure 600 permissions will be set on the file after writing.
+
+        Deprecated: Use save_provider_api_key("deepseek", api_key) instead.
     """
+    save_provider_api_key("deepseek", api_key)
+
+
+def save_provider_api_key(provider: str, api_key: str) -> None:
+    """Save API key for a specific provider to secrets.toml file.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+        api_key: The API key to save
+
+    Note:
+        This will overwrite any existing API key for this provider in secrets.toml.
+        The application will need to rerun for the new key to be loaded via st.secrets.
+        Secure 600 permissions will be set on the file after writing.
+    """
+    from utils.constants import get_provider_api_key_env
+
     secrets_path = ensure_secrets_file_exists()
 
     # Read existing content
@@ -94,8 +113,11 @@ def save_api_key(api_key: str) -> None:
                 key, value = line.split('=', 1)
                 existing_lines[key.strip()] = value.strip()
 
-    # Update the DEEPSEEK_API_KEY
-    existing_lines['DEEPSEEK_API_KEY'] = f'"{api_key}"'
+    # Get the environment variable name for this provider's API key
+    env_key = get_provider_api_key_env(provider)
+
+    # Update the API key
+    existing_lines[env_key] = f'"{api_key}"'
 
     # Write back to file
     new_content = '\n'.join([f'{k} = {v}' for k, v in existing_lines.items()])
@@ -113,17 +135,37 @@ def get_api_key_from_file() -> str | None:
 
     Returns:
         str | None: The API key if found, None otherwise
+
+    Deprecated: Use get_provider_api_key("deepseek") instead.
     """
+    return get_provider_api_key("deepseek")
+
+
+def get_provider_api_key(provider: str) -> str | None:
+    """Get API key for a specific provider directly from secrets.toml file.
+
+    This is useful for displaying the current key without using st.secrets
+    (which requires a rerun to update).
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str | None: The API key if found, None otherwise
+    """
+    from utils.constants import get_provider_api_key_env
+
     secrets_path = get_secrets_path()
 
     if not secrets_path.exists():
         return None
 
+    env_key = get_provider_api_key_env(provider)
     content = secrets_path.read_text()
 
     for line in content.split('\n'):
         line = line.strip()
-        if line.startswith('DEEPSEEK_API_KEY'):
+        if line.startswith(env_key):
             if '=' in line:
                 value = line.split('=', 1)[1].strip()
                 # Remove quotes if present
@@ -133,10 +175,43 @@ def get_api_key_from_file() -> str | None:
     return None
 
 
+def get_all_provider_api_keys() -> dict[str, str]:
+    """Get all provider API keys from secrets.toml file.
+
+    Returns:
+        dict: Dictionary mapping provider keys to their API keys
+               (e.g., {"deepseek": "sk-abc...", "openai": "sk-def..."})
+    """
+    from utils.constants import LLM_PROVIDERS
+
+    api_keys = {}
+
+    for provider in LLM_PROVIDERS.keys():
+        api_key = get_provider_api_key(provider)
+        if api_key:
+            api_keys[provider] = api_key
+
+    return api_keys
+
+
+def has_provider_api_key(provider: str) -> bool:
+    """Check if secrets.toml file has API key for a specific provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        bool: True if API key exists in file for this provider, False otherwise
+    """
+    return get_provider_api_key(provider) is not None
+
+
 def has_api_key_file() -> bool:
     """Check if secrets.toml file exists and has DEEPSEEK_API_KEY.
 
     Returns:
         bool: True if API key exists in file, False otherwise
+
+    Deprecated: Use has_provider_api_key("deepseek") instead.
     """
-    return get_api_key_from_file() is not None
+    return has_provider_api_key("deepseek")

@@ -45,8 +45,9 @@ def main():
         # Status section
         st.caption("**Status**")
 
-        # API Key status
-        if st.session_state.deepseek_api_key:
+        # API Key status (check if any provider key is set)
+        api_keys = st.session_state.get("api_keys", {})
+        if any(api_keys.values()):
             st.success("✅ API key configured")
         else:
             st.caption("⚠️ API key not set")

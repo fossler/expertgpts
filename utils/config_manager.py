@@ -28,6 +28,9 @@ class ConfigManager:
         temperature: float = 1.0,
         system_prompt: Optional[str] = None,
         api_key: Optional[str] = None,
+        provider: str = "deepseek",
+        model: Optional[str] = None,
+        thinking_level: str = "none",
     ) -> str:
         """Create a new configuration file for an expert.
 
@@ -37,19 +40,29 @@ class ConfigManager:
             page_number: Page number for filename (matches page numbering)
             temperature: Temperature for AI responses (0.0-2.0)
             system_prompt: Optional custom system prompt (None triggers AI generation)
-            api_key: DeepSeek API key (required for AI generation)
+            api_key: API key for system prompt generation (provider-specific)
+            provider: LLM provider (e.g., "deepseek", "openai", "zai")
+            model: Model to use (if None, uses provider default)
+            thinking_level: Thinking/reasoning effort level ("none", "low", "medium", "high", "xhigh")
 
         Returns:
             expert_id: Unique ID for the created expert (matches filename without extension)
         """
+        # Import here for provider defaults
+        from utils.constants import get_default_model_for_provider
+
         # Generate expert_id based on page number and name (matches filename)
         safe_name = sanitize_name(expert_name)
         expert_id = f"{page_number}_{safe_name}"
 
+        # Use provider default model if not specified
+        if model is None:
+            model = get_default_model_for_provider(provider)
+
         # Create system prompt if not provided or empty
         if system_prompt is None or system_prompt.strip() == "":
             system_prompt = self._generate_system_prompt(
-                expert_name, description, temperature, api_key
+                expert_name, description, temperature, api_key, provider, model
             )
 
         config = {
@@ -60,8 +73,10 @@ class ConfigManager:
             "system_prompt": system_prompt,
             "created_at": datetime.now().isoformat(),
             "metadata": {
-                "version": "1.0",
-                "model": "deepseek-chat",
+                "version": "2.0",
+                "provider": provider,
+                "model": model,
+                "thinking_level": thinking_level,
             },
         }
 
@@ -90,14 +105,31 @@ class ConfigManager:
             raise FileNotFoundError(f"Configuration not found: {expert_id}")
 
         with open(config_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            config = yaml.safe_load(f)
+
+        # Backward compatibility: ensure metadata has provider/model/thinking fields
+        metadata = config.get("metadata", {})
+
+        # If version is 1.0 or missing, default to DeepSeek
+        if metadata.get("version") == "1.0" or "provider" not in metadata:
+            metadata["provider"] = "deepseek"
+            metadata["model"] = metadata.get("model", "deepseek-chat")
+            metadata["version"] = "2.0"  # Upgrade version
+
+        # Ensure thinking_level exists (default to "none")
+        if "thinking_level" not in metadata:
+            metadata["thinking_level"] = "none"
+
+        config["metadata"] = metadata
+
+        return config
 
     def update_config(self, expert_id: str, updates: Dict) -> None:
         """Update configuration for an expert.
 
         Args:
             expert_id: Unique ID of the expert
-            updates: Dictionary of fields to update
+            updates: Dictionary of fields to update (can include provider, model, thinking_level)
         """
         config = self.load_config(expert_id)
 
@@ -111,13 +143,26 @@ class ConfigManager:
                 expert_name = updates.get("expert_name", config.get("expert_name"))
                 description = updates.get("description", config.get("description"))
                 temperature = updates.get("temperature", config.get("temperature", 1.0))
+                provider = updates.get("provider", config["metadata"].get("provider", "deepseek"))
+                model = updates.get("model", config["metadata"].get("model"))
 
                 updates["system_prompt"] = self._generate_system_prompt(
-                    expert_name, description, temperature, api_key
+                    expert_name, description, temperature, api_key, provider, model
                 )
 
         # Continue with normal update
         config.update(updates)
+
+        # Update metadata if provider/model/thinking are specified
+        metadata = config.get("metadata", {})
+        if "provider" in updates:
+            metadata["provider"] = updates["provider"]
+        if "model" in updates:
+            metadata["model"] = updates["model"]
+        if "thinking_level" in updates:
+            metadata["thinking_level"] = updates["thinking_level"]
+
+        config["metadata"] = metadata
         config["updated_at"] = datetime.now().isoformat()
 
         # Save config file
@@ -175,6 +220,8 @@ class ConfigManager:
         description: str,
         temperature: float = 1.0,
         api_key: Optional[str] = None,
+        provider: str = "deepseek",
+        model: Optional[str] = None,
     ) -> str:
         """Generate a system prompt using AI or fallback template.
 
@@ -182,22 +229,24 @@ class ConfigManager:
             expert_name: Name of the expert
             description: Description of the expert's domain
             temperature: Temperature for AI generation
-            api_key: DeepSeek API key (if None, uses template only)
+            api_key: API key for system prompt generation (provider-specific)
+            provider: LLM provider to use for generation
+            model: Model to use for generation (if None, uses provider default)
 
         Returns:
             Generated system prompt (AI-generated or template fallback)
         """
         # Import here to avoid circular dependency
-        from utils.deepseek_client import DeepSeekClient
+        from utils.llm_client import LLMClient
 
         # If no API key provided, use template directly
         if not api_key:
             return self._get_template_system_prompt(expert_name, description)
 
         try:
-            # Try AI generation
-            client = DeepSeekClient(api_key=api_key)
-            return client.generate_system_prompt(expert_name, description, temperature)
+            # Try AI generation with specified provider and model
+            client = LLMClient(provider=provider, api_key=api_key)
+            return client.generate_system_prompt(expert_name, description, temperature, model)
         except Exception:
             # Silent fallback to template
             return self._get_template_system_prompt(expert_name, description)

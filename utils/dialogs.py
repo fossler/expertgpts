@@ -6,8 +6,9 @@ across multiple pages.
 
 import re
 import streamlit as st
+from pathlib import Path
 from utils.config_manager import ConfigManager
-from utils.constants import EXPERT_BEHAVIOR_DOCS
+from utils.constants import EXPERT_BEHAVIOR_DOCS, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 from utils.page_generator import PageGenerator
 from utils.helpers import sanitize_name
 
@@ -34,11 +35,12 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     return True, ""
 
 
-def render_temperature_input(value: float = 1.0) -> float:
+def render_temperature_input(value: float = 1.0, provider: str = None) -> float:
     """Render temperature slider input field with half width.
 
     Args:
         value: Current temperature value (default: 1.0)
+        provider: LLM provider (to disable slider for OpenAI)
 
     Returns:
         float: Temperature value from user input
@@ -47,33 +49,239 @@ def render_temperature_input(value: float = 1.0) -> float:
     col1, col2 = st.columns(2)
 
     with col1:
-        temperature = st.slider(
-            "Temperature",
-            min_value=0.0,
-            max_value=2.0,
-            value=value,
-            step=0.1,
-            help="Controls response creativity and focus",
-        )
+        # OpenAI models only support temperature=1.0
+        if provider == "openai":
+            temperature = st.number_input(
+                "Temperature",
+                min_value=0.0,
+                max_value=2.0,
+                value=1.0,
+                step=0.01,
+                help="Fixed at 1.0 for OpenAI models",
+                disabled=True,
+                format="%.2f"
+            )
+            st.caption("⚠️ OpenAI models only support temperature value of 1.0")
+        else:
+            temperature = st.number_input(
+                "Temperature",
+                min_value=0.0,
+                max_value=2.0,
+                value=value,
+                step=0.1,
+                help="Controls response creativity and focus",
+                format="%.1f"
+            )
 
-        # Add expander with detailed temperature guidance
-        with st.expander("📖 Recommended values", expanded=False):
-            st.markdown("**Use Case Guidelines:**\n")
-            st.markdown("• **0.0** - Coding/Math (precision required)")
-            st.markdown("• **1.0** - Data Analysis (balanced interpretation)")
-            st.markdown("• **1.3** - Conversation/Translation (natural communication)")
-            st.markdown("• **1.5** - Creative Writing/Poetry (maximum creativity)")
-            st.caption("\n*Based on official DeepSeek documentation*")
+        # Add expander with detailed temperature guidance (only for non-OpenAI)
+        if provider != "openai":
+            with st.expander("📖 Recommended values", expanded=False):
+                st.markdown("**Use Case Guidelines:**\n")
+                st.markdown("• **0.0** - Coding/Math (precision required)")
+                st.markdown("• **1.0** - Data Analysis (balanced interpretation)")
+                st.markdown("• **1.3** - Conversation/Translation (natural communication)")
+                st.markdown("• **1.5** - Creative Writing/Poetry (maximum creativity)")
+                st.caption("\n*Based on official DeepSeek documentation*")
 
     return temperature
 
+
+def render_llm_configuration(
+    current_provider: str = None,
+    current_model: str = None,
+    current_temperature: float = 1.0,
+    current_thinking: str = None,
+    show_thinking: bool = True,
+    is_defaults: bool = False
+) -> tuple:
+    """Render complete LLM configuration UI (Provider, Model, Temperature, Thinking).
+
+    This combines provider selection and temperature into one logical unit,
+    ensuring temperature UI adapts to provider choice in real-time.
+
+    Args:
+        current_provider: Currently selected provider (defaults to session state default)
+        current_model: Currently selected model (defaults to provider default)
+        current_temperature: Current temperature value (default: 1.0)
+        current_thinking: Current thinking/reasoning level (OpenAI: "none"|"low"|"medium"|"high"|"xhigh")
+        show_thinking: Whether to show thinking UI element
+        is_defaults: Whether this is for default settings (affects labels and keys)
+
+    Returns:
+        tuple: (provider, model, temperature, thinking_level)
+    """
+    st.info("💡 **Tip:** Select your LLM provider and model first, then fill in the expert details below.")
+
+    provider, model, thinking_level = render_provider_selection(
+        current_provider=current_provider,
+        current_model=current_model,
+        current_thinking=current_thinking,
+        show_thinking=show_thinking,
+        is_defaults=is_defaults
+    )
+
+    temperature = render_temperature_input(
+        value=current_temperature,
+        provider=provider
+    )
+
+    return provider, model, temperature, thinking_level
+
+
+def render_provider_selection(
+    current_provider: str = None,
+    current_model: str = None,
+    current_thinking: str = None,
+    show_thinking: bool = True,
+    is_defaults: bool = False
+) -> tuple:
+    """Render LLM provider and model selection UI.
+
+    This function provides IDENTICAL UI/UX to the Default LLM Settings page,
+    ensuring consistency across all expert creation/editing interfaces.
+
+    Args:
+        current_provider: Currently selected provider (defaults to session state default)
+        current_model: Currently selected model (defaults to provider default)
+        current_thinking: Current thinking/reasoning level (OpenAI: "none"|"low"|"medium"|"high"|"xhigh")
+        show_thinking: Whether to show thinking UI element
+        is_defaults: Whether this is for default settings (affects labels and keys)
+
+    Returns:
+        tuple: (provider, model, thinking_level)
+    """
+    # Get defaults from session state if not provided
+    if current_provider is None:
+        current_provider = st.session_state.get("default_provider", "deepseek")
+
+    if current_model is None:
+        current_model = st.session_state.get("default_model", "deepseek-chat")
+
+    # Set default thinking level if not provided
+    if current_thinking is None:
+        current_thinking = "none"
+
+    # Set labels based on context
+    if is_defaults:
+        provider_label = "Default Provider"
+        model_label = "Default Model"
+        thinking_label = "Select Thinking Mode Level"
+        provider_help = "The default LLM provider for new experts"
+        model_help = f"The default {{provider}} model for new experts"
+        thinking_help = "Default reasoning effort level for new OpenAI experts"
+        provider_key = "default_provider_selector"
+        model_key = "default_model_selector"
+        thinking_key = "default_thinking_slider"
+    else:
+        provider_label = "LLM Provider"
+        model_label = "Model"
+        thinking_label = "Thinking Mode Level"
+        provider_help = "Select the LLM provider for this expert"
+        model_help = f"Select the {{provider}} model to use"
+        thinking_help = "Select reasoning effort level for OpenAI models"
+        provider_key = "expert_provider_selector"
+        model_key = "expert_model_selector"
+        thinking_key = "expert_thinking_slider"
+
+    st.markdown("### 🤖 LLM Provider & Model")
+
+    # Provider selection
+    provider_options = list(LLM_PROVIDERS.keys())
+    provider_index = provider_options.index(current_provider) if current_provider in provider_options else 0
+
+    provider = st.selectbox(
+        provider_label,
+        options=provider_options,
+        index=provider_index,
+        format_func=lambda x: get_provider_display_name(x),
+        help=provider_help,
+        key=provider_key
+    )
+
+    # Model selection (filtered by provider)
+    model_options = list(LLM_PROVIDERS[provider]["models"].keys())
+
+    # If current model is not in the new provider's models, use provider default
+    if current_model not in model_options:
+        current_model = get_default_model_for_provider(provider)
+
+    model_index = model_options.index(current_model) if current_model in model_options else 0
+
+    model = st.selectbox(
+        model_label,
+        options=model_options,
+        index=model_index,
+        format_func=lambda x: get_model_display_name(provider, x),
+        help=model_help.format(provider=get_provider_display_name(provider)),
+        key=model_key
+    )
+
+    # Display model info
+    model_config = LLM_PROVIDERS[provider]["models"][model]
+
+    # Determine UI type based on provider
+    uses_reasoning_efforts = provider == "openai"
+    requires_thinking = model == "deepseek-reasoner"
+
+    # Check if provider/model supports thinking mode
+    # Providers that support thinking: openai, zai (DeepSeek handled separately)
+    optional_thinking_providers = {"openai", "zai"}
+    supports_optional_thinking = provider in optional_thinking_providers and "thinking_param" in model_config
+
+    st.caption(f"📏 **Context Length:** {model_config['max_tokens']:,} tokens")
+
+    if show_thinking:
+        if uses_reasoning_efforts:
+            # OpenAI: Show selectbox with effort levels (use half width like temperature)
+            col1, col2 = st.columns(2)
+            with col1:
+                effort_options = ["none", "low", "medium", "high", "xhigh"]
+                effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
+                thinking_level = st.selectbox(
+                    thinking_label,
+                    options=effort_options,
+                    index=effort_index,
+                    help=thinking_help,
+                    key=thinking_key
+                )
+
+        elif supports_optional_thinking:
+            # Z.AI: Show selectbox with Enabled/Disabled options (use half width like temperature)
+            col1, col2 = st.columns(2)
+            with col1:
+                thinking_options = ["Disabled", "Enabled"]
+                # Map current_thinking to index ("none" -> 0, "medium" -> 1)
+                option_index = 1 if current_thinking and current_thinking != "none" else 0
+                selected_option = st.selectbox(
+                    thinking_label,
+                    options=thinking_options,
+                    index=option_index,
+                    help=thinking_help,
+                    key=thinking_key
+                )
+                # Convert back to string ("Disabled" -> "none", "Enabled" -> "medium")
+                thinking_level = "medium" if selected_option == "Enabled" else "none"
+
+        else:
+            # DeepSeek or other providers: No thinking UI
+            # DeepSeek-chat: no thinking support
+            # DeepSeek-reasoner: thinking always enabled (handled in API layer)
+            thinking_level = "none"
+    else:
+        # Thinking UI hidden
+        thinking_level = current_thinking if current_thinking else "none"
+
+    return provider, model, thinking_level
 
 def create_new_expert(
     chat_name: str,
     description: str,
     temperature: float,
     custom_system_prompt: str = None,
-    api_key: str = None
+    api_key: str = None,
+    provider: str = "deepseek",
+    model: str = None,
+    thinking_level: str = "none"
 ):
     """Create a new expert agent.
 
@@ -82,7 +290,10 @@ def create_new_expert(
         description: Description of expertise
         temperature: Temperature setting
         custom_system_prompt: Optional custom system prompt
-        api_key: DeepSeek API key for AI system prompt generation
+        api_key: API key for AI system prompt generation (provider-specific)
+        provider: LLM provider (e.g., "deepseek", "openai", "zai")
+        model: Model to use (if None, uses provider default)
+        thinking_level: Thinking/reasoning effort level ("none"|"low"|"medium"|"high"|"xhigh")
 
     Returns:
         tuple: (expert_id, page_path)
@@ -127,6 +338,9 @@ def create_new_expert(
                 system_prompt=custom_system_prompt,
                 api_key=api_key,
                 page_number=page_number,
+                provider=provider,
+                model=model,
+                thinking_level=thinking_level,
             )
     else:
         # No AI generation, create directly
@@ -137,6 +351,9 @@ def create_new_expert(
             system_prompt=custom_system_prompt,
             api_key=api_key,
             page_number=page_number,
+            provider=provider,
+            model=model,
+            thinking_level=thinking_level,
         )
 
     # Generate page with correct expert_id from the start (no workaround needed!)
@@ -169,8 +386,9 @@ def render_add_chat_dialog():
 
     st.title("➕ Add New Expert Chat")
 
-    # Check for API key - required for expert creation
-    api_key_available = bool(st.session_state.get("deepseek_api_key", ""))
+    # Check for API keys - at least one provider must have a key
+    api_keys = st.session_state.get("api_keys", {})
+    api_key_available = any(api_keys.values())
 
     if not api_key_available:
         st.warning("""
@@ -178,13 +396,18 @@ def render_add_chat_dialog():
 
         New chats can only be created when an API key is defined.
 
-        Please set your DeepSeek API key in **Settings → API Key** tab first.
+        Please set at least one provider's API key in **Settings → API Key** tab first.
         """)
 
         if st.button("🔧 Go to Settings", type="primary"):
             st.switch_page("pages/9999_Settings.py")
 
         return
+
+    # LLM Configuration (Provider, Model, Temperature, Thinking)
+    provider, model, temperature, thinking_level = render_llm_configuration()
+
+    st.divider()
 
     with st.form("add_chat_form"):
         st.subheader("Expert Configuration")
@@ -208,9 +431,6 @@ def render_add_chat_dialog():
             height="content",
             max_chars=1000,
         ).strip()
-
-        # Temperature
-        temperature = render_temperature_input()
 
         st.divider()
 
@@ -240,14 +460,15 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
 
         st.caption("* Required fields")
 
-        # Form buttons
-        col1, col2 = st.columns(2)
+        # Form buttons (left-aligned)
+        st.write("")  # Spacing
+        col1, col2, col3 = st.columns([1, 1, 6])
 
         with col1:
-            submit_button = st.form_submit_button("Create Expert", width="stretch", type="primary")
+            submit_button = st.form_submit_button("Create Expert", type="primary")
 
         with col2:
-            cancel_button = st.form_submit_button("Cancel", width="stretch")
+            cancel_button = st.form_submit_button("Cancel")
 
         # Handle form submission
         if submit_button:
@@ -263,10 +484,24 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
                 return
 
             try:
-                # Get API key for system prompt generation
-                api_key = st.session_state.get("deepseek_api_key", None)
+                # Get API key for system prompt generation (provider-specific)
+                api_keys = st.session_state.get("api_keys", {})
+                api_key = api_keys.get(provider, None)
 
-                expert_id, page_path = create_new_expert(chat_name, description, temperature, custom_system_prompt, api_key)
+                if not api_key:
+                    st.error(f"❌ No API key found for {get_provider_display_name(provider)}. Please add it in Settings.")
+                    return
+
+                expert_id, page_path = create_new_expert(
+                    chat_name,
+                    description,
+                    temperature,
+                    custom_system_prompt,
+                    api_key,
+                    provider,
+                    model,
+                    thinking_level
+                )
 
                 # Store the page path for navigation after rerun
                 st.session_state.pending_expert_page = page_path

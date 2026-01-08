@@ -53,6 +53,33 @@ This allows the user to review changes before they're committed to the repositor
 
 **Remember:** The user values DRY compliance highly and will notice violations.
 
+### No Backward Compatibility
+
+**IMPORTANT: Do NOT maintain backward compatibility code.**
+
+When refactoring or changing data structures:
+- Remove old code paths immediately
+- Do NOT add "legacy" support or migration logic
+- Assume all configs and data will be regenerated from scratch
+- The user can run `scripts/reset_application.py` to recreate everything
+
+**Rationale:**
+- This is a personal project with a small number of experts
+- Configs are easy to regenerate
+- Backward compatibility adds complexity and technical debt
+- Clean code is more valuable than supporting old data formats
+
+**Example:**
+```python
+# ❌ BAD - Don't do this
+if isinstance(thinking_level, bool):
+    thinking_level = "medium" if thinking_level else "none"
+
+# ✅ GOOD - Just use the new format
+thinking_level = thinking_level  # Always a string
+```
+
+
 ## Project Overview
 
 ExpertGPTs is a multi-expert AI chat application built with Streamlit, powered by the DeepSeek API. It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.

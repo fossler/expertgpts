@@ -12,7 +12,7 @@ import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 from utils.constants import EXPERT_BEHAVIOR_DOCS, EXPERT_BEHAVIOR_DOCS_EDIT
-from utils.dialogs import create_new_expert, render_add_chat_dialog, render_temperature_input
+from utils.dialogs import create_new_expert, render_add_chat_dialog, render_llm_configuration
 from utils.helpers import sanitize_name
 from utils import secrets_manager
 from utils import config_toml_manager
@@ -37,51 +37,73 @@ def initialize_session_state():
 
 
 def render_api_key_section():
-    """Render the API Key management section."""
+    """Render the multi-provider API Key management section."""
     st.subheader("🔑 API Key Configuration")
 
-    has_file_key = secrets_manager.has_api_key_file()
+    # Provider selection
+    from utils.constants import LLM_PROVIDERS, get_provider_display_name
+
+    # Initialize api_keys in session state if not exists
+    if "api_keys" not in st.session_state:
+        st.session_state.api_keys = {}
+
+    provider_options = list(LLM_PROVIDERS.keys())
+    selected_provider = st.selectbox(
+        "Select LLM Provider",
+        options=provider_options,
+        format_func=lambda x: get_provider_display_name(x),
+        key="api_key_provider_selector"
+    )
+
+    # Get API keys from session state
+    api_keys = st.session_state.api_keys
+    current_api_key = api_keys.get(selected_provider, "")
+
+    # Check if key exists in file
+    has_file_key = secrets_manager.has_provider_api_key(selected_provider)
 
     # Current status
     col1, col2 = st.columns(2)
 
     with col1:
         if has_file_key:
-            st.success("✅ API key saved in secrets.toml")
+            st.success(f"✅ {get_provider_display_name(selected_provider)} API key saved in secrets.toml")
         else:
-            st.info("💡 No API key in secrets.toml")
+            st.info(f"💡 No {get_provider_display_name(selected_provider)} API key in secrets.toml")
 
     with col2:
-        if st.session_state.deepseek_api_key:
-            st.success("✅ API key is set and available to all experts")
+        if current_api_key:
+            st.success(f"✅ {get_provider_display_name(selected_provider)} API key is available")
         else:
-            st.warning("⚠️ API key not set")
+            st.warning(f"⚠️ {get_provider_display_name(selected_provider)} API key not set")
 
     st.divider()
 
     # API Key input
     api_key = st.text_input(
-        "DeepSeek API Key",
-        key="settings_api_key",
+        f"{get_provider_display_name(selected_provider)} API Key",
+        key=f"settings_api_key_{selected_provider}",
         type="password",
         value="",  # Always show empty for security
-        help="Enter your API key. It will be saved to .streamlit/secrets.toml and shared across all expert pages.",
-        placeholder="Enter your API key here",
+        help=f"Enter your {get_provider_display_name(selected_provider)} API key. It will be saved to .streamlit/secrets.toml.",
+        placeholder=f"Enter your {get_provider_display_name(selected_provider)} API key here",
     )
 
-    # Save button
+    # Save and Clear buttons
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("💾 Save API Key", type="primary", disabled=not api_key):
+        if st.button("💾 Save API Key", type="primary", disabled=not api_key, key=f"save_{selected_provider}"):
             try:
                 # Save to secrets.toml file
-                secrets_manager.save_api_key(api_key)
+                secrets_manager.save_provider_api_key(selected_provider, api_key)
 
                 # Update session state
-                st.session_state.deepseek_api_key = api_key
+                if "api_keys" not in st.session_state:
+                    st.session_state.api_keys = {}
+                st.session_state.api_keys[selected_provider] = api_key
 
-                st.success("✅ API key saved successfully to .streamlit/secrets.toml!")
+                st.success(f"✅ {get_provider_display_name(selected_provider)} API key saved successfully!")
                 st.info("🔄 The application will now rerun to load the new key.")
 
                 # Rerun to load the new key from st.secrets
@@ -90,17 +112,16 @@ def render_api_key_section():
                 st.error(f"❌ Error saving API key: {str(e)}")
 
     with col2:
-        if st.button("🗑️ Clear API Key", disabled=not has_file_key):
+        if st.button("🗑️ Clear API Key", disabled=not has_file_key, key=f"clear_{selected_provider}"):
             try:
-                # Delete the secrets.toml file
-                secrets_path = secrets_manager.get_secrets_path()
-                if secrets_path.exists():
-                    secrets_path.unlink()
+                # Save empty key to remove it from file
+                secrets_manager.save_provider_api_key(selected_provider, "")
 
-                # Clear session state
-                st.session_state.deepseek_api_key = ""
+                # Clear from session state
+                if selected_provider in st.session_state.api_keys:
+                    del st.session_state.api_keys[selected_provider]
 
-                st.success("✅ API key cleared successfully!")
+                st.success(f"✅ {get_provider_display_name(selected_provider)} API key cleared successfully!")
                 st.rerun()
             except Exception as e:
                 st.error(f"❌ Error clearing API key: {str(e)}")
@@ -109,11 +130,135 @@ def render_api_key_section():
 
     # Resources links
     st.subheader("📚 Resources")
-    st.caption("**Useful Links**")
-    "[Get a DeepSeek API key](https://platform.deepseek.com/)"
-    "[DeepSeek API Documentation](https://api-docs.deepseek.com/)"
-    "[View the source code](https://github.com/fossler/expertgpts)"
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)"
+    st.caption("**Get API Keys:**")
+
+    # Provider-specific links
+    if selected_provider == "deepseek":
+        st.markdown("[Get a DeepSeek API key](https://platform.deepseek.com/) | [DeepSeek API Documentation](https://api-docs.deepseek.com/)")
+    elif selected_provider == "openai":
+        st.markdown("[Get an OpenAI API key](https://platform.openai.com/) | [OpenAI API Documentation](https://platform.openai.com/docs)")
+    elif selected_provider == "zai":
+        st.markdown("[Get a Z.AI API key](https://open.bigmodel.cn/) | [Z.AI API Documentation](https://open.bigmodel.cn/dev/api)")
+
+    st.caption("**Project Links:**")
+    st.markdown("[View the source code](https://github.com/fossler/expertgpts) | [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")
+
+
+def render_default_llm_settings_section():
+    """Render the Default LLM Settings section for configuring global defaults."""
+    st.subheader("⚙️ Default LLM Settings")
+
+    st.caption("These defaults will be used when creating new experts. You can still customize each expert individually.")
+
+    from utils.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+
+    # Initialize defaults in session state if not exists
+    if "default_provider" not in st.session_state:
+        st.session_state.default_provider = "deepseek"
+    if "default_model" not in st.session_state:
+        st.session_state.default_model = "deepseek-chat"
+    if "default_thinking_level" not in st.session_state:
+        st.session_state.default_thinking_level = "none"
+
+    st.divider()
+
+    # Default provider selection
+    provider_options = list(LLM_PROVIDERS.keys())
+    current_default_provider = st.session_state.default_provider
+    provider_index = provider_options.index(current_default_provider) if current_default_provider in provider_options else 0
+
+    default_provider = st.selectbox(
+        "Default Provider",
+        options=provider_options,
+        index=provider_index,
+        format_func=lambda x: get_provider_display_name(x),
+        help="The default LLM provider for new experts",
+        key="default_provider_selector"
+    )
+
+    # Default model selection (filtered by provider)
+    model_options = list(LLM_PROVIDERS[default_provider]["models"].keys())
+    current_default_model = st.session_state.default_model
+
+    # If current default model is not in the new provider's models, use provider default
+    if current_default_model not in model_options:
+        current_default_model = get_default_model_for_provider(default_provider)
+
+    model_index = model_options.index(current_default_model) if current_default_model in model_options else 0
+
+    default_model = st.selectbox(
+        "Default Model",
+        options=model_options,
+        index=model_index,
+        format_func=lambda x: get_model_display_name(default_provider, x),
+        help=f"The default {get_provider_display_name(default_provider)} model for new experts",
+        key="default_model_selector"
+    )
+
+    # Default thinking mode - show different UI based on provider
+    if default_provider == "openai":
+        # Show selectbox for OpenAI (use half width like temperature)
+        col1, col2 = st.columns(2)
+        with col1:
+            effort_options = ["none", "low", "medium", "high", "xhigh"]
+            effort_index = effort_options.index(st.session_state.default_thinking_level) if st.session_state.default_thinking_level in effort_options else 0
+            default_thinking_level = st.selectbox(
+                "🧠 Select Thinking Mode Level",
+                options=effort_options,
+                index=effort_index,
+                help="Default reasoning effort level for new OpenAI experts",
+                key="default_thinking_selector"
+            )
+    elif default_provider == "zai":
+        # Show selectbox for Z.AI (optional thinking mode)
+        col1, col2 = st.columns(2)
+        with col1:
+            thinking_options = ["Disabled", "Enabled"]
+            # Map current_thinking to index ("none" -> 0, "medium" -> 1)
+            option_index = 1 if st.session_state.default_thinking_level and st.session_state.default_thinking_level != "none" else 0
+            selected_option = st.selectbox(
+                "🧠 Thinking Mode",
+                options=thinking_options,
+                index=option_index,
+                help="New experts will have thinking mode enabled by default",
+                key="default_thinking_selector"
+            )
+            # Convert back to string ("Disabled" -> "none", "Enabled" -> "medium")
+            default_thinking_level = "medium" if selected_option == "Enabled" else "none"
+    else:
+        # DeepSeek: Thinking mode depends on model (no default setting needed)
+        # deepseek-chat: no thinking support
+        # deepseek-reasoner: thinking always enabled
+        default_thinking_level = "none"
+
+    # Save defaults button
+    if st.button("💾 Save Defaults", type="primary", key="save_defaults"):
+        st.session_state.default_provider = default_provider
+        st.session_state.default_model = default_model
+        st.session_state.default_thinking_level = default_thinking_level
+
+        st.success(f"✅ Defaults saved! New experts will use {get_provider_display_name(default_provider)} - {get_model_display_name(default_provider, default_model)}")
+        st.rerun()
+
+    # Show current settings info
+    st.divider()
+
+    # Format thinking level for display
+    if st.session_state.default_provider == "openai" and st.session_state.default_thinking_level != "none":
+        thinking_display = f"Reasoning ({st.session_state.default_thinking_level})"
+    elif st.session_state.default_provider == "deepseek":
+        thinking_display = "Determined by model"
+    elif st.session_state.default_thinking_level == "none":
+        thinking_display = "Disabled"
+    else:
+        thinking_display = st.session_state.default_thinking_level.capitalize()
+
+    st.info(f"""
+    **Current Defaults:**
+    - Provider: {get_provider_display_name(st.session_state.default_provider)}
+    - Model: {get_model_display_name(st.session_state.default_provider, st.session_state.default_model)}
+    - Thinking Mode: {thinking_display}
+    """)
 
 
 def render_general_settings_section():
@@ -359,118 +504,6 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     return True, ""
 
 
-def render_add_chat_dialog():
-    """Render the Add Chat dialog.
-
-    This dialog allows users to create a new Domain Expert Agent by providing:
-    - Chat Name
-    - Agent Description
-    - Temperature (default: 1.0)
-    """
-    if not st.session_state.show_add_chat_dialog:
-        return
-
-    st.title("➕ Add New Expert Chat")
-
-    with st.form("add_chat_form"):
-        st.subheader("Expert Configuration")
-
-        # Chat Name
-        chat_name = st.text_input(
-            "Expert Name *",
-            placeholder="e.g., Python Expert, Data Scientist, Legal Advisor",
-            help="A descriptive name for the domain expert",
-            max_chars=100,
-        ).strip()
-
-        # Add caption with allowed characters
-        st.caption("💡 **Allowed characters:** Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)")
-
-        # Agent Description
-        description = st.text_area(
-            "Agent Description *",
-            placeholder="Describe the expert's domain, expertise, and capabilities...",
-            help="Detailed description of what this expert specializes in",
-            height="content",
-            max_chars=1000,
-        ).strip()
-
-        # Temperature
-        temperature = render_temperature_input()
-
-        st.divider()
-
-        # Expert Behavior (Advanced) - The most important field!
-        st.markdown("### 🧠 Expert Behavior (Advanced)")
-        st.caption(
-            "💡 **This is the most important field!** It defines how your expert responds, thinks, and acts. "
-            "Leave empty to auto-generate from description."
-        )
-
-        custom_system_prompt = st.text_area(
-            "Customize Expert Behavior",
-            placeholder="""How should this expert respond? (Optional)
-
-Leave empty to auto-generate from description.
-
-Example: "Provide clear, step-by-step explanations with code examples..." """,
-            help="🎯 This defines everything about your expert - tone, expertise, style, and constraints",
-            height=250,
-            max_chars=3000,
-        ).strip()
-
-        # Add expander with examples
-        with st.expander("📖 Why is this important? + Examples"):
-            st.markdown(EXPERT_BEHAVIOR_DOCS)
-
-        st.caption("* Required fields")
-
-        # Form buttons (1/8 width each, left-aligned like Temperature input)
-        col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
-
-        with col1:
-            submit_button = st.form_submit_button("Create Expert", width="stretch", type="primary")
-
-        with col2:
-            cancel_button = st.form_submit_button("Cancel", width="stretch")
-
-        # Handle form submission
-        if submit_button:
-            # Validate required fields
-            if not chat_name or not description:
-                st.error("Please fill in all required fields.")
-                return
-
-            # Validate expert name
-            is_valid, error_msg = validate_expert_name(chat_name)
-            if not is_valid:
-                st.error(f"❌ {error_msg}")
-                return
-
-            try:
-                # Get API key for system prompt generation
-                api_key = st.session_state.get("deepseek_api_key", None)
-
-                expert_id, page_path = create_new_expert(chat_name, description, temperature, custom_system_prompt, api_key)
-
-                # Store the page path for navigation after rerun
-                st.session_state.pending_expert_page = page_path
-                st.session_state.show_add_chat_dialog = False
-
-                st.success(f"✅ Expert '{chat_name}' created successfully!")
-                st.info("🔄 Navigating to your new expert...")
-
-                # Rerun to let Streamlit discover the new page
-                st.rerun()
-
-            except Exception as e:
-                st.error(f"❌ Error creating expert: {str(e)}")
-
-        if cancel_button:
-            st.session_state.show_add_chat_dialog = False
-            st.rerun()
-
-
 def render_edit_expert_dialog():
     """Render the Edit Expert dialog.
 
@@ -502,6 +535,23 @@ def render_edit_expert_dialog():
 
     st.title(f"✏️ Edit Expert: {expert_config['expert_name']}")
 
+    # LLM Configuration (Provider, Model, Temperature, Thinking)
+    metadata = expert_config.get("metadata", {})
+    current_provider = metadata.get("provider", "deepseek")
+    current_model = metadata.get("model", "deepseek-chat")
+    current_thinking = metadata.get("thinking_level", "none")
+    current_temperature = expert_config.get('temperature', 1.0)
+
+    provider, model, temperature, thinking_level = render_llm_configuration(
+        current_provider=current_provider,
+        current_model=current_model,
+        current_temperature=current_temperature,
+        current_thinking=current_thinking,
+        show_thinking=True
+    )
+
+    st.divider()
+
     with st.form("edit_expert_form"):
         st.subheader("Expert Configuration")
 
@@ -513,8 +563,7 @@ def render_edit_expert_dialog():
             help="Expert ID cannot be changed",
         )
 
-        # Temperature
-        temperature = render_temperature_input(value=float(expert_config.get('temperature', 1.0)))
+        st.divider()
 
         # Expert Name
         chat_name = st.text_input(
@@ -538,11 +587,16 @@ def render_edit_expert_dialog():
 
         st.divider()
 
+        # Get provider from expert config
+        metadata = expert_config.get("metadata", {})
+        expert_provider = metadata.get("provider", "deepseek")  # Backward compatible
+
         # Expert Behavior (Advanced) - The most important field!
         st.markdown("### 🧠 Expert Behavior (Advanced)")
 
-        # Check if API key available
-        api_key_available = bool(st.session_state.get("deepseek_api_key", ""))
+        # Check if API key available for this expert's provider
+        api_keys = st.session_state.get("api_keys", {})
+        api_key_available = bool(api_keys.get(expert_provider, ""))
 
         if api_key_available:
             caption_text = (
@@ -571,14 +625,15 @@ def render_edit_expert_dialog():
 
         st.caption("* Required fields")
 
-        # Form buttons (1/8 width each, left-aligned like Temperature input)
-        col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+        # Form buttons (left-aligned)
+        st.write("")  # Spacing
+        col1, col2, col3 = st.columns([1, 1, 6])
 
         with col1:
-            submit_button = st.form_submit_button("Save Changes", width="stretch", type="primary")
+            submit_button = st.form_submit_button("Save Changes", type="primary")
 
         with col2:
-            cancel_button = st.form_submit_button("Cancel", width="stretch")
+            cancel_button = st.form_submit_button("Cancel")
 
         # Handle form submission
         if submit_button:
@@ -600,8 +655,8 @@ def render_edit_expert_dialog():
                     # No API key - keep existing prompt
                     final_system_prompt = expert_config.get('system_prompt', '')
 
-                # Get API key for AI generation
-                api_key = st.session_state.get("deepseek_api_key", None) if api_key_available else None
+                # Get API key for AI generation (provider-specific)
+                api_key = api_keys.get(expert_provider, None) if api_key_available else None
 
                 # Update the config
                 config_manager.update_config(
@@ -612,6 +667,9 @@ def render_edit_expert_dialog():
                         "temperature": temperature,
                         "system_prompt": final_system_prompt,
                         "api_key": api_key,
+                        "provider": provider,
+                        "model": model,
+                        "thinking_level": thinking_level,
                     }
                 )
 
@@ -639,8 +697,9 @@ def render_expert_management_section():
     """Render the Expert Management section."""
     st.subheader("🤖 Expert Management")
 
-    # Check API key availability
-    api_key_available = st.session_state.get("deepseek_api_key", "")
+    # Check if ANY provider API key is available
+    api_keys = st.session_state.get("api_keys", {})
+    api_key_available = any(api_keys.values())
 
     if api_key_available:
         if st.button("➕ Add new Chat", type="primary", width="content"):
@@ -670,10 +729,31 @@ def render_expert_management_section():
 
     # Display experts in a table
     for idx, expert in enumerate(experts):
+        # Get provider and model info
+        metadata = expert.get('metadata', {})
+        provider = metadata.get('provider', 'deepseek')
+        model = metadata.get('model', 'deepseek-chat')
+        thinking_level = metadata.get('thinking_level', 'none')
+
+        # Import for display helpers
+        from utils.constants import get_provider_display_name, get_model_display_name
+
+        provider_name = get_provider_display_name(provider)
+        model_name = get_model_display_name(provider, model)
+
         with st.expander(f"📝 {expert['expert_name']}", expanded=False):
             col1, col2 = st.columns([3, 1])
 
             with col1:
+                # Show provider/model info
+                st.markdown(
+                    f"**LLM:** {provider_name} - {model_name}"
+                )
+                # Show thinking mode status
+                if provider == "openai" and thinking_level != "none":
+                    st.caption(f"🧠 Reasoning Effort: {thinking_level.capitalize()}")
+                elif thinking_level != "none":
+                    st.caption("🧠 Thinking Mode: Enabled")
                 st.markdown(f"**Temperature:** `{expert['temperature']}`")
                 st.markdown("**Description:**")
                 st.text_area(
@@ -927,7 +1007,7 @@ def main():
     st.title("⚙️ Settings")
 
     # Tab-based navigation for different settings sections (stateful)
-    tabs = ["🎨 General", "🔑 API Key", "🤖 Expert Management", "⚠️ Danger Zone", "ℹ️ About"]
+    tabs = ["🎨 General", "🔑 API Key", "⚙️ Default LLM", "🤖 Expert Management", "⚠️ Danger Zone", "ℹ️ About"]
     active_tab = st.segmented_control(
         "Settings Sections",
         options=tabs,
@@ -945,10 +1025,12 @@ def main():
     elif tabs.index(active_tab) == 1:
         render_api_key_section()
     elif tabs.index(active_tab) == 2:
-        render_expert_management_section()
+        render_default_llm_settings_section()
     elif tabs.index(active_tab) == 3:
-        render_danger_zone_section()
+        render_expert_management_section()
     elif tabs.index(active_tab) == 4:
+        render_danger_zone_section()
+    elif tabs.index(active_tab) == 5:
         render_about_section()
 
     # Footer
