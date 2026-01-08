@@ -306,6 +306,14 @@ def display_model_settings(config: dict, messages_key: str):
             key=f"{EXPERT_ID}_temperature_input_v{cache_version}"
         )
 
+    # Display provider links below temperature
+    if provider == "deepseek":
+        st.sidebar.markdown("[Chat](https://chat.deepseek.com/) | [Platform](https://platform.deepseek.com/usage)")
+    elif provider == "openai":
+        st.sidebar.markdown("[Chat](https://chatgpt.com/) | [Platform](https://platform.openai.com/usage)")
+    elif provider == "zai":
+        st.sidebar.markdown("[Chat](https://chat.z.ai/) | [Platform](https://z.ai/manage-apikey/subscription)")
+
     # Save button if any setting changed
     if (new_model != model or
         new_thinking_level != thinking_level or

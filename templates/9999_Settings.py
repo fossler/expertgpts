@@ -130,18 +130,18 @@ def render_api_key_section():
 
     # Resources links
     st.subheader("📚 Resources")
-    st.caption("**Get API Keys:**")
 
-    # Provider-specific links
+    from utils.constants import get_provider_display_name
+
+    # Provider name and links (one-liner)
+    provider_name = get_provider_display_name(selected_provider)
+
     if selected_provider == "deepseek":
-        st.markdown("[Get a DeepSeek API key](https://platform.deepseek.com/) | [DeepSeek API Documentation](https://api-docs.deepseek.com/)")
+        st.markdown(f"**{provider_name}:** [Chat](https://chat.deepseek.com/) | [Platform](https://platform.deepseek.com/usage)")
     elif selected_provider == "openai":
-        st.markdown("[Get an OpenAI API key](https://platform.openai.com/) | [OpenAI API Documentation](https://platform.openai.com/docs)")
+        st.markdown(f"**{provider_name}:** [Chat](https://chatgpt.com/) | [Platform](https://platform.openai.com/usage)")
     elif selected_provider == "zai":
-        st.markdown("[Get a Z.AI API key](https://open.bigmodel.cn/) | [Z.AI API Documentation](https://open.bigmodel.cn/dev/api)")
-
-    st.caption("**Project Links:**")
-    st.markdown("[View the source code](https://github.com/fossler/expertgpts) | [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")
+        st.markdown(f"**{provider_name}:** [Chat](https://chat.z.ai/) | [Platform](https://z.ai/manage-apikey/subscription)")
 
 
 def render_default_llm_settings_section():
@@ -983,10 +983,8 @@ def render_about_section():
     - 📋 Template-based page generation
 
     **Resources:**
-    - [Get a DeepSeek API key](https://platform.deepseek.com/)
-    - [DeepSeek API Documentation](https://api-docs.deepseek.com/)
-    - [View the source code](https://github.com/fossler/expertgpts)
     """)
+    st.markdown("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")
 
 
 def main():
