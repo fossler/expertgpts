@@ -152,37 +152,59 @@ def render_default_llm_settings_section():
 
     from utils.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 
-    # Initialize defaults in session state if not exists
-    if "default_provider" not in st.session_state:
-        st.session_state.default_provider = "deepseek"
-    if "default_model" not in st.session_state:
-        st.session_state.default_model = "deepseek-chat"
-    if "default_thinking_level" not in st.session_state:
-        st.session_state.default_thinking_level = "none"
-
     st.divider()
 
-    # Default provider selection
-    provider_options = list(LLM_PROVIDERS.keys())
-    current_default_provider = st.session_state.default_provider
-    provider_index = provider_options.index(current_default_provider) if current_default_provider in provider_options else 0
+    # Get available providers (only those with API keys configured)
+    api_keys = st.session_state.get("api_keys", {})
+    available_providers = [p for p in LLM_PROVIDERS.keys() if api_keys.get(p)]
+
+    # Show message if no API keys are configured
+    if not available_providers:
+        st.warning("⚠️ No API keys configured. Please add API keys in the API Key tab first.")
+        return
+
+    # Check if defaults have been explicitly set by user
+    defaults_set = (
+        st.session_state.get("default_provider") and
+        st.session_state.get("default_provider") in available_providers
+    )
+
+    if not defaults_set:
+        st.info("👋 Welcome! Please configure your default LLM settings below. These will be used when creating new experts.")
+
+    # Default provider selection (filtered to available providers only)
+    current_default_provider = st.session_state.get("default_provider")
+
+    # Only auto-select if no provider is set, otherwise use existing value
+    if not current_default_provider or current_default_provider not in available_providers:
+        current_default_provider = None
+
+    provider_index = available_providers.index(current_default_provider) if current_default_provider in available_providers else 0
 
     default_provider = st.selectbox(
         "Default Provider",
-        options=provider_options,
+        options=available_providers,
         index=provider_index,
         format_func=lambda x: get_provider_display_name(x),
         help="The default LLM provider for new experts",
         key="default_provider_selector"
     )
 
+    # Update session state when provider changes
+    if st.session_state.get("default_provider") != default_provider:
+        st.session_state.default_provider = default_provider
+        # Clear the model when provider changes (force user to select)
+        if st.session_state.get("default_model"):
+            model_for_new_provider = get_default_model_for_provider(default_provider)
+            st.session_state.default_model = model_for_new_provider
+
     # Default model selection (filtered by provider)
     model_options = list(LLM_PROVIDERS[default_provider]["models"].keys())
-    current_default_model = st.session_state.default_model
+    current_default_model = st.session_state.get("default_model")
 
-    # If current default model is not in the new provider's models, use provider default
+    # Only show default model if it exists for this provider
     if current_default_model not in model_options:
-        current_default_model = get_default_model_for_provider(default_provider)
+        current_default_model = None
 
     model_index = model_options.index(current_default_model) if current_default_model in model_options else 0
 
@@ -195,13 +217,18 @@ def render_default_llm_settings_section():
         key="default_model_selector"
     )
 
+    # Update session state when model changes
+    if st.session_state.get("default_model") != default_model:
+        st.session_state.default_model = default_model
+
     # Default thinking mode - show different UI based on provider
     if default_provider == "openai":
         # Show selectbox for OpenAI (use half width like temperature)
         col1, col2 = st.columns(2)
         with col1:
             effort_options = ["none", "low", "medium", "high", "xhigh"]
-            effort_index = effort_options.index(st.session_state.default_thinking_level) if st.session_state.default_thinking_level in effort_options else 0
+            current_thinking = st.session_state.get("default_thinking_level", "none")
+            effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
             default_thinking_level = st.selectbox(
                 "🧠 Select Thinking Mode Level",
                 options=effort_options,
@@ -215,7 +242,8 @@ def render_default_llm_settings_section():
         with col1:
             thinking_options = ["Disabled", "Enabled"]
             # Map current_thinking to index ("none" -> 0, "medium" -> 1)
-            option_index = 1 if st.session_state.default_thinking_level and st.session_state.default_thinking_level != "none" else 0
+            current_thinking = st.session_state.get("default_thinking_level", "none")
+            option_index = 1 if current_thinking and current_thinking != "none" else 0
             selected_option = st.selectbox(
                 "🧠 Thinking Mode",
                 options=thinking_options,
