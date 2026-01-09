@@ -28,6 +28,44 @@ class PageGenerator:
 
 **Why it works:** The leading underscore tells Streamlit "this is an internal parameter, don't include it in the cache key." Python still passes `self` automatically when called as `self._build_page_index()`.
 
+### ❌ DON'T: Forget to invalidate cache when data changes
+
+```python
+# WRONG - Cache doesn't know new pages were created
+@st.cache_resource
+def _build_page_index(_self):
+    pages = list(_self.pages_dir.glob("*.py"))
+    return pages
+
+# Later: Create a new page
+page_generator.generate_page(...)
+st.rerun()  # Cache still returns old page list!
+```
+
+**Why it fails:** `@st.cache_resource` persists across reruns. Creating new files doesn't automatically invalidate the cache, so the navigation system tries to switch to a page that isn't registered.
+
+### ✅ DO: Manually clear cache after mutations
+
+```python
+# CORRECT - Clear cache after mutations
+class PageGenerator:
+    @st.cache_resource
+    def _build_page_index(_self):
+        pages = list(_self.pages_dir.glob("*.py"))
+        return pages
+
+    def clear_page_cache(self):
+        """Clear the cached page index."""
+        _build_page_index.clear()  # Invalidate the cache
+
+# Later: Create a new page and clear cache
+page_generator.generate_page(...)
+page_generator.clear_page_cache()  # Force rebuild on next access
+st.rerun()  # Navigation will see updated page list
+```
+
+**Why it works:** Calling `function_name.clear()` invalidates the cache, so the next call rebuilds the data with fresh files.
+
 ### ❌ DON'T: Forget imports used in cached methods
 
 ```python
