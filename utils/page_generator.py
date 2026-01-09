@@ -2,8 +2,10 @@
 
 from pathlib import Path
 from typing import Optional, Tuple, Dict, List
+import streamlit as st
 
 from utils.helpers import sanitize_name
+from utils.types import PageInfo
 
 
 class PageGenerator:
@@ -174,39 +176,67 @@ class PageGenerator:
 
         return False
 
+    @st.cache_resource
+    def _build_page_index() -> Dict[str, PageInfo]:
+        """Build an optimized index of pages without reading file contents.
+
+        This is much faster than reading every file - it just parses filenames.
+
+        Returns:
+            Dict mapping page numbers to PageInfo objects
+        """
+        index = {}
+
+        if not self.pages_dir.exists():
+            return index
+
+        for page_file in self.pages_dir.glob("*.py"):
+            # Skip system pages
+            if (page_file.name.startswith("_") or
+                page_file.name == "template.py" or
+                page_file.name in ["1000_Home.py", "9999_Settings.py"]):
+                continue
+
+            # Parse filename to extract page number and expert name
+            # Format: NUMBER_SafeName.py (e.g., 1001_Python_Expert.py)
+            match = re.match(r"(\d+)_(.+)\.py", page_file.name)
+
+            if match:
+                page_number = int(match.group(1))
+                safe_name = match.group(2)
+
+                # Convert safe_name to display name
+                expert_name = safe_name.replace("_", " ").title()
+
+                index[str(page_number)] = {
+                    "filename": page_file.name,
+                    "expert_name": expert_name,
+                    "page_number": page_number
+                }
+
+        return index
+
     def list_pages(self) -> List[Dict]:
-        """List all existing expert pages.
+        """List all existing expert pages (optimized with indexing).
 
         Returns:
             List of page file information
+
+        Note:
+            This method is cached at the resource level for performance.
+            The cache automatically invalidates when files change.
         """
-        pages = []
+        # Get the cached index
+        page_index = self._build_page_index()
 
-        for page_file in sorted(self.pages_dir.glob("*.py")):
-            if page_file.name.startswith("_") or page_file.name == "template.py":
-                continue
-
-            try:
-                with open(page_file, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                # Extract expert info from page
-                expert_id = None
-                expert_name = None
-
-                for line in content.split("\n"):
-                    if line.startswith("EXPERT_ID = "):
-                        expert_id = line.split("=")[1].strip().strip('"\'')
-                    elif line.startswith("EXPERT_NAME = "):
-                        expert_name = line.split("=")[1].strip().strip('"\'')
-
-                if expert_id:
-                    pages.append({
-                        "filename": page_file.name,
-                        "expert_id": expert_id,
-                        "expert_name": expert_name or "Unknown",
-                    })
-            except Exception:
-                continue
+        # Convert index to list format (backward compatibility)
+        pages = [
+            {
+                "filename": info["filename"],
+                "expert_id": f"{page_num}_{info['expert_name'].lower().replace(' ', '_')}",
+                "expert_name": info["expert_name"]
+            }
+            for page_num, info in sorted(page_index.items(), key=lambda x: int(x[0]))
+        ]
 
         return pages

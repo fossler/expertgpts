@@ -153,8 +153,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
             message_placeholder = st.empty()
 
             try:
-                # Initialize LLM client with provider-specific config
-                client = LLMClient(provider=provider, api_key=api_key)
+                # Get LLM client from pool (cached for performance)
+                from utils.client_pool import get_client
+                client = get_client(provider=provider, api_key=api_key)
 
                 # Convert messages to format expected by API
                 api_messages = [

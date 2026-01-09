@@ -7,3 +7,15 @@ General Assistant
 Java Developer
 
 I'm an Senior Java Developer with over 15 years of experience
+
+
+
+
+Use deep thinking to examine this project for potential optimizations, focus on:
+- DRY principle (Do not Repeat Yourself)
+- Code optimization for simplification
+- Code optimization for performance improvement
+- Structural optimizations
+- Best practices
+- Cache optimizations
+- Security improvements

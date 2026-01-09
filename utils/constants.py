@@ -65,6 +65,44 @@ LLM_PROVIDERS = {
     }
 }
 
+# Performance Optimization: Pre-computed lookup tables for O(1) access
+# These eliminate nested dictionary lookups and provide direct access paths
+
+# Nested model lookup: MODEL_LOOKUP[provider][model] -> model_config
+MODEL_LOOKUP = {
+    provider: {model_id: config for model_id, config in models.items()}
+    for provider, models in {
+        provider: provider_config["models"]
+        for provider, provider_config in LLM_PROVIDERS.items()
+    }.items()
+}
+
+# Provider display names: PROVIDER_NAMES[provider] -> display_name
+PROVIDER_NAMES = {provider: config["name"] for provider, config in LLM_PROVIDERS.items()}
+
+# Default models: DEFAULT_MODELS[provider] -> default_model_id
+DEFAULT_MODELS = {provider: config["default_model"] for provider, config in LLM_PROVIDERS.items()}
+
+# Base URLs: BASE_URLS[provider] -> base_url
+BASE_URLS = {provider: config["base_url"] for provider, config in LLM_PROVIDERS.items()}
+
+# API key environment variables: API_KEY_ENVS[provider] -> env_var_name
+API_KEY_ENVS = {provider: config["api_key_env"] for provider, config in LLM_PROVIDERS.items()}
+
+# Max tokens: MAX_TOKENS[(provider, model)] -> max_tokens
+MAX_TOKENS = {
+    (provider, model): config["max_tokens"]
+    for provider, provider_config in LLM_PROVIDERS.items()
+    for model, config in provider_config["models"].items()
+}
+
+# Thinking parameters: THINKING_PARAMS[(provider, model)] -> thinking_param
+THINKING_PARAMS = {
+    (provider, model): config["thinking_param"]
+    for provider, provider_config in LLM_PROVIDERS.items()
+    for model, config in provider_config["models"].items()
+}
+
 # Global Defaults (stored in session state)
 DEFAULT_LLM_PROVIDER = "deepseek"
 DEFAULT_LLM_MODEL = "deepseek-chat"
@@ -194,11 +232,13 @@ def get_model_config(provider: str, model: str) -> dict:
     Raises:
         ValueError: If provider or model is not found
     """
-    provider_config = get_provider_config(provider)
-    if model not in provider_config["models"]:
-        available = list(provider_config["models"].keys())
+    # Optimized: Use pre-computed lookup table
+    if provider not in MODEL_LOOKUP:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(MODEL_LOOKUP.keys())}")
+    if model not in MODEL_LOOKUP[provider]:
+        available = list(MODEL_LOOKUP[provider].keys())
         raise ValueError(f"Unknown model: {model} for provider {provider}. Available: {available}")
-    return provider_config["models"][model]
+    return MODEL_LOOKUP[provider][model]
 
 
 def get_max_tokens(provider: str, model: str) -> int:
@@ -214,7 +254,11 @@ def get_max_tokens(provider: str, model: str) -> int:
     Raises:
         ValueError: If provider or model is not found
     """
-    return get_model_config(provider, model)["max_tokens"]
+    # Optimized: Direct tuple key lookup
+    key = (provider, model)
+    if key not in MAX_TOKENS:
+        raise ValueError(f"Unknown provider/model combination: {provider}/{model}")
+    return MAX_TOKENS[key]
 
 
 def get_provider_display_name(provider: str) -> str:
@@ -225,8 +269,14 @@ def get_provider_display_name(provider: str) -> str:
 
     Returns:
         str: Display name (e.g., "DeepSeek", "OpenAI", "Z.AI")
+
+    Raises:
+        ValueError: If provider is not found
     """
-    return get_provider_config(provider)["name"]
+    # Optimized: Direct dict lookup
+    if provider not in PROVIDER_NAMES:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(PROVIDER_NAMES.keys())}")
+    return PROVIDER_NAMES[provider]
 
 
 def get_model_display_name(provider: str, model: str) -> str:
@@ -238,8 +288,13 @@ def get_model_display_name(provider: str, model: str) -> str:
 
     Returns:
         str: Display name (e.g., "DeepSeek Chat", "GPT-5", "GLM-4.7")
+
+    Raises:
+        ValueError: If provider or model is not found
     """
-    return get_model_config(provider, model)["display_name"]
+    # Optimized: Use pre-computed lookup
+    config = get_model_config(provider, model)
+    return config["display_name"]
 
 
 def get_provider_base_url(provider: str) -> str:
@@ -250,8 +305,14 @@ def get_provider_base_url(provider: str) -> str:
 
     Returns:
         str: Base URL for the provider's API
+
+    Raises:
+        ValueError: If provider is not found
     """
-    return get_provider_config(provider)["base_url"]
+    # Optimized: Direct dict lookup
+    if provider not in BASE_URLS:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(BASE_URLS.keys())}")
+    return BASE_URLS[provider]
 
 
 def get_provider_api_key_env(provider: str) -> str:
@@ -262,8 +323,14 @@ def get_provider_api_key_env(provider: str) -> str:
 
     Returns:
         str: Environment variable name (e.g., "DEEPSEEK_API_KEY")
+
+    Raises:
+        ValueError: If provider is not found
     """
-    return get_provider_config(provider)["api_key_env"]
+    # Optimized: Direct dict lookup
+    if provider not in API_KEY_ENVS:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(API_KEY_ENVS.keys())}")
+    return API_KEY_ENVS[provider]
 
 
 def get_default_model_for_provider(provider: str) -> str:
@@ -274,5 +341,11 @@ def get_default_model_for_provider(provider: str) -> str:
 
     Returns:
         str: Default model ID for the provider
+
+    Raises:
+        ValueError: If provider is not found
     """
-    return get_provider_config(provider)["default_model"]
+    # Optimized: Direct dict lookup
+    if provider not in DEFAULT_MODELS:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(DEFAULT_MODELS.keys())}")
+    return DEFAULT_MODELS[provider]
