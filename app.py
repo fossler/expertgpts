@@ -118,6 +118,11 @@ def main():
     expert_pages = []
     for page_info in page_list:
         page_path = Path("pages") / page_info["filename"]
+
+        # Skip if page file doesn't exist (may have been deleted)
+        if not page_path.exists():
+            continue
+
         expert_pages.append(
             st.Page(
                 str(page_path),

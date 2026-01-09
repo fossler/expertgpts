@@ -184,8 +184,18 @@ class PageGenerator:
 
         This should be called after creating or deleting pages to ensure
         the navigation system sees the updated page list.
+
+        Note: This clears the cache globally for all PageGenerator instances.
         """
-        _build_page_index.clear()
+        try:
+            # Access the cached function and clear its cache
+            # The function is stored as an attribute after decoration
+            cached_func = self.__class__._build_page_index
+            if hasattr(cached_func, 'clear'):
+                cached_func.clear()
+        except Exception:
+            # If clearing fails, we'll rebuild on next access anyway
+            pass
 
     @st.cache_resource
     def _build_page_index(_self) -> Dict[str, PageInfo]:
