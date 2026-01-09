@@ -63,9 +63,10 @@ def create_example_experts():
             "temperature": 0.5,
         },
         {
-            "name": "Career Coach",
-            "description": "Expert in career guidance, resume writing, interview preparation, and professional development. Helps with career planning, job search strategies, and workplace advice.",
-            "temperature": 1.2,
+            "name": "General Assistant",
+            "description": "A helpful general-purpose assistant for everyday questions and tasks. Provides friendly, accurate assistance across a wide range of topics including general knowledge, problem-solving, and creative tasks.",
+            "temperature": 1.0,
+            "system_prompt": "You are a helpful assistant.",
         },
         {
             "name": "Translation Expert",
@@ -90,12 +91,18 @@ def create_example_experts():
             expert_id = f"{page_number}_{sanitize_name(example['name'])}"
 
             # Create configuration (uses page_number for naming)
-            config_manager.create_config(
-                expert_name=example["name"],
-                description=example["description"],
-                temperature=example["temperature"],
-                page_number=page_number,
-            )
+            config_kwargs = {
+                "expert_name": example["name"],
+                "description": example["description"],
+                "temperature": example["temperature"],
+                "page_number": page_number,
+            }
+
+            # Add system_prompt if provided
+            if "system_prompt" in example:
+                config_kwargs["system_prompt"] = example["system_prompt"]
+
+            config_manager.create_config(**config_kwargs)
 
             # Create page with correct expert_id from the start (no workaround needed!)
             page_path, _ = page_generator.generate_page(
