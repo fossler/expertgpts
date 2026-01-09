@@ -66,6 +66,35 @@ st.rerun()  # Navigation will see updated page list
 
 **Why it works:** Calling `function_name.clear()` invalidates the cache, so the next call rebuilds the data with fresh files.
 
+### ❌ DON'T: Assume cached data is always in sync with filesystem
+
+```python
+# WRONG - Crashes if page file was deleted
+page_list = page_generator.list_pages()  # May return stale data
+for page_info in page_list:
+    page_path = Path("pages") / page_info["filename"]
+    pages.append(st.Page(str(page_path)))  # Crashes if file doesn't exist!
+```
+
+**Why it fails:** Even with cache clearing, there can be timing issues or race conditions where the cached list doesn't immediately reflect filesystem changes. The app crashes trying to create `st.Page()` for a deleted file.
+
+### ✅ DO: Add defensive checks for filesystem state
+
+```python
+# CORRECT - Verify files exist before using them
+page_list = page_generator.list_pages()
+for page_info in page_list:
+    page_path = Path("pages") / page_info["filename"]
+
+    # Skip if page file doesn't exist (may have been deleted)
+    if not page_path.exists():
+        continue
+
+    pages.append(st.Page(str(page_path)))  # Safe: file exists
+```
+
+**Why it works:** Even if the page list is stale, we verify each file exists before creating a page object. This makes the app resilient to cache timing issues and race conditions.
+
 ### ❌ DON'T: Forget imports used in cached methods
 
 ```python
