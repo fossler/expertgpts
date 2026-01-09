@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Optional, Tuple, Dict, List
+import re
 import streamlit as st
 
 from utils.helpers import sanitize_name
@@ -177,7 +178,7 @@ class PageGenerator:
         return False
 
     @st.cache_resource
-    def _build_page_index() -> Dict[str, PageInfo]:
+    def _build_page_index(_self) -> Dict[str, PageInfo]:
         """Build an optimized index of pages without reading file contents.
 
         This is much faster than reading every file - it just parses filenames.
@@ -187,10 +188,10 @@ class PageGenerator:
         """
         index = {}
 
-        if not self.pages_dir.exists():
+        if not _self.pages_dir.exists():
             return index
 
-        for page_file in self.pages_dir.glob("*.py"):
+        for page_file in _self.pages_dir.glob("*.py"):
             # Skip system pages
             if (page_file.name.startswith("_") or
                 page_file.name == "template.py" or
