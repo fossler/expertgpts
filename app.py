@@ -6,10 +6,65 @@ expert AI agents powered by DeepSeek API.
 This is the main entry point using the newer st.navigation() approach.
 """
 
+import sys
+import subprocess
 import streamlit as st
 from pathlib import Path
 from utils.page_generator import PageGenerator
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
+from utils.constants import EXAMPLE_EXPERTS_COUNT
+
+
+def check_first_run():
+    """Check if this is a first run (no expert pages exist).
+
+    Returns True if setup should be run.
+    """
+    pages_dir = Path(__file__).parent / "pages"
+
+    # Check if expert pages exist (excluding Home and Settings)
+    if pages_dir.exists():
+        expert_pages = [
+            f for f in pages_dir.glob("*.py")
+            if f.name not in ["1000_Home.py", "9999_Settings.py"]
+            and not f.name.startswith("_")
+        ]
+        return len(expert_pages) == 0
+
+    return True
+
+
+def run_first_time_setup():
+    """Run first-time setup by calling scripts/setup.py."""
+    project_root = Path(__file__).parent
+
+    st.info("""
+    🚀 **First Run Detected**
+
+    Setting up ExpertGPTs with example expert agents...
+    This will only happen once.
+    """)
+
+    try:
+        result = subprocess.run(
+            [sys.executable, "scripts/setup.py"],
+            cwd=project_root,
+            check=True,
+            capture_output=True,
+            text=True
+        )
+
+        st.success("✅ Setup complete! Refreshing...")
+        st.rerun()
+
+    except subprocess.CalledProcessError as e:
+        st.error(f"""
+        ❌ **Setup Failed**
+
+        {e.stderr}
+
+        Please run manually: `python3 scripts/setup.py`
+        """)
 
 
 def initialize_session_state():
@@ -32,6 +87,11 @@ def main():
         layout="wide",
         initial_sidebar_state="auto"
     )
+
+    # Check for first run (before navigation)
+    if check_first_run():
+        run_first_time_setup()
+        return  # Wait for rerun after setup
 
     # Initialize session state before navigation
     initialize_session_state()

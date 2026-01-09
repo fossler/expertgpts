@@ -57,13 +57,17 @@ docs/llm_instructions/
 .secrets
 credentials.json
 
-# Auto-generated content - recreated by scripts/setup.py or scripts/reset_application.py
+# Auto-generated content
 configs/
-pages/
 logs/
 
-# Setup state marker
-.setup_complete
+# Expert pages only (not Home/Settings which are permanent)
+pages/*.py
+!pages/1000_Home.py
+!pages/9999_Settings.py
+
+# Setup state marker (no longer needed)
+# .setup_complete
 
 # Notes files
 Notes.txt

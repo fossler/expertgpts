@@ -152,37 +152,50 @@ def render_default_llm_settings_section():
 
     from utils.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 
-    # Initialize defaults in session state if not exists
-    if "default_provider" not in st.session_state:
-        st.session_state.default_provider = "deepseek"
-    if "default_model" not in st.session_state:
-        st.session_state.default_model = "deepseek-chat"
-    if "default_thinking_level" not in st.session_state:
-        st.session_state.default_thinking_level = "none"
-
     st.divider()
 
-    # Default provider selection
-    provider_options = list(LLM_PROVIDERS.keys())
-    current_default_provider = st.session_state.default_provider
-    provider_index = provider_options.index(current_default_provider) if current_default_provider in provider_options else 0
+    # Get available providers (only those with API keys configured)
+    api_keys = st.session_state.get("api_keys", {})
+    available_providers = [p for p in LLM_PROVIDERS.keys() if api_keys.get(p)]
+
+    # Show message if no API keys are configured
+    if not available_providers:
+        st.warning("⚠️ No API keys configured. Please add API keys in the API Key tab first.")
+        return
+
+    # Default provider selection (filtered to available providers only)
+    current_default_provider = st.session_state.get("default_provider")
+
+    # If current default provider is not available or not set, use first available
+    if not current_default_provider or current_default_provider not in available_providers:
+        current_default_provider = available_providers[0]
+
+    provider_index = available_providers.index(current_default_provider)
 
     default_provider = st.selectbox(
         "Default Provider",
-        options=provider_options,
+        options=available_providers,
         index=provider_index,
         format_func=lambda x: get_provider_display_name(x),
         help="The default LLM provider for new experts",
         key="default_provider_selector"
     )
 
+    # Update session state when provider changes
+    if st.session_state.get("default_provider") != default_provider:
+        st.session_state.default_provider = default_provider
+        # Update model to match new provider
+        new_model = get_default_model_for_provider(default_provider)
+        st.session_state.default_model = new_model
+
     # Default model selection (filtered by provider)
     model_options = list(LLM_PROVIDERS[default_provider]["models"].keys())
-    current_default_model = st.session_state.default_model
+    current_default_model = st.session_state.get("default_model")
 
     # If current default model is not in the new provider's models, use provider default
-    if current_default_model not in model_options:
+    if not current_default_model or current_default_model not in model_options:
         current_default_model = get_default_model_for_provider(default_provider)
+        st.session_state.default_model = current_default_model
 
     model_index = model_options.index(current_default_model) if current_default_model in model_options else 0
 
@@ -195,13 +208,19 @@ def render_default_llm_settings_section():
         key="default_model_selector"
     )
 
+    # Update session state when model changes
+    if st.session_state.get("default_model") != default_model:
+        st.session_state.default_model = default_model
+
     # Default thinking mode - show different UI based on provider
+    current_thinking = st.session_state.get("default_thinking_level", "none")
+
     if default_provider == "openai":
         # Show selectbox for OpenAI (use half width like temperature)
         col1, col2 = st.columns(2)
         with col1:
             effort_options = ["none", "low", "medium", "high", "xhigh"]
-            effort_index = effort_options.index(st.session_state.default_thinking_level) if st.session_state.default_thinking_level in effort_options else 0
+            effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
             default_thinking_level = st.selectbox(
                 "🧠 Select Thinking Mode Level",
                 options=effort_options,
@@ -215,7 +234,7 @@ def render_default_llm_settings_section():
         with col1:
             thinking_options = ["Disabled", "Enabled"]
             # Map current_thinking to index ("none" -> 0, "medium" -> 1)
-            option_index = 1 if st.session_state.default_thinking_level and st.session_state.default_thinking_level != "none" else 0
+            option_index = 1 if current_thinking and current_thinking != "none" else 0
             selected_option = st.selectbox(
                 "🧠 Thinking Mode",
                 options=thinking_options,
@@ -239,26 +258,6 @@ def render_default_llm_settings_section():
 
         st.success(f"✅ Defaults saved! New experts will use {get_provider_display_name(default_provider)} - {get_model_display_name(default_provider, default_model)}")
         st.rerun()
-
-    # Show current settings info
-    st.divider()
-
-    # Format thinking level for display
-    if st.session_state.default_provider == "openai" and st.session_state.default_thinking_level != "none":
-        thinking_display = f"Reasoning ({st.session_state.default_thinking_level})"
-    elif st.session_state.default_provider == "deepseek":
-        thinking_display = "Determined by model"
-    elif st.session_state.default_thinking_level == "none":
-        thinking_display = "Disabled"
-    else:
-        thinking_display = st.session_state.default_thinking_level.capitalize()
-
-    st.info(f"""
-    **Current Defaults:**
-    - Provider: {get_provider_display_name(st.session_state.default_provider)}
-    - Model: {get_model_display_name(st.session_state.default_provider, st.session_state.default_model)}
-    - Thinking Mode: {thinking_display}
-    """)
 
 
 def render_general_settings_section():
@@ -982,6 +981,39 @@ def render_about_section():
     - 💾 Chat history management
     - 📋 Template-based page generation
 
+    **Development:**
+    """)
+
+    # Display z.ai icon and link
+    col1, col2 = st.columns([1, 6])
+    with col1:
+        # Read the SVG file and embed as data URL
+        import base64
+        from pathlib import Path
+
+        icon_path = Path("icons/zai_logo.svg")
+        if icon_path.exists():
+            with open(icon_path, "rb") as f:
+                svg_data = f.read().decode("utf-8")
+            # Encode SVG as base64 data URL
+            svg_base64 = base64.b64encode(svg_data.encode("utf-8")).decode("utf-8")
+            data_url = f"data:image/svg+xml;base64,{svg_base64}"
+
+            # Make the icon clickable
+            st.markdown(
+                f'<a href="https://z.ai/subscribe?ic=JGTYCX7ZO7" target="_blank">'
+                f'<img src="{data_url}" width="100"></a>',
+                unsafe_allow_html=True
+            )
+        else:
+            # Fallback to non-clickable image if file not found
+            st.image("icons/zai_logo.svg", width=100)
+
+        st.markdown("This entire application was developed with [https://z.ai/subscribe](https://z.ai/subscribe?ic=JGTYCX7ZO7)")
+    with col2:
+        st.empty()
+
+    st.markdown("""
     **Resources:**
     """)
     st.markdown("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")

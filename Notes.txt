@@ -1,8 +1,7 @@
 Finance GPT
 Accountant GPT
-General Purpose
 Web Search - for up-to-date Infos
-
+General Assistant
 
 
 Java Developer

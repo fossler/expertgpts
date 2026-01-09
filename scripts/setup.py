@@ -3,7 +3,6 @@
 Run this script to populate the app with example Domain Expert Agents.
 """
 
-import shutil
 import sys
 from pathlib import Path
 
@@ -17,28 +16,23 @@ from utils.helpers import sanitize_name
 from utils.constants import EXAMPLE_EXPERTS_COUNT
 
 
-def copy_settings_page():
-    """Copy the Settings page from templates to pages directory."""
-    template_settings = Path("templates/9999_Settings.py")
-    pages_settings = Path("pages/9999_Settings.py")
+def should_create_example_experts() -> bool:
+    """Check if example experts should be created.
 
-    if template_settings.exists():
-        shutil.copy2(template_settings, pages_settings)
-        print(f"✅ Copied Settings page to pages/")
-    else:
-        print(f"⚠️  Warning: Settings template not found at {template_settings}")
+    Returns True if no expert pages exist (pages/ only contains Home and Settings).
+    """
+    pages_dir = Path("pages")
+    if not pages_dir.exists():
+        return True
 
+    # Check if expert pages exist (excluding Home and Settings)
+    expert_pages = [
+        f for f in pages_dir.glob("*.py")
+        if f.name not in ["1000_Home.py", "9999_Settings.py"]
+        and not f.name.startswith("_")
+    ]
 
-def copy_home_page():
-    """Copy the Home page from templates to pages directory."""
-    template_home = Path("templates/1000_Home.py")
-    pages_home = Path("pages/1000_Home.py")
-
-    if template_home.exists():
-        shutil.copy2(template_home, pages_home)
-        print(f"✅ Copied Home page to pages/")
-    else:
-        print(f"⚠️  Warning: Home template not found at {template_home}")
+    return len(expert_pages) == 0
 
 
 def create_example_experts():
@@ -128,27 +122,39 @@ def create_example_experts():
 
 
 if __name__ == "__main__":
-    print("Creating example expert agents...\n")
+    print("Setting up ExpertGPTs...\n")
     print("-" * 60)
 
-    # Ensure pages directory exists before any file operations
+    # Ensure pages directory exists
     Path("pages").mkdir(exist_ok=True)
 
-    # Copy Home page first (so experts start at 1001)
-    copy_home_page()
+    # Verify Home and Settings exist (they should be in git)
+    home_page = Path("pages/1000_Home.py")
+    settings_page = Path("pages/9999_Settings.py")
+
+    if not home_page.exists():
+        print("⚠️  Warning: Home page not found at pages/1000_Home.py")
+        print("   This file should be in the repository. Please check your git checkout.")
+
+    if not settings_page.exists():
+        print("⚠️  Warning: Settings page not found at pages/9999_Settings.py")
+        print("   This file should be in the repository. Please check your git checkout.")
+
     print()
 
-    # Copy Settings page
-    copy_settings_page()
-    print()
+    # Smart recreation: only create experts if none exist
+    if should_create_example_experts():
+        print("No expert pages found. Creating example experts...\n")
+        created = create_example_experts()
 
-    # Create example experts
-    created = create_example_experts()
+        # Verify we created the expected number of experts
+        if len(created) != EXAMPLE_EXPERTS_COUNT:
+            print(f"⚠️  Warning: Expected {EXAMPLE_EXPERTS_COUNT} experts, but created {len(created)}")
+            print("   Please update EXAMPLE_EXPERTS_COUNT in utils/constants.py")
 
-    # Verify we created the expected number of experts
-    if len(created) != EXAMPLE_EXPERTS_COUNT:
-        print(f"⚠️  Warning: Expected {EXAMPLE_EXPERTS_COUNT} experts, but created {len(created)}")
-        print("   Please update EXAMPLE_EXPERTS_COUNT in utils/constants.py")
+        print(f"\n✅ Successfully created {len(created)} expert(s)!")
+    else:
+        print("ℹ️  Expert pages already exist. Skipping example expert creation.")
+        print("   To recreate experts, use: python3 scripts/reset_application.py")
 
-    print(f"\n✅ Successfully created {len(created)} expert(s)!")
     print("\n🎉 You can now run the app with: streamlit run app.py")

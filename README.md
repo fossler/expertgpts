@@ -11,7 +11,7 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 - **Theme Customization**: Customize colors through the Settings page with preset themes
 - **Secure Secrets Management**: API keys stored securely in `.streamlit/secrets.toml`
 - **File-Based Configuration**: Each expert has its own configuration file for easy management
-- **Template-Based Pages**: Home, Settings, and expert pages are generated from templates
+- **Template-Based Pages**: Expert pages are generated from a master template
 - **Chat History**: Maintain conversation context throughout your session
 - **Adjustable Temperature**: Control response creativity and focus for each expert
 
@@ -21,15 +21,13 @@ A multi-expert AI chat application built with Streamlit and powered by the DeepS
 expertgpts/
 ├── app.py                         # Main entry point with st.navigation()
 ├── pages/
-│   ├── 1000_Home.py              # Home page (generated from template)
+│   ├── 1000_Home.py              # Home page (permanent, committed to git)
 │   ├── 1001_Python_Expert.py     # Expert pages (generated from template)
 │   ├── 1002_Data_Scientist.py
 │   └── ...
-│   └── 9999_Settings.py          # Settings page (generated from template)
+│   └── 9999_Settings.py          # Settings page (permanent, committed to git)
 ├── templates/
-│   ├── template.py               # Template for all expert pages
-│   ├── 1000_Home.py             # Home page template
-│   └── 9999_Settings.py         # Settings page template
+│   └── template.py               # Template for expert pages only
 ├── configs/
 │   └── {expert_id}.yaml          # Config files for each expert
 ├── utils/
@@ -96,14 +94,12 @@ This will create 7 example experts:
 
 Start the application with:
 ```bash
-./start_app.sh
+streamlit run app.py
 ```
 
-**First run?** The script will automatically create 7 example expert agents before launching.
+**First run?** The app will automatically create 7 example expert agents on first launch.
 
 The app will open in your browser at `http://localhost:8501`
-
-> **Note:** You can also run `streamlit run app.py` directly, but it will skip the automatic setup. Use the wrapper script for the best experience.
 
 **Note**: ExpertGPTs uses Streamlit's modern `st.navigation()` API with Material Design icons for a polished user experience. Wide mode is enabled by default for maximum content visibility.
 
@@ -273,29 +269,30 @@ For more information on the DeepSeek API, see the [official documentation](https
 ### Project Structure
 
 - **app.py**: Main application entry point using `st.navigation()` for modern navigation
-- **templates/**: Template files for Home, Settings, and expert pages
-- **pages/**: Auto-generated pages from templates (Home: 1000, Experts: 1001+, Settings: 9999)
+- **templates/**: Template file for expert pages only
+- **pages/**: Home (1000) and Settings (9999) are permanent; expert pages (1001+) are auto-generated
 - **utils/**: Shared utilities and business logic
 - **configs/**: YAML configuration files for each expert
 
 ### Adding New Features
 
 1. **New Utility**: Add to `utils/` directory
-2. **UI Changes**: Modify templates in `templates/` directory, then run `echo "yes" | python3 scripts/reset_application.py` to regenerate pages
-3. **New Pages**: Create template in `templates/` and generate via `scripts/setup.py` or programmatically
+2. **UI Changes for Experts**: Modify `templates/template.py`, then run `echo "yes" | python3 scripts/reset_application.py` to regenerate expert pages
+3. **UI Changes for Home/Settings**: Edit directly in `pages/1000_Home.py` or `pages/9999_Settings.py` (permanent files)
+4. **New Expert Pages**: Generate via Settings UI or programmatically using `PageGenerator`
 
 ### Template-Based Architecture
 
-ExpertGPTs uses a template-based architecture for consistency:
+ExpertGPTs uses a template-based architecture for expert pages:
 
-- **Home & Settings**: Generated from `templates/1000_Home.py` and `templates/9999_Settings.py`
+- **Home & Settings**: Permanent files in `pages/` (committed to git)
 - **Expert Pages**: Generated from `templates/template.py` with placeholders replaced
 - **Numbering**: Home (1000) → Experts (1001+) → Settings (9999)
 
-When modifying templates:
-1. Edit the template file in `templates/`
-2. Run `echo "yes" | python3 scripts/reset_application.py` to regenerate all pages
-3. Changes will be reflected across all generated pages
+When modifying the expert template:
+1. Edit `templates/template.py`
+2. Run `echo "yes" | python3 scripts/reset_application.py` to regenerate all expert pages
+3. Changes will be reflected across all generated expert pages
 
 ### Testing
 
@@ -312,13 +309,14 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is open source and available under the Apache License 2.0.
 
 ## Acknowledgments
 
 - Built with [Streamlit](https://streamlit.io/)
 - Powered by [DeepSeek API](https://www.deepseek.com/)
 - Inspired by OpenAI's GPTs explore functionality
+- Developed with [Z.AI](https://z.ai/subscribe?ic=JGTYCX7ZO7) - Advanced AI platform for intelligent context engineering
 
 ## Support
 
