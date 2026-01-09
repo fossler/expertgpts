@@ -23,10 +23,10 @@ Get ExpertGPTs up and running in minutes!
 
 Start the app with:
 ```bash
-./start_app.sh
+streamlit run app.py
 ```
 
-**First run?** The script will automatically create 7 example expert agents:
+**First run?** The app will automatically create 7 example expert agents:
 - Python Expert
 - Data Scientist
 - Writing Assistant
@@ -37,12 +37,10 @@ Start the app with:
 
 The application will open at `http://localhost:8501`
 
-> **Note:** You can also run `streamlit run app.py` directly, but the wrapper script is recommended as it handles automatic setup.
-
 **Features**:
 - Modern navigation with Material Design icons
 - Wide mode enabled by default
-- All pages generated from templates for consistency
+- Expert pages generated from templates for consistency
 
 ## First Use
 
@@ -90,7 +88,7 @@ The application will open at `http://localhost:8501`
 ## Next Steps
 
 - Read the full [README.md](README.md) for detailed documentation
-- Customize the page template in `templates/template.py`
+- Customize expert pages by editing `templates/template.py`
 - Explore the config files in `configs/` to understand expert settings
 - Create custom experts for your specific use cases!
 
