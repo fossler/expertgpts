@@ -362,6 +362,9 @@ def create_new_expert(
         expert_name=chat_name,
     )
 
+    # Clear the page index cache so navigation sees the new page
+    page_generator.clear_page_cache()
+
     # Invalidate cache for this expert
     if f"cache_version_{expert_id}" not in st.session_state:
         st.session_state[f"cache_version_{expert_id}"] = 0

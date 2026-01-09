@@ -171,11 +171,21 @@ class PageGenerator:
                 # Check if this page belongs to the expert
                 if f'EXPERT_ID = "{expert_id}"' in content:
                     page_file.unlink()
+                    # Clear cache after deletion
+                    self.clear_page_cache()
                     return True
             except Exception:
                 continue
 
         return False
+
+    def clear_page_cache(self):
+        """Clear the cached page index.
+
+        This should be called after creating or deleting pages to ensure
+        the navigation system sees the updated page list.
+        """
+        _build_page_index.clear()
 
     @st.cache_resource
     def _build_page_index(_self) -> Dict[str, PageInfo]:
