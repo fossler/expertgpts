@@ -1,12 +1,13 @@
 """Professional internationalization (i18n) manager for ExpertGPTs.
 
-Supports 14 languages with RTL, pluralization, and locale-specific formatting.
+Supports 13 languages with automatic system language detection.
 """
 
 import json
+import locale
 import streamlit as st
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from datetime import datetime
 
 
@@ -134,6 +135,52 @@ class I18nManager:
         self.translations: Dict[str, Dict] = {}
         self.current_lang: str = "en"
         self.load_translations()
+
+    def detect_system_language(self) -> str:
+        """Detect system language and return appropriate language code.
+
+        Returns:
+            Language code that matches system language, or 'en' as fallback
+
+        Examples:
+            - 'de_DE' → 'de'
+            - 'de-AT' → 'de' (Austrian German uses German translation)
+            - 'de-CH' → 'de' (Swiss German uses German translation)
+            - 'zh_CN' → 'zh-CN'
+            - 'fr_FR' → 'fr'
+            - 'unsupported' → 'en'
+        """
+        try:
+            # Get system locale
+            system_locale = locale.getdefaultlocale()[0]
+
+            if not system_locale:
+                return "en"
+
+            # Handle special cases first
+            # German variants: de-AT (Austrian), de-CH (Swiss), de-DE, de-?? → all use 'de'
+            if system_locale.startswith('de'):
+                return "de"
+
+            # Chinese variants
+            if system_locale in ['zh_CN', 'zh-CN', 'zh_SG']:
+                return "zh-CN"
+            elif system_locale in ['zh_TW', 'zh-TW', 'zh_HK']:
+                return "zh-TW"
+
+            # Extract language code (before '_' or '-')
+            lang_code = system_locale.split('_')[0].split('-')[0]
+
+            # Check if we support this language
+            if lang_code in LANGUAGE_METADATA:
+                return lang_code
+
+            # Fallback to English
+            return "en"
+
+        except Exception:
+            # If detection fails, use English
+            return "en"
 
     def load_translations(self):
         """Load translation files from locales/ directory."""

@@ -18,6 +18,7 @@ def initialize_shared_session_state():
     - Navigation state
     - Dialog states
     - Default LLM settings
+    - Language preference (auto-detected from system)
 
     The function uses a try-except pattern to gracefully handle cases
     where secrets.toml doesn't exist or has errors.
@@ -27,6 +28,11 @@ def initialize_shared_session_state():
     """
     # Import LLM_PROVIDERS to get all provider keys
     from utils.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
+    from utils.i18n import i18n
+
+    # Initialize language with auto-detection from system
+    if "language" not in st.session_state:
+        st.session_state.language = i18n.detect_system_language()
 
     # Initialize API keys dictionary in session state (from secrets if not set)
     if "api_keys" not in st.session_state:

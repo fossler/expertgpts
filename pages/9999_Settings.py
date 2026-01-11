@@ -262,9 +262,72 @@ def render_default_llm_settings_section():
 
 def render_general_settings_section():
     """Render the General Settings section for theme customization."""
+    from utils.i18n import i18n
+
     st.subheader("🎨 Theme Customization")
 
     st.caption("Customize the appearance of your ExpertGPTs application.")
+
+    st.divider()
+
+    # Language selector
+    st.subheader(f"🌐 {i18n.t('language.title')}")
+
+    # Get current language
+    current_lang = st.session_state.get("language", "en")
+    current_info = i18n.get_language_info(current_lang)
+
+    # Display current language
+    st.caption(f"{i18n.t('language.current_language')}: {current_info['flag']} {current_info['native_name']}")
+
+    st.divider()
+
+    # Group languages by script for better UX
+    latin_langs = ["en", "de", "fr", "es", "it", "pt", "tr", "id", "ms"]
+    cyrillic_langs = ["ru"]
+    han_langs = ["zh-CN", "zh-TW", "wyw", "yue"]
+
+    # Latin Script Languages
+    st.write("**Latin Script / Lateinische Schrift / Script Latin**")
+    cols_latin = st.columns(3)
+    for idx, code in enumerate(latin_langs):
+        info = i18n.get_language_info(code)
+        with cols_latin[idx % 3]:
+            if st.button(
+                f"{info['flag']} {info['native_name']}",
+                key=f"lang_{code}",
+                use_container_width=True,
+                type="secondary" if code != current_lang else "primary"
+            ):
+                i18n.set_language(code)
+
+    # Cyrillic Script Languages
+    st.write("**Cyrillic Script / Kyrillische Schrift**")
+    cols_cyrillic = st.columns(3)
+    for idx, code in enumerate(cyrillic_langs):
+        info = i18n.get_language_info(code)
+        with cols_cyrillic[idx]:
+            if st.button(
+                f"{info['flag']} {info['native_name']}",
+                key=f"lang_{code}",
+                use_container_width=True,
+                type="secondary" if code != current_lang else "primary"
+            ):
+                i18n.set_language(code)
+
+    # Chinese (Han Script) Languages
+    st.write("**Chinese (Han Script) / Chinesisch (Han-Schrift)**")
+    cols_han = st.columns(2)
+    for idx, code in enumerate(han_langs):
+        info = i18n.get_language_info(code)
+        with cols_han[idx]:
+            if st.button(
+                f"{info['flag']} {info['native_name']}",
+                key=f"lang_{code}",
+                use_container_width=True,
+                type="secondary" if code != current_lang else "primary"
+            ):
+                i18n.set_language(code)
 
     st.divider()
 

@@ -384,17 +384,19 @@ def render_add_chat_dialog():
 
     The dialog creates a new expert configuration and generates a dedicated page.
     """
+    from utils.i18n import i18n
+
     if not st.session_state.show_add_chat_dialog:
         return
 
-    st.title("➕ Add New Expert Chat")
+    st.title(f"➕ {i18n.t('buttons.add_chat')}")
 
     # Check for API keys - at least one provider must have a key
     api_keys = st.session_state.get("api_keys", {})
     api_key_available = any(api_keys.values())
 
     if not api_key_available:
-        st.warning("""
+        st.warning(f"""
         ⚠️ **API Key Required**
 
         New chats can only be created when an API key is defined.
@@ -402,7 +404,7 @@ def render_add_chat_dialog():
         Please set at least one provider's API key in **Settings → API Key** tab first.
         """)
 
-        if st.button("🔧 Go to Settings", type="primary"):
+        if st.button(f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"):
             st.switch_page("pages/9999_Settings.py")
 
         return
@@ -417,19 +419,19 @@ def render_add_chat_dialog():
 
         # Chat Name
         chat_name = st.text_input(
-            "Expert Name *",
-            placeholder="e.g., Python Expert, Data Scientist, Legal Advisor",
+            f"{i18n.t('forms.expert_name')} *",
+            placeholder=i18n.t('forms.expert_name_placeholder'),
             help="A descriptive name for the domain expert",
             max_chars=100,
         ).strip()
 
         # Add caption with allowed characters
-        st.caption("💡 **Allowed characters:** Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)")
+        st.caption(f"💡 **{i18n.t('forms.allowed_characters')}:** {i18n.t('forms.allowed_characters_desc')}")
 
         # Agent Description
         description = st.text_area(
-            "Agent Description *",
-            placeholder="Describe the expert's domain, expertise, and capabilities...",
+            f"{i18n.t('forms.agent_description')} *",
+            placeholder=i18n.t('forms.agent_description_placeholder'),
             help="Detailed description of what this expert specializes in",
             height="content",
             max_chars=1000,
@@ -468,16 +470,16 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
         col1, col2, col3 = st.columns([1, 1, 6])
 
         with col1:
-            submit_button = st.form_submit_button("Create Expert", type="primary")
+            submit_button = st.form_submit_button(i18n.t("buttons.create_expert"), type="primary")
 
         with col2:
-            cancel_button = st.form_submit_button("Cancel")
+            cancel_button = st.form_submit_button(i18n.t("buttons.cancel"))
 
         # Handle form submission
         if submit_button:
             # Validate required fields
             if not chat_name or not description:
-                st.error("Please fill in all required fields.")
+                st.error(i18n.t("errors.required_fields"))
                 return
 
             # Validate expert name
@@ -492,7 +494,8 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
                 api_key = api_keys.get(provider, None)
 
                 if not api_key:
-                    st.error(f"❌ No API key found for {get_provider_display_name(provider)}. Please add it in Settings.")
+                    provider_name = get_provider_display_name(provider)
+                    st.error(i18n.t("status.no_api_key", provider=provider_name))
                     return
 
                 expert_id, page_path = create_new_expert(
@@ -510,15 +513,18 @@ Example: "Provide clear, step-by-step explanations with code examples..." """,
                 st.session_state.pending_expert_page = page_path
                 st.session_state.show_add_chat_dialog = False
 
-                st.success(f"✅ Expert '{chat_name}' created successfully!")
-                st.info("🔄 Navigating to your new expert...")
+                st.success(i18n.t("success.expert_created", name=chat_name))
+                st.info("🔄 " + i18n.t("info.navigating"))
 
                 # Rerun to let Streamlit discover the new page
                 st.rerun()
 
+            except ValueError as e:
+                # Show user-friendly error in UI
+                st.error(i18n.t("errors.expert_exists", name=chat_name))
             except Exception as e:
                 # Show user-friendly error in UI
-                st.error(f"❌ Error creating expert: {str(e)}")
+                st.error(f"❌ {i18n.t('errors.error_creating_expert')}: {str(e)}")
 
         if cancel_button:
             st.session_state.show_add_chat_dialog = False

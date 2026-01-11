@@ -6,6 +6,7 @@ Welcome page for the ExpertGPTs multi-expert AI chat application.
 import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.dialogs import render_add_chat_dialog
+from utils.i18n import i18n
 
 
 def render_expert_list():
@@ -14,10 +15,10 @@ def render_expert_list():
     experts = config_manager.list_experts()
 
     if not experts:
-        st.info("🔍 No expert agents found. Create your first expert from Settings!")
+        st.info(f"🔍 {i18n.t('home.no_experts')}")
         return
 
-    st.subheader("📚 Available Expert Agents")
+    st.subheader(f"📚 {i18n.t('home.available_experts')}")
 
     # Display experts in a grid
     cols = st.columns(min(3, len(experts)))
@@ -36,7 +37,7 @@ def main():
     with st.sidebar:
         # Toolbox
         st.caption("**Toolbox**")
-        if st.button("➕ Add Chat", width="stretch"):
+        if st.button(f"➕ {i18n.t('buttons.add_chat')}", width="stretch"):
             st.session_state.show_add_chat_dialog = True
             st.rerun()
 
@@ -48,9 +49,9 @@ def main():
         # API Key status (check if any provider key is set)
         api_keys = st.session_state.get("api_keys", {})
         if any(api_keys.values()):
-            st.success("✅ API key configured")
+            st.success(f"✅ {i18n.t('status.api_key_configured')}")
         else:
-            st.caption("⚠️ API key not set")
+            st.caption(f"⚠️ {i18n.t('status.api_key_not_set')}")
 
         st.divider()
 
@@ -59,35 +60,35 @@ def main():
         render_add_chat_dialog()
         return
 
-    st.title("🤖 Welcome to ExpertGPTs")
+    st.title(f"🤖 {i18n.t('home.title')}")
 
-    st.markdown("""
-    ## Your Multi-Expert AI Assistant Platform
+    st.markdown(f"""
+    ## {i18n.t('home.subtitle')}
 
     ExpertGPTs provides access to multiple domain-specific expert AI agents, each specialized
     in different fields. Select an expert from the navigation menu to start chatting!
 
-    ### Getting Started
+    ### {i18n.t('home.getting_started')}
 
-    1. **Set your API Key**: Enter your DeepSeek API key in Settings (it will be saved securely)
-    2. **Choose an Expert**: Select an expert agent from the navigation menu
-    3. **Start Chatting**: Ask questions and get expert-level responses
+    1. **{i18n.t('home.getting_started_steps.step1')}**: {i18n.t('home.getting_started_steps.step1_desc')}
+    2. **{i18n.t('home.getting_started_steps.step2')}**: {i18n.t('home.getting_started_steps.step2_desc')}
+    3. **{i18n.t('home.getting_started_steps.step3')}**: {i18n.t('home.getting_started_steps.step3_desc')}
 
-    ### Create Custom Experts
+    ### {i18n.t('home.create_custom_experts')}
 
-    Click the **"➕ Add Chat"** button in the sidebar to create your own domain-specific experts:
-    - Define the expert's name and specialization
-    - Set the temperature for response creativity
-    - Optionally provide a custom system prompt
+    {i18n.t('home.create_experts_desc')}
+    - {i18n.t('home.expert_features.feature1')}
+    - {i18n.t('home.expert_features.feature2')}
+    - {i18n.t('home.expert_features.feature3')}
 
-    ### Features
+    ### {i18n.t('home.features.title')}
 
-    - 🎯 **Domain-Specific Expertise**: Each expert specializes in a specific domain
-    - 🔧 **Customizable**: Create experts tailored to your needs
-    - 🌡️ **Adjustable Temperature**: Control response creativity and focus
-    - 💾 **Chat History**: Maintain conversation context throughout your session
-    - 🔐 **Secure Secrets**: API keys stored in `.streamlit/secrets.toml`
-    - 🎨 **Customizable Themes**: Personalize the app appearance
+    - 🎯 **{i18n.t('home.features.domain_expertise')}**: {i18n.t('home.features.domain_expertise_desc')}
+    - 🔧 **{i18n.t('home.features.customizable')}**: {i18n.t('home.features.customizable_desc')}
+    - 🌡️ **{i18n.t('home.features.temperature')}**: {i18n.t('home.features.temperature_desc')}
+    - 💾 **{i18n.t('home.features.chat_history')}**: {i18n.t('home.features.chat_history_desc')}
+    - 🔐 **{i18n.t('home.features.secure_secrets')}**: {i18n.t('home.features.secure_secrets_desc')}
+    - 🎨 **{i18n.t('home.features.custom_themes')}**: {i18n.t('home.features.custom_themes_desc')}
     """)
 
     st.divider()

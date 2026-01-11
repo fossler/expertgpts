@@ -1,9 +1,7 @@
 Finance GPT
 Accountant GPT
-Web Search - for up-to-date Infos
-General Assistant
-
-
+Mail Responder
+Summarizer
 Java Developer
 
 I'm an Senior Java Developer with over 15 years of experience
@@ -18,4 +16,57 @@ Use deep thinking to examine this project for potential optimizations, focus on:
 - Structural optimizations
 - Best practices
 - Cache optimizations
-- Security improvements
+
+
+  1. Python Expert
+  2. Data Scientist
+  3. Writing Assistant
+  4. Linux System Admin
+  5. General Assistant ← NEW! (replaces Career Coach)
+  6. Translation Expert
+  7. Spell Checker
+
+
+
+  1. General Assistant
+  2. Mail Responder
+  3. Summarizer
+  4. Translation Expert
+  5. Spell Checker
+  7. Linux System Admin
+  8. Python Developer
+  9. MLOps Engineer
+
+
+
+
+Die Applikation soll Mehrsprachigkeit unterstützen, englisch ist die basissprache. 
+Bitte implementiere eine Lösung, die es ermöglicht, dass die Benutzeroberfläche und die Antworten der GPT-Modelle in verschiedenen Sprachen angezeigt werden können. 
+Berücksichtige dabei auch die Handhabung von Zeichensätzen und kulturellen Unterschieden. 
+Um Mehrsprachigkeit in der Applikation zu unterstützen, können wir die folgenden Schritte unternehmen:
+3. Sprachumschaltung implementieren: Füge eine Sprachumschaltfunktion in der Benutzeroberfläche hinzu, die es den Benutzern ermöglicht,
+    ihre bevorzugte Sprache auszuwählen. Stelle sicher, dass die Auswahl gespeichert wird (z.B. in Cookies oder Benutzereinstellungen). 
+
+Folgende Sprachen sollen unterstützt werden: 
+- de: German
+- fr: French
+- es: Spanish
+- zh-CN: Simplified Chinese
+- zh-TW: Traditional Chinese
+- wyw: Classical Chinese
+- yue: Cantonese
+- ru: Russian
+- it: Italian
+- tr: Turkish
+- pt: Portuguese
+- id: Indonesian
+- ms: Malay
+
+
+
+4. Zeichensatz- und Kulturhandling: Stelle sicher, dass die Anwendung Unicode unterstützt, um
+    verschiedene Zeichensätze korrekt darzustellen. Berücksichtige kulturelle Unterschiede bei Datums-, Zeit- und Zahlenformaten.
+5. GPT-Antworten lokalisieren: Implementiere eine Methode, um die Antworten der GPT-Modelle basierend auf der ausgewählten Sprache zu lokalisieren. Dies kann durch
+    die Verwendung von Übersetzungs-APIs oder durch vorab trainierte mehrsprachige Modelle erfolgen.
+6. Testen: Führe umfassende Tests durch, um sicherzustellen, dass die Mehrsprachigkeitsfunktionen in allen unterstützten Sprachen korrekt funktionieren und die Benutzererfahrung
+    konsistent ist.
