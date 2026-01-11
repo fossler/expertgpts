@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "ExpertGPTs",
+    "subtitle": "Your Multi-Expert AI Assistant Platform"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Welcome to ExpertGPTs",
+    "subtitle": "Your Multi-Expert AI Assistant Platform",
+    "no_experts": "No expert agents found. Create your first expert from Settings!",
+    "available_experts": "Available Expert Agents",
+    "getting_started": "Getting Started",
+    "getting_started_steps": {
+      "step1": "Set your API Key",
+      "step1_desc": "Enter your DeepSeek API key in Settings (it will be saved securely)",
+      "step2": "Choose an Expert",
+      "step2_desc": "Select an expert agent from the navigation menu",
+      "step3": "Start Chatting",
+      "step3_desc": "Ask questions and get expert-level responses"
+    },
+    "create_custom_experts": "Create Custom Experts",
+    "create_experts_desc": "Click the **\"➕ Add Chat\"** button in the sidebar to create your own domain-specific experts:",
+    "expert_features": {
+      "feature1": "Define the expert's name and specialization",
+      "feature2": "Set the temperature for response creativity",
+      "feature3": "Optionally provide a custom system prompt"
+    },
+    "features": {
+      "title": "Features",
+      "domain_expertise": "Domain-Specific Expertise",
+      "domain_expertise_desc": "Each expert specializes in a specific domain",
+      "customizable": "Customizable",
+      "customizable_desc": "Create experts tailored to your needs",
+      "temperature": "Adjustable Temperature",
+      "temperature_desc": "Control response creativity and focus",
+      "chat_history": "Chat History",
+      "chat_history_desc": "Maintain conversation context throughout your session",
+      "secure_secrets": "Secure Secrets",
+      "secure_secrets_desc": "API keys stored in `.streamlit/secrets.toml`",
+      "custom_themes": "Customizable Themes",
+      "custom_themes_desc": "Personalize the app appearance"
+    }
+  },
+  "buttons": {
+    "add_chat": "Add Chat",
+    "create_expert": "Create Expert",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "save_api_key": "Save API Key",
+    "go_to_settings": "Go to Settings",
+    "confirm": "Confirm",
+    "clear": "Clear",
+    "reset": "Reset"
+  },
+  "status": {
+    "api_key_configured": "API key configured",
+    "api_key_not_set": "API key not set",
+    "no_api_key": "No API key found for {provider}"
+  },
+  "forms": {
+    "expert_name": "Expert Name",
+    "expert_name_placeholder": "e.g., Python Expert, Data Scientist, Legal Advisor",
+    "agent_description": "Agent Description",
+    "agent_description_placeholder": "Describe the expert's domain, expertise, and capabilities...",
+    "temperature": "Temperature",
+    "llm_provider": "LLM Provider",
+    "model": "Model",
+    "api_key": "API Key",
+    "custom_system_prompt": "Customize Expert Behavior",
+    "custom_system_prompt_placeholder": "How should this expert respond? (Optional)\n\nLeave empty to auto-generate from description.\n\nExample: \"Provide clear, step-by-step explanations with code examples...\"",
+    "allowed_characters": "Allowed characters",
+    "allowed_characters_desc": "Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "api_key_tab": "API Key",
+    "theme": "Theme",
+    "experts": "Experts",
+    "language": "Language",
+    "select_language": "Select Language"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Select Language",
+    "current_language": "Current Language",
+    "available_languages": "Available Languages"
+  },
+  "errors": {
+    "required_fields": "Please fill in all required fields.",
+    "invalid_name": "Invalid expert name",
+    "error_creating_expert": "Error creating expert",
+    "expert_exists": "An expert named '{name}' already exists. Please use a different name or delete the existing expert first."
+  },
+  "success": {
+    "expert_created": "Expert '{name}' created successfully!",
+    "expert_deleted": "Expert '{name}' deleted successfully!",
+    "api_key_saved": "API key saved successfully!",
+    "settings_saved": "Settings saved successfully!"
+  },
+  "info": {
+    "navigating": "Navigating to your new expert...",
+    "ai_generating": "AI-powered generation in progress...",
+    "first_run": "First Run Detected"
+  },
+  "experts": {
+    "general_assistant": {
+      "name": "General Assistant",
+      "description": "A helpful general-purpose assistant for everyday questions and tasks."
+    },
+    "python_expert": {
+      "name": "Python Expert",
+      "description": "Expert in Python programming, software development, debugging, and best practices."
+    },
+    "data_scientist": {
+      "name": "Data Scientist",
+      "description": "Expert in data analysis, machine learning, statistics, and data visualization."
+    },
+    "writing_assistant": {
+      "name": "Writing Assistant",
+      "description": "Expert in writing, editing, and content creation."
+    },
+    "linux_admin": {
+      "name": "Linux System Admin",
+      "description": "Expert in Linux system administration, shell scripting, and server management."
+    },
+    "translation_expert": {
+      "name": "Translation Expert",
+      "description": "Expert in translating texts between German and English."
+    },
+    "spell_checker": {
+      "name": "Spell Checker",
+      "description": "Expert in spell checking and text correction across multiple languages."
+    }
+  }
+}

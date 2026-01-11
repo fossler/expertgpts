@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "ExpertGPTs",
+    "subtitle": "Ihre Multi-Experten-KI-Assistenten-Plattform"
+  },
+  "nav": {
+    "home": "Startseite",
+    "settings": "Einstellungen"
+  },
+  "home": {
+    "title": "Willkommen bei ExpertGPTs",
+    "subtitle": "Ihre Multi-Experten-KI-Assistenten-Plattform",
+    "no_experts": "Keine Experten gefunden. Erstellen Sie Ihren ersten Experten in den Einstellungen!",
+    "available_experts": "Verfügbare Experten",
+    "getting_started": "Erste Schritte",
+    "getting_started_steps": {
+      "step1": "API-Schlüssel festlegen",
+      "step1_desc": "Geben Sie Ihren DeepSeek-API-Schlüssel in den Einstellungen ein (er wird sicher gespeichert)",
+      "step2": "Experten auswählen",
+      "step2_desc": "Wählen Sie einen Experten aus dem Navigationsmenü",
+      "step3": "Chatten starten",
+      "step3_desc": "Stellen Sie Fragen und erhalten Sie Experten-Antworten"
+    },
+    "create_custom_experts": "Benutzerdefinierte Experten erstellen",
+    "create_experts_desc": "Klicken Sie auf die Schaltfläche **\"➕ Chat hinzufügen\"** in der Seitenleiste, um Ihre eigenen domänenspezifischen Experten zu erstellen:",
+    "expert_features": {
+      "feature1": "Definieren Sie den Namen und die Spezialisierung des Experten",
+      "feature2": "Legen Sie die Temperatur für die Antwortkreativität fest",
+      "feature3": "Geben Sie optional einen benutzerdefinierten System-Prompt an"
+    },
+    "features": {
+      "title": "Funktionen",
+      "domain_expertise": "Domänenspezifische Expertise",
+      "domain_expertise_desc": "Jeder Experte ist auf ein bestimmtes Gebiet spezialisiert",
+      "customizable": "Anpassbar",
+      "customizable_desc": "Erstellen Sie Experten maßgeschneidert für Ihre Bedürfnisse",
+      "temperature": "Einstellbare Temperatur",
+      "temperature_desc": "Steuern Sie Antwortkreativität und Fokus",
+      "chat_history": "Chat-Verlauf",
+      "chat_history_desc": "Kontext während der gesamten Sitzung beibehalten",
+      "secure_secrets": "Sichere Geheimnisse",
+      "secure_secrets_desc": "API-Schlüssel in `.streamlit/secrets.toml` gespeichert",
+      "custom_themes": "Anpassbare Designs",
+      "custom_themes_desc": "Personalisieren Sie das Erscheinungsbild der App"
+    }
+  },
+  "buttons": {
+    "add_chat": "Chat hinzufügen",
+    "create_expert": "Experten erstellen",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "save_api_key": "API-Schlüssel speichern",
+    "go_to_settings": "Zu den Einstellungen",
+    "confirm": "Bestätigen",
+    "clear": "Löschen",
+    "reset": "Zurücksetzen"
+  },
+  "status": {
+    "api_key_configured": "API-Schlüssel konfiguriert",
+    "api_key_not_set": "API-Schlüssel nicht festgelegt",
+    "no_api_key": "Kein API-Schlüssel für {provider} gefunden"
+  },
+  "forms": {
+    "expert_name": "Expertenname",
+    "expert_name_placeholder": "z.B., Python-Experte, Datenwissenschaftler, Rechtsberater",
+    "agent_description": "Agentenbeschreibung",
+    "agent_description_placeholder": "Beschreiben Sie das Gebiet, die Expertise und die Fähigkeiten des Experten...",
+    "temperature": "Temperatur",
+    "llm_provider": "LLM-Anbieter",
+    "model": "Modell",
+    "api_key": "API-Schlüssel",
+    "custom_system_prompt": "Expertenverhalten anpassen",
+    "custom_system_prompt_placeholder": "Wie sollte dieser Experte antworten? (Optional)\n\nLeer lassen, um automatisch aus der Beschreibung zu generieren.\n\nBeispiel: \"Geben Sie klare, schrittweise Erklärungen mit Codebeispielen...\"",
+    "allowed_characters": "Zulässige Zeichen",
+    "allowed_characters_desc": "Buchstaben, Zahlen, Leerzeichen, Unterstriche (_), Bindestriche (-) und Punkte (.)"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "api_key_tab": "API-Schlüssel",
+    "theme": "Design",
+    "experts": "Experten",
+    "language": "Sprache",
+    "select_language": "Sprache wählen"
+  },
+  "language": {
+    "title": "Sprache",
+    "select": "Sprache wählen",
+    "current_language": "Aktuelle Sprache",
+    "available_languages": "Verfügbare Sprachen"
+  },
+  "errors": {
+    "required_fields": "Bitte füllen Sie alle Pflichtfelder aus.",
+    "invalid_name": "Ungültiger Expertenname",
+    "error_creating_expert": "Fehler beim Erstellen des Experten",
+    "expert_exists": "Ein Experte namens '{name}' existiert bereits. Bitte verwenden Sie einen anderen Namen oder löschen Sie zuerst den vorhandenen Experten."
+  },
+  "success": {
+    "expert_created": "Experte '{name}' erfolgreich erstellt!",
+    "expert_deleted": "Experte '{name}' erfolgreich gelöscht!",
+    "api_key_saved": "API-Schlüssel erfolgreich gespeichert!",
+    "settings_saved": "Einstellungen erfolgreich gespeichert!"
+  },
+  "info": {
+    "navigating": "Navigiere zu Ihrem neuen Experten...",
+    "ai_generating": "KI-gestellte Generierung läuft...",
+    "first_run": "Erste Ausführung erkannt"
+  },
+  "experts": {
+    "general_assistant": {
+      "name": "Allgemeiner Assistent",
+      "description": "Ein hilfreicher allgemeiner Assistent für alltägliche Fragen und Aufgaben."
+    },
+    "python_expert": {
+      "name": "Python-Experte",
+      "description": "Experte für Python-Programmierung, Softwareentwicklung, Debugging und Best Practices."
+    },
+    "data_scientist": {
+      "name": "Datenwissenschaftler",
+      "description": "Experte für Datenanalyse, maschinelles Lernen, Statistik und Datenvisualisierung."
+    },
+    "writing_assistant": {
+      "name": "Schreibassistent",
+      "description": "Experte für Schreiben, Redigieren und Contentschöpfung."
+    },
+    "linux_admin": {
+      "name": "Linux-Systemadministrator",
+      "description": "Experte für Linux-Systemadministration, Shell-Scripting und Serververwaltung."
+    },
+    "translation_expert": {
+      "name": "Übersetzungsexperte",
+      "description": "Experte für Übersetzungen zwischen Deutsch und Englisch."
+    },
+    "spell_checker": {
+      "name": "Rechtschreibprüfung",
+      "description": "Experte für Rechtschreibprüfung und Textkorrektur in mehreren Sprachen."
+    }
+  }
+}
