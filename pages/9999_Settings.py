@@ -320,7 +320,7 @@ def render_general_settings_section():
     cols_han = st.columns(2)
     for idx, code in enumerate(han_langs):
         info = i18n.get_language_info(code)
-        with cols_han[idx]:
+        with cols_han[idx % 2]:
             if st.button(
                 f"{info['flag']} {info['native_name']}",
                 key=f"lang_{code}",
