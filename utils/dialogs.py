@@ -449,7 +449,7 @@ def render_add_chat_dialog():
         # Expert Behavior (Advanced) - The most important field!
         st.markdown(f"### 🧠 {i18n.t('dialogs.add_chat.expert_behavior_title')}")
         st.caption(
-            f"💡 **{i18n.t('info.ai_generating')}** {i18n.t('info.ai_powered_tip')}"
+            f"💡 {i18n.t('info.ai_powered_tip')}"
         )
 
         custom_system_prompt = st.text_area(

@@ -673,13 +673,11 @@ def render_edit_expert_dialog():
 
         if api_key_available:
             caption_text = (
-                f"💡 **{i18n.t('info.ai_powered_generation')}** "
-                f"{i18n.t('dialogs.edit_expert.ai_powered_regeneration')}"
+                f"💡 {i18n.t('dialogs.edit_expert.ai_powered_regeneration')}"
             )
         else:
             caption_text = (
-                f"💡 **{i18n.t('info.manual_mode_tip')}** "
-                f"{i18n.t('dialogs.edit_expert.manual_mode_regeneration')}"
+                f"💡 {i18n.t('dialogs.edit_expert.manual_mode_regeneration')}"
             )
 
         st.caption(caption_text)
