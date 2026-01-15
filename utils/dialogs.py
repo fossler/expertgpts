@@ -460,6 +460,9 @@ def render_add_chat_dialog():
             max_chars=3000,
         ).strip()
 
+        # Inform users about automatic language response
+        st.caption(f"💡 {i18n.t('info.language_prefix_auto')}")
+
         # Add expander with examples
         with st.expander(f"📖 {i18n.t('dialogs.add_chat.why_important_title')}"):
             st.markdown(get_expert_behavior_docs())

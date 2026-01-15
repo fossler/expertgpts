@@ -147,7 +147,13 @@
     "error_resetting_application": "Fehler beim Zurücksetzen der Anwendung: {error}",
     "expert_name_empty": "Expertenname darf nicht leer sein",
     "expert_name_invalid_chars": "Expertenname darf nur folgende Zeichen enthalten: {allowed}",
-    "error": "Fehler: {error}"
+    "error": "Fehler: {error}",
+    "api_key_not_set": "API key is not set",
+    "api_key_invalid": "API key appears to be invalid (too short)",
+    "expert_config_not_found": "Configuration not found for expert: {expert_id}",
+    "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
+    "api_response_error": "API response error: {error}",
+    "unexpected_error": "Unexpected error: {type}: {message}"
   },
   "success": {
     "expert_created": "Experte '{name}' erfolgreich erstellt!",
@@ -330,6 +336,15 @@
       "reasoning_effort": "Reasoning Aufwand: {level}",
       "thinking_mode_enabled": "Thinking-Modus aktiviert",
       "confirm_delete": "Möchten Sie den Experten '{name}' wirklich löschen?"
+    },
+    "names": {
+      "python_expert": "Python-Experte",
+      "data_scientist": "Datenwissenschaftler",
+      "writing_assistant": "Schreib-Assistent",
+      "linux_admin": "Linux-Systemadministrator",
+      "general_assistant": "Allgemeiner Assistent",
+      "translation_expert": "Übersetzungs-Experte",
+      "spell_checker": "Rechtschreibprüfung"
     }
   }
 }

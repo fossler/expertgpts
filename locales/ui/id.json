@@ -147,7 +147,13 @@
     "error_resetting_application": "Kesalahan mereset aplikasi: {error}",
     "expert_name_empty": "Nama ahli tidak boleh kosong",
     "expert_name_invalid_chars": "Nama ahli hanya dapat berisi: {allowed}",
-    "error": "Kesalahan: {error}"
+    "error": "Kesalahan: {error}",
+    "api_key_not_set": "API key is not set",
+    "api_key_invalid": "API key appears to be invalid (too short)",
+    "expert_config_not_found": "Configuration not found for expert: {expert_id}",
+    "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
+    "api_response_error": "API response error: {error}",
+    "unexpected_error": "Unexpected error: {type}: {message}"
   },
   "success": {
     "expert_created": "Ahli '{name}' berhasil dibuat!",
@@ -330,6 +336,15 @@
       "reasoning_effort": "Usaha penalaran: {level}",
       "thinking_mode_enabled": "Mode berpikir diaktifkan",
       "confirm_delete": "Apakah Anda yakin ingin menghapus ahli '{name}'?"
+    },
+    "names": {
+      "python_expert": "Ahli Python",
+      "data_scientist": "Ilmuwan Data",
+      "writing_assistant": "Asisten Penulisan",
+      "linux_admin": "Administrator Linux",
+      "general_assistant": "Asisten Umum",
+      "translation_expert": "Ahli Terjemahan",
+      "spell_checker": "Pengeja Ejaan"
     }
   }
 }

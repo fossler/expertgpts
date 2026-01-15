@@ -38,10 +38,12 @@ def initialize_session_state():
 
 def render_api_key_section():
     """Render the multi-provider API Key management section."""
-    st.subheader("🔑 API Key Configuration")
+    from utils.i18n import i18n
+    from utils.constants import LLM_PROVIDERS, get_provider_display_name
+
+    st.subheader(f"🔑 {i18n.t('api_key.title')}")
 
     # Provider selection
-    from utils.constants import LLM_PROVIDERS, get_provider_display_name
 
     # Initialize api_keys in session state if not exists
     if "api_keys" not in st.session_state:
@@ -49,7 +51,7 @@ def render_api_key_section():
 
     provider_options = list(LLM_PROVIDERS.keys())
     selected_provider = st.selectbox(
-        "Select LLM Provider",
+        i18n.t('api_key.select_provider'),
         options=provider_options,
         format_func=lambda x: get_provider_display_name(x),
         key="api_key_provider_selector"
@@ -67,33 +69,33 @@ def render_api_key_section():
 
     with col1:
         if has_file_key:
-            st.success(f"✅ {get_provider_display_name(selected_provider)} API key saved in secrets.toml")
+            st.success(f"✅ {i18n.t('status.api_key_saved_in_secrets', provider=get_provider_display_name(selected_provider))}")
         else:
-            st.info(f"💡 No {get_provider_display_name(selected_provider)} API key in secrets.toml")
+            st.info(f"💡 {i18n.t('status.no_api_key_in_secrets', provider=get_provider_display_name(selected_provider))}")
 
     with col2:
         if current_api_key:
-            st.success(f"✅ {get_provider_display_name(selected_provider)} API key is available")
+            st.success(f"✅ {i18n.t('status.api_key_available', provider=get_provider_display_name(selected_provider))}")
         else:
-            st.warning(f"⚠️ {get_provider_display_name(selected_provider)} API key not set")
+            st.warning(f"⚠️ {i18n.t('status.api_key_not_set_warning', provider=get_provider_display_name(selected_provider))}")
 
     st.divider()
 
     # API Key input
     api_key = st.text_input(
-        f"{get_provider_display_name(selected_provider)} API Key",
+        i18n.t('forms.api_key'),
         key=f"settings_api_key_{selected_provider}",
         type="password",
         value="",  # Always show empty for security
-        help=f"Enter your {get_provider_display_name(selected_provider)} API key. It will be saved to .streamlit/secrets.toml.",
-        placeholder=f"Enter your {get_provider_display_name(selected_provider)} API key here",
+        help=i18n.t('api_key.enter_key_help', provider=get_provider_display_name(selected_provider)),
+        placeholder=i18n.t('api_key.enter_key', provider=get_provider_display_name(selected_provider)),
     )
 
     # Save and Clear buttons
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("💾 Save API Key", type="primary", disabled=not api_key, key=f"save_{selected_provider}"):
+        if st.button(f"💾 {i18n.t('buttons.save_api_key')}", type="primary", disabled=not api_key, key=f"save_{selected_provider}"):
             try:
                 # Save to secrets.toml file
                 secrets_manager.save_provider_api_key(selected_provider, api_key)
@@ -103,16 +105,16 @@ def render_api_key_section():
                     st.session_state.api_keys = {}
                 st.session_state.api_keys[selected_provider] = api_key
 
-                st.success(f"✅ {get_provider_display_name(selected_provider)} API key saved successfully!")
-                st.info("🔄 The application will now rerun to load the new key.")
+                st.success(f"✅ {i18n.t('success.api_key_saved')}")
+                st.info(f"🔄 {i18n.t('status.application_will_rerun')}")
 
                 # Rerun to load the new key from st.secrets
                 st.rerun()
             except Exception as e:
-                st.error(f"❌ Error saving API key: {str(e)}")
+                st.error(f"❌ {i18n.t('errors.error_saving_api_key', error=str(e))}")
 
     with col2:
-        if st.button("🗑️ Clear API Key", disabled=not has_file_key, key=f"clear_{selected_provider}"):
+        if st.button(f"🗑️ {i18n.t('buttons.clear')}", disabled=not has_file_key, key=f"clear_{selected_provider}"):
             try:
                 # Save empty key to remove it from file
                 secrets_manager.save_provider_api_key(selected_provider, "")
@@ -121,15 +123,15 @@ def render_api_key_section():
                 if selected_provider in st.session_state.api_keys:
                     del st.session_state.api_keys[selected_provider]
 
-                st.success(f"✅ {get_provider_display_name(selected_provider)} API key cleared successfully!")
+                st.success(f"✅ {i18n.t('success.api_key_cleared', provider=get_provider_display_name(selected_provider))}")
                 st.rerun()
             except Exception as e:
-                st.error(f"❌ Error clearing API key: {str(e)}")
+                st.error(f"❌ {i18n.t('errors.error_clearing_api_key', error=str(e))}")
 
     st.divider()
 
     # Resources links
-    st.subheader("📚 Resources")
+    st.subheader(f"📚 {i18n.t('api_key.resources')}")
 
     from utils.constants import get_provider_display_name
 
@@ -146,11 +148,12 @@ def render_api_key_section():
 
 def render_default_llm_settings_section():
     """Render the Default LLM Settings section for configuring global defaults."""
-    st.subheader("⚙️ Default LLM Settings")
-
-    st.caption("These defaults will be used when creating new experts. You can still customize each expert individually.")
-
+    from utils.i18n import i18n
     from utils.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+
+    st.subheader(f"⚙️ {i18n.t('default_llm.title')}")
+
+    st.caption(i18n.t('default_llm.description'))
 
     st.divider()
 
@@ -160,7 +163,7 @@ def render_default_llm_settings_section():
 
     # Show message if no API keys are configured
     if not available_providers:
-        st.warning("⚠️ No API keys configured. Please add API keys in the API Key tab first.")
+        st.warning(f"⚠️ {i18n.t('api_key.no_api_keys_configured')}")
         return
 
     # Default provider selection (filtered to available providers only)
@@ -173,11 +176,11 @@ def render_default_llm_settings_section():
     provider_index = available_providers.index(current_default_provider)
 
     default_provider = st.selectbox(
-        "Default Provider",
+        i18n.t('default_llm.default_provider'),
         options=available_providers,
         index=provider_index,
         format_func=lambda x: get_provider_display_name(x),
-        help="The default LLM provider for new experts",
+        help=i18n.t('default_llm.default_provider_help'),
         key="default_provider_selector"
     )
 
@@ -200,11 +203,11 @@ def render_default_llm_settings_section():
     model_index = model_options.index(current_default_model) if current_default_model in model_options else 0
 
     default_model = st.selectbox(
-        "Default Model",
+        i18n.t('default_llm.default_model'),
         options=model_options,
         index=model_index,
         format_func=lambda x: get_model_display_name(default_provider, x),
-        help=f"The default {get_provider_display_name(default_provider)} model for new experts",
+        help=i18n.t('default_llm.default_model_help', provider=get_provider_display_name(default_provider)),
         key="default_model_selector"
     )
 
@@ -222,28 +225,28 @@ def render_default_llm_settings_section():
             effort_options = ["none", "low", "medium", "high", "xhigh"]
             effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
             default_thinking_level = st.selectbox(
-                "🧠 Select Thinking Mode Level",
+                f"🧠 {i18n.t('default_llm.select_thinking_mode')}",
                 options=effort_options,
                 index=effort_index,
-                help="Default reasoning effort level for new OpenAI experts",
+                help=i18n.t('default_llm.thinking_mode_help'),
                 key="default_thinking_selector"
             )
     elif default_provider == "zai":
         # Show selectbox for Z.AI (optional thinking mode)
         col1, col2 = st.columns(2)
         with col1:
-            thinking_options = ["Disabled", "Enabled"]
+            thinking_options = [i18n.t('sidebar.disabled'), i18n.t('sidebar.enabled')]
             # Map current_thinking to index ("none" -> 0, "medium" -> 1)
             option_index = 1 if current_thinking and current_thinking != "none" else 0
             selected_option = st.selectbox(
-                "🧠 Thinking Mode",
+                f"🧠 {i18n.t('default_llm.thinking_mode')}",
                 options=thinking_options,
                 index=option_index,
-                help="New experts will have thinking mode enabled by default",
+                help=i18n.t('default_llm.thinking_mode_help_zai'),
                 key="default_thinking_selector"
             )
             # Convert back to string ("Disabled" -> "none", "Enabled" -> "medium")
-            default_thinking_level = "medium" if selected_option == "Enabled" else "none"
+            default_thinking_level = "medium" if selected_option == i18n.t('sidebar.enabled') else "none"
     else:
         # DeepSeek: Thinking mode depends on model (no default setting needed)
         # deepseek-chat: no thinking support
@@ -251,12 +254,12 @@ def render_default_llm_settings_section():
         default_thinking_level = "none"
 
     # Save defaults button
-    if st.button("💾 Save Defaults", type="primary", key="save_defaults"):
+    if st.button(f"💾 {i18n.t('buttons.save_defaults')}", type="primary", key="save_defaults"):
         st.session_state.default_provider = default_provider
         st.session_state.default_model = default_model
         st.session_state.default_thinking_level = default_thinking_level
 
-        st.success(f"✅ Defaults saved! New experts will use {get_provider_display_name(default_provider)} - {get_model_display_name(default_provider, default_model)}")
+        st.success(f"✅ {i18n.t('success.defaults_saved', provider=get_provider_display_name(default_provider), model=get_model_display_name(default_provider, default_model))}")
         st.rerun()
 
 
@@ -265,57 +268,58 @@ def render_general_settings_section():
     from utils.i18n import i18n
 
     # Theme Customization
-    st.subheader("🎨 Theme Customization")
+    st.subheader(f"🎨 {i18n.t('theme.title')}")
 
-    st.caption("Customize the appearance of your ExpertGPTs application.")
+    st.caption(i18n.t('theme.description'))
 
     st.divider()
 
     # Define 7 complete themes with harmonious colors
+    # Using theme keys as identifiers, display names will be translated
     themes = {
-        "Modern Red": {
+        "modern_red": {
             "primary": "#FF6B6B",
             "background": "#FFFFFF",
             "secondary": "#F0F2F6",
             "text": "#262730",
             "icon": "🔴"
         },
-        "Ocean Blue": {
+        "ocean_blue": {
             "primary": "#4A90E2",
             "background": "#FFFFFF",
             "secondary": "#E8F0FE",
             "text": "#1E3A8A",
             "icon": "🔵"
         },
-        "Forest Green": {
+        "forest_green": {
             "primary": "#10B981",
             "background": "#FFFFFF",
             "secondary": "#ECFDF5",
             "text": "#064E3B",
             "icon": "🟢"
         },
-        "Royal Purple": {
+        "royal_purple": {
             "primary": "#9B59B6",
             "background": "#FFFFFF",
             "secondary": "#F3E5F5",
             "text": "#4A148C",
             "icon": "🟣"
         },
-        "Dark Blue": {
+        "dark_blue": {
             "primary": "#4A90E2",
             "background": "#0E1117",
             "secondary": "#262730",
             "text": "#FAFAFA",
             "icon": "🌑"
         },
-        "Dark Gray": {
+        "dark_gray": {
             "primary": "#FF6B6B",
             "background": "#1A1A1A",
             "secondary": "#2D2D2D",
             "text": "#FFFFFF",
             "icon": "🖤"
         },
-        "Custom": {
+        "custom": {
             "primary": "#F59E0B",
             "background": "#FFFBEB",
             "secondary": "#FEF3C7",
@@ -324,40 +328,43 @@ def render_general_settings_section():
         }
     }
 
-    # Create theme options with icons
-    theme_options = [f"{icon} {name}" for name, theme in themes.items() for icon in [theme["icon"]]]
-    theme_labels = {f"{theme['icon']} {name}": name for name, theme in themes.items()}
+    # Create theme options with icons (using translated names)
+    theme_options = [f"{theme['icon']} {i18n.t(f'theme.{name}')}" for name, theme in themes.items()]
+    theme_labels = {f"{theme['icon']} {i18n.t(f'theme.{name}')}": name for name, theme in themes.items()}
 
-    # Initialize session state for selected theme and colors
-    if "selected_theme_option" not in st.session_state:
+    # Initialize session state for selected theme KEY (language-independent) and colors
+    if "selected_theme_key" not in st.session_state:
         # Read current theme from config file (now includes theme_name!)
         current_config = config_toml_manager.get_theme_settings()
 
-        # Get the saved theme name directly (defaults to "Custom" if not set)
-        saved_theme_name = current_config.get("theme_name", "Custom")
+        # Get the saved theme name directly (defaults to "custom" if not set)
+        saved_theme_name = current_config.get("theme_name", "custom")
 
         # Validate that the saved theme name exists in our predefined themes
-        if saved_theme_name in themes and saved_theme_name != "Custom":
+        if saved_theme_name in themes and saved_theme_name != "custom":
             # Use the saved theme directly - no color comparison needed!
             theme_data = themes[saved_theme_name]
-            st.session_state.selected_theme_option = f"{theme_data['icon']} {saved_theme_name}"
+            st.session_state.selected_theme_key = saved_theme_name
             st.session_state.theme_primary_color = theme_data["primary"]
             st.session_state.theme_background_color = theme_data["background"]
             st.session_state.theme_secondary_background_color = theme_data["secondary"]
             st.session_state.theme_text_color = theme_data["text"]
         else:
             # Use Custom theme with current config values
-            st.session_state.selected_theme_option = f"{themes['Custom']['icon']} Custom"
+            st.session_state.selected_theme_key = "custom"
             st.session_state.theme_primary_color = current_config.get("primaryColor", "#F59E0B")
             st.session_state.theme_background_color = current_config.get("backgroundColor", "#FFFBEB")
             st.session_state.theme_secondary_background_color = current_config.get("secondaryBackgroundColor", "#FEF3C7")
             st.session_state.theme_text_color = current_config.get("textColor", "#78350F")
 
+    # Get the current display name for the selected theme key (in current language)
+    current_theme_display = f"{themes[st.session_state.selected_theme_key]['icon']} {i18n.t(f'theme.{st.session_state.selected_theme_key}')}"
+
     # Radio button for theme selection (outside form for reactivity)
     selected_theme = st.radio(
-        "Select a theme to preview",
+        i18n.t('theme.select_theme'),
         options=theme_options,
-        index=theme_options.index(st.session_state.selected_theme_option),
+        index=theme_options.index(current_theme_display),
         horizontal=True,
         key="theme_radio_selector"
     )
@@ -367,8 +374,8 @@ def render_general_settings_section():
     theme_colors = themes[theme_name]
 
     # Update session state and rerun if selection changed
-    if selected_theme != st.session_state.selected_theme_option:
-        st.session_state.selected_theme_option = selected_theme
+    if theme_name != st.session_state.selected_theme_key:
+        st.session_state.selected_theme_key = theme_name
         # Update color values in session state
         st.session_state.theme_primary_color = theme_colors["primary"]
         st.session_state.theme_background_color = theme_colors["background"]
@@ -379,47 +386,47 @@ def render_general_settings_section():
     st.divider()
 
     # Color Preview section (outside form for reactivity)
-    st.markdown("### Color Preview")
+    st.markdown(f"### {i18n.t('forms.color_preview')}")
 
     # Check if Custom theme is selected
-    is_custom_theme = (theme_name == "Custom")
+    is_custom_theme = (theme_name == "custom")
 
     # Create columns for color inputs in one row
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         primary_color = st.color_picker(
-            "Buttons and interactive Elements",
+            i18n.t('forms.buttons_elements'),
             value=st.session_state.theme_primary_color,
-            help="Color for buttons and interactive elements",
-            key=f"primary_{st.session_state.selected_theme_option}",
+            help=i18n.t('theme.buttons_elements_help'),
+            key=f"primary_{st.session_state.selected_theme_key}",
             disabled=not is_custom_theme
         )
 
     with col2:
         background_color = st.color_picker(
-            "Background Color",
+            i18n.t('forms.background_color'),
             value=st.session_state.theme_background_color,
-            help="Main background color of the app",
-            key=f"background_{st.session_state.selected_theme_option}",
+            help=i18n.t('theme.background_help'),
+            key=f"background_{st.session_state.selected_theme_key}",
             disabled=not is_custom_theme
         )
 
     with col3:
         secondary_background_color = st.color_picker(
-            "Secondary Background",
+            i18n.t('forms.secondary_background'),
             value=st.session_state.theme_secondary_background_color,
-            help="Background color for sidebar and other secondary areas",
-            key=f"secondary_{st.session_state.selected_theme_option}",
+            help=i18n.t('theme.secondary_background_help'),
+            key=f"secondary_{st.session_state.selected_theme_key}",
             disabled=not is_custom_theme
         )
 
     with col4:
         text_color = st.color_picker(
-            "Text Color",
+            i18n.t('forms.text_color'),
             value=st.session_state.theme_text_color,
-            help="Main text color throughout the app",
-            key=f"text_{st.session_state.selected_theme_option}",
+            help=i18n.t('theme.text_help'),
+            key=f"text_{st.session_state.selected_theme_key}",
             disabled=not is_custom_theme
         )
 
@@ -446,13 +453,13 @@ def render_general_settings_section():
         """Callback to save theme settings to config.toml and force page reload."""
         try:
             # Read current values directly from the color picker widgets
-            primary_key = f"primary_{st.session_state.selected_theme_option}"
-            background_key = f"background_{st.session_state.selected_theme_option}"
-            secondary_key = f"secondary_{st.session_state.selected_theme_option}"
-            text_key = f"text_{st.session_state.selected_theme_option}"
+            primary_key = f"primary_{st.session_state.selected_theme_key}"
+            background_key = f"background_{st.session_state.selected_theme_key}"
+            secondary_key = f"secondary_{st.session_state.selected_theme_key}"
+            text_key = f"text_{st.session_state.selected_theme_key}"
 
-            # Get the current theme name (extract from radio selection)
-            current_theme_name = theme_labels[st.session_state.selected_theme_option]
+            # Get the current theme name directly from session state
+            current_theme_name = st.session_state.selected_theme_key
 
             # Save to config.toml
             config_toml_manager.save_theme_settings(
@@ -467,12 +474,12 @@ def render_general_settings_section():
             st.session_state.trigger_page_reload = True
 
             # Show success toast
-            st.toast("✅ Theme saved! Reloading page...", icon="🎨")
+            st.toast(f"✅ {i18n.t('status.theme_saved_reloading')}", icon="🎨")
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f"❌ {i18n.t('errors.error', error=str(e))}")
 
     with col1:
-        if st.button("💾 Save & Apply Theme", key="save_apply_button", on_click=save_and_apply_theme, type="primary"):
+        if st.button(f"💾 {i18n.t('buttons.save_apply_theme')}", key="save_apply_button", on_click=save_and_apply_theme, type="primary"):
             pass
 
     with col2:
@@ -501,7 +508,7 @@ def render_general_settings_section():
     han_langs = ["zh-CN", "zh-TW", "wyw", "yue"]
 
     # Latin Script Languages
-    st.write("**Latin Script / Lateinische Schrift / Script Latin**")
+    st.write(f"**{i18n.t('language.latin_script')}**")
     cols_latin = st.columns(3)
     for idx, code in enumerate(latin_langs):
         info = i18n.get_language_info(code)
@@ -515,7 +522,7 @@ def render_general_settings_section():
                 i18n.set_language(code)
 
     # Cyrillic Script Languages
-    st.write("**Cyrillic Script / Kyrillische Schrift**")
+    st.write(f"**{i18n.t('language.cyrillic_script')}**")
     cols_cyrillic = st.columns(3)
     for idx, code in enumerate(cyrillic_langs):
         info = i18n.get_language_info(code)
@@ -529,7 +536,7 @@ def render_general_settings_section():
                 i18n.set_language(code)
 
     # Chinese (Han Script) Languages
-    st.write("**Chinese (Han Script) / Chinesisch (Han-Schrift)**")
+    st.write(f"**{i18n.t('language.han_script')}**")
     cols_han = st.columns(2)
     for idx, code in enumerate(han_langs):
         info = i18n.get_language_info(code)
@@ -584,11 +591,12 @@ def render_edit_expert_dialog():
         return
 
     # Load the expert's config
+    from utils.i18n import i18n
     config_manager = ConfigManager()
     try:
         expert_config = config_manager.load_config(editing_expert_id)
     except FileNotFoundError:
-        st.error(f"❌ Expert not found: {editing_expert_id}")
+        st.error(f"❌ {i18n.t('errors.expert_not_found', expert_id=editing_expert_id)}")
         # Clear the editing state
         for key in st.session_state:
             if key.startswith("editing_expert_"):
@@ -616,34 +624,34 @@ def render_edit_expert_dialog():
     st.divider()
 
     with st.form("edit_expert_form"):
-        st.subheader("Expert Configuration")
+        st.subheader(i18n.t('dialogs.add_chat.expert_configuration'))
 
         # Expert ID (read-only)
         st.text_input(
-            "Expert ID",
+            i18n.t('forms.expert_id'),
             value=expert_config['expert_id'],
             disabled=True,
-            help="Expert ID cannot be changed",
+            help=i18n.t('dialogs.edit_expert.expert_id_help'),
         )
 
         st.divider()
 
         # Expert Name
         chat_name = st.text_input(
-            "Expert Name *",
+            f"{i18n.t('forms.expert_name')} *",
             value=expert_config['expert_name'],
-            help="A descriptive name for the domain expert",
+            help=i18n.t('dialogs.add_chat.help_expert_name'),
             max_chars=100,
         ).strip()
 
         # Add caption with allowed characters
-        st.caption("💡 **Allowed characters:** Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)")
+        st.caption(f"💡 **{i18n.t('forms.allowed_characters')}:** {i18n.t('forms.allowed_characters_desc')}")
 
         # Agent Description
         description = st.text_area(
-            "Agent Description *",
+            f"{i18n.t('forms.agent_description')} *",
             value=expert_config['description'],
-            help="Detailed description of what this expert specializes in",
+            help=i18n.t('dialogs.add_chat.help_expert_description'),
             height="content",
             max_chars=1000,
         ).strip()
@@ -655,7 +663,7 @@ def render_edit_expert_dialog():
         expert_provider = metadata.get("provider", "deepseek")  # Backward compatible
 
         # Expert Behavior (Advanced) - The most important field!
-        st.markdown("### 🧠 Expert Behavior (Advanced)")
+        st.markdown(f"### 🧠 {i18n.t('dialogs.add_chat.expert_behavior_title')}")
 
         # Check if API key available for this expert's provider
         api_keys = st.session_state.get("api_keys", {})
@@ -663,45 +671,48 @@ def render_edit_expert_dialog():
 
         if api_key_available:
             caption_text = (
-                "💡 **AI-powered generation!** Leave empty to regenerate a customized "
-                "system prompt using AI. Provide your own for complete control."
+                f"💡 **{i18n.t('info.ai_powered_generation')}** "
+                f"{i18n.t('dialogs.edit_expert.ai_powered_regeneration')}"
             )
         else:
             caption_text = (
-                "💡 **Manual mode**: API key not set, so AI generation is unavailable. "
-                "Keep the existing behavior, or provide your own."
+                f"💡 **{i18n.t('info.manual_mode_tip')}** "
+                f"{i18n.t('dialogs.edit_expert.manual_mode_regeneration')}"
             )
 
         st.caption(caption_text)
 
         custom_system_prompt = st.text_area(
-            "Customize Expert Behavior",
+            i18n.t('forms.custom_system_prompt'),
             value=expert_config.get('system_prompt', ''),
             height=250,
-            help="🎯 This defines everything about your expert - tone, expertise, style, and constraints",
+            help=i18n.t('dialogs.add_chat.help_custom_behavior'),
             max_chars=3000,
         ).strip()
 
+        # Inform users about automatic language response
+        st.caption(f"💡 {i18n.t('info.language_prefix_auto')}")
+
         # Add expander with examples
-        with st.expander("📖 Why is this important? + Examples"):
+        with st.expander(f"📖 {i18n.t('dialogs.add_chat.why_important_title')}"):
             st.markdown(EXPERT_BEHAVIOR_DOCS_EDIT)
 
-        st.caption("* Required fields")
+        st.caption(i18n.t('info.required_fields_hint'))
 
         # Form buttons (left-aligned)
         st.write("")  # Spacing
         col1, col2, col3 = st.columns([1, 1, 6])
 
         with col1:
-            submit_button = st.form_submit_button("Save Changes", type="primary")
+            submit_button = st.form_submit_button(i18n.t('buttons.save_changes'), type="primary")
 
         with col2:
-            cancel_button = st.form_submit_button("Cancel")
+            cancel_button = st.form_submit_button(i18n.t('buttons.cancel'))
 
         # Handle form submission
         if submit_button:
             if not chat_name or not description:
-                st.error("Please fill in all required fields.")
+                st.error(i18n.t('errors.required_fields'))
                 return
 
             try:
@@ -742,13 +753,13 @@ def render_edit_expert_dialog():
                 # Clear the editing state
                 st.session_state[f"editing_expert_{editing_expert_id}"] = False
 
-                st.success(f"✅ Expert '{chat_name}' updated successfully!")
-                st.info("🔄 Refreshing...")
+                st.success(f"✅ {i18n.t('status.expert_updated', name=chat_name)}")
+                st.info(f"🔄 {i18n.t('status.refreshing')}")
 
                 st.rerun()
 
             except Exception as e:
-                st.error(f"❌ Error updating expert: {str(e)}")
+                st.error(f"❌ {i18n.t('errors.error_updating_expert', error=str(e))}")
 
         if cancel_button:
             # Clear the editing state
@@ -758,25 +769,27 @@ def render_edit_expert_dialog():
 
 def render_expert_management_section():
     """Render the Expert Management section."""
-    st.subheader("🤖 Expert Management")
+    from utils.i18n import i18n
+
+    st.subheader(f"🤖 {i18n.t('experts.management.title')}")
 
     # Check if ANY provider API key is available
     api_keys = st.session_state.get("api_keys", {})
     api_key_available = any(api_keys.values())
 
     if api_key_available:
-        if st.button("➕ Add new Chat", type="primary", width="content"):
+        if st.button(f"➕ {i18n.t('buttons.add_new_chat')}", type="primary", width="content"):
             st.session_state.show_add_chat_dialog = True
             st.rerun()
     else:
         st.button(
-            "➕ Add new Chat",
+            f"➕ {i18n.t('buttons.add_new_chat')}",
             type="primary",
             width="content",
             disabled=True,
-            help="API key must be set to create new chats"
+            help=i18n.t('info.set_api_key_to_create')
         )
-        st.caption("⚠️ Set API key above to create experts")
+        st.caption(f"⚠️ {i18n.t('info.set_api_key_to_create')}")
 
     st.divider()
 
@@ -785,10 +798,10 @@ def render_expert_management_section():
     experts = config_manager.list_experts()
 
     if not experts:
-        st.info("🔍 No expert agents found. Create your first expert from the Home page!")
+        st.info(f"🔍 {i18n.t('info.create_first_expert')}")
         return
 
-    st.caption(f"Found {len(experts)} expert agent(s)")
+    st.caption(i18n.t('status.found_experts', count=len(experts)))
 
     # Display experts in a table
     for idx, expert in enumerate(experts):
@@ -814,13 +827,13 @@ def render_expert_management_section():
                 )
                 # Show thinking mode status
                 if provider == "openai" and thinking_level != "none":
-                    st.caption(f"🧠 Reasoning Effort: {thinking_level.capitalize()}")
+                    st.caption(f"🧠 {i18n.t('experts.management.reasoning_effort', level=thinking_level.capitalize())}")
                 elif thinking_level != "none":
-                    st.caption("🧠 Thinking Mode: Enabled")
+                    st.caption(f"🧠 {i18n.t('experts.management.thinking_mode_enabled')}")
                 st.markdown(f"**Temperature:** `{expert['temperature']}`")
-                st.markdown("**Description:**")
+                st.markdown(f"**{i18n.t('experts.management.description_label')}:**")
                 st.text_area(
-                    "Description",
+                    i18n.t('experts.management.description_label'),
                     value=expert['description'],
                     height=None,
                     disabled=True,
@@ -831,10 +844,13 @@ def render_expert_management_section():
                 # Show expert behavior
                 system_prompt = expert.get('system_prompt', '')
                 if system_prompt:
-                    st.markdown("**🧠 Expert Behavior:**")
+                    st.markdown(f"**🧠 {i18n.t('experts.management.expert_behavior')}:**")
+                    # Show language prefix that will be automatically added
+                    language_prefix = i18n.get_language_prefix()
+                    st.caption(f"💡 **{language_prefix}**")
                     # Display as read-only text area preview
                     st.text_area(
-                        "Expert Behavior",
+                        i18n.t('experts.management.expert_behavior'),
                         value=system_prompt,
                         height=None,
                         disabled=True,
@@ -842,27 +858,30 @@ def render_expert_management_section():
                         label_visibility="collapsed",
                     )
                 else:
-                    st.markdown("**🧠 Expert Behavior:** Auto-generated from description")
+                    st.markdown(f"**🧠 {i18n.t('experts.management.expert_behavior')}:** {i18n.t('info.expert_behavior_auto')}")
+                    # Show language prefix that will be automatically added
+                    language_prefix = i18n.get_language_prefix()
+                    st.caption(f"💡 **{language_prefix}**")
 
             with col2:
-                st.markdown("**Actions**")
+                st.markdown(f"**{i18n.t('experts.management.actions')}**")
                 edit_key = f"edit_{expert['expert_id']}"
-                if st.button("✏️ Edit", key=edit_key, width="stretch"):
+                if st.button(f"✏️ {i18n.t('buttons.edit')}", key=edit_key, width="stretch"):
                     st.session_state[f"editing_expert_{expert['expert_id']}"] = True
                     st.rerun()
 
                 delete_key = f"delete_{expert['expert_id']}"
-                if st.button("🗑️ Delete", key=delete_key, width="stretch"):
+                if st.button(f"🗑️ {i18n.t('buttons.delete')}", key=delete_key, width="stretch"):
                     st.session_state[f"confirm_delete_{expert['expert_id']}"] = True
 
         # Confirmation dialog for deletion
         if st.session_state.get(f"confirm_delete_{expert['expert_id']}"):
-            st.warning(f"⚠️ Are you sure you want to delete **{expert['expert_name']}**? This action cannot be undone!")
+            st.warning(f"⚠️ {i18n.t('experts.management.confirm_delete', name=expert['expert_name'])}")
 
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                if st.button("✅ Yes, Delete", key=f"confirm_{expert['expert_id']}", type="primary"):
+                if st.button(f"✅ {i18n.t('buttons.yes_delete')}", key=f"confirm_{expert['expert_id']}", type="primary"):
                     try:
                         # Import PageGenerator
                         from utils.page_generator import PageGenerator
@@ -891,15 +910,15 @@ def render_expert_management_section():
                         for key in keys_to_delete:
                             del st.session_state[key]
 
-                        st.success(f"✅ Expert '{expert['expert_name']}' deleted successfully!")
+                        st.success(f"✅ {i18n.t('success.expert_deleted', name=expert['expert_name'])}")
                         st.session_state[f"confirm_delete_{expert['expert_id']}"] = False
                         st.rerun()
 
                     except Exception as e:
-                        st.error(f"❌ Error deleting expert: {str(e)}")
+                        st.error(f"❌ {i18n.t('errors.error_deleting_expert', error=str(e))}")
 
             with col2:
-                if st.button("❌ Cancel", key=f"cancel_{expert['expert_id']}"):
+                if st.button(f"❌ {i18n.t('buttons.cancel')}", key=f"cancel_{expert['expert_id']}"):
                     st.session_state[f"confirm_delete_{expert['expert_id']}"] = False
                     st.rerun()
 
@@ -929,20 +948,17 @@ def get_configs_as_zip():
 
 def render_danger_zone_section():
     """Render the Danger Zone section for destructive actions."""
-    st.subheader("⚠️ Danger Zone")
+    from utils.i18n import i18n
 
-    st.warning("⚠️ **Warning**: Actions in this section are irreversible and will delete all your data!")
+    st.subheader(f"⚠️ {i18n.t('danger_zone.title')}")
+
+    st.warning(f"⚠️ **{i18n.t('danger_zone.warning')}**")
 
     # Download configs section
     st.markdown("---")
-    st.markdown("### 💾 Backup Expert Configurations")
+    st.markdown(f"### 💾 {i18n.t('danger_zone.backup_title')}")
 
-    st.markdown("""
-    **Download All Configurations** will:
-    - Download all expert configuration files as a ZIP archive
-    - Preserve your custom experts and their settings
-    - Allow you to restore configurations later (manual import required)
-    """)
+    st.markdown(i18n.t('danger_zone.backup_description'))
 
     # Get the zip file content
     config_zip = get_configs_as_zip()
@@ -953,7 +969,7 @@ def render_danger_zone_section():
 
     # Download button
     st.download_button(
-        label="📥 Download All Configurations (ZIP)",
+        label=f"📥 {i18n.t('danger_zone.download_button')}",
         data=config_zip,
         file_name=filename,
         mime="application/zip",
@@ -962,23 +978,18 @@ def render_danger_zone_section():
 
     st.markdown("---")
 
-    st.markdown("""
-    **Reset Application** will:
-    - Delete all expert configurations
-    - Delete all expert pages
-    - Reset to the default example experts
-    """)
+    st.markdown(i18n.t('danger_zone.reset_description'))
 
-    if st.button("🔄 Reset Application to Factory Defaults", type="primary", width="content"):
+    if st.button(f"🔄 {i18n.t('danger_zone.reset_button')}", type="primary", width="content"):
         st.session_state.confirm_reset = True
 
     if st.session_state.get("confirm_reset"):
-        st.error("🚨 **FINAL WARNING**: This will delete all experts and reset the application!")
+        st.error(f"🚨 **{i18n.t('danger_zone.final_warning')}**")
 
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            if st.button("✅ Yes, Reset Everything", key="confirm_reset_button", type="primary"):
+            if st.button(f"✅ {i18n.t('buttons.yes_reset_everything')}", key="confirm_reset_button", type="primary"):
                 try:
                     # Delete all configs
                     configs_dir = Path(__file__).parent.parent / "configs"
@@ -995,7 +1006,7 @@ def render_danger_zone_section():
                                 page_file.unlink()
 
                     # Recreate example experts using scripts/setup.py
-                    st.info("🔄 Recreating example experts...")
+                    st.info(f"🔄 {i18n.t('status.recreating_experts')}")
 
                     # Run scripts/setup.py as a subprocess
                     result = subprocess.run(
@@ -1006,46 +1017,48 @@ def render_danger_zone_section():
                         cwd=Path(__file__).parent.parent
                     )
 
-                    st.success("✅ Application reset successfully!")
-                    st.info("🔄 Restarting application...")
+                    st.success(f"✅ {i18n.t('success.application_reset')}")
+                    st.info(f"🔄 {i18n.t('status.restarting_application')}")
 
                     st.session_state.confirm_reset = False
                     st.rerun()
 
                 except subprocess.CalledProcessError as e:
-                    st.error(f"❌ Error recreating experts: {e}")
+                    st.error(f"❌ {i18n.t('errors.error_recreating_experts', error=str(e))}")
                     if e.stdout:
                         st.error(f"Output: {e.stdout}")
                     if e.stderr:
                         st.error(f"Error: {e.stderr}")
                 except Exception as e:
-                    st.error(f"❌ Error resetting application: {str(e)}")
+                    st.error(f"❌ {i18n.t('errors.error_resetting_application', error=str(e))}")
 
         with col2:
-            if st.button("❌ Cancel", key="cancel_reset_button"):
+            if st.button(f"❌ {i18n.t('buttons.cancel')}", key="cancel_reset_button"):
                 st.session_state.confirm_reset = False
                 st.rerun()
 
 
 def render_about_section():
     """Render the About section."""
-    st.subheader("ℹ️ About")
+    from utils.i18n import i18n
 
-    st.markdown("""
+    st.subheader(f"ℹ️ {i18n.t('about.title')}")
+
+    st.markdown(f"""
     ### ExpertGPTs
 
-    A multi-expert AI chat application built with Streamlit, powered by the DeepSeek API.
+    {i18n.t('about.description')}
 
-    **Version:** 1.0.0
+    **{i18n.t('about.version')}**
 
-    **Features:**
-    - 🎯 Domain-specific expert AI agents
-    - 🔧 Customizable experts
-    - 🌡️ Adjustable temperature settings
-    - 💾 Chat history management
-    - 📋 Template-based page generation
+    **{i18n.t('about.features_title')}:**
+    - 🎯 {i18n.t('about.feature_domain_experts')}
+    - 🔧 {i18n.t('about.feature_customizable')}
+    - 🌡️ {i18n.t('about.feature_temperature')}
+    - 💾 {i18n.t('about.feature_chat_history')}
+    - 📋 {i18n.t('about.feature_template_generation')}
 
-    **Development:**
+    **{i18n.t('about.development')}:**
     """)
 
     # Display z.ai icon and link
@@ -1073,12 +1086,12 @@ def render_about_section():
             # Fallback to non-clickable image if file not found
             st.image("icons/zai_logo.svg", width=100)
 
-        st.markdown("This entire application was developed with [https://z.ai/subscribe](https://z.ai/subscribe?ic=JGTYCX7ZO7)")
+        st.markdown(i18n.t('about.developed_with'))
     with col2:
         st.empty()
 
-    st.markdown("""
-    **Resources:**
+    st.markdown(f"""
+    **{i18n.t('about.resources')}:**
     """)
     st.markdown("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")
 
@@ -1098,10 +1111,19 @@ def main():
         render_add_chat_dialog()
         return
 
-    st.title("⚙️ Settings")
+    from utils.i18n import i18n
+
+    st.title(f"⚙️ {i18n.t('settings.title')}")
 
     # Tab-based navigation for different settings sections (stateful)
-    tabs = ["🎨 General", "🔑 API Key", "⚙️ Default LLM", "🤖 Expert Management", "⚠️ Danger Zone", "ℹ️ About"]
+    tabs = [
+        f"🎨 {i18n.t('settings.sections.general')}",
+        f"🔑 {i18n.t('settings.sections.api_key')}",
+        f"⚙️ {i18n.t('settings.sections.default_llm')}",
+        f"🤖 {i18n.t('settings.sections.expert_management')}",
+        f"⚠️ {i18n.t('settings.sections.danger_zone')}",
+        f"ℹ️ {i18n.t('settings.sections.about')}"
+    ]
     active_tab = st.segmented_control(
         "Settings Sections",
         options=tabs,

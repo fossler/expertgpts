@@ -147,7 +147,13 @@
     "error_resetting_application": "重置应用程序时出错：{error}",
     "expert_name_empty": "专家名称不能为空",
     "expert_name_invalid_chars": "专家名称只能包含：{allowed}",
-    "error": "错误：{error}"
+    "error": "错误：{error}",
+    "api_key_not_set": "API key is not set",
+    "api_key_invalid": "API key appears to be invalid (too short)",
+    "expert_config_not_found": "Configuration not found for expert: {expert_id}",
+    "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
+    "api_response_error": "API response error: {error}",
+    "unexpected_error": "Unexpected error: {type}: {message}"
   },
   "success": {
     "expert_created": "专家 '{name}' 创建成功！",
@@ -330,6 +336,15 @@
       "reasoning_effort": "推理强度: {level}",
       "thinking_mode_enabled": "思维模式已启用",
       "confirm_delete": "您确定要删除专家 '{name}' 吗？"
+    },
+    "names": {
+      "python_expert": "Python 专家",
+      "data_scientist": "数据科学家",
+      "writing_assistant": "写作助手",
+      "linux_admin": "Linux 系统管理员",
+      "general_assistant": "通用助手",
+      "translation_expert": "翻译专家",
+      "spell_checker": "拼写检查器"
     }
   }
 }

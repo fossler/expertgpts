@@ -28,6 +28,48 @@ EXPERT_ID = "{{EXPERT_ID}}"
 EXPERT_NAME = "{{EXPERT_NAME}}"
 
 
+def translate_expert_name(expert_name: str) -> str:
+    """Translate expert names for default experts.
+
+    Default expert names are stored in English but should be displayed
+    in the user's selected language. Custom expert names (user-created)
+    are returned as-is.
+
+    Args:
+        expert_name: The expert name from config
+
+    Returns:
+        Translated expert name (or original if no translation exists)
+    """
+    # Mapping of default expert names to translation keys
+    expert_name_translations = {
+        "Python Expert": "experts.names.python_expert",
+        "Data Scientist": "experts.names.data_scientist",
+        "Writing Assistant": "experts.names.writing_assistant",
+        "Linux System Admin": "experts.names.linux_admin",
+        "General Assistant": "experts.names.general_assistant",
+        "Translation Expert": "experts.names.translation_expert",
+        "Spell Checker": "experts.names.spell_checker",
+    }
+
+    # Check if this is a default expert that should be translated
+    translation_key = expert_name_translations.get(expert_name)
+
+    if translation_key:
+        # Attempt to translate, fall back to original if translation fails
+        try:
+            translated = i18n.t(translation_key)
+            # If the translation key itself is returned (no translation), use original
+            if translated == translation_key:
+                return expert_name
+            return translated
+        except:
+            return expert_name
+
+    # Return original name for custom experts
+    return expert_name
+
+
 def initialize_session_state():
     """Initialize session state variables."""
     # Initialize shared state first (API key, navigation, etc.)
@@ -53,10 +95,10 @@ def validate_api_key(api_key: str) -> tuple:
         - (False, error_message) if invalid
     """
     if not api_key:
-        return False, "API key is not set"
+        return False, i18n.t("errors.api_key_not_set")
 
     if len(api_key) < 20:
-        return False, "API key appears to be invalid (too short)"
+        return False, i18n.t("errors.api_key_invalid")
 
     # Generic validation - different providers have different formats
     return True, ""
@@ -94,7 +136,7 @@ def load_expert_config() -> dict:
     config = load_expert_config_cached(EXPERT_ID, cache_version)
 
     if not config:
-        st.error(f"Configuration not found for expert: {EXPERT_ID}")
+        st.error(f"❌ {i18n.t('errors.expert_config_not_found', expert_id=EXPERT_ID)}")
 
     return config
 
@@ -108,7 +150,11 @@ def render_chat_interface(config: dict, messages_key: str):
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
     """
-    st.title(f"🤖 {config.get('expert_name', EXPERT_NAME)}")
+    # Translate expert name for default experts
+    expert_name = config.get('expert_name', EXPERT_NAME)
+    translated_name = translate_expert_name(expert_name)
+
+    st.title(f"🤖 {translated_name}")
 
     # Display expert description
     if config.get("description"):
@@ -139,7 +185,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
         # Validate API key format
         is_valid, error_msg = validate_api_key(api_key)
         if not is_valid:
-            st.error(f"❌ {error_msg}. Please check your Settings.")
+            st.error(f"❌ {error_msg}")
             return
 
         # Add user message to chat history
@@ -200,21 +246,21 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
             except (ConnectionError, TimeoutError) as e:
                 provider_name = get_provider_display_name(provider)
-                error_msg = f"Network error: Could not reach {provider_name} API. Please check your connection."
+                error_msg = i18n.t("errors.network_error", provider_name=provider_name)
                 message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
                     "content": f"❌ {error_msg}"
                 })
             except ValueError as e:
-                error_msg = f"API response error: {str(e)}"
+                error_msg = i18n.t("errors.api_response_error", error=str(e))
                 message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
                     "content": f"❌ {error_msg}"
                 })
             except Exception as e:
-                error_msg = f"Unexpected error: {type(e).__name__}: {str(e)}"
+                error_msg = i18n.t("errors.unexpected_error", type=type(e).__name__, message=str(e))
                 message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
