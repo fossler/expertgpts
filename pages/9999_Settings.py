@@ -11,7 +11,7 @@ from pathlib import Path
 import streamlit as st
 from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
-from utils.constants import EXPERT_BEHAVIOR_DOCS, EXPERT_BEHAVIOR_DOCS_EDIT
+from utils.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
 from utils.dialogs import create_new_expert, render_add_chat_dialog, render_llm_configuration
 from utils.helpers import sanitize_name
 from utils import secrets_manager
@@ -695,7 +695,7 @@ def render_edit_expert_dialog():
 
         # Add expander with examples
         with st.expander(f"📖 {i18n.t('dialogs.add_chat.why_important_title')}"):
-            st.markdown(EXPERT_BEHAVIOR_DOCS_EDIT)
+            st.markdown(get_expert_behavior_docs_edit())
 
         st.caption(i18n.t('info.required_fields_hint'))
 

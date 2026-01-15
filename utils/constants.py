@@ -263,7 +263,7 @@ def get_expert_behavior_docs_edit():
     """Get translated expert behavior documentation for edit expert dialog.
 
     Returns:
-        str: Markdown-formatted documentation about expert behavior field (shorter version)
+        str: Markdown-formatted documentation about editing expert behavior
     """
     from utils.i18n import i18n
     return i18n.t("dialogs.edit_expert.expert_behavior_docs_edit")
