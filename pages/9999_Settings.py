@@ -13,7 +13,7 @@ from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 from utils.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
 from utils.dialogs import create_new_expert, render_add_chat_dialog, render_llm_configuration
-from utils.helpers import sanitize_name
+from utils.helpers import sanitize_name, translate_expert_name
 from utils import secrets_manager
 from utils import config_toml_manager
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
@@ -604,7 +604,9 @@ def render_edit_expert_dialog():
         st.rerun()
         return
 
-    st.title(f"✏️ Edit Expert: {expert_config['expert_name']}")
+    # Translate expert name for title
+    translated_name = translate_expert_name(expert_config['expert_name'])
+    st.title(f"✏️ Edit Expert: {translated_name}")
 
     # LLM Configuration (Provider, Model, Temperature, Thinking)
     metadata = expert_config.get("metadata", {})
@@ -817,7 +819,10 @@ def render_expert_management_section():
         provider_name = get_provider_display_name(provider)
         model_name = get_model_display_name(provider, model)
 
-        with st.expander(f"📝 {expert['expert_name']}", expanded=False):
+        # Translate expert name for display
+        translated_name = translate_expert_name(expert['expert_name'])
+
+        with st.expander(f"📝 {translated_name}", expanded=False):
             col1, col2 = st.columns([3, 1])
 
             with col1:
@@ -876,7 +881,8 @@ def render_expert_management_section():
 
         # Confirmation dialog for deletion
         if st.session_state.get(f"confirm_delete_{expert['expert_id']}"):
-            st.warning(f"⚠️ {i18n.t('experts.management.confirm_delete', name=expert['expert_name'])}")
+            translated_name = translate_expert_name(expert['expert_name'])
+            st.warning(f"⚠️ {i18n.t('experts.management.confirm_delete', name=translated_name)}")
 
             col1, col2, col3 = st.columns(3)
 
@@ -910,7 +916,9 @@ def render_expert_management_section():
                         for key in keys_to_delete:
                             del st.session_state[key]
 
-                        st.success(f"✅ {i18n.t('success.expert_deleted', name=expert['expert_name'])}")
+                        # Get translated name for success message
+                        translated_name = translate_expert_name(expert['expert_name'])
+                        st.success(f"✅ {i18n.t('success.expert_deleted', name=translated_name)}")
                         st.session_state[f"confirm_delete_{expert['expert_id']}"] = False
                         st.rerun()
 
