@@ -13,6 +13,7 @@ from pathlib import Path
 from utils.page_generator import PageGenerator
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
 from utils.constants import EXAMPLE_EXPERTS_COUNT
+from utils.i18n import i18n
 
 
 def check_first_run():
@@ -99,14 +100,14 @@ def main():
     # Define the home page with icon
     home = st.Page(
         "pages/1000_Home.py",
-        title="Home",
+        title=i18n.t("nav.home"),
         icon=":material/home:"
     )
 
     # Define Settings page
     settings = st.Page(
         "pages/9999_Settings.py",
-        title="Settings",
+        title=i18n.t("nav.settings"),
         icon=":material/settings:"
     )
 
@@ -123,10 +124,14 @@ def main():
         if not page_path.exists():
             continue
 
+        # Get expert name for navigation
+        expert_id = page_info["expert_id"]
+        expert_name = page_info["expert_name"]
+
         expert_pages.append(
             st.Page(
                 str(page_path),
-                title=page_info["expert_name"],
+                title=expert_name,
                 icon=":material/psychology:"
             )
         )

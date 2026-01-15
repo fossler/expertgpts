@@ -30,9 +30,23 @@ def initialize_shared_session_state():
     from utils.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
     from utils.i18n import i18n
 
-    # Initialize language with auto-detection from system
+    # Initialize language with saved preference or auto-detection
     if "language" not in st.session_state:
-        st.session_state.language = i18n.detect_system_language()
+        from utils.config_toml_manager import get_language_preference, save_language_preference
+
+        # Try to load saved preference first
+        saved_lang = get_language_preference()
+
+        if saved_lang:
+            # Use saved preference
+            st.session_state.language = saved_lang
+        else:
+            # No saved preference - auto-detect and save
+            detected_lang = i18n.detect_system_language()
+            st.session_state.language = detected_lang
+
+            # Save detected language to config for next time
+            save_language_preference(detected_lang)
 
     # Initialize API keys dictionary in session state (from secrets if not set)
     if "api_keys" not in st.session_state:
@@ -48,10 +62,6 @@ def initialize_shared_session_state():
             except Exception:
                 # If secrets.toml doesn't exist or has errors, continue
                 pass
-
-    # Backward compatibility: Initialize deepseek_api_key for legacy code
-    if "deepseek_api_key" not in st.session_state:
-        st.session_state.deepseek_api_key = st.session_state.api_keys.get("deepseek", "")
 
     # Initialize default LLM settings in session state
     if "default_provider" not in st.session_state:

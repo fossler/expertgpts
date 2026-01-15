@@ -15,6 +15,14 @@ textColor = "#1F2937"
 # Base font size - default font size for the application (reduced from default 16)
 baseFontSize = 14
 
-[layout]
-# Use wide mode by default (expands main content area)
-wideMode = true
+[client]
+showErrorDetails = false
+# https://docs.streamlit.io/develop/api-reference/configuration/config.toml
+toolbarMode = "minimal"
+
+
+[language]
+# Language preference for the UI
+# Options: en, de, es, fr, it, id, ms, pt, ru, tr, wyw, yue, zh-CN, zh-TW
+# Leave empty to auto-detect from system
+code = "en"

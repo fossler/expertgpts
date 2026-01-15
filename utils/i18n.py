@@ -252,10 +252,59 @@ class I18nManager:
             lang = st.session_state.get("language", "en")
         return self.get_language_info(lang)["direction"]
 
+    def get_language_prefix(self, lang: str = None) -> str:
+        """Generate language prefix for AI responses.
+
+        Creates a prefix that instructs the AI to respond in the
+        user's preferred language, with both English and native
+        language names for clarity.
+
+        Args:
+            lang: Language code (uses current if None)
+
+        Returns:
+            str: Language instruction prefix
+            Examples:
+                - "You must respond in English."
+                - "You must respond in German."
+                - "You must respond in French (Français)."
+                - "You must respond in Simplified Chinese (简体中文)."
+        """
+        if lang is None:
+            lang = st.session_state.get("language", "en")
+
+        lang_info = self.get_language_info(lang)
+        english_name = lang_info["name"]
+        native_name = lang_info["native_name"]
+
+        # Handle special cases for Chinese variants
+        if lang == "zh-CN":
+            return "You must respond in Simplified Chinese (简体中文)."
+        elif lang == "zh-TW":
+            return "You must respond in Traditional Chinese (繁體中文)."
+        elif english_name == native_name:
+            # Language name is same in English and native (e.g., German, Spanish)
+            return f"You must respond in {english_name}."
+        else:
+            # Different names (e.g., French / Français, Italian / Italiano)
+            return f"You must respond in {english_name} ({native_name})."
+
     def set_language(self, lang: str):
-        """Set current language and rerun app."""
+        """Set current language, persist it, and rerun app.
+
+        Args:
+            lang: Language code to set (e.g., 'de', 'en')
+        """
         if lang in LANGUAGE_METADATA:
+            from utils.config_toml_manager import save_language_preference
+
+            # Update session state
             st.session_state.language = lang
+
+            # Persist to disk
+            save_language_preference(lang)
+
+            # Rerun to apply new language
             st.rerun()
         else:
             print(f"Warning: Language '{lang}' not available")

@@ -27,7 +27,8 @@ def render_expert_list():
         with cols[idx % 3]:
             with st.container():
                 st.markdown(f"### {expert['expert_name']}")
-                st.caption(expert['description'][:100] + "..." if len(expert['description']) > 100 else expert['description'])
+                display_desc = expert['description'][:100] + "..." if len(expert['description']) > 100 else expert['description']
+                st.caption(display_desc)
                 st.caption(f"🆔 {expert['expert_id']}")
 
 
@@ -36,7 +37,7 @@ def main():
     # Render sidebar
     with st.sidebar:
         # Toolbox
-        st.caption("**Toolbox**")
+        st.caption(f"**{i18n.t('home.toolbox')}**")
         if st.button(f"➕ {i18n.t('buttons.add_chat')}", width="stretch"):
             st.session_state.show_add_chat_dialog = True
             st.rerun()
@@ -44,7 +45,7 @@ def main():
         st.divider()
 
         # Status section
-        st.caption("**Status**")
+        st.caption(f"**{i18n.t('home.status')}**")
 
         # API Key status (check if any provider key is set)
         api_keys = st.session_state.get("api_keys", {})

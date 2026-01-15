@@ -48,6 +48,119 @@ expertgpts/
 └── README.md
 ```
 
+## Internationalization (i18n)
+
+ExpertGPTs supports **13 languages** with automatic language detection and runtime language injection.
+
+### Supported Languages
+
+- 🇺🇸 **English** (en)
+- 🇩🇪 **German** (Deutsch) (de)
+- 🇪🇸 **Spanish** (Español) (es)
+- 🇫🇷 **French** (Français) (fr)
+- 🇮🇹 **Italian** (Italiano) (it)
+- 🇮🇩 **Indonesian** (Bahasa Indonesia) (id)
+- 🇲🇾 **Malay** (Bahasa Melayu) (ms)
+- 🇵🇹 **Portuguese** (Português) (pt)
+- 🇷🇺 **Russian** (Русский) (ru)
+- 🇹🇷 **Turkish** (Türkçe) (tr)
+- 🇨🇳 **Simplified Chinese** (简体中文) (zh-CN)
+- 🇹🇼 **Traditional Chinese** (繁體中文) (zh-TW)
+- 🇭🇰 **Cantonese** (粵語) (yue)
+- 🗣️ **Wu Chinese** (文言文) (wyw)
+
+### How It Works
+
+ExpertGPTs uses a **clean three-layer architecture** for internationalization:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. STORAGE LAYER (configs/*.yaml)                      │
+│  Expert content in English - Single Source of Truth     │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  2. TRANSLATION LAYER (locales/ui/*.json)               │
+│  UI translations ONLY - Buttons, labels, messages       │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  3. RUNTIME LAYER (template.py, i18n.py)                │
+│  Language prefix injection: "Respond in German (Deutsch)"│
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key Features:**
+
+1. **Auto-Detection**: First run detects system language automatically
+2. **Manual Selection**: Users can change language in Settings
+3. **Persistent Preference**: Language choice saved to `.streamlit/config.toml`
+4. **AI Language Respect**: Experts automatically respond in user's language
+5. **No Duplication**: Expert content exists ONLY in YAML configs (not in locales)
+
+### Language Preference
+
+The app stores your language preference in `.streamlit/config.toml`:
+
+```toml
+[language]
+code = "de"  # German
+```
+
+**First Run:**
+- App auto-detects system language
+- Saves detected language to config
+- Starts app in detected language
+
+**Manual Change:**
+- Go to Settings → Language
+- Select your preferred language
+- Preference saved automatically
+- App restarts in selected language
+
+### Creating Multilingual Experts
+
+You can create experts in ANY language:
+
+1. **Expert Name**: Use name in your language (e.g., "Datenexperte")
+2. **Description**: Write description in your language
+3. **System Prompt**: Write prompt in your language
+4. **AI Response**: Expert will respond in the user's selected language
+
+**Example (German):**
+```yaml
+expert_name: Datenexperte
+description: Experte für Datenanalyse und Visualisierung
+system_prompt: |
+  Sie sind Datenexperte, spezialisiert auf Datenanalyse...
+```
+
+### Language Prefix Injection
+
+When you chat with an expert, the app automatically adds a language prefix to the system prompt:
+
+```
+You must respond in German (Deutsch).
+
+You are Python Expert, a domain-specific expert AI assistant.
+Expert in Python programming, software development...
+```
+
+This ensures AI responds in the user's preferred language while maintaining expert context.
+
+### File Structure
+
+```
+locales/ui/
+├── en.json         # English UI translations (buttons, labels, messages)
+├── de.json         # German UI translations
+├── es.json         # Spanish UI translations
+├── fr.json         # French UI translations
+└── ... (10 more language files)
+```
+
+**Important:** Locale files contain ONLY UI translations, not expert content.
+
 ## Installation
 
 1. **Clone the repository**:

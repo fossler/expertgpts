@@ -8,7 +8,7 @@ import re
 import streamlit as st
 from pathlib import Path
 from utils.config_manager import ConfigManager
-from utils.constants import EXPERT_BEHAVIOR_DOCS, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+from utils.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 from utils.page_generator import PageGenerator
 from utils.helpers import sanitize_name
 
@@ -22,15 +22,17 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     Returns:
         tuple: (is_valid, error_message)
     """
+    from utils.i18n import i18n
+
     if not name:
-        return False, "Expert name cannot be empty"
+        return False, i18n.t('errors.expert_name_empty')
 
     # Regex pattern for allowed characters
     pattern = r'^[A-Za-z0-9_.\- ]+$'
 
     if not re.match(pattern, name):
-        allowed = "letters (A-Z, a-z), numbers (0-9), underscore (_), hyphen (-), dot (.), and space"
-        return False, f"Expert name can only contain: {allowed}"
+        allowed = i18n.t('forms.allowed_characters_desc')
+        return False, i18n.t('errors.expert_name_invalid_chars', allowed=allowed)
 
     return True, ""
 
@@ -45,6 +47,8 @@ def render_temperature_input(value: float = 1.0, provider: str = None) -> float:
     Returns:
         float: Temperature value from user input
     """
+    from utils.i18n import i18n
+
     # Use half width (1/2) for temperature field
     col1, col2 = st.columns(2)
 
@@ -52,36 +56,36 @@ def render_temperature_input(value: float = 1.0, provider: str = None) -> float:
         # OpenAI models only support temperature=1.0
         if provider == "openai":
             temperature = st.number_input(
-                "Temperature",
+                i18n.t('forms.temperature'),
                 min_value=0.0,
                 max_value=2.0,
                 value=1.0,
                 step=0.01,
-                help="Fixed at 1.0 for OpenAI models",
+                help=i18n.t('dialogs.temperature.fixed_for_openai'),
                 disabled=True,
                 format="%.2f"
             )
-            st.caption("⚠️ OpenAI models only support temperature value of 1.0")
+            st.caption(f"⚠️ {i18n.t('dialogs.temperature.openai_warning')}")
         else:
             temperature = st.number_input(
-                "Temperature",
+                i18n.t('forms.temperature'),
                 min_value=0.0,
                 max_value=2.0,
                 value=value,
                 step=0.1,
-                help="Controls response creativity and focus",
+                help=i18n.t('dialogs.temperature.help_creativity'),
                 format="%.1f"
             )
 
         # Add expander with detailed temperature guidance (only for non-OpenAI)
         if provider != "openai":
-            with st.expander("📖 Recommended values", expanded=False):
-                st.markdown("**Use Case Guidelines:**\n")
-                st.markdown("• **0.0** - Coding/Math (precision required)")
-                st.markdown("• **1.0** - Data Analysis (balanced interpretation)")
-                st.markdown("• **1.3** - Conversation/Translation (natural communication)")
-                st.markdown("• **1.5** - Creative Writing/Poetry (maximum creativity)")
-                st.caption("\n*Based on official DeepSeek documentation*")
+            with st.expander(f"📖 {i18n.t('dialogs.temperature.recommended_values')}", expanded=False):
+                st.markdown(f"**{i18n.t('dialogs.temperature.use_case_guidelines')}**\n")
+                st.markdown(f"• **0.0** - {i18n.t('dialogs.temperature.coding')}")
+                st.markdown(f"• **1.0** - {i18n.t('dialogs.temperature.data_analysis')}")
+                st.markdown(f"• **1.3** - {i18n.t('dialogs.temperature.conversation')}")
+                st.markdown(f"• **1.5** - {i18n.t('dialogs.temperature.creative_writing')}")
+                st.caption(f"\n*{i18n.t('dialogs.temperature.based_on_docs')}*")
 
     return temperature
 
@@ -110,7 +114,9 @@ def render_llm_configuration(
     Returns:
         tuple: (provider, model, temperature, thinking_level)
     """
-    st.info("💡 **Tip:** Select your LLM provider and model first, then fill in the expert details below.")
+    from utils.i18n import i18n
+
+    st.info(f"💡 **Tip:** {i18n.t('info.select_llm_tip')}")
 
     provider, model, thinking_level = render_provider_selection(
         current_provider=current_provider,
@@ -150,6 +156,8 @@ def render_provider_selection(
     Returns:
         tuple: (provider, model, thinking_level)
     """
+    from utils.i18n import i18n
+
     # Get defaults from session state if not provided
     if current_provider is None:
         current_provider = st.session_state.get("default_provider", "deepseek")
@@ -163,27 +171,27 @@ def render_provider_selection(
 
     # Set labels based on context
     if is_defaults:
-        provider_label = "Default Provider"
-        model_label = "Default Model"
-        thinking_label = "Select Thinking Mode Level"
-        provider_help = "The default LLM provider for new experts"
-        model_help = f"The default {{provider}} model for new experts"
-        thinking_help = "Default reasoning effort level for new OpenAI experts"
+        provider_label = i18n.t('dialogs.llm_config.default_provider')
+        model_label = i18n.t('dialogs.llm_config.default_model')
+        thinking_label = i18n.t('dialogs.llm_config.thinking_mode_level')
+        provider_help = i18n.t('dialogs.llm_config.default_provider_help')
+        model_help = i18n.t('dialogs.llm_config.default_model_help', provider="{provider}")
+        thinking_help = i18n.t('dialogs.llm_config.thinking_mode_help')
         provider_key = "default_provider_selector"
         model_key = "default_model_selector"
         thinking_key = "default_thinking_slider"
     else:
-        provider_label = "LLM Provider"
-        model_label = "Model"
-        thinking_label = "Thinking Mode Level"
-        provider_help = "Select the LLM provider for this expert"
-        model_help = f"Select the {{provider}} model to use"
-        thinking_help = "Select reasoning effort level for OpenAI models"
+        provider_label = i18n.t('forms.llm_provider')
+        model_label = i18n.t('forms.model')
+        thinking_label = i18n.t('default_llm.select_thinking_mode')
+        provider_help = i18n.t('dialogs.llm_config.provider_help')
+        model_help = i18n.t('dialogs.llm_config.model_help', provider="{provider}")
+        thinking_help = i18n.t('dialogs.llm_config.thinking_mode_help_expert')
         provider_key = "expert_provider_selector"
         model_key = "expert_model_selector"
         thinking_key = "expert_thinking_slider"
 
-    st.markdown("### 🤖 LLM Provider & Model")
+    st.markdown(f"### 🤖 {i18n.t('dialogs.llm_config.title')}")
 
     # Provider selection
     provider_options = list(LLM_PROVIDERS.keys())
@@ -228,7 +236,7 @@ def render_provider_selection(
     optional_thinking_providers = {"openai", "zai"}
     supports_optional_thinking = provider in optional_thinking_providers and "thinking_param" in model_config
 
-    st.caption(f"📏 **Context Length:** {model_config['max_tokens']:,} tokens")
+    st.caption(i18n.t('info.context_length', tokens=f"{model_config['max_tokens']:,}"))
 
     if show_thinking:
         if uses_reasoning_efforts:
@@ -330,7 +338,8 @@ def create_new_expert(
 
     if needs_ai_generation:
         # Show spinner during AI generation
-        with st.spinner("🤖 Generating AI-powered system prompt..."):
+        from utils.i18n import i18n
+        with st.spinner(f"🤖 {i18n.t('dialogs.add_chat.generating_system_prompt')}"):
             config_manager.create_config(
                 expert_name=chat_name,
                 description=description,
@@ -397,11 +406,9 @@ def render_add_chat_dialog():
 
     if not api_key_available:
         st.warning(f"""
-        ⚠️ **API Key Required**
+        ⚠️ **{i18n.t('dialogs.add_chat.api_key_required')}**
 
-        New chats can only be created when an API key is defined.
-
-        Please set at least one provider's API key in **Settings → API Key** tab first.
+        {i18n.t('dialogs.add_chat.api_key_required_desc')}
         """)
 
         if st.button(f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"):
@@ -415,13 +422,13 @@ def render_add_chat_dialog():
     st.divider()
 
     with st.form("add_chat_form"):
-        st.subheader("Expert Configuration")
+        st.subheader(i18n.t('dialogs.add_chat.expert_configuration'))
 
         # Chat Name
         chat_name = st.text_input(
             f"{i18n.t('forms.expert_name')} *",
             placeholder=i18n.t('forms.expert_name_placeholder'),
-            help="A descriptive name for the domain expert",
+            help=i18n.t('dialogs.add_chat.help_expert_name'),
             max_chars=100,
         ).strip()
 
@@ -432,7 +439,7 @@ def render_add_chat_dialog():
         description = st.text_area(
             f"{i18n.t('forms.agent_description')} *",
             placeholder=i18n.t('forms.agent_description_placeholder'),
-            help="Detailed description of what this expert specializes in",
+            help=i18n.t('dialogs.add_chat.help_expert_description'),
             height="content",
             max_chars=1000,
         ).strip()
@@ -440,30 +447,24 @@ def render_add_chat_dialog():
         st.divider()
 
         # Expert Behavior (Advanced) - The most important field!
-        st.markdown("### 🧠 Expert Behavior (Advanced)")
+        st.markdown(f"### 🧠 {i18n.t('dialogs.add_chat.expert_behavior_title')}")
         st.caption(
-            "💡 **AI-powered generation!** Leave empty to auto-generate a customized "
-            "system prompt based on the description above. "
-            "Provide your own for complete control."
+            f"💡 **{i18n.t('info.ai_generating')}** {i18n.t('info.ai_powered_tip')}"
         )
 
         custom_system_prompt = st.text_area(
-            "Customize Expert Behavior",
-            placeholder="""How should this expert respond? (Optional)
-
-Leave empty to auto-generate from description.
-
-Example: "Provide clear, step-by-step explanations with code examples..." """,
-            help="🎯 This defines everything about your expert - tone, expertise, style, and constraints",
+            i18n.t('forms.custom_system_prompt'),
+            placeholder=i18n.t('forms.custom_system_prompt_placeholder'),
+            help=i18n.t('dialogs.add_chat.help_custom_behavior'),
             height=250,
             max_chars=3000,
         ).strip()
 
         # Add expander with examples
-        with st.expander("📖 Why is this important? + Examples"):
-            st.markdown(EXPERT_BEHAVIOR_DOCS)
+        with st.expander(f"📖 {i18n.t('dialogs.add_chat.why_important_title')}"):
+            st.markdown(get_expert_behavior_docs())
 
-        st.caption("* Required fields")
+        st.caption(i18n.t('info.required_fields_hint'))
 
         # Form buttons (left-aligned)
         st.write("")  # Spacing

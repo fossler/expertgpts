@@ -42,7 +42,10 @@
       "secure_secrets_desc": "API-Schlüssel in `.streamlit/secrets.toml` gespeichert",
       "custom_themes": "Anpassbare Designs",
       "custom_themes_desc": "Personalisieren Sie das Erscheinungsbild der App"
-    }
+    },
+    "chat_input_placeholder": "Den Experten fragen...",
+    "toolbox": "Toolbox",
+    "status": "Status"
   },
   "buttons": {
     "add_chat": "Chat hinzufügen",
@@ -54,12 +57,31 @@
     "go_to_settings": "Zu den Einstellungen",
     "confirm": "Bestätigen",
     "clear": "Löschen",
-    "reset": "Zurücksetzen"
+    "reset": "Zurücksetzen",
+    "save_changes": "Änderungen speichern",
+    "add_new_chat": "Neuen Chat hinzufügen",
+    "save_defaults": "Standardwerte speichern",
+    "save_apply_theme": "Speichern & Thema anwenden",
+    "edit": "Bearbeiten",
+    "yes_delete": "Ja, Löschen",
+    "yes_reset_everything": "Ja, Alles zurücksetzen"
   },
   "status": {
     "api_key_configured": "API-Schlüssel konfiguriert",
     "api_key_not_set": "API-Schlüssel nicht festgelegt",
-    "no_api_key": "Kein API-Schlüssel für {provider} gefunden"
+    "no_api_key": "Kein API-Schlüssel für {provider} gefunden",
+    "api_key_saved_in_secrets": "{provider}-API-Schlüssel in secrets.toml gespeichert",
+    "no_api_key_in_secrets": "Kein {provider}-API-Schlüssel in secrets.toml",
+    "api_key_available": "{provider}-API-Schlüssel ist verfügbar",
+    "api_key_not_set_warning": "{provider}-API-Schlüssel nicht festgelegt",
+    "application_will_rerun": "Die Anwendung wird neu gestartet, um den neuen Schlüssel zu laden.",
+    "found_experts": "{count} Experte(n) gefunden",
+    "refreshing": "Aktualisiere...",
+    "recreating_experts": "Erstelle Beispiel-Experten neu...",
+    "restarting_application": "Starte Anwendung neu...",
+    "expert_updated": "Experte '{name}' erfolgreich aktualisiert!",
+    "expert_deleted": "Experte '{name}' erfolgreich gelöscht!",
+    "theme_saved_reloading": "Thema gespeichert! Seite wird neu geladen..."
   },
   "forms": {
     "expert_name": "Expertenname",
@@ -73,7 +95,14 @@
     "custom_system_prompt": "Expertenverhalten anpassen",
     "custom_system_prompt_placeholder": "Wie sollte dieser Experte antworten? (Optional)\n\nLeer lassen, um automatisch aus der Beschreibung zu generieren.\n\nBeispiel: \"Geben Sie klare, schrittweise Erklärungen mit Codebeispielen...\"",
     "allowed_characters": "Zulässige Zeichen",
-    "allowed_characters_desc": "Buchstaben, Zahlen, Leerzeichen, Unterstriche (_), Bindestriche (-) und Punkte (.)"
+    "allowed_characters_desc": "Buchstaben, Zahlen, Leerzeichen, Unterstriche (_), Bindestriche (-) und Punkte (.)",
+    "expert_id": "Experten-ID",
+    "buttons_elements": "Schaltflächen und interaktive Elemente",
+    "background_color": "Hintergrundfarbe",
+    "secondary_background": "Sekundärer Hintergrund",
+    "text_color": "Textfarbe",
+    "select_theme": "Wählen Sie ein Thema zur Vorschau",
+    "color_preview": "Farbvorschau"
   },
   "settings": {
     "title": "Einstellungen",
@@ -82,59 +111,225 @@
     "theme": "Design",
     "experts": "Experten",
     "language": "Sprache",
-    "select_language": "Sprache wählen"
+    "select_language": "Sprache wählen",
+    "default_llm": "Standard-LLM",
+    "danger_zone": "Gefahrenzone",
+    "about": "Über",
+    "sections": {
+      "general": "Allgemein",
+      "api_key": "API-Schlüssel",
+      "default_llm": "Standard-LLM",
+      "expert_management": "Expertenverwaltung",
+      "danger_zone": "Gefahrenzone",
+      "about": "Über"
+    }
   },
   "language": {
     "title": "Sprache",
     "select": "Sprache wählen",
     "current_language": "Aktuelle Sprache",
-    "available_languages": "Verfügbare Sprachen"
+    "available_languages": "Verfügbare Sprachen",
+    "latin_script": "Lateinische Schrift",
+    "cyrillic_script": "Kyrillische Schrift",
+    "han_script": "Chinesisch (Han-Schrift)"
   },
   "errors": {
     "required_fields": "Bitte füllen Sie alle Pflichtfelder aus.",
     "invalid_name": "Ungültiger Expertenname",
     "error_creating_expert": "Fehler beim Erstellen des Experten",
-    "expert_exists": "Ein Experte namens '{name}' existiert bereits. Bitte verwenden Sie einen anderen Namen oder löschen Sie zuerst den vorhandenen Experten."
+    "expert_exists": "Ein Experte namens '{name}' existiert bereits. Bitte verwenden Sie einen anderen Namen oder löschen Sie zuerst den vorhandenen Experten.",
+    "error_saving_api_key": "Fehler beim Speichern des API-Schlüssels: {error}",
+    "error_clearing_api_key": "Fehler beim Löschen des API-Schlüssels: {error}",
+    "expert_not_found": "Experte nicht gefunden: {expert_id}",
+    "error_updating_expert": "Fehler beim Aktualisieren des Experten: {error}",
+    "error_deleting_expert": "Fehler beim Löschen des Experten: {error}",
+    "error_recreating_experts": "Fehler beim Neuerstellen der Experten: {error}",
+    "error_resetting_application": "Fehler beim Zurücksetzen der Anwendung: {error}",
+    "expert_name_empty": "Expertenname darf nicht leer sein",
+    "expert_name_invalid_chars": "Expertenname darf nur folgende Zeichen enthalten: {allowed}",
+    "error": "Fehler: {error}"
   },
   "success": {
     "expert_created": "Experte '{name}' erfolgreich erstellt!",
     "expert_deleted": "Experte '{name}' erfolgreich gelöscht!",
     "api_key_saved": "API-Schlüssel erfolgreich gespeichert!",
-    "settings_saved": "Einstellungen erfolgreich gespeichert!"
+    "settings_saved": "Einstellungen erfolgreich gespeichert!",
+    "api_key_cleared": "{provider}-API-Schlüssel erfolgreich gelöscht!",
+    "defaults_saved": "Standardwerte gespeichert! Neue Experten verwenden {provider} - {model}",
+    "application_reset": "Anwendung erfolgreich zurückgesetzt!"
   },
   "info": {
     "navigating": "Navigiere zu Ihrem neuen Experten...",
     "ai_generating": "KI-gestellte Generierung läuft...",
-    "first_run": "Erste Ausführung erkannt"
+    "first_run": "Erste Ausführung erkannt",
+    "select_llm_tip": "Wählen Sie zuerst Ihren LLM-Anbieter und Ihr Modell, dann füllen Sie die Expertendetails unten aus.",
+    "set_api_key_to_create": "Legen Sie oben den API-Schlüssel fest, um Experten zu erstellen",
+    "create_first_expert": "Keine Experten-Agenten gefunden. Erstellen Sie Ihren ersten Experten auf der Startseite!",
+    "ai_powered_generation": "KI-gestützte Generierung läuft...",
+    "ai_powered_tip": "KI-gestützte Generierung! Leer lassen, um automatisch einen angepassten System-Prompt basierend auf der obigen Beschreibung zu generieren. Geben Sie Ihren eigenen ein für vollständige Kontrolle.",
+    "manual_mode_tip": "Manueller Modus: API-Schlüssel nicht festgelegt, daher ist KI-Generierung nicht verfügbar. Behalten Sie das bestehende Verhalten bei oder geben Sie Ihren eigenen ein.",
+    "required_fields_hint": "* Pflichtfelder",
+    "context_length": "Kontextlänge: {tokens} Token",
+    "expert_behavior_auto": "Automatisch aus Beschreibung generiert",
+    "language_prefix_auto": "Der Experte antwortet automatisch in der vom Benutzer ausgewählten Sprache."
+  },
+  "api_key": {
+    "title": "API-Schlüssel-Konfiguration",
+    "select_provider": "LLM-Anbieter auswählen",
+    "enter_key": "Geben Sie hier Ihren {provider}-API-Schlüssel ein",
+    "enter_key_help": "Geben Sie Ihren {provider}-API-Schlüssel ein. Er wird in .streamlit/secrets.toml gespeichert.",
+    "save_key": "API-Schlüssel speichern",
+    "clear_key": "API-Schlüssel löschen",
+    "resources": "Ressourcen",
+    "chat": "Chat",
+    "platform": "Plattform",
+    "no_api_keys_configured": "Keine API-Schlüssel konfiguriert. Bitte fügen Sie zuerst API-Schlüssel im API-Schlüssel-Tab hinzu."
+  },
+  "default_llm": {
+    "title": "Standard-LLM-Einstellungen",
+    "description": "Diese Standardwerte werden beim Erstellen neuer Experten verwendet. Sie können jeden Experten weiterhin individuell anpassen.",
+    "default_provider": "Standard-Anbieter",
+    "default_model": "Standard-Modell",
+    "select_thinking_mode": "Denkmodus-Stufe auswählen",
+    "thinking_mode": "Denkmodus",
+    "default_provider_help": "Der Standard-LLM-Anbieter für neue Experten",
+    "default_model_help": "Das Standard-{provider}-Modell für neue Experten",
+    "thinking_mode_help": "Standard-Reasoning-Aufwandlevel für neue OpenAI-Experten",
+    "thinking_mode_help_zai": "Neue Experten haben standardmäßig den Denkmodus aktiviert",
+    "select_thinking_mode_help": "Reasoning-Aufwandlevel für OpenAI-Modelle auswählen"
+  },
+  "theme": {
+    "title": "Themen-Anpassung",
+    "description": "Passen Sie das Erscheinungsbild Ihrer ExpertGPTs-Anwendung an.",
+    "select_theme": "Wählen Sie ein Thema zur Vorschau",
+    "modern_red": "Modernes Rot",
+    "ocean_blue": "Ozeanblau",
+    "forest_green": "Waldgrün",
+    "royal_purple": "Königslila",
+    "dark_blue": "Dunkelblau",
+    "dark_gray": "Dunkelgrau",
+    "custom": "Benutzerdefiniert",
+    "buttons_elements_help": "Farbe für Schaltflächen und interaktive Elemente",
+    "background_help": "Haupt-Hintergrundfarbe der Anwendung",
+    "secondary_background_help": "Hintergrundfarbe für Seitenleiste und andere sekundäre Bereiche",
+    "text_help": "Haupt-Textfarbe in der gesamten Anwendung"
+  },
+  "danger_zone": {
+    "title": "Gefahrenzone",
+    "warning": "Warnung: Aktionen in diesem Abschnitt sind irreversibel und werden alle Ihre Daten löschen!",
+    "backup_title": "Experten-Konfigurationen sichern",
+    "backup_description": "Alle Konfigurationen herunterladen wird:\n- Alle Experten-Konfigurationsdateien als ZIP-Archiv herunterladen\n- Ihre benutzerdefinierten Experten und deren Einstellungen erhalten\n- Ihnen ermöglichen, Konfigurationen später wiederherzustellen (manueller Import erforderlich)",
+    "download_button": "Alle Konfigurationen herunterladen (ZIP)",
+    "reset_title": "Anwendung zurücksetzen",
+    "reset_description": "Anwendung zurücksetzen wird:\n- Alle Experten-Konfigurationen löschen\n- Alle Experten-Seiten löschen\n- Auf die Standard-Beispiel-Experten zurücksetzen",
+    "reset_button": "Anwendung auf Werkseinstellungen zurücksetzen",
+    "final_warning": "LETZTE WARNUNG: Dies wird alle Experten löschen und die Anwendung zurücksetzen!"
+  },
+  "about": {
+    "title": "Über",
+    "description": "Eine Multi-Experten-KI-Chat-Anwendung, erstellt mit Streamlit, betrieben mit der DeepSeek-API.",
+    "version": "Version: 1.0.0",
+    "features_title": "Funktionen:",
+    "feature_domain_experts": "Domain-spezifische KI-Experten-Agenten",
+    "feature_customizable": "Anpassbare Experten",
+    "feature_temperature": "Einstellbare Temperatur-Einstellungen",
+    "feature_chat_history": "Chat-Verwaltungsverwaltung",
+    "feature_template_generation": "Vorlagenbasierte Seitengenerierung",
+    "development": "Entwicklung:",
+    "developed_with": "Diese gesamte Anwendung wurde entwickelt mit",
+    "resources": "Ressourcen:"
+  },
+  "dialogs": {
+    "add_chat": {
+      "title": "Chat hinzufügen",
+      "api_key_required": "API-Schlüssel erforderlich",
+      "api_key_required_desc": "Neue Chats können nur erstellt werden, wenn ein API-Schlüssel festgelegt ist.\n\nBitte legen Sie zuerst mindestens einen Anbieter-API-Schlüssel im Tab **Einstellungen → API-Schlüssel** fest.",
+      "expert_configuration": "Experten-Konfiguration",
+      "expert_behavior_title": "Expertenverhalten (Erweitert)",
+      "why_important_title": "Warum ist das wichtig? + Beispiele",
+      "help_expert_name": "Ein beschreibender Name für den Domain-Experten",
+      "help_expert_description": "Detaillierte Beschreibung der Spezialisierung dieses Experten",
+      "help_custom_behavior": "Dies definiert alles über Ihren Experten - Ton, Expertise, Stil und Einschränkungen",
+      "generating_system_prompt": "Generiere KI-gestützten System-Prompt...",
+      "expert_behavior_docs": "### 🎯 Warum Dieses Feld Am Wichtigsten Ist\n\nDie Verhaltensanweisungen definieren den gesamten Ansatz Ihres Experten:\n- **Ton**: Freundlich, professionell, locker, formell?\n- **Expertise**: Allgemeine Übersicht oder tiefe technische Details?\n- **Format**: Codebeispiele, Schritt für Schritt, konversationell?\n- **Einschränkungen**: Was soll der Experte NICHT tun?\n- **Richtlinien**: Spezifische Anforderungen für Antworten\n\n### 📝 Beispiel: Python-Experte\n\n```\nDu bist ein Python-Experte mit 15 Jahren Erfahrung.\n- Stelle sauberen, PEP 8-konformen Code mit Typ-Hints und Docstrings bereit\n- Erkläre Konzepte klar mit praktischen Beispielen\n- Warne vor häufigen Fallstricken und Best Practices\n- Schlage hilfreiche Bibliotheken vor, wenn angemessen\n```\n\n### 📝 Beispiel: Rechtsberater\n\n```\nDu bist ein rechtlicher Assistent, der allgemeine rechtliche Informationen bereitstellt.\n- Füge immer einen Haftungsausschluss hinzu: \"Ich bin kein Anwalt, dies ist keine Rechtsberatung\"\n- Sei gründlich aber vorsichtig in Empfehlungen\n- Schlage die Konsultation eines qualifizierten Anwalts für spezifische Rechtsangelegenheiten vor\n- Biete allgemeine rechtliche Konzepte und Rahmenbedingungen\n```\n\n### 📝 Beispiel: Schreibcoach\n\n```\nDu bist ein ermutigender Schreibcoach.\n- Stelle Fragen, um die Ziele des Autors zu verstehen\n- Biete spezifisches, umsetzbares Feedback\n- Balanciere Lob mit konstruktiver Kritik\n- Schlage Ressourcen zur Verbesserung vor\n- Sei geduldig und unterstützend\n```"
+    },
+    "edit_expert": {
+      "title": "Experte bearbeiten: {name}",
+      "expert_configuration": "Experten-Konfiguration",
+      "expert_id_help": "Experten-ID kann nicht geändert werden",
+      "expert_behavior_title": "Expertenverhalten (Erweitert)",
+      "ai_powered_regeneration": "KI-gestützte Generierung! Leer lassen, um einen angepassten System-Prompt mit KI neu zu generieren. Geben Sie Ihren eigenen ein für vollständige Kontrolle.",
+      "manual_mode_regeneration": "Manueller Modus: API-Schlüssel nicht festgelegt, daher ist KI-Generierung nicht verfügbar. Behalten Sie das bestehende Verhalten bei oder geben Sie Ihren eigenen ein.",
+      "why_important_title": "Warum ist das wichtig? + Beispiele",
+      "help_expert_name": "Ein beschreibender Name für den Domain-Experten",
+      "help_expert_description": "Detaillierte Beschreibung der Spezialisierung dieses Experten",
+      "help_custom_behavior": "Dies definiert alles über Ihren Experten - Ton, Expertise, Stil und Einschränkungen",
+      "expert_behavior_docs_edit": "### 🎯 Warum Dieses Feld Am Wichtigsten Ist\n\nDie Verhaltensanweisungen definieren den gesamten Ansatz Ihres Experten:\n- **Ton**: Freundlich, professionell, locker, formell?\n- **Expertise**: Allgemeine Übersicht oder tiefe technische Details?\n- **Format**: Codebeispiele, Schritt für Schritt, konversationell?\n- **Einschränkungen**: Was soll der Experte NICHT tun?\n- **Richtlinien**: Spezifische Anforderungen für Antworten\n\n### 💡 Tipp\nLeeres Feld behält das aktuelle Verhalten des Experten bei. Nur bearbeiten, wenn Sie ändern möchten, wie sie antworten!"
+    },
+    "temperature": {
+      "fixed_for_openai": "Fix auf 1.0 für OpenAI-Modelle",
+      "openai_warning": "OpenAI-Modelle unterstützen nur einen Temperaturwert von 1.0",
+      "help_creativity": "Steuert Antwort-Kreativität und Fokus",
+      "recommended_values": "Empfohlene Werte",
+      "use_case_guidelines": "Anwendungsfall-Richtlinien:",
+      "coding": "Codierung/Mathematik (Präzision erforderlich)",
+      "data_analysis": "Datenanalyse ( ausgewogene Interpretation)",
+      "conversation": "Gespräch/Übersetzung (natürliche Kommunikation)",
+      "creative_writing": "Kreatives Schreiben/Poesie (maximale Kreativität)",
+      "based_on_docs": "Basierend auf der offiziellen DeepSeek-Dokumentation"
+    },
+    "llm_config": {
+      "title": "LLM-Anbieter & Modell",
+      "default_provider": "Standard-Anbieter",
+      "default_model": "Standard-Modell",
+      "thinking_mode_level": "Denkmodus-Stufe",
+      "default_provider_help": "Der Standard-LLM-Anbieter für neue Experten",
+      "default_model_help": "Das Standard-{provider}-Modell für neue Experten",
+      "thinking_mode_help": "Standard-Reasoning-Aufwandlevel für neue OpenAI-Experten",
+      "provider_help": "Wählen Sie den LLM-Anbieter für diesen Experten",
+      "model_help": "Wählen Sie das zu verwendende {provider}-Modell",
+      "thinking_mode_help_expert": "Reasoning-Aufwandlevel für OpenAI-Modelle auswählen"
+    }
+  },
+  "links": {
+    "deepseek_chat": "https://chat.deepseek.com/",
+    "deepseek_platform": "https://platform.deepseek.com/usage",
+    "openai_chat": "https://chatgpt.com/",
+    "openai_platform": "https://platform.openai.com/usage",
+    "zai_chat": "https://chat.z.ai/",
+    "zai_platform": "https://z.ai/manage-apikey/subscription",
+    "zai_referral": "https://z.ai/subscribe?ic=JGTYCX7ZO7",
+    "github_codespaces": "https://codespaces.new/fossler/expertgpts"
+  },
+  "sidebar": {
+    "model_settings": "Modelleinstellungen",
+    "clear_chat_history": "Chat-Verlauf löschen",
+    "model": "Modell",
+    "thinking_mode": "Denkmodus",
+    "temperature": "Temperatur",
+    "context_usage": "Kontextnutzung",
+    "see_breakdown": "Aufschlüsselung anzeigen",
+    "system_prompt": "System-Prompt",
+    "chat_messages": "Chat-Nachrichten",
+    "save_settings": "Einstellungen speichern",
+    "disabled": "Deaktiviert",
+    "enabled": "Aktiviert",
+    "no_api_key_warning": "Kein API-Schlüssel für {provider} gefunden. Bitte fügen Sie ihn in den Einstellungen hinzu.",
+    "go_to_settings_api_key": "Gehen Sie zu **Einstellungen → 🔑 API-Schlüssel** und wählen Sie {provider}, um Ihren API-Schlüssel hinzuzufügen.",
+    "config_not_found": "Konfiguration für Experte nicht gefunden: {expert_id}",
+    "total_tokens": "Gesamt: {total} / {max} Tokens",
+    "of_tokens": "von {max} Tokens"
   },
   "experts": {
-    "general_assistant": {
-      "name": "Allgemeiner Assistent",
-      "description": "Ein hilfreicher allgemeiner Assistent für alltägliche Fragen und Aufgaben."
-    },
-    "python_expert": {
-      "name": "Python-Experte",
-      "description": "Experte für Python-Programmierung, Softwareentwicklung, Debugging und Best Practices."
-    },
-    "data_scientist": {
-      "name": "Datenwissenschaftler",
-      "description": "Experte für Datenanalyse, maschinelles Lernen, Statistik und Datenvisualisierung."
-    },
-    "writing_assistant": {
-      "name": "Schreibassistent",
-      "description": "Experte für Schreiben, Redigieren und Contentschöpfung."
-    },
-    "linux_admin": {
-      "name": "Linux-Systemadministrator",
-      "description": "Experte für Linux-Systemadministration, Shell-Scripting und Serververwaltung."
-    },
-    "translation_expert": {
-      "name": "Übersetzungsexperte",
-      "description": "Experte für Übersetzungen zwischen Deutsch und Englisch."
-    },
-    "spell_checker": {
-      "name": "Rechtschreibprüfung",
-      "description": "Experte für Rechtschreibprüfung und Textkorrektur in mehreren Sprachen."
+    "management": {
+      "title": "Expertenverwaltung",
+      "description_label": "Beschreibung",
+      "expert_behavior": "Expertenverhalten",
+      "actions": "Aktionen",
+      "temperature": "Temperatur: {temp}",
+      "reasoning_effort": "Reasoning Aufwand: {level}",
+      "thinking_mode_enabled": "Thinking-Modus aktiviert",
+      "confirm_delete": "Möchten Sie den Experten '{name}' wirklich löschen?"
     }
   }
 }

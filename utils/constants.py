@@ -143,61 +143,130 @@ SYSTEM_PROMPT_CACHE_TTL = 300
 
 
 # Documentation Content
-EXPERT_BEHAVIOR_DOCS = """
-### 🎯 Why This Field Matters Most
+EXPERT_BEHAVIOR_DOCS = """### Why is the Expert Behavior field important?
 
-The behavior instructions define your expert's entire approach:
-- **Tone**: Friendly, professional, casual, formal?
-- **Expertise**: General overview or deep technical details?
-- **Format**: Code examples, step-by-step, conversational?
-- **Constraints**: What should the expert NOT do?
-- **Guidelines**: Specific requirements for responses
+The **system prompt** is the heart of your expert. It defines everything about how your expert will behave:
+- **Tone and personality**: Friendly, professional, humorous, serious?
+- **Expertise level**: Beginner-friendly explanations vs. technical deep-dives?
+- **Communication style**: Concise answers vs. detailed explanations with examples?
+- **Domain focus**: Specific areas of expertise to focus on
+- **Constraints**: What the expert should NOT do (e.g., "Don't provide legal advice")
 
-### 📝 Example: Python Expert
+#### Examples
 
+**Beginner-Friendly Expert:**
 ```
-You are a Python expert with 15 years of experience.
-- Provide clean, PEP 8-compliant code with type hints and docstrings
-- Explain concepts clearly with practical examples
-- Warn about common pitfalls and best practices
-- Suggest helpful libraries when appropriate
-```
+You are a Python Expert who specializes in teaching programming to beginners.
 
-### 📝 Example: Legal Advisor
-
-```
-You are a legal assistant providing general legal information.
-- Always include a disclaimer: "I am not a lawyer, this is not legal advice"
-- Be thorough but cautious in recommendations
-- Suggest consulting a qualified attorney for specific legal matters
-- Provide general legal concepts and frameworks
+Your communication style:
+- Use simple, clear language
+- Provide code examples with detailed comments
+- Explain concepts step-by-step
+- Avoid jargon unless necessary, and explain it when used
+- Encourage questions and learning
 ```
 
-### 📝 Example: Writing Coach
+**Technical Expert:**
+```
+You are a Python Expert specializing in advanced Python programming and software architecture.
 
+Your expertise includes:
+- Design patterns and best practices
+- Performance optimization
+- Testing strategies (pytest, unittest)
+- Code review and refactoring
+- Enterprise Python applications
+
+Provide concise, technical answers with code examples.
 ```
-You are an encouraging writing coach.
-- Ask questions to understand the writer's goals
-- Provide specific, actionable feedback
-- Balance praise with constructive criticism
-- Suggest resources for improvement
-- Be patient and supportive
+
+**Creative Writing Assistant:**
 ```
+You are a creative writing expert who helps authors improve their craft.
+
+Your approach:
+- Provide constructive, specific feedback
+- Suggest creative alternatives and improvements
+- Explain storytelling techniques and narrative devices
+- Encourage experimentation with different styles
+- Balance critique with encouragement
+```
+
+#### Tips for Great Results
+1. **Be specific** about the expert's role and expertise
+2. **Define the communication style** clearly (tone, detail level)
+3. **Set expectations** for what the expert should focus on
+4. **Include constraints** if needed (what NOT to do)
+5. **Keep it concise** but comprehensive enough to guide behavior
+
+Remember: The more specific and clear your system prompt, the better your expert will perform!
 """
 
-EXPERT_BEHAVIOR_DOCS_EDIT = """
-### 🎯 Why This Field Matters Most
 
-The behavior instructions define your expert's entire approach:
-- **Tone**: Friendly, professional, casual, formal?
-- **Expertise**: General overview or deep technical details?
-- **Format**: Code examples, step-by-step, conversational?
-- **Constraints**: What should the expert NOT do?
-- **Guidelines**: Specific requirements for responses
+EXPERT_BEHAVIOR_DOCS_EDIT = """### Why is this important?
 
-### 💡 Tip
-Leaving this empty will keep the expert's current behavior. Only edit if you want to change how they respond!
+The **system prompt** defines your expert's behavior, expertise, and communication style. Editing it allows you to:
+- **Refine behavior**: Improve how your expert responds based on experience
+- **Add expertise**: Expand the domain knowledge or specialize further
+- **Adjust tone**: Make responses more formal, casual, technical, or friendly
+- **Set boundaries**: Define what the expert should NOT do
+
+#### Quick Guidelines
+
+✅ **Good edits:**
+- Add new areas of expertise
+- Refine communication style
+- Add constraints or guidelines
+- Clarify the expert's role
+
+❌ **Avoid:**
+- Making it too vague or generic
+- Removing key role definitions
+- Making it overly long (experts should stay focused)
+
+#### Example Edit
+
+**Original:**
+```
+You are a Python Expert who helps with Python programming questions.
+```
+
+**Improved:**
+```
+You are a Python Expert specializing in data science and machine learning.
+
+Your expertise includes:
+- Data analysis with pandas and numpy
+- Machine learning with scikit-learn
+- Data visualization with matplotlib and seaborn
+- Jupyter notebooks and best practices
+
+Provide clear explanations with code examples, and suggest best practices
+for data science projects.
+```
+
+**Pro tip**: Test your expert after editing to ensure it behaves as expected!
 """
+
+
+def get_expert_behavior_docs():
+    """Get translated expert behavior documentation for add chat dialog.
+
+    Returns:
+        str: Markdown-formatted documentation about expert behavior field
+    """
+    from utils.i18n import i18n
+    return i18n.t("dialogs.add_chat.expert_behavior_docs")
+
+
+def get_expert_behavior_docs_edit():
+    """Get translated expert behavior documentation for edit expert dialog.
+
+    Returns:
+        str: Markdown-formatted documentation about expert behavior field (shorter version)
+    """
+    from utils.i18n import i18n
+    return i18n.t("dialogs.edit_expert.expert_behavior_docs_edit")
 
 
 # LLM Provider Helper Functions

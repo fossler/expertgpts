@@ -42,7 +42,10 @@
       "secure_secrets_desc": "API keys stored in `.streamlit/secrets.toml`",
       "custom_themes": "Customizable Themes",
       "custom_themes_desc": "Personalize the app appearance"
-    }
+    },
+    "chat_input_placeholder": "Ask the expert...",
+    "toolbox": "Toolbox",
+    "status": "Status"
   },
   "buttons": {
     "add_chat": "Add Chat",
@@ -54,12 +57,31 @@
     "go_to_settings": "Go to Settings",
     "confirm": "Confirm",
     "clear": "Clear",
-    "reset": "Reset"
+    "reset": "Reset",
+    "save_changes": "Save Changes",
+    "add_new_chat": "Add new Chat",
+    "save_defaults": "Save Defaults",
+    "save_apply_theme": "Save & Apply Theme",
+    "edit": "Edit",
+    "yes_delete": "Yes, Delete",
+    "yes_reset_everything": "Yes, Reset Everything"
   },
   "status": {
     "api_key_configured": "API key configured",
     "api_key_not_set": "API key not set",
-    "no_api_key": "No API key found for {provider}"
+    "no_api_key": "No API key found for {provider}",
+    "api_key_saved_in_secrets": "{provider} API key saved in secrets.toml",
+    "no_api_key_in_secrets": "No {provider} API key in secrets.toml",
+    "api_key_available": "{provider} API key is available",
+    "api_key_not_set_warning": "{provider} API key not set",
+    "application_will_rerun": "The application will now rerun to load the new key.",
+    "found_experts": "Found {count} expert agent(s)",
+    "refreshing": "Refreshing...",
+    "recreating_experts": "Recreating example experts...",
+    "restarting_application": "Restarting application...",
+    "expert_updated": "Expert '{name}' updated successfully!",
+    "expert_deleted": "Expert '{name}' deleted successfully!",
+    "theme_saved_reloading": "Theme saved! Reloading page..."
   },
   "forms": {
     "expert_name": "Expert Name",
@@ -73,7 +95,14 @@
     "custom_system_prompt": "Customize Expert Behavior",
     "custom_system_prompt_placeholder": "How should this expert respond? (Optional)\n\nLeave empty to auto-generate from description.\n\nExample: \"Provide clear, step-by-step explanations with code examples...\"",
     "allowed_characters": "Allowed characters",
-    "allowed_characters_desc": "Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)"
+    "allowed_characters_desc": "Letters, numbers, spaces, underscores (_), hyphens (-), and dots (.)",
+    "expert_id": "Expert ID",
+    "buttons_elements": "Buttons and interactive Elements",
+    "background_color": "Background Color",
+    "secondary_background": "Secondary Background",
+    "text_color": "Text Color",
+    "select_theme": "Select a theme to preview",
+    "color_preview": "Color Preview"
   },
   "settings": {
     "title": "Settings",
@@ -82,59 +111,225 @@
     "theme": "Theme",
     "experts": "Experts",
     "language": "Language",
-    "select_language": "Select Language"
+    "select_language": "Select Language",
+    "default_llm": "Default LLM",
+    "danger_zone": "Danger Zone",
+    "about": "About",
+    "sections": {
+      "general": "General",
+      "api_key": "API Key",
+      "default_llm": "Default LLM",
+      "expert_management": "Expert Management",
+      "danger_zone": "Danger Zone",
+      "about": "About"
+    }
   },
   "language": {
     "title": "Language",
     "select": "Select Language",
     "current_language": "Current Language",
-    "available_languages": "Available Languages"
+    "available_languages": "Available Languages",
+    "latin_script": "Latin Script",
+    "cyrillic_script": "Cyrillic Script",
+    "han_script": "Chinese (Han Script)"
   },
   "errors": {
     "required_fields": "Please fill in all required fields.",
     "invalid_name": "Invalid expert name",
     "error_creating_expert": "Error creating expert",
-    "expert_exists": "An expert named '{name}' already exists. Please use a different name or delete the existing expert first."
+    "expert_exists": "An expert named '{name}' already exists. Please use a different name or delete the existing expert first.",
+    "error_saving_api_key": "Error saving API key: {error}",
+    "error_clearing_api_key": "Error clearing API key: {error}",
+    "expert_not_found": "Expert not found: {expert_id}",
+    "error_updating_expert": "Error updating expert: {error}",
+    "error_deleting_expert": "Error deleting expert: {error}",
+    "error_recreating_experts": "Error recreating experts: {error}",
+    "error_resetting_application": "Error resetting application: {error}",
+    "expert_name_empty": "Expert name cannot be empty",
+    "expert_name_invalid_chars": "Expert name can only contain: {allowed}",
+    "error": "Error: {error}"
   },
   "success": {
     "expert_created": "Expert '{name}' created successfully!",
     "expert_deleted": "Expert '{name}' deleted successfully!",
     "api_key_saved": "API key saved successfully!",
-    "settings_saved": "Settings saved successfully!"
+    "api_key_cleared": "{provider} API key cleared successfully!",
+    "settings_saved": "Settings saved successfully!",
+    "defaults_saved": "Defaults saved! New experts will use {provider} - {model}",
+    "application_reset": "Application reset successfully!"
   },
   "info": {
     "navigating": "Navigating to your new expert...",
     "ai_generating": "AI-powered generation in progress...",
-    "first_run": "First Run Detected"
+    "first_run": "First Run Detected",
+    "select_llm_tip": "Select your LLM provider and model first, then fill in the expert details below.",
+    "set_api_key_to_create": "Set API key above to create experts",
+    "create_first_expert": "No expert agents found. Create your first expert from the Home page!",
+    "ai_powered_generation": "AI-powered generation in progress...",
+    "ai_powered_tip": "AI-powered generation! Leave empty to auto-generate a customized system prompt based on the description above. Provide your own for complete control.",
+    "manual_mode_tip": "Manual mode: API key not set, so AI generation is unavailable. Keep the existing behavior, or provide your own.",
+    "required_fields_hint": "* Required fields",
+    "context_length": "Context Length: {tokens} tokens",
+    "expert_behavior_auto": "Auto-generated from description",
+    "language_prefix_auto": "The expert will automatically respond in the user's selected language."
+  },
+  "api_key": {
+    "title": "API Key Configuration",
+    "select_provider": "Select LLM Provider",
+    "enter_key": "Enter your {provider} API key here",
+    "enter_key_help": "Enter your {provider} API key. It will be saved to .streamlit/secrets.toml.",
+    "save_key": "Save API Key",
+    "clear_key": "Clear API Key",
+    "resources": "Resources",
+    "chat": "Chat",
+    "platform": "Platform",
+    "no_api_keys_configured": "No API keys configured. Please add API keys in the API Key tab first."
+  },
+  "default_llm": {
+    "title": "Default LLM Settings",
+    "description": "These defaults will be used when creating new experts. You can still customize each expert individually.",
+    "default_provider": "Default Provider",
+    "default_model": "Default Model",
+    "select_thinking_mode": "Select Thinking Mode Level",
+    "thinking_mode": "Thinking Mode",
+    "default_provider_help": "The default LLM provider for new experts",
+    "default_model_help": "The default {provider} model for new experts",
+    "thinking_mode_help": "Default reasoning effort level for new OpenAI experts",
+    "thinking_mode_help_zai": "New experts will have thinking mode enabled by default",
+    "select_thinking_mode_help": "Select reasoning effort level for OpenAI models"
   },
   "experts": {
-    "general_assistant": {
-      "name": "General Assistant",
-      "description": "A helpful general-purpose assistant for everyday questions and tasks."
-    },
-    "python_expert": {
-      "name": "Python Expert",
-      "description": "Expert in Python programming, software development, debugging, and best practices."
-    },
-    "data_scientist": {
-      "name": "Data Scientist",
-      "description": "Expert in data analysis, machine learning, statistics, and data visualization."
-    },
-    "writing_assistant": {
-      "name": "Writing Assistant",
-      "description": "Expert in writing, editing, and content creation."
-    },
-    "linux_admin": {
-      "name": "Linux System Admin",
-      "description": "Expert in Linux system administration, shell scripting, and server management."
-    },
-    "translation_expert": {
-      "name": "Translation Expert",
-      "description": "Expert in translating texts between German and English."
-    },
-    "spell_checker": {
-      "name": "Spell Checker",
-      "description": "Expert in spell checking and text correction across multiple languages."
+    "management": {
+      "title": "Expert Management",
+      "description_label": "Description",
+      "expert_behavior": "Expert Behavior",
+      "actions": "Actions",
+      "temperature": "Temperature: {temp}",
+      "reasoning_effort": "Reasoning Effort: {level}",
+      "thinking_mode_enabled": "Thinking mode enabled",
+      "confirm_delete": "Are you sure you want to delete expert '{name}'?"
     }
+  },
+  "theme": {
+    "title": "Theme Customization",
+    "description": "Customize the appearance of your ExpertGPTs application.",
+    "select_theme": "Select a theme to preview",
+    "modern_red": "Modern Red",
+    "ocean_blue": "Ocean Blue",
+    "forest_green": "Forest Green",
+    "royal_purple": "Royal Purple",
+    "dark_blue": "Dark Blue",
+    "dark_gray": "Dark Gray",
+    "custom": "Custom",
+    "buttons_elements_help": "Color for buttons and interactive elements",
+    "background_help": "Main background color of the app",
+    "secondary_background_help": "Background color for sidebar and other secondary areas",
+    "text_help": "Main text color throughout the app"
+  },
+  "danger_zone": {
+    "title": "Danger Zone",
+    "warning": "Warning: Actions in this section are irreversible and will delete all your data!",
+    "backup_title": "Backup Expert Configurations",
+    "backup_description": "Download All Configurations will:\n- Download all expert configuration files as a ZIP archive\n- Preserve your custom experts and their settings\n- Allow you to restore configurations later (manual import required)",
+    "download_button": "Download All Configurations (ZIP)",
+    "reset_title": "Reset Application",
+    "reset_description": "Reset Application will:\n- Delete all expert configurations\n- Delete all expert pages\n- Reset to the default example experts",
+    "reset_button": "Reset Application to Factory Defaults",
+    "final_warning": "FINAL WARNING: This will delete all experts and reset the application!"
+  },
+  "about": {
+    "title": "About",
+    "description": "A multi-expert AI chat application built with Streamlit, powered by the DeepSeek API.",
+    "version": "Version: 1.0.0",
+    "features_title": "Features:",
+    "feature_domain_experts": "Domain-specific expert AI agents",
+    "feature_customizable": "Customizable experts",
+    "feature_temperature": "Adjustable temperature settings",
+    "feature_chat_history": "Chat history management",
+    "feature_template_generation": "Template-based page generation",
+    "development": "Development:",
+    "developed_with": "This entire application was developed with",
+    "resources": "Resources:"
+  },
+  "links": {
+    "deepseek_chat": "https://chat.deepseek.com/",
+    "deepseek_platform": "https://platform.deepseek.com/usage",
+    "openai_chat": "https://chatgpt.com/",
+    "openai_platform": "https://platform.openai.com/usage",
+    "zai_chat": "https://chat.z.ai/",
+    "zai_platform": "https://z.ai/manage-apikey/subscription",
+    "zai_referral": "https://z.ai/subscribe?ic=JGTYCX7ZO7",
+    "github_codespaces": "https://codespaces.new/fossler/expertgpts"
+  },
+  "dialogs": {
+    "add_chat": {
+      "title": "Add Chat",
+      "api_key_required": "API Key Required",
+      "api_key_required_desc": "New chats can only be created when an API key is defined.\n\nPlease set at least one provider's API key in **Settings → API Key** tab first.",
+      "expert_configuration": "Expert Configuration",
+      "expert_behavior_title": "Expert Behavior (Advanced)",
+      "why_important_title": "Why is this important? + Examples",
+      "help_expert_name": "A descriptive name for the domain expert",
+      "help_expert_description": "Detailed description of what this expert specializes in",
+      "help_custom_behavior": "This defines everything about your expert - tone, expertise, style, and constraints",
+      "generating_system_prompt": "Generating AI-powered system prompt...",
+      "expert_behavior_docs": "### 🎯 Why This Field Matters Most\n\nThe behavior instructions define your expert's entire approach:\n- **Tone**: Friendly, professional, casual, formal?\n- **Expertise**: General overview or deep technical details?\n- **Format**: Code examples, step-by-step, conversational?\n- **Constraints**: What should the expert NOT do?\n- **Guidelines**: Specific requirements for responses\n\n### 📝 Example: Python Expert\n\n```\nYou are a Python expert with 15 years of experience.\n- Provide clean, PEP 8-compliant code with type hints and docstrings\n- Explain concepts clearly with practical examples\n- Warn about common pitfalls and best practices\n- Suggest helpful libraries when appropriate\n```\n\n### 📝 Example: Legal Advisor\n\n```\nYou are a legal assistant providing general legal information.\n- Always include a disclaimer: \"I am not a lawyer, this is not legal advice\"\n- Be thorough but cautious in recommendations\n- Suggest consulting a qualified attorney for specific legal matters\n- Provide general legal concepts and frameworks\n```\n\n### 📝 Example: Writing Coach\n\n```\nYou are an encouraging writing coach.\n- Ask questions to understand the writer's goals\n- Provide specific, actionable feedback\n- Balance praise with constructive criticism\n- Suggest resources for improvement\n- Be patient and supportive\n```"
+    },
+    "edit_expert": {
+      "title": "Edit Expert: {name}",
+      "expert_configuration": "Expert Configuration",
+      "expert_id_help": "Expert ID cannot be changed",
+      "expert_behavior_title": "Expert Behavior (Advanced)",
+      "ai_powered_regeneration": "AI-powered generation! Leave empty to regenerate a customized system prompt using AI. Provide your own for complete control.",
+      "manual_mode_regeneration": "Manual mode: API key not set, so AI generation is unavailable. Keep the existing behavior, or provide your own.",
+      "why_important_title": "Why is this important? + Examples",
+      "help_expert_name": "A descriptive name for the domain expert",
+      "help_expert_description": "Detailed description of what this expert specializes in",
+      "help_custom_behavior": "This defines everything about your expert - tone, expertise, style, and constraints",
+      "expert_behavior_docs_edit": "### 🎯 Why This Field Matters Most\n\nThe behavior instructions define your expert's entire approach:\n- **Tone**: Friendly, professional, casual, formal?\n- **Expertise**: General overview or deep technical details?\n- **Format**: Code examples, step-by-step, conversational?\n- **Constraints**: What should the expert NOT do?\n- **Guidelines**: Specific requirements for responses\n\n### 💡 Tip\nLeaving this empty will keep the expert's current behavior. Only edit if you want to change how they respond!"
+    },
+    "temperature": {
+      "fixed_for_openai": "Fixed at 1.0 for OpenAI models",
+      "openai_warning": "OpenAI models only support temperature value of 1.0",
+      "help_creativity": "Controls response creativity and focus",
+      "recommended_values": "Recommended values",
+      "use_case_guidelines": "Use Case Guidelines:",
+      "coding": "Coding/Math (precision required)",
+      "data_analysis": "Data Analysis (balanced interpretation)",
+      "conversation": "Conversation/Translation (natural communication)",
+      "creative_writing": "Creative Writing/Poetry (maximum creativity)",
+      "based_on_docs": "Based on official DeepSeek documentation"
+    },
+    "llm_config": {
+      "title": "LLM Provider & Model",
+      "default_provider": "Default Provider",
+      "default_model": "Default Model",
+      "thinking_mode_level": "Thinking Mode Level",
+      "default_provider_help": "The default LLM provider for new experts",
+      "default_model_help": "The default {provider} model for new experts",
+      "thinking_mode_help": "Default reasoning effort level for new OpenAI experts",
+      "provider_help": "Select the LLM provider for this expert",
+      "model_help": "Select the {provider} model to use",
+      "thinking_mode_help_expert": "Select reasoning effort level for OpenAI models"
+    }
+  },
+  "sidebar": {
+    "model_settings": "Model Settings",
+    "clear_chat_history": "Clear Chat History",
+    "model": "Model",
+    "thinking_mode": "Thinking Mode",
+    "temperature": "Temperature",
+    "context_usage": "Context Usage",
+    "see_breakdown": "See breakdown",
+    "system_prompt": "System Prompt",
+    "chat_messages": "Chat Messages",
+    "save_settings": "Save Settings",
+    "disabled": "Disabled",
+    "enabled": "Enabled",
+    "no_api_key_warning": "No API key found for {provider}. Please add it in Settings.",
+    "go_to_settings_api_key": "Go to **Settings → 🔑 API Key** and select {provider} to add your API key.",
+    "config_not_found": "Configuration not found for expert: {expert_id}",
+    "total_tokens": "Total: {total} / {max} tokens",
+    "of_tokens": "of {max} tokens"
   }
 }

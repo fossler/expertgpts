@@ -9,6 +9,7 @@ from utils.config_manager import ConfigManager
 from utils.llm_client import LLMClient
 from utils.session_state import initialize_shared_session_state
 from utils.token_manager import TokenManager
+from utils.i18n import i18n
 from utils.constants import (
     LLM_PROVIDERS,
     get_provider_display_name,
@@ -134,7 +135,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     model = metadata.get("model", "deepseek-chat")
     thinking_level = metadata.get("thinking_level", "none")
 
-    if prompt := st.chat_input("Ask the expert..."):
+    if prompt := st.chat_input(i18n.t("home.chat_input_placeholder")):
         # Validate API key format
         is_valid, error_msg = validate_api_key(api_key)
         if not is_valid:
@@ -169,12 +170,18 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 if provider == "openai":
                     api_temperature = 1.0
 
+                # Get system prompt from config and inject language prefix
+                # This ensures AI responds in the user's preferred language
+                raw_system_prompt = config.get("system_prompt", "")
+                language_prefix = i18n.get_language_prefix()
+                system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
+
                 response = ""
                 for chunk in client.chat_stream(
                     messages=api_messages,
                     temperature=api_temperature,
                     model=model,
-                    system_prompt=config.get("system_prompt"),
+                    system_prompt=system_prompt_with_lang,
                     thinking_level=thinking_level
                 ):
                     response += chunk
@@ -222,7 +229,7 @@ def clear_chat_history(messages_key: str):
     Args:
         messages_key: Session state key for this expert's messages
     """
-    if st.sidebar.button("🗑️ Clear Chat History"):
+    if st.sidebar.button(f"🗑️ {i18n.t('sidebar.clear_chat_history')}"):
         st.session_state[messages_key] = []
         st.rerun()
 
@@ -244,7 +251,7 @@ def display_model_settings(config: dict, messages_key: str):
     cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
 
     # Display model settings (editable)
-    st.sidebar.markdown("### ⚙️ Model Settings")
+    st.sidebar.markdown(f"### ⚙️ {i18n.t('sidebar.model_settings')}")
 
     # Model selection (filtered by current provider)
     from utils.constants import LLM_PROVIDERS, get_default_model_for_provider
@@ -252,7 +259,7 @@ def display_model_settings(config: dict, messages_key: str):
     current_model_index = model_options.index(model) if model in model_options else 0
 
     new_model = st.sidebar.selectbox(
-        "Model",
+        i18n.t("sidebar.model"),
         options=model_options,
         index=current_model_index,
         format_func=lambda x: get_model_display_name(provider, x),
@@ -265,29 +272,29 @@ def display_model_settings(config: dict, messages_key: str):
         effort_options = ["none", "low", "medium", "high", "xhigh"]
         effort_index = effort_options.index(thinking_level) if thinking_level in effort_options else 0
         new_thinking_level = st.sidebar.selectbox(
-            "Thinking Mode",
+            i18n.t("sidebar.thinking_mode"),
             options=effort_options,
             index=effort_index,
             format_func=lambda x: x.capitalize(),
             key=f"{EXPERT_ID}_thinking_selector_v{cache_version}"
         )
     elif provider == "zai":
-        thinking_options = ["Disabled", "Enabled"]
+        thinking_options = [i18n.t("sidebar.disabled"), i18n.t("sidebar.enabled")]
         option_index = 1 if thinking_level and thinking_level != "none" else 0
         selected_option = st.sidebar.selectbox(
-            "Thinking Mode",
+            i18n.t("sidebar.thinking_mode"),
             options=thinking_options,
             index=option_index,
             key=f"{EXPERT_ID}_thinking_selector_v{cache_version}"
         )
-        new_thinking_level = "medium" if selected_option == "Enabled" else "none"
+        new_thinking_level = "medium" if selected_option == i18n.t("sidebar.enabled") else "none"
     # DeepSeek: no thinking mode control
 
     # Temperature (editable, but disabled for OpenAI)
     current_temperature = config.get("temperature", 1.0)
     if provider == "openai":
         new_temperature = st.sidebar.number_input(
-            "Temperature",
+            i18n.t("sidebar.temperature"),
             min_value=0.0,
             max_value=2.0,
             value=1.0,
@@ -298,7 +305,7 @@ def display_model_settings(config: dict, messages_key: str):
         )
     else:
         new_temperature = st.sidebar.number_input(
-            "Temperature",
+            i18n.t("sidebar.temperature"),
             min_value=0.0,
             max_value=2.0,
             value=float(current_temperature),
@@ -319,7 +326,7 @@ def display_model_settings(config: dict, messages_key: str):
     if (new_model != model or
         new_thinking_level != thinking_level or
         new_temperature != float(current_temperature)):
-        if st.sidebar.button("💾 Save Settings", key=f"{EXPERT_ID}_save_settings_v{cache_version}", type="primary"):
+        if st.sidebar.button(f"💾 {i18n.t('sidebar.save_settings')}", key=f"{EXPERT_ID}_save_settings_v{cache_version}", type="primary"):
             try:
                 config_manager = ConfigManager()
                 config_manager.update_config(
@@ -355,7 +362,10 @@ def display_context_usage(config: dict, messages_key: str):
     max_tokens = get_max_tokens(provider, model)
 
     # Calculate usage statistics using TokenManager
-    system_prompt = config.get("system_prompt", "")
+    # Use system prompt with language prefix for accurate token counting
+    raw_system_prompt = config.get("system_prompt", "")
+    language_prefix = i18n.get_language_prefix()
+    system_prompt = f"{language_prefix}\n\n{raw_system_prompt}"
     messages = st.session_state.get(messages_key, [])
 
     try:
@@ -373,21 +383,24 @@ def display_context_usage(config: dict, messages_key: str):
         return
 
     # Display context usage in sidebar
-    st.sidebar.markdown(f"### 📊 Context Usage")
+    st.sidebar.markdown(f"### 📊 {i18n.t('sidebar.context_usage')}")
 
     # Display main stats
+    max_tokens_formatted = f"{stats['max_tokens']:,}"
     st.sidebar.markdown(
         f"{stats['color']} **{stats['usage_percent']:.1f}%** "
-        f"of {stats['max_tokens']:,} tokens"
+        f"{i18n.t('sidebar.of_tokens', max=max_tokens_formatted)}"
     )
+    total_tokens_formatted = f"{stats['total_tokens']:,}"
+    max_tokens_formatted = f"{stats['max_tokens']:,}"
     st.sidebar.caption(
-        f"Total: {stats['total_tokens']:,} / {stats['max_tokens']:,} tokens"
+        i18n.t('sidebar.total_tokens', total=total_tokens_formatted, max=max_tokens_formatted)
     )
 
     # Show breakdown
-    with st.sidebar.expander("See breakdown"):
-        st.caption(f"📝 System Prompt: {stats['system_tokens']:,} tokens")
-        st.caption(f"💬 Chat Messages: {stats['messages_tokens']:,} tokens")
+    with st.sidebar.expander(i18n.t("sidebar.see_breakdown")):
+        st.caption(f"📝 {i18n.t('sidebar.system_prompt')}: {stats['system_tokens']:,} tokens")
+        st.caption(f"💬 {i18n.t('sidebar.chat_messages')}: {stats['messages_tokens']:,} tokens")
 
 
 def main():
@@ -398,7 +411,7 @@ def main():
     config = load_expert_config()
 
     if not config:
-        st.error(f"Configuration not found for expert: {EXPERT_ID}")
+        st.error(i18n.t("sidebar.config_not_found", expert_id=EXPERT_ID))
         st.stop()
 
     # Get provider and model from config metadata
@@ -410,8 +423,9 @@ def main():
     api_key = api_keys.get(provider, "")
 
     if not api_key:
-        st.warning(f"⚠️ No API key found for {get_provider_display_name(provider)}. Please add it in Settings.")
-        st.info(f"Go to **Settings → 🔑 API Key** and select {get_provider_display_name(provider)} to add your API key.")
+        provider_name = get_provider_display_name(provider)
+        st.warning(f"⚠️ {i18n.t('sidebar.no_api_key_warning', provider=provider_name)}")
+        st.info(i18n.t('sidebar.go_to_settings_api_key', provider=provider_name))
         st.stop()
 
     # Display model settings (at the top of sidebar)
