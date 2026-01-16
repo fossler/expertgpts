@@ -1,0 +1,39 @@
+# Application Default Settings
+# This file persists your default LLM and other app-wide settings
+#
+# Copy this file to app_defaults.toml and customize it with your preferences
+# The app will automatically create app_defaults.toml when you save settings
+# through the UI, but you can also create/edit this file manually
+#
+# Location: .streamlit/app_defaults.toml
+# Permissions: 600 (read/write for owner only)
+
+[llm]
+# Default LLM provider
+# Options: deepseek, openai, zai
+provider = "deepseek"
+
+# Default model for the selected provider
+# DeepSeek: deepseek-chat, deepseek-reasoner
+# OpenAI: gpt-5, gpt-5-mini, gpt-5-nano
+# Z.AI: glm-4.7
+model = "deepseek-chat"
+
+# Default thinking/reasoning level for OpenAI models
+# Options: none, low, medium, high, xhigh
+# Only applies to OpenAI models; ignored for other providers
+thinking_level = "none"
+
+[language]
+# Default interface language
+# Options: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
+# The app will auto-detect your system language on first run
+code = "en"
+
+# Future sections could include:
+# [ui]
+# default_theme = "ocean_blue"
+#
+# [features]
+# auto_save_chats = true
+# show_context_usage = true

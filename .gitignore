@@ -23,9 +23,6 @@ env/
 .env/
 .env.*.local
 
-# Ignore Streamlit secrets file
-.streamlit/secrets.toml
-
 # Ignore IDE specific files
 .vscode/
 
@@ -37,10 +34,8 @@ env/
 .claude_config.json
 .claude/
 
-# Streamlit
-.streamlit/
-# But keep example files
-!.streamlit/*.example
+# Streamlit - keep everything except secrets.toml
+.streamlit/secrets.toml
 
 # Testing
 .pytest_cache/

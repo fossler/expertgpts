@@ -71,14 +71,13 @@ def get_theme_settings() -> dict:
     """Get current theme settings from config.toml.
 
     Returns:
-        dict: Dictionary with theme settings including theme_name and colors
+        dict: Dictionary with theme color settings
     """
     config_path = get_config_path()
 
     if not config_path.exists():
         # Return default values if config doesn't exist
         return {
-            "theme_name": "Custom",
             "primaryColor": "#6366F1",
             "backgroundColor": "#FFFFFF",
             "secondaryBackgroundColor": "#F3F4F6",
@@ -87,13 +86,91 @@ def get_theme_settings() -> dict:
 
     content = config_path.read_text()
 
-    # Parse the config file to extract theme settings
+    # Check if base parameter exists in config.toml
+    in_theme_section = False
+    base_path = None
+
+    for line in content.split('\n'):
+        line = line.strip()
+
+        # Check if we're in the [theme] section
+        if line == "[theme]":
+            in_theme_section = True
+            continue
+        elif line.startswith("[") and line != "[theme]":
+            in_theme_section = False
+            continue
+
+        # Look for base parameter
+        if in_theme_section and "=" in line:
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+
+            if key == "base":
+                # Load theme from external file
+                theme_file_path = Path(__file__).parent.parent / ".streamlit" / value
+                return load_theme_file(theme_file_path)
+
+    # If no base parameter, read colors directly from config.toml (legacy)
     theme_settings = {
-        "theme_name": "Custom",
         "primaryColor": "#FF6B6B",
         "backgroundColor": "#FFFFFF",
         "secondaryBackgroundColor": "#F0F2F6",
         "textColor": "#262730",
+    }
+
+    in_theme_section = False
+    for line in content.split('\n'):
+        line = line.strip()
+
+        # Check if we're in the [theme] section
+        if line == "[theme]":
+            in_theme_section = True
+            continue
+        elif line.startswith("[") and line != "[theme]":
+            in_theme_section = False
+            continue
+
+        # Parse theme color settings
+        if in_theme_section and "=" in line:
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+
+            # Store valid theme color settings
+            if key in theme_settings:
+                theme_settings[key] = value
+
+    return theme_settings
+
+
+def load_theme_file(theme_file_path: Path) -> dict:
+    """Load theme colors from external .toml file.
+
+    Args:
+        theme_file_path: Path to theme .toml file
+
+    Returns:
+        dict with primaryColor, backgroundColor, secondaryBackgroundColor, textColor
+    """
+    if not theme_file_path.exists():
+        # Return default values if theme file doesn't exist
+        return {
+            "primaryColor": "#6366F1",
+            "backgroundColor": "#FFFFFF",
+            "secondaryBackgroundColor": "#F3F4F6",
+            "textColor": "#1F2937",
+        }
+
+    content = theme_file_path.read_text()
+
+    # Default theme colors
+    theme_settings = {
+        "primaryColor": "#6366F1",
+        "backgroundColor": "#FFFFFF",
+        "secondaryBackgroundColor": "#F3F4F6",
+        "textColor": "#1F2937",
     }
 
     in_theme_section = False
@@ -114,32 +191,55 @@ def get_theme_settings() -> dict:
             key = key.strip()
             value = value.strip().strip('"').strip("'")
 
-            # Store all theme settings including theme_name
-            if key in theme_settings or key == "theme_name":
+            # Store valid theme color settings
+            if key in theme_settings:
                 theme_settings[key] = value
 
     return theme_settings
 
 
-def save_theme_settings(
-    theme_name: str = None,
-    primaryColor: str = None,
-    backgroundColor: str = None,
-    secondaryBackgroundColor: str = None,
-    textColor: str = None
+def update_custom_theme(
+    primaryColor: str,
+    backgroundColor: str,
+    secondaryBackgroundColor: str,
+    textColor: str
 ) -> None:
-    """Save theme settings to config.toml file.
+    """Update the custom.toml theme file with new colors.
 
     Args:
-        theme_name: Name of the theme (e.g., "Royal Purple", "Custom")
         primaryColor: Color for buttons and interactive elements
         backgroundColor: Main background color
         secondaryBackgroundColor: Background color for sidebar
         textColor: Main text color
+    """
+    custom_theme_path = Path(__file__).parent.parent / ".streamlit" / "themes" / "custom.toml"
+
+    # Create themes directory if it doesn't exist
+    custom_theme_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Write theme settings to custom.toml
+    content = f"""[theme]
+primaryColor = "{primaryColor}"
+backgroundColor = "{backgroundColor}"
+secondaryBackgroundColor = "{secondaryBackgroundColor}"
+textColor = "{textColor}"
+"""
+
+    custom_theme_path.write_text(content)
+
+    # Set secure permissions
+    set_secure_permissions(custom_theme_path)
+
+
+def save_theme_settings(base: str) -> None:
+    """Save theme base path to config.toml file.
+
+    Args:
+        base: Path to theme file (e.g., "themes/modern_red.toml")
 
     Note:
-        Only updates the fields that are provided (not None).
-        Preserves other settings in the config file.
+        Saves only the base parameter. All color settings are stored
+        in the external theme file. Preserves other settings in config.toml.
     """
     config_path = ensure_config_file_exists()
 
@@ -151,10 +251,10 @@ def save_theme_settings(
     new_lines = []
     in_theme_section = False
     theme_found = False
+    base_added = False
 
-    # Track which theme settings we've seen
-    theme_keys = {"theme_name", "primaryColor", "backgroundColor", "secondaryBackgroundColor", "textColor"}
-    seen_theme_settings = set()
+    # Theme color keys to remove when using base parameter
+    theme_color_keys = {"primaryColor", "backgroundColor", "secondaryBackgroundColor", "textColor"}
 
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -169,29 +269,19 @@ def save_theme_settings(
             # We've reached the next section
             in_theme_section = False
 
-        # If we're in the theme section, check for theme settings
+        # If we're in the theme section, process theme settings
         if in_theme_section and "=" in stripped:
             key = stripped.split("=", 1)[0].strip()
 
-            # Update the setting if a new value is provided
-            if key in theme_keys:
-                seen_theme_settings.add(key)
+            # Remove old color keys when switching to base parameter
+            if key in theme_color_keys:
+                continue  # Skip color keys (they're in the theme file now)
 
-                if key == "theme_name" and theme_name is not None:
-                    new_lines.append(f'{key} = "{theme_name}"')
-                    continue
-                elif key == "primaryColor" and primaryColor is not None:
-                    new_lines.append(f'{key} = "{primaryColor}"')
-                    continue
-                elif key == "backgroundColor" and backgroundColor is not None:
-                    new_lines.append(f'{key} = "{backgroundColor}"')
-                    continue
-                elif key == "secondaryBackgroundColor" and secondaryBackgroundColor is not None:
-                    new_lines.append(f'{key} = "{secondaryBackgroundColor}"')
-                    continue
-                elif key == "textColor" and textColor is not None:
-                    new_lines.append(f'{key} = "{textColor}"')
-                    continue
+            # Update or add base parameter
+            if key == "base":
+                new_lines.append(f'base = "{base}"')
+                base_added = True
+                continue
 
         new_lines.append(line)
 
@@ -199,41 +289,18 @@ def save_theme_settings(
     if not theme_found:
         new_lines.append("\n[theme]")
 
-    # Add any new theme settings that weren't in the file
-    theme_section_index = None
-    for i, line in enumerate(new_lines):
-        if line.strip() == "[theme]":
-            theme_section_index = i
-            break
+    # Add base parameter if not already added
+    if not base_added:
+        # Find the [theme] section
+        theme_section_index = None
+        for i, line in enumerate(new_lines):
+            if line.strip() == "[theme]":
+                theme_section_index = i
+                break
 
-    if theme_section_index is not None:
-        # Insert new settings after [theme] header
-        insert_position = theme_section_index + 1
-        settings_to_add = []
-
-        if "theme_name" not in seen_theme_settings and theme_name is not None:
-            settings_to_add.append(f'theme_name = "{theme_name}"')
-            seen_theme_settings.add("theme_name")
-
-        if "primaryColor" not in seen_theme_settings and primaryColor is not None:
-            settings_to_add.append(f'primaryColor = "{primaryColor}"')
-            seen_theme_settings.add("primaryColor")
-
-        if "backgroundColor" not in seen_theme_settings and backgroundColor is not None:
-            settings_to_add.append(f'backgroundColor = "{backgroundColor}"')
-            seen_theme_settings.add("backgroundColor")
-
-        if "secondaryBackgroundColor" not in seen_theme_settings and secondaryBackgroundColor is not None:
-            settings_to_add.append(f'secondaryBackgroundColor = "{secondaryBackgroundColor}"')
-            seen_theme_settings.add("secondaryBackgroundColor")
-
-        if "textColor" not in seen_theme_settings and textColor is not None:
-            settings_to_add.append(f'textColor = "{textColor}"')
-            seen_theme_settings.add("textColor")
-
-        # Insert the new settings
-        for setting in reversed(settings_to_add):
-            new_lines.insert(insert_position, setting)
+        if theme_section_index is not None:
+            # Insert base parameter after [theme] header
+            new_lines.insert(theme_section_index + 1, f'base = "{base}"')
 
     # Write back to file
     new_content = '\n'.join(new_lines)
@@ -244,10 +311,5 @@ def save_theme_settings(
 
 
 def reset_to_default_theme() -> None:
-    """Reset theme settings to default values."""
-    save_theme_settings(
-        primaryColor="#6366F1",
-        backgroundColor="#FFFFFF",
-        secondaryBackgroundColor="#F3F4F6",
-        textColor="#1F2937"
-    )
+    """Reset theme settings to default theme (ocean_blue)."""
+    save_theme_settings(base=".streamlit/themes/ocean_blue.toml")
