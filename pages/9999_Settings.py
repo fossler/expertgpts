@@ -345,28 +345,41 @@ def render_general_settings_section():
 
     # Initialize session state for selected theme KEY (language-independent) and colors
     if "selected_theme_key" not in st.session_state:
-        # Read current theme from config file (now includes theme_name!)
+        # Read current theme colors from config file (theme_name not supported by Streamlit)
         current_config = config_toml_manager.get_theme_settings()
 
-        # Get the saved theme name directly (defaults to "custom" if not set)
-        saved_theme_name = current_config.get("theme_name", "custom")
+        # Get current colors from config
+        current_primary = current_config.get("primaryColor", "#F59E0B")
+        current_background = current_config.get("backgroundColor", "#FFFBEB")
+        current_secondary = current_config.get("secondaryBackgroundColor", "#FEF3C7")
+        current_text = current_config.get("textColor", "#78350F")
 
-        # Validate that the saved theme name exists in our predefined themes
-        if saved_theme_name in themes and saved_theme_name != "custom":
-            # Use the saved theme directly - no color comparison needed!
-            theme_data = themes[saved_theme_name]
-            st.session_state.selected_theme_key = saved_theme_name
-            st.session_state.theme_primary_color = theme_data["primary"]
-            st.session_state.theme_background_color = theme_data["background"]
-            st.session_state.theme_secondary_background_color = theme_data["secondary"]
-            st.session_state.theme_text_color = theme_data["text"]
+        # Try to match current colors against predefined themes
+        matched_theme = None
+        for theme_key, theme_data in themes.items():
+            if theme_key == "custom":
+                continue
+            if (theme_data["primary"] == current_primary and
+                theme_data["background"] == current_background and
+                theme_data["secondary"] == current_secondary and
+                theme_data["text"] == current_text):
+                matched_theme = theme_key
+                break
+
+        if matched_theme:
+            # Found a matching predefined theme
+            st.session_state.selected_theme_key = matched_theme
+            st.session_state.theme_primary_color = themes[matched_theme]["primary"]
+            st.session_state.theme_background_color = themes[matched_theme]["background"]
+            st.session_state.theme_secondary_background_color = themes[matched_theme]["secondary"]
+            st.session_state.theme_text_color = themes[matched_theme]["text"]
         else:
             # Use Custom theme with current config values
             st.session_state.selected_theme_key = "custom"
-            st.session_state.theme_primary_color = current_config.get("primaryColor", "#F59E0B")
-            st.session_state.theme_background_color = current_config.get("backgroundColor", "#FFFBEB")
-            st.session_state.theme_secondary_background_color = current_config.get("secondaryBackgroundColor", "#FEF3C7")
-            st.session_state.theme_text_color = current_config.get("textColor", "#78350F")
+            st.session_state.theme_primary_color = current_primary
+            st.session_state.theme_background_color = current_background
+            st.session_state.theme_secondary_background_color = current_secondary
+            st.session_state.theme_text_color = current_text
 
     # Get the current display name for the selected theme key (in current language)
     current_theme_display = f"{themes[st.session_state.selected_theme_key]['icon']} {i18n.t(f'theme.{st.session_state.selected_theme_key}')}"
@@ -469,12 +482,8 @@ def render_general_settings_section():
             secondary_key = f"secondary_{st.session_state.selected_theme_key}"
             text_key = f"text_{st.session_state.selected_theme_key}"
 
-            # Get the current theme name directly from session state
-            current_theme_name = st.session_state.selected_theme_key
-
-            # Save to config.toml
+            # Save to config.toml (theme_name is not saved - not supported by Streamlit)
             config_toml_manager.save_theme_settings(
-                theme_name=current_theme_name,
                 primaryColor=st.session_state[primary_key],
                 backgroundColor=st.session_state[background_key],
                 secondaryBackgroundColor=st.session_state[secondary_key],
