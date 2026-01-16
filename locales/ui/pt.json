@@ -241,9 +241,9 @@
     "feature_temperature": "Configurações de temperatura ajustáveis",
     "feature_chat_history": "Gerenciamento de histórico de chat",
     "feature_template_generation": "Geração de páginas baseada em modelos",
-    "development": "Desenvolvimento:",
-    "developed_with": "Este aplicativo inteiro foi desenvolvido com",
-    "resources": "Recursos:"
+    "development": "Desenvolvimento",
+    "developed_with": "Toda esta aplicação foi desenvolvida com [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
+    "resources": "Recursos"
   },
   "dialogs": {
     "add_chat": {

@@ -1064,7 +1064,7 @@ def render_about_section():
     - 💾 {i18n.t('about.feature_chat_history')}
     - 📋 {i18n.t('about.feature_template_generation')}
 
-    **{i18n.t('about.development')}:**
+    ### {i18n.t('about.development')}
     """)
 
     # Display z.ai icon and link
@@ -1097,7 +1097,7 @@ def render_about_section():
         st.empty()
 
     st.markdown(f"""
-    **{i18n.t('about.resources')}:**
+    ### {i18n.t('about.resources')}
     """)
     st.markdown("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")
 

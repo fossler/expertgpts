@@ -241,9 +241,9 @@
     "feature_temperature": "Tetapan suhu boleh disesuaikan",
     "feature_chat_history": "Pengurusan sejarah chat",
     "feature_template_generation": "Penjanaan halaman berasaskan templat",
-    "development": "Pembangunan:",
-    "developed_with": "Seluruh aplikasi ini dibangunkan dengan",
-    "resources": "Sumber:"
+    "development": "Pembangunan",
+    "developed_with": "Seluruh aplikasi ini dibangunkan dengan [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
+    "resources": "Sumber"
   },
   "dialogs": {
     "add_chat": {

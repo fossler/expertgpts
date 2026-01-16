@@ -241,9 +241,9 @@
     "feature_temperature": "可调节的温度设置",
     "feature_chat_history": "聊天记录管理",
     "feature_template_generation": "基于模板的页面生成",
-    "development": "开发：",
-    "developed_with": "整个应用程序是使用以下工具开发的",
-    "resources": "资源："
+    "development": "开发",
+    "developed_with": "整个应用程序是使用 [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7) 开发的",
+    "resources": "资源"
   },
   "dialogs": {
     "add_chat": {

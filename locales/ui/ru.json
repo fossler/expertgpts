@@ -241,9 +241,9 @@
     "feature_temperature": "Настраиваемые настройки температуры",
     "feature_chat_history": "Управление историей чата",
     "feature_template_generation": "Генерация страниц на основе шаблонов",
-    "development": "Разработка:",
-    "developed_with": "Всё приложение было разработано с помощью",
-    "resources": "Ресурсы:"
+    "development": "Разработка",
+    "developed_with": "Все это приложение было разработано с [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
+    "resources": "Ресурсы"
   },
   "dialogs": {
     "add_chat": {

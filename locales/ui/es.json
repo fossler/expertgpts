@@ -241,9 +241,9 @@
     "feature_temperature": "Configuraciones de temperatura ajustables",
     "feature_chat_history": "Gestión del historial de chat",
     "feature_template_generation": "Generación de páginas basada en plantillas",
-    "development": "Desarrollo:",
-    "developed_with": "Toda esta aplicación fue desarrollada con",
-    "resources": "Recursos:"
+    "development": "Desarrollo",
+    "developed_with": "Toda esta aplicación fue desarrollada con [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
+    "resources": "Recursos"
   },
   "links": {
     "deepseek_chat": "https://chat.deepseek.com/",

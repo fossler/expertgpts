@@ -241,9 +241,9 @@
     "feature_temperature": "Ayarlanabilir sıcaklık ayarları",
     "feature_chat_history": "Sohbet geçmişi yönetimi",
     "feature_template_generation": "Şablon tabanlı sayfa oluşturma",
-    "development": "Geliştirme:",
-    "developed_with": "Bu tüm uygulama şu şekilde geliştirildi:",
-    "resources": "Kaynaklar:"
+    "development": "Geliştirme",
+    "developed_with": "Tüm uygulama [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7) ile geliştirilmiştir",
+    "resources": "Kaynaklar"
   },
   "links": {
     "deepseek_chat": "https://chat.deepseek.com/",
