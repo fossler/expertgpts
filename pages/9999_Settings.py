@@ -255,11 +255,22 @@ def render_default_llm_settings_section():
 
     # Save defaults button
     if st.button(f"💾 {i18n.t('buttons.save_defaults')}", type="primary", key="save_defaults"):
+        from utils.app_defaults_manager import save_llm_defaults
+
+        # Update session state
         st.session_state.default_provider = default_provider
         st.session_state.default_model = default_model
         st.session_state.default_thinking_level = default_thinking_level
 
-        st.success(f"✅ {i18n.t('success.defaults_saved', provider=get_provider_display_name(default_provider), model=get_model_display_name(default_provider, default_model))}")
+        # Persist to disk
+        saved = save_llm_defaults(default_provider, default_model, default_thinking_level)
+
+        if saved:
+            st.success(f"✅ {i18n.t('success.defaults_saved', provider=get_provider_display_name(default_provider), model=get_model_display_name(default_provider, default_model))}")
+        else:
+            st.warning(f"⚠️ {i18n.t('success.defaults_saved', provider=get_provider_display_name(default_provider), model=get_model_display_name(default_provider, default_model))}")
+            st.caption("ℹ️ Settings saved to session but could not persist to disk.")
+
         st.rerun()
 
 

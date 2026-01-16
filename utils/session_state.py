@@ -32,7 +32,7 @@ def initialize_shared_session_state():
 
     # Initialize language with saved preference or auto-detection
     if "language" not in st.session_state:
-        from utils.config_toml_manager import get_language_preference, save_language_preference
+        from utils.app_defaults_manager import get_language_preference, save_language_preference
 
         # Try to load saved preference first
         saved_lang = get_language_preference()
@@ -45,7 +45,7 @@ def initialize_shared_session_state():
             detected_lang = i18n.detect_system_language()
             st.session_state.language = detected_lang
 
-            # Save detected language to config for next time
+            # Save detected language to app_defaults for next time
             save_language_preference(detected_lang)
 
     # Initialize API keys dictionary in session state (from secrets if not set)
@@ -64,13 +64,14 @@ def initialize_shared_session_state():
                 pass
 
     # Initialize default LLM settings in session state
+    # Try to load from app_defaults.toml first, fall back to constants
+    from utils.app_defaults_manager import get_llm_defaults
+
     if "default_provider" not in st.session_state:
-        st.session_state.default_provider = DEFAULT_LLM_PROVIDER
-
-    if "default_model" not in st.session_state:
-        st.session_state.default_model = DEFAULT_LLM_MODEL
-
-    if "default_thinking_enabled" not in st.session_state:
+        llm_defaults = get_llm_defaults()
+        st.session_state.default_provider = llm_defaults["provider"]
+        st.session_state.default_model = llm_defaults["model"]
+        st.session_state.default_thinking_level = llm_defaults["thinking_level"]
         st.session_state.default_thinking_enabled = DEFAULT_THINKING_ENABLED
 
 

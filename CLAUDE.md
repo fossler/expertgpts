@@ -255,6 +255,7 @@ page_path = page_generator.generate_page(
 - **`utils/`**: Shared business logic - modular, testable components
   - **`utils/secrets_manager.py`**: Manages `.streamlit/secrets.toml` for API key storage
   - **`utils/config_toml_manager.py`**: Manages `.streamlit/config.toml` for theme settings
+  - **`utils/app_defaults_manager.py`**: Manages `.streamlit/app_defaults.toml` for user preferences (LLM defaults, language)
   - **`utils/session_state.py`**: Manages shared session state initialization
   - **`utils/dialogs.py`**: Shared dialog components (DRY compliance)
   - **`utils/constants.py`**: Shared constants and documentation (DRY compliance)
@@ -266,8 +267,13 @@ page_path = page_generator.generate_page(
   - **`secrets.toml.example`**: Template file for manual setup
   - **`config.toml`**: Theme and appearance settings - **gitignored** (managed through Settings page)
   - **`config.toml.example`**: Template file for theme settings
+  - **`app_defaults.toml`**: User preferences (LLM defaults, language) - **gitignored** (auto-created by app)
+  - **`app_defaults.toml.example`**: Template file for app defaults
 
-**Important**: Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated. To recreate them, run `scripts/setup.py` or `scripts/reset_application.py`.
+**Important**:
+- Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated
+- To recreate them, run `scripts/setup.py` or `scripts/reset_application.py`
+- `.streamlit/app_defaults.toml` contains user preferences (not auto-generated, but gitignored for privacy)
 
 ## Key Implementation Details
 
@@ -367,6 +373,7 @@ ExpertGPTs supports 13 languages with a comprehensive i18n system:
 **Important i18n utilities:**
 - `utils/i18n.py`: `I18nManager` class with translation and language detection
 - `utils/helpers.py`: `translate_expert_name()` - Dynamic expert name translation
+- `utils/app_defaults_manager.py`: `get_language_preference()` / `save_language_preference()`
 - `scripts/update_translations.py`: Sync all locale files with `en.json`
 
 **Best Practices for i18n:**
@@ -393,6 +400,60 @@ lang = i18n.current_language
 ```
 
 **For detailed i18n documentation**, see `docs/I18N_GUIDE.md`
+
+### Application Defaults
+
+ExpertGPTs persists user preferences in `.streamlit/app_defaults.toml`:
+
+**What's Stored:**
+- **LLM Defaults**: Default provider, model, and thinking level
+- **Language**: Interface language preference
+- **Future**: UI preferences, feature flags, etc.
+
+**File Structure:**
+```toml
+[llm]
+provider = "deepseek"
+model = "deepseek-chat"
+thinking_level = "none"
+
+[language]
+code = "en"
+```
+
+**Key utilities:**
+- `utils/app_defaults_manager.py`: All app defaults persistence
+  - `get_llm_defaults()` / `save_llm_defaults()`
+  - `get_language_preference()` / `save_language_preference()`
+  - `has_app_defaults()` / `reset_app_defaults()`
+
+**How It Works:**
+1. **On startup**: `initialize_shared_session_state()` loads defaults from TOML
+2. **When changed**: Settings page saves to TOML on "Save" button click
+3. **Persistence**: Settings survive app restarts and browser closes
+
+**Security:**
+- File permissions: 600 (owner read/write only)
+- Location: `.streamlit/` (gitignored)
+- No secrets: Only preferences, not API keys
+
+**Example Usage:**
+```python
+from utils.app_defaults_manager import (
+    get_llm_defaults,
+    save_llm_defaults,
+    get_language_preference,
+    save_language_preference
+)
+
+# Load defaults
+llm = get_llm_defaults()
+lang = get_language_preference()
+
+# Save defaults
+save_llm_defaults("openai", "gpt-5", "medium")
+save_language_preference("de")
+```
 
 ## Common Pitfalls
 

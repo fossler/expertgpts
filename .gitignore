@@ -39,6 +39,8 @@ env/
 
 # Streamlit
 .streamlit/
+# But keep example files
+!.streamlit/*.example
 
 # Testing
 .pytest_cache/

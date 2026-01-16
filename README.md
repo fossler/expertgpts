@@ -35,12 +35,15 @@ expertgpts/
 │   ├── page_generator.py         # Page generation logic
 │   ├── deepseek_client.py        # DeepSeek API wrapper
 │   ├── secrets_manager.py        # Streamlit secrets management
-│   └── config_toml_manager.py    # Theme configuration management
+│   ├── config_toml_manager.py    # Theme configuration management
+│   └── app_defaults_manager.py   # User preferences management (LLM defaults, language)
 ├── .streamlit/
 │   ├── secrets.toml              # API keys and secrets (gitignored)
 │   ├── secrets.toml.example      # Template for secrets file
 │   ├── config.toml               # Theme settings (gitignored)
-│   └── config.toml.example       # Template for theme settings
+│   ├── config.toml.example       # Template for theme settings
+│   ├── app_defaults.toml         # User preferences (gitignored)
+│   └── app_defaults.toml.example # Template for app defaults
 ├── requirements.txt
 ├── scripts/                      # Administrative scripts
 │   ├── setup.py                 # Script to set up the application
@@ -94,28 +97,33 @@ ExpertGPTs uses a **clean three-layer architecture** for internationalization:
 
 1. **Auto-Detection**: First run detects system language automatically
 2. **Manual Selection**: Users can change language in Settings
-3. **Persistent Preference**: Language choice saved to `.streamlit/config.toml`
+3. **Persistent Preference**: Language choice saved to `.streamlit/app_defaults.toml`
 4. **AI Language Respect**: Experts automatically respond in user's language
 5. **No Duplication**: Expert content exists ONLY in YAML configs (not in locales)
 
 ### Language Preference
 
-The app stores your language preference in `.streamlit/config.toml`:
+The app stores your language preference in `.streamlit/app_defaults.toml`:
 
 ```toml
+[llm]
+provider = "deepseek"
+model = "deepseek-chat"
+thinking_level = "none"
+
 [language]
 code = "de"  # German
 ```
 
 **First Run:**
 - App auto-detects system language
-- Saves detected language to config
+- Saves detected language to `app_defaults.toml`
 - Starts app in detected language
 
 **Manual Change:**
 - Go to Settings → Language
 - Select your preferred language
-- Preference saved automatically
+- Preference saved to `app_defaults.toml`
 - App restarts in selected language
 
 ### Creating Multilingual Experts

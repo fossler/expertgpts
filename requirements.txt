@@ -9,6 +9,11 @@ openai>=1.12.0
 # YAML Configuration
 pyyaml>=6.0.1
 
+# TOML Configuration (for app_defaults.toml)
+# Python 3.11+ has tomllib built-in, tomli/tomli_w are fallbacks for older versions
+tomli>=2.0.1
+tomli_w>=1.2.0
+
 # Environment Variables
 python-dotenv>=1.0.0
 

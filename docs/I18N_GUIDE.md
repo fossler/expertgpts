@@ -124,12 +124,66 @@ def translate_expert_name(expert_name: str) -> str:
 
 Custom expert names (user-created) are displayed as-is without translation.
 
+### 4. Language Persistence
+
+**File**: `.streamlit/app_defaults.toml` - Managed by `utils/app_defaults_manager.py`
+
+Language preference is automatically saved when changed through the Settings page:
+
+```python
+# When user selects language in Settings
+from utils.app_defaults_manager import save_language_preference
+
+save_language_preference("de")  # Saves to app_defaults.toml
+```
+
+On app startup, language is loaded automatically:
+
+```python
+# utils/session_state.py - initialize_shared_session_state()
+from utils.app_defaults_manager import get_language_preference
+
+saved_lang = get_language_preference()
+if saved_lang:
+    st.session_state.language = saved_lang
+else:
+    # Auto-detect system language and save it
+    detected_lang = i18n.detect_system_language()
+    st.session_state.language = detected_lang
+    save_language_preference(detected_lang)
+```
+
+**File Structure**:
+```toml
+# .streamlit/app_defaults.toml
+
+[llm]
+provider = "deepseek"
+model = "deepseek-chat"
+thinking_level = "none"
+
+[language]
+code = "en"
+```
+
+**Benefits**:
+- ✅ Language preference persists across app restarts
+- ✅ Auto-detection on first run
+- ✅ Clean separation: user preferences in app_defaults.toml, theme in config.toml
+- ✅ Secure: 600 file permissions
+
 ---
 
 ## 📂 Translation File Structure
 
 ### Location
 ```
+.streamlit/
+├── app_defaults.toml         # User preferences (language, LLM defaults)
+├── app_defaults.toml.example # Template file for reference
+├── config.toml               # UI theme settings only
+└── config.toml.example       # Theme template file
+
 locales/ui/
 ├── en.json          # English (source of truth)
 ├── de.json          # German
@@ -143,7 +197,7 @@ locales/ui/
 ├── ms.json          # Malay
 ├── wyw.json         # Classical Chinese
 ├── yue.json         # Cantonese
-└── zh-CN.json       # Simplified Chinese
+├── zh-CN.json       # Simplified Chinese
 └── zh-TW.json       # Traditional Chinese
 ```
 
@@ -412,6 +466,7 @@ This syncs all locale files with `en.json`.
 |------|---------|
 | `utils/i18n.py` | I18nManager class, language prefix generation |
 | `utils/helpers.py` | Expert name translation function |
+| `utils/app_defaults_manager.py` | Language and LLM defaults persistence |
 | `templates/template.py` | Language prefix injection at runtime |
 | `utils/llm_client.py` | Language prefix in AI-powered generation |
 | `pages/9999_Settings.py` | Settings page with language selector |
