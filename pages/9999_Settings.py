@@ -1119,7 +1119,7 @@ def render_about_section():
         '<a href="https://www.buymeacoffee.com/MirzetKadic" target="_blank">'
         '<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" '
         'alt="Buy Me A Coffee" '
-        'style="height: 30px !important; width: 109px !important; border-radius: 5px;"></a>',
+        'style="height: 6px !important; width: 22px !important; border-radius: 5px;"></a>',
         unsafe_allow_html=True
     )
 
