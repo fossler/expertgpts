@@ -235,12 +235,6 @@ def save_theme_settings(
         for setting in reversed(settings_to_add):
             new_lines.insert(insert_position, setting)
 
-    # Ensure [layout] section exists with wideMode
-    layout_found = any(line.strip() == "[layout]" for line in new_lines)
-    if not layout_found:
-        new_lines.append("\n[layout]")
-        new_lines.append("wideMode = true")
-
     # Write back to file
     new_content = '\n'.join(new_lines)
     config_path.write_text(new_content)
