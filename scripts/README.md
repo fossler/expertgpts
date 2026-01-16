@@ -29,31 +29,6 @@ python3 scripts/update_translations.py
 
 ---
 
-#### `test_i18n_refactoring.py`
-**Purpose**: Test/verification suite for i18n implementation
-
-**What it tests**:
-- Language prefix generation for all 13 languages
-- System prompt construction with language prefix
-- Locale files are clean (no expert content)
-- YAML configs still have expert content
-- Integration test simulating full workflow
-
-**When to use**:
-- After making changes to i18n system
-- Adding new languages
-- Refactoring translation-related code
-- Before releases
-
-**Example**:
-```bash
-python3 scripts/test_i18n_refactoring.py
-```
-
-**Notes**: Essential for ensuring the i18n architecture doesn't break during development.
-
----
-
 ### 🛠️ Application Setup Scripts
 
 #### `setup.py`
@@ -125,11 +100,12 @@ echo "yes" | python3 scripts/reset_application.py
 scripts/
 ├── README.md                           # This file
 ├── update_translations.py              # Sync locales with en.json
-├── test_i18n_refactoring.py            # Test i18n implementation
 ├── setup.py                            # Initial app setup
 ├── reset_application.py                # Reset to factory defaults
 └── run_tests.sh                        # Run test suite
 ```
+
+**Note**: i18n tests are now located in `tests/test_i18n.py` as part of the proper pytest test suite.
 
 ## 📝 Script Development Guidelines
 
