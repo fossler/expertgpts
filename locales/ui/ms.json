@@ -243,7 +243,8 @@
     "feature_template_generation": "Penjanaan halaman berasaskan templat",
     "development": "Pembangunan",
     "developed_with": "Seluruh aplikasi ini dibangunkan dengan [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
-    "resources": "Sumber"
+    "resources": "Sumber",
+    "support": "Sokongan"
   },
   "dialogs": {
     "add_chat": {

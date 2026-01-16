@@ -243,7 +243,8 @@
     "feature_template_generation": "Generazione di pagine basata su modelli",
     "development": "Sviluppo",
     "developed_with": "L'intera applicazione è stata sviluppata con [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
-    "resources": "Risorse"
+    "resources": "Risorse",
+    "support": "Supporto"
   },
   "dialogs": {
     "add_chat": {

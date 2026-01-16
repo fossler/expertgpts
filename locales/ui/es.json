@@ -243,7 +243,8 @@
     "feature_template_generation": "Generación de páginas basada en plantillas",
     "development": "Desarrollo",
     "developed_with": "Toda esta aplicación fue desarrollada con [Z.ai](https://z.ai/subscribe?ic=JGTYCX7ZO7)",
-    "resources": "Recursos"
+    "resources": "Recursos",
+    "support": "Soporte"
   },
   "links": {
     "deepseek_chat": "https://chat.deepseek.com/",

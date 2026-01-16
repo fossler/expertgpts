@@ -1101,6 +1101,19 @@ def render_about_section():
     """)
     st.markdown("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)")
 
+    st.markdown(f"""
+    ### {i18n.t('about.support')}
+    """)
+
+    # Buy Me a Coffee button
+    st.markdown(
+        '<a href="https://www.buymeacoffee.com/MirzetKadic" target="_blank">'
+        '<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" '
+        'alt="Buy Me A Coffee" '
+        'style="height: 60px !important; width: 217px !important; border-radius: 5px;"></a>',
+        unsafe_allow_html=True
+    )
+
 
 def main():
     """Main settings page entry point."""
