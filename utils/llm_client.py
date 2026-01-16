@@ -20,6 +20,7 @@ from utils.constants import (
     get_model_config,
     get_provider_base_url,
 )
+from utils.i18n import i18n
 
 
 @dataclass
@@ -259,8 +260,13 @@ class LLMClient:
         if model is None:
             model = self.config["default_model"]
 
+        # Get language prefix to instruct LLM on response language
+        language_prefix = i18n.get_language_prefix()
+
         # Generation prompt - instructions for LLM
-        generation_prompt = f"""Create a system prompt, the output must be in Markdown:
+        generation_prompt = f"""{language_prefix}
+
+Create a system prompt, the output must be in Markdown:
 You are {expert_name}, a domain-specific expert AI assistant.
 
 Role description:
