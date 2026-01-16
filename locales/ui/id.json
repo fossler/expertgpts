@@ -177,7 +177,8 @@
     "required_fields_hint": "* Kolom wajib",
     "context_length": "Panjang Konteks: {tokens} token",
     "expert_behavior_auto": "Dibuat otomatis dari deskripsi",
-    "language_prefix_auto": "Ahli akan merespons secara otomatis dalam bahasa yang dipilih pengguna."
+    "language_prefix_auto": "Ahli akan merespons secara otomatis dalam bahasa yang dipilih pengguna.",
+    "language_behavior_explanation": "Ahli selalu merespons dalam bahasa yang Anda pilih, meskipun perilaku ditulis dalam bahasa Inggris."
   },
   "api_key": {
     "title": "Konfigurasi Kunci API",

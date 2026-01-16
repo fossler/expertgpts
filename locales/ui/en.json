@@ -177,7 +177,8 @@
     "required_fields_hint": "* Required fields",
     "context_length": "Context Length: {tokens} tokens",
     "expert_behavior_auto": "Auto-generated from description",
-    "language_prefix_auto": "The expert will automatically respond in the user's selected language."
+    "language_prefix_auto": "The expert will automatically respond in the user's selected language.",
+    "language_behavior_explanation": "The expert always responds in your selected language, even if the behavior is written in English."
   },
   "api_key": {
     "title": "API Key Configuration",

@@ -177,7 +177,8 @@
     "required_fields_hint": "* Champs obligatoires",
     "context_length": "Longueur du contexte : {tokens} jetons",
     "expert_behavior_auto": "Généré automatiquement à partir de la description",
-    "language_prefix_auto": "L'expert répondra automatiquement dans la langue sélectionnée par l'utilisateur."
+    "language_prefix_auto": "L'expert répondra automatiquement dans la langue sélectionnée par l'utilisateur.",
+    "language_behavior_explanation": "L'expert répond toujours dans votre langue sélectionnée, même si le comportement est écrit en anglais."
   },
   "api_key": {
     "title": "Configuration de la Clé API",

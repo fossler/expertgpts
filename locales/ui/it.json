@@ -177,7 +177,8 @@
     "required_fields_hint": "* Campi obbligatori",
     "context_length": "Lunghezza del Contesto: {tokens} token",
     "expert_behavior_auto": "Generato automaticamente dalla descrizione",
-    "language_prefix_auto": "L'esperto risponderà automaticamente nella lingua selezionata dall'utente."
+    "language_prefix_auto": "L'esperto risponderà automaticamente nella lingua selezionata dall'utente.",
+    "language_behavior_explanation": "L'esperto risponde sempre nella lingua selezionata, anche se il comportamento è scritto in inglese."
   },
   "api_key": {
     "title": "Configurazione Chiave API",

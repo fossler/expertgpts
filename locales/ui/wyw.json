@@ -177,7 +177,8 @@
     "required_fields_hint": "* 必填欄位",
     "context_length": "上下文長度：{tokens}個權杖",
     "expert_behavior_auto": "從描述自動產生",
-    "language_prefix_auto": "專家會自動用用戶選擇嘅語言回應。"
+    "language_prefix_auto": "專家會自動用用戶選擇嘅語言回應。",
+    "language_behavior_explanation": "專家總是用你揀個語言回應，即便行為是用英文寫嘅。"
   },
   "api_key": {
     "title": "API金鑰設定",

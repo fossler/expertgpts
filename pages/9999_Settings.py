@@ -848,9 +848,8 @@ def render_expert_management_section():
                 system_prompt = expert.get('system_prompt', '')
                 if system_prompt:
                     st.markdown(f"**🧠 {i18n.t('experts.management.expert_behavior')}:**")
-                    # Show language prefix that will be automatically added
-                    language_prefix = i18n.get_language_prefix()
-                    st.caption(f"💡 **{language_prefix}**")
+                    # Show explanatory message about language behavior
+                    st.caption(f"💡 **{i18n.t('info.language_behavior_explanation')}**")
                     # Display as read-only text area preview
                     st.text_area(
                         i18n.t('experts.management.expert_behavior'),
@@ -862,9 +861,8 @@ def render_expert_management_section():
                     )
                 else:
                     st.markdown(f"**🧠 {i18n.t('experts.management.expert_behavior')}:** {i18n.t('info.expert_behavior_auto')}")
-                    # Show language prefix that will be automatically added
-                    language_prefix = i18n.get_language_prefix()
-                    st.caption(f"💡 **{language_prefix}**")
+                    # Show explanatory message about language behavior
+                    st.caption(f"💡 **{i18n.t('info.language_behavior_explanation')}**")
 
             with col2:
                 st.markdown(f"**{i18n.t('experts.management.actions')}**")

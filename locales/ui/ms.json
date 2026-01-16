@@ -177,7 +177,8 @@
     "required_fields_hint": "* Medan wajib",
     "context_length": "Panjang Konteks: {tokens} token",
     "expert_behavior_auto": "Dijana secara automatik dari penerangan",
-    "language_prefix_auto": "Pakar akan bertindak balas secara automatik dalam bahasa yang dipilih oleh pengguna."
+    "language_prefix_auto": "Pakar akan bertindak balas secara automatik dalam bahasa yang dipilih oleh pengguna.",
+    "language_behavior_explanation": "Pakar sentiasa bertindak balas dalam bahasa yang anda pilih, walaupun kelakuan ditulis dalam bahasa Inggeris."
   },
   "api_key": {
     "title": "Konfigurasi Kunci API",

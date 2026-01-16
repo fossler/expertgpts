@@ -177,7 +177,8 @@
     "required_fields_hint": "* Zorunlu alanlar",
     "context_length": "Bağlam Uzunluğu: {tokens} jeton",
     "expert_behavior_auto": "Açıklamadan otomatik olarak oluşturuldu",
-    "language_prefix_auto": "Uzman, kullanıcının seçtiği dilde otomatik olarak yanıt verecektir."
+    "language_prefix_auto": "Uzman, kullanıcının seçtiği dilde otomatik olarak yanıt verecektir.",
+    "language_behavior_explanation": "Uzman, davranış yazılmış olsa bile, her zaman seçtiğiniz dilde yanıt verir."
   },
   "api_key": {
     "title": "API Anahtarı Yapılandırması",

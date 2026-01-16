@@ -177,7 +177,8 @@
     "required_fields_hint": "* 必填字段",
     "context_length": "上下文长度：{tokens}个令牌",
     "expert_behavior_auto": "从描述自动生成",
-    "language_prefix_auto": "专家将自动使用用户选择的语言进行回复。"
+    "language_prefix_auto": "专家将自动使用用户选择的语言进行回复。",
+    "language_behavior_explanation": "专家始终使用您选择的语言回复，即使行为是用英文编写的。"
   },
   "api_key": {
     "title": "API密钥配置",
