@@ -1116,10 +1116,12 @@ def render_about_section():
 
     # Buy Me a Coffee button
     st.markdown(
+        '<div style="display: inline-block; width: fit-content;">'
         '<a href="https://www.buymeacoffee.com/MirzetKadic" target="_blank">'
         '<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" '
         'alt="Buy Me A Coffee" '
-        'style="height: 6px !important; width: 22px !important; border-radius: 5px;"></a>',
+        'style="height: auto; width: 270px; border-radius: 5px; min-width: 0 !important; max-width: 270px !important;"></a>'
+        '</div>',
         unsafe_allow_html=True
     )
 
