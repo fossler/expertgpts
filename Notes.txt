@@ -64,9 +64,10 @@ Folgende Sprachen sollen unterstützt werden:
 
 
 
-4. Zeichensatz- und Kulturhandling: Stelle sicher, dass die Anwendung Unicode unterstützt, um
-    verschiedene Zeichensätze korrekt darzustellen. Berücksichtige kulturelle Unterschiede bei Datums-, Zeit- und Zahlenformaten.
-5. GPT-Antworten lokalisieren: Implementiere eine Methode, um die Antworten der GPT-Modelle basierend auf der ausgewählten Sprache zu lokalisieren. Dies kann durch
-    die Verwendung von Übersetzungs-APIs oder durch vorab trainierte mehrsprachige Modelle erfolgen.
-6. Testen: Führe umfassende Tests durch, um sicherzustellen, dass die Mehrsprachigkeitsfunktionen in allen unterstützten Sprachen korrekt funktionieren und die Benutzererfahrung
-    konsistent ist.
+
+[https://z.ai/](https://z.ai/subscribe?ic=JGTYCX7ZO7)
+
+
+
+<a href="https://www.buymeacoffee.com/MirzetKadic" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="MirzetKadic" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>

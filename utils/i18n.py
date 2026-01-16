@@ -5,10 +5,12 @@ Supports 13 languages with automatic system language detection.
 
 import json
 import locale
+import logging
 import streamlit as st
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
-from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 # Language metadata with script, direction, and locale info
@@ -136,6 +138,26 @@ class I18nManager:
         self.current_lang: str = "en"
         self.load_translations()
 
+    @property
+    def current_language(self) -> str:
+        """Get the current language with caching to avoid repeated session state lookups.
+
+        Returns:
+            Current language code from session state, or 'en' as default
+        """
+        if not hasattr(self, '_cached_lang'):
+            self._cached_lang = st.session_state.get("language", "en")
+        return self._cached_lang
+
+    def invalidate_cache(self):
+        """Invalidate the cached language when language changes.
+
+        This should be called whenever the language is changed to ensure
+        the cached value is updated.
+        """
+        if hasattr(self, '_cached_lang'):
+            delattr(self, '_cached_lang')
+
     def detect_system_language(self) -> str:
         """Detect system language and return appropriate language code.
 
@@ -195,9 +217,9 @@ class I18nManager:
             try:
                 with open(lang_file, "r", encoding="utf-8") as f:
                     self.translations[lang] = json.load(f)
-                    print(f"✅ Loaded translations for {lang}")
+                    logger.info(f"Loaded translations for {lang}")
             except Exception as e:
-                print(f"❌ Error loading {lang}: {e}")
+                logger.error(f"Error loading {lang}: {e}")
 
     def t(self, key: str, **kwargs) -> str:
         """Get translated string with interpolation.
@@ -209,7 +231,7 @@ class I18nManager:
         Returns:
             Translated string, or key if not found
         """
-        lang = st.session_state.get("language", "en")
+        lang = self.current_language
         template = self._get_nested(self.translations, lang, key)
 
         if template is None:
@@ -243,13 +265,13 @@ class I18nManager:
     def is_rtl(self, lang: str = None) -> bool:
         """Check if language is right-to-left."""
         if lang is None:
-            lang = st.session_state.get("language", "en")
+            lang = self.current_language
         return self.get_language_info(lang)["direction"] == "rtl"
 
     def get_text_direction(self, lang: str = None) -> str:
         """Get text direction for CSS (ltr or rtl)."""
         if lang is None:
-            lang = st.session_state.get("language", "en")
+            lang = self.current_language
         return self.get_language_info(lang)["direction"]
 
     def get_language_prefix(self, lang: str = None) -> str:
@@ -271,7 +293,7 @@ class I18nManager:
                 - "You must respond in Simplified Chinese (简体中文)."
         """
         if lang is None:
-            lang = st.session_state.get("language", "en")
+            lang = self.current_language
 
         lang_info = self.get_language_info(lang)
         english_name = lang_info["name"]
@@ -301,57 +323,16 @@ class I18nManager:
             # Update session state
             st.session_state.language = lang
 
+            # Invalidate cached language
+            self.invalidate_cache()
+
             # Persist to disk
             save_language_preference(lang)
 
             # Rerun to apply new language
             st.rerun()
         else:
-            print(f"Warning: Language '{lang}' not available")
-
-    def format_date(self, date: datetime, lang: str = None) -> str:
-        """Format date according to locale.
-
-        Args:
-            date: datetime object to format
-            lang: language code (uses current if None)
-
-        Returns:
-            Locally formatted date string
-        """
-        if lang is None:
-            lang = st.session_state.get("language", "en")
-
-        locale_str = self.get_language_info(lang)["locale"]
-
-        # Simple formatting (can be enhanced with locale library)
-        # For now, use ISO format which is universally understood
-        return date.strftime("%Y-%m-%d")
-
-    def format_number(self, number: float, lang: str = None) -> str:
-        """Format number according to locale.
-
-        Args:
-            number: number to format
-            lang: language code (uses current if None)
-
-        Returns:
-            Locally formatted number string
-        """
-        if lang is None:
-            lang = st.session_state.get("language", "en")
-
-        # For Arabic, use different digits if needed
-        # For now, return standard format
-        return f"{number:,}"
-
-    def get_supported_fonts(self) -> Dict[str, list]:
-        """Get font families that support each script."""
-        return {
-            "Latin": ["Arial", "Helvetica", "Roboto", "Open Sans"],
-            "Cyrillic": ["Arial", "Roboto", "Noto Sans"],
-            "Han": ["Noto Sans SC", "Noto Sans TC", "PingFang SC", "Microsoft YaHei"]
-        }
+            logger.warning(f"Language '{lang}' not available")
 
     def _get_nested(self, data: Dict, lang: str, key: str) -> Any:
         """Get nested value from dict using dot notation."""

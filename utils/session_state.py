@@ -7,6 +7,7 @@ session state across all pages in the application.
 import streamlit as st
 from typing import Optional
 from utils.types import MessagesList
+from utils.i18n import i18n
 
 
 def initialize_shared_session_state():
@@ -28,7 +29,6 @@ def initialize_shared_session_state():
     """
     # Import LLM_PROVIDERS to get all provider keys
     from utils.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
-    from utils.i18n import i18n
 
     # Initialize language with saved preference or auto-detection
     if "language" not in st.session_state:

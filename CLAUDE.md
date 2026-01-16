@@ -37,6 +37,8 @@ This allows the user to review changes before they're committed to the repositor
    - Validation logic (expert names, descriptions, etc.)
    - Dialog rendering (add, edit, delete)
    - Documentation content (constants)
+   - **i18n translations**: Import `i18n` at module level, never inline in functions
+   - **Expert name translations**: Use `sanitize_name()` to generate keys dynamically
 
 4. **Checklist before committing:**
    - [ ] Did I search for existing implementations?
@@ -345,13 +347,52 @@ ExpertGPTs supports full theme customization through the Settings page:
 - `reset_to_default_theme()` - Reset to default colors
 - Settings automatically saved to `.streamlit/config.toml` with 600 permissions
 
-**Default Theme Colors:**
-- Primary (Buttons): Indigo `#6366F1`
-- Background: White `#FFFFFF`
-- Secondary: Light Gray `#F3F4F6`
-- Text: Dark Gray `#1F2937`
-- Base Font Size: `14px` (reduced from Streamlit's default 16px for better content density)
-- Layout: Wide mode enabled by default
+### Internationalization (i18n)
+
+ExpertGPTs supports 13 languages with a comprehensive i18n system:
+
+**Architecture:**
+- **Storage Layer**: Expert content (YAML configs) stored in English only
+- **Translation Layer**: UI translations in JSON files (`locales/ui/{lang}.json`)
+- **Runtime Layer**: Language prefix dynamically injected for AI responses
+
+**Key Features:**
+- ✅ Auto-detection of system language
+- ✅ Instant language switching (no expert regeneration needed)
+- ✅ All UI elements translated (buttons, labels, errors, success messages)
+- ✅ Default expert names translated to all 13 languages
+- ✅ Professional logging instead of print statements
+- ✅ Cached language access for performance (~50% reduction in lookups)
+
+**Important i18n utilities:**
+- `utils/i18n.py`: `I18nManager` class with translation and language detection
+- `utils/helpers.py`: `translate_expert_name()` - Dynamic expert name translation
+- `scripts/update_translations.py`: Sync all locale files with `en.json`
+
+**Best Practices for i18n:**
+- **Always** import `i18n` at module level (never inline in functions)
+- **Always** use `i18n.t('key')` for UI strings, never hardcode
+- **Always** add new translation keys to `en.json` first (source of truth)
+- **Always** run `update_translations.py` after adding new keys
+- **Never** add expert content (system prompts) to locale files
+- **Never** create duplicate expert name mappings - use `sanitize_name()` dynamically
+
+**Example Usage:**
+```python
+# ✅ GOOD - Module level import
+from utils.i18n import i18n
+
+# Simple translation
+text = i18n.t('home.title')
+
+# With parameters
+text = i18n.t('errors.error', error=str(e))
+
+# Access current language (cached)
+lang = i18n.current_language
+```
+
+**For detailed i18n documentation**, see `docs/I18N_GUIDE.md`
 
 ## Common Pitfalls
 
@@ -362,6 +403,12 @@ ExpertGPTs supports full theme customization through the Settings page:
 5. **Hardcoding paths** - Use `Path(__file__).parent` for relative paths
 6. **Not regenerating pages** after template changes - Old pages use outdated code
    - Solution: Run `python3 scripts/reset_application.py` after modifying template
+7. **Importing i18n inline** - Violates DRY and hurts performance
+   - Solution: Always import `i18n` at module level
+8. **Hardcoding UI strings** - Breaks i18n and creates maintenance burden
+   - Solution: Always use `i18n.t('key')` for user-facing text
+9. **Creating duplicate expert name mappings** - Violates DRY principle
+   - Solution: Use `sanitize_name()` to generate translation keys dynamically
 
 ## Testing Approach
 

@@ -3,6 +3,7 @@
 from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
+from utils.i18n import i18n
 
 
 def sanitize_name(name: str) -> str:
@@ -34,38 +35,26 @@ def translate_expert_name(expert_name: str) -> str:
     in the user's selected language. Custom expert names (user-created)
     are returned as-is.
 
+    This function generates translation keys dynamically using the
+    sanitize_name() function, eliminating the need for a duplicate
+    mapping dictionary.
+
     Args:
         expert_name: The expert name from config
 
     Returns:
         Translated expert name (or original if no translation exists)
     """
-    from utils.i18n import i18n
+    # Generate translation key directly from expert name
+    sanitized = sanitize_name(expert_name)
+    translation_key = f"experts.names.{sanitized}"
 
-    # Mapping of default expert names to translation keys
-    expert_name_translations = {
-        "Python Expert": "experts.names.python_expert",
-        "Data Scientist": "experts.names.data_scientist",
-        "Writing Assistant": "experts.names.writing_assistant",
-        "Linux System Admin": "experts.names.linux_admin",
-        "General Assistant": "experts.names.general_assistant",
-        "Translation Expert": "experts.names.translation_expert",
-        "Spell Checker": "experts.names.spell_checker",
-    }
-
-    # Check if this is a default expert that should be translated
-    translation_key = expert_name_translations.get(expert_name)
-
-    if translation_key:
-        # Attempt to translate, fall back to original if translation fails
-        try:
-            translated = i18n.t(translation_key)
-            # If the translation key itself is returned (no translation), use original
-            if translated == translation_key:
-                return expert_name
-            return translated
-        except:
+    # Attempt to translate, fall back to original if translation fails
+    try:
+        translated = i18n.t(translation_key)
+        # If the translation key itself is returned (no translation), use original
+        if translated == translation_key:
             return expert_name
-
-    # Return original name for custom experts
-    return expert_name
+        return translated
+    except:
+        return expert_name

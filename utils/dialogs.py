@@ -11,6 +11,7 @@ from utils.config_manager import ConfigManager
 from utils.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 from utils.page_generator import PageGenerator
 from utils.helpers import sanitize_name
+from utils.i18n import i18n
 
 
 def validate_expert_name(name: str) -> tuple[bool, str]:
@@ -22,8 +23,6 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     Returns:
         tuple: (is_valid, error_message)
     """
-    from utils.i18n import i18n
-
     if not name:
         return False, i18n.t('errors.expert_name_empty')
 
@@ -47,8 +46,6 @@ def render_temperature_input(value: float = 1.0, provider: str = None) -> float:
     Returns:
         float: Temperature value from user input
     """
-    from utils.i18n import i18n
-
     # Use half width (1/2) for temperature field
     col1, col2 = st.columns(2)
 
@@ -114,8 +111,6 @@ def render_llm_configuration(
     Returns:
         tuple: (provider, model, temperature, thinking_level)
     """
-    from utils.i18n import i18n
-
     st.info(f"💡 **Tip:** {i18n.t('info.select_llm_tip')}")
 
     provider, model, thinking_level = render_provider_selection(
@@ -156,8 +151,6 @@ def render_provider_selection(
     Returns:
         tuple: (provider, model, thinking_level)
     """
-    from utils.i18n import i18n
-
     # Get defaults from session state if not provided
     if current_provider is None:
         current_provider = st.session_state.get("default_provider", "deepseek")
@@ -338,7 +331,6 @@ def create_new_expert(
 
     if needs_ai_generation:
         # Show spinner during AI generation
-        from utils.i18n import i18n
         with st.spinner(f"🤖 {i18n.t('dialogs.add_chat.generating_system_prompt')}"):
             config_manager.create_config(
                 expert_name=chat_name,
@@ -393,8 +385,6 @@ def render_add_chat_dialog():
 
     The dialog creates a new expert configuration and generates a dedicated page.
     """
-    from utils.i18n import i18n
-
     if not st.session_state.show_add_chat_dialog:
         return
 

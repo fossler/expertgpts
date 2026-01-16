@@ -4,6 +4,8 @@ This module centralizes all magic numbers, thresholds, and configuration
 values used throughout the application.
 """
 
+from utils.i18n import i18n
+
 # LLM Provider Configuration
 LLM_PROVIDERS = {
     "deepseek": {
@@ -255,7 +257,6 @@ def get_expert_behavior_docs():
     Returns:
         str: Markdown-formatted documentation about expert behavior field
     """
-    from utils.i18n import i18n
     return i18n.t("dialogs.add_chat.expert_behavior_docs")
 
 
@@ -265,7 +266,6 @@ def get_expert_behavior_docs_edit():
     Returns:
         str: Markdown-formatted documentation about editing expert behavior
     """
-    from utils.i18n import i18n
     return i18n.t("dialogs.edit_expert.expert_behavior_docs_edit")
 
 
