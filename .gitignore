@@ -45,10 +45,6 @@ htmlcov/
 coverage.xml
 *.cover
 
-# AI Generated content
-docs/llm_outputs/
-docs/llm_instructions/
-
 # Project specific - API keys and secrets
 *.key
 .secrets
@@ -65,8 +61,3 @@ pages/*.py
 !pages/1000_Home.py
 !pages/9999_Settings.py
 
-# Setup state marker (no longer needed)
-# .setup_complete
-
-# Notes files
-Notes.txt
