@@ -3,7 +3,8 @@
 This script completely resets the application by:
 1. Deleting all expert configurations from configs/
 2. Deleting all expert pages from pages/
-3. Running setup.py to recreate the example experts
+3. Deleting all chat history files from chat_history/
+4. Running setup.py to recreate the example experts
 
 Use this script when you want to start fresh or restore the application to its
 initial state with the default example experts.
@@ -23,11 +24,12 @@ from utils.constants import EXAMPLE_EXPERTS_COUNT
 
 def confirm_reset():
     """Ask user to confirm the reset operation."""
-    print("⚠️  WARNING: This will DELETE ALL configs and pages!")
+    print("⚠️  WARNING: This will DELETE ALL configs, pages, and chat history!")
     print("-" * 60)
     print("This action will:")
     print("  • Delete all YAML config files in configs/")
     print("  • Delete all expert page files in pages/")
+    print("  • Delete all chat history files in chat_history/")
     print(f"  • Recreate {EXAMPLE_EXPERTS_COUNT} example experts from scratch")
     print("-" * 60)
 
@@ -83,6 +85,28 @@ def delete_pages():
     return True
 
 
+def delete_chat_history():
+    """Delete all chat history JSON files."""
+    chat_history_dir = Path("chat_history")
+
+    if not chat_history_dir.exists():
+        print("ℹ️  Chat history directory not found (no history to delete).")
+        return True
+
+    chat_files = list(chat_history_dir.glob("*.json"))
+
+    if not chat_files:
+        print("ℹ️  No chat history files to delete.")
+        return True
+
+    print(f"\n🗑️  Deleting {len(chat_files)} chat history file(s)...")
+    for chat_file in chat_files:
+        chat_file.unlink()
+        print(f"   Deleted: {chat_file.name}")
+
+    return True
+
+
 def run_setup():
     """Run the setup.py script to perform application setup."""
     print("\n🔄 Running scripts/setup.py to set up the application...\n")
@@ -132,6 +156,11 @@ def main():
     # Delete pages
     if not delete_pages():
         print("\n❌ Failed to delete pages. Aborting.")
+        return 1
+
+    # Delete chat history
+    if not delete_chat_history():
+        print("\n❌ Failed to delete chat history. Aborting.")
         return 1
 
     # Recreate example experts
