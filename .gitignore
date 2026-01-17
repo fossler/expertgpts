@@ -58,6 +58,7 @@ credentials.json
 configs/
 logs/
 chat_history/
+llm_comm/
 
 # Expert pages only (not Home/Settings which are permanent)
 pages/*.py
