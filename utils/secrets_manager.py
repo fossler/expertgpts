@@ -68,23 +68,6 @@ def ensure_secrets_file_exists() -> Path:
 
     return secrets_path
 
-
-def save_api_key(api_key: str) -> None:
-    """Save DeepSeek API key to secrets.toml file.
-
-    Args:
-        api_key: The DeepSeek API key to save
-
-    Note:
-        This will overwrite any existing DEEPSEEK_API_KEY in secrets.toml.
-        The application will need to rerun for the new key to be loaded via st.secrets.
-        Secure 600 permissions will be set on the file after writing.
-
-        Deprecated: Use save_provider_api_key("deepseek", api_key) instead.
-    """
-    save_provider_api_key("deepseek", api_key)
-
-
 def save_provider_api_key(provider: str, api_key: str) -> None:
     """Save API key for a specific provider to secrets.toml file.
 
@@ -125,20 +108,6 @@ def save_provider_api_key(provider: str, api_key: str) -> None:
 
     # Ensure secure permissions after writing
     set_secure_permissions(secrets_path)
-
-
-def get_api_key_from_file() -> str | None:
-    """Get DeepSeek API key directly from secrets.toml file.
-
-    This is useful for displaying the current key without using st.secrets
-    (which requires a rerun to update).
-
-    Returns:
-        str | None: The API key if found, None otherwise
-
-    Deprecated: Use get_provider_api_key("deepseek") instead.
-    """
-    return get_provider_api_key("deepseek")
 
 
 def get_provider_api_key(provider: str) -> str | None:
@@ -204,14 +173,3 @@ def has_provider_api_key(provider: str) -> bool:
         bool: True if API key exists in file for this provider, False otherwise
     """
     return get_provider_api_key(provider) is not None
-
-
-def has_api_key_file() -> bool:
-    """Check if secrets.toml file exists and has DEEPSEEK_API_KEY.
-
-    Returns:
-        bool: True if API key exists in file, False otherwise
-
-    Deprecated: Use has_provider_api_key("deepseek") instead.
-    """
-    return has_provider_api_key("deepseek")

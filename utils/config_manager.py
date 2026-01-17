@@ -107,21 +107,6 @@ class ConfigManager:
         with open(config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
 
-        # Backward compatibility: ensure metadata has provider/model/thinking fields
-        metadata = config.get("metadata", {})
-
-        # If version is 1.0 or missing, default to DeepSeek
-        if metadata.get("version") == "1.0" or "provider" not in metadata:
-            metadata["provider"] = "deepseek"
-            metadata["model"] = metadata.get("model", "deepseek-chat")
-            metadata["version"] = "2.0"  # Upgrade version
-
-        # Ensure thinking_level exists (default to "none")
-        if "thinking_level" not in metadata:
-            metadata["thinking_level"] = "none"
-
-        config["metadata"] = metadata
-
         return config
 
     def update_config(self, expert_id: str, updates: Dict) -> None:

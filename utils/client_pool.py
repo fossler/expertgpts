@@ -123,29 +123,3 @@ def get_cached_client(provider: str, api_key: str) -> LLMClient:
         that are safe to reuse across reruns (like HTTP clients).
     """
     return LLMClient(provider=provider, api_key=api_key)
-
-
-# Convenience function for backward compatibility
-def get_client(provider: str, api_key: str, use_streamlit_cache: bool = True) -> LLMClient:
-    """Get an LLM client (with automatic caching).
-
-    This is the recommended way to get client instances in your code.
-
-    Args:
-        provider: Provider key (e.g., "deepseek", "openai", "zai")
-        api_key: API key for the provider
-        use_streamlit_cache: If True, use Streamlit's @st.cache_resource
-                            If False, use manual ClientPool
-
-    Returns:
-        LLMClient: Cached client instance
-
-    Example:
-        >>> from utils.client_pool import get_client
-        >>> client = get_client("deepseek", api_key)
-        >>> response = client.chat_stream(messages, temperature=0.7)
-    """
-    if use_streamlit_cache:
-        return get_cached_client(provider, api_key)
-    else:
-        return ClientPool.get_client(provider, api_key)

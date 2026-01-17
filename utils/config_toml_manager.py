@@ -112,37 +112,13 @@ def get_theme_settings() -> dict:
                 theme_file_path = Path(__file__).parent.parent / ".streamlit" / value
                 return load_theme_file(theme_file_path)
 
-    # If no base parameter, read colors directly from config.toml (legacy)
-    theme_settings = {
-        "primaryColor": "#FF6B6B",
+    # No base parameter found - return default theme
+    return {
+        "primaryColor": "#6366F1",
         "backgroundColor": "#FFFFFF",
-        "secondaryBackgroundColor": "#F0F2F6",
-        "textColor": "#262730",
+        "secondaryBackgroundColor": "#F3F4F6",
+        "textColor": "#1F2937",
     }
-
-    in_theme_section = False
-    for line in content.split('\n'):
-        line = line.strip()
-
-        # Check if we're in the [theme] section
-        if line == "[theme]":
-            in_theme_section = True
-            continue
-        elif line.startswith("[") and line != "[theme]":
-            in_theme_section = False
-            continue
-
-        # Parse theme color settings
-        if in_theme_section and "=" in line:
-            key, value = line.split("=", 1)
-            key = key.strip()
-            value = value.strip().strip('"').strip("'")
-
-            # Store valid theme color settings
-            if key in theme_settings:
-                theme_settings[key] = value
-
-    return theme_settings
 
 
 def load_theme_file(theme_file_path: Path) -> dict:

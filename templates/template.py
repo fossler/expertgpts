@@ -160,8 +160,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
             try:
                 # Get LLM client from pool (cached for performance)
-                from utils.client_pool import get_client
-                client = get_client(provider=provider, api_key=api_key)
+                from utils.client_pool import get_cached_client
+                client = get_cached_client(provider=provider, api_key=api_key)
 
                 # Convert messages to format expected by API
                 api_messages = [

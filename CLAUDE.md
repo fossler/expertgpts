@@ -320,15 +320,16 @@ if st.session_state.get("pending_expert_page"):
 2. **Manually**: Copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and add your key
 
 **Key utilities in `utils/secrets_manager.py`:**
-- `save_api_key(api_key)` - Saves API key to secrets.toml with secure 600 permissions
-- `get_api_key_from_file()` - Reads API key directly from file (for status display)
-- `has_api_key_file()` - Checks if API key exists in file
+- `save_provider_api_key(provider, api_key)` - Saves provider-specific API key to secrets.toml with secure 600 permissions
+- `get_provider_api_key(provider)` - Reads provider API key directly from file (for status display)
+- `has_provider_api_key(provider)` - Checks if provider API key exists in file
+- `get_all_provider_api_keys()` - Returns dictionary of all provider API keys
 - `ensure_secrets_file_exists()` - Creates .streamlit directory and file if needed
 - `set_secure_permissions(file_path)` - Sets 600 permissions (owner read/write only)
 
 **IMPORTANT:**
 - Never commit `.streamlit/secrets.toml` to git (it's in .gitignore)
-- All API key access uses `st.secrets["DEEPSEEK_API_KEY"]`
+- API keys are accessed via `st.secrets` using provider-specific environment variable names (e.g., `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, `ZAI_API_KEY`)
 
 ### Theme Customization
 
