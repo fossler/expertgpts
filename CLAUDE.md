@@ -63,14 +63,16 @@ When refactoring or changing data structures:
 
 ## Project Overview
 
-ExpertGPTs is a multi-expert AI chat application built with Streamlit, powered by the DeepSeek API. It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.
+ExpertGPTs is a multi-expert AI chat application built with Streamlit, powered by multiple LLM providers (DeepSeek, OpenAI, Z.AI). It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.
 
 ## Key Architecture Concepts
 
 ### Template-Based Page Generation
 - **All expert pages** are generated from `templates/template.py`
 - **Home and Settings pages** are permanent files in `pages/` (not generated)
-- **PageGenerator** creates numbered Python files (e.g., `1_Python_Expert.py`) from the template
+- **PageGenerator** creates numbered Python files (e.g., `1001_python_expert.py`) from the template
+  - Format: 4-digit number + underscore + lowercase name
+  - Example: `1001_python_expert.py`, `1002_data_scientist.py`
 - Placeholders `{{EXPERT_ID}}` and `{{EXPERT_NAME}}` are replaced during generation
 - **Never manually edit expert pages** - changes will be lost when regenerated
 - To modify all experts, edit `templates/template.py` instead
@@ -85,7 +87,10 @@ Each expert has a corresponding YAML config file in `configs/`:
 ### Session State Architecture
 Critical pattern for expert isolation:
 - **Chat history per expert**: `st.session_state[f"messages_{EXPERT_ID}"]` - prevents cross-contamination
-- **Shared API key**: `st.session_state.deepseek_api_key` - available across all experts, loaded from `st.secrets["DEEPSEEK_API_KEY"]`
+- **API keys dictionary**: `st.session_state.api_keys` - dictionary of provider → API key mappings
+  - Providers: `"deepseek"`, `"openai"`, `"zai"`
+  - Loaded from `st.secrets` on startup (DEEPSEEK_API_KEY, OPENAI_API_KEY, ZAI_API_KEY)
+  - Managed through Settings page
 - **Navigation state**: `st.session_state.pending_expert_page` - for auto-navigation after creation
 
 ### Streamlit Navigation Architecture
@@ -108,9 +113,12 @@ source .venv/bin/activate
 pip install -r requirements-dev.txt  # Development (includes watchdog, pytest, black)
 pip install -r requirements.txt        # Production only
 
-# Set up API key (optional - can also do via UI)
+# Set up API keys (optional - can also do via Settings page)
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
-# Then edit .streamlit/secrets.toml and add your DEEPSEEK_API_KEY
+# Then edit .streamlit/secrets.toml and add your API keys:
+# DEEPSEEK_API_KEY = "your_key_here"
+# OPENAI_API_KEY = "your_key_here" (optional)
+# ZAI_API_KEY = "your_key_here" (optional)
 
 # Run the app (first run will automatically create example experts)
 streamlit run app.py
@@ -119,7 +127,7 @@ streamlit run app.py
 ### Application Reset
 ```bash
 # Reset application to factory default state
-# WARNING: This deletes all configs and expert pages, then recreates example experts
+# WARNING: This deletes all configs, expert pages, and chat history, then recreates example experts
 # IMPORTANT: Home and Settings pages are preserved (they're permanent files)
 # IMPORTANT: Always use echo "yes" | to auto-confirm (required for non-interactive environments)
 echo "yes" | python3 scripts/reset_application.py
@@ -224,9 +232,22 @@ page_path = page_generator.generate_page(
   - **`utils/session_state.py`**: Manages shared session state initialization
   - **`utils/dialogs.py`**: Shared dialog components (DRY compliance)
   - **`utils/constants.py`**: Shared constants and documentation (DRY compliance)
+  - **`utils/chat_history_manager.py`**: Manages chat history persistence (JSON files, truncation)
+  - **`utils/llm_client.py`**: Multi-provider LLM client (unified interface for DeepSeek, OpenAI, Z.AI)
+  - **`utils/llm_base.py`**: Base LLM client classes and interfaces
+  - **`utils/client_pool.py`**: Connection pooling for LLM clients (performance optimization)
+  - **`utils/token_manager.py`**: Token counting and context usage statistics
+  - **`utils/i18n.py`**: Internationalization manager (13 languages)
+  - **`utils/helpers.py`**: Helper functions (expert name translation, etc.)
+  - **`utils/validators.py`**: Input validation functions
+  - **`utils/exceptions.py`**: Custom exception classes
+  - **`utils/types.py`**: Type definitions and aliases
+  - **`utils/logging.py`**: Logging configuration
+  - **`utils/page_generator.py`**: Expert page generation from templates
+  - **`utils/config_manager.py`**: Expert configuration file management
 - **`tests/`**: Test suite using pytest with temporary directories for isolation
 - **`scripts/setup.py`**: Sets up the application (creates 7 default example experts on first run)
-- **`scripts/reset_application.py`**: Resets app to factory state (deletes expert pages and configs, then runs setup.py)
+- **`scripts/reset_application.py`**: Resets app to factory state (deletes configs, pages, and chat history, then runs setup.py)
 - **`.streamlit/`**: Streamlit configuration directory
   - **`secrets.toml`**: API keys and secrets - **gitignored** (auto-created by app)
   - **`secrets.toml.example`**: Template file for manual setup
@@ -278,10 +299,13 @@ if st.session_state.get("pending_expert_page"):
 **ExpertGPTs uses Streamlit's recommended secrets management system:**
 
 - **Storage**: API keys stored in `.streamlit/secrets.toml` (gitignored)
-- **Access**: Keys accessed via `st.secrets["DEEPSEEK_API_KEY"]`
+- **Access**: Keys accessed via provider-specific environment variables:
+  - `st.secrets["DEEPSEEK_API_KEY"]`
+  - `st.secrets["OPENAI_API_KEY"]`
+  - `st.secrets["ZAI_API_KEY"]`
 - **UI Management**: Users can set/clear API keys through the Settings page
 - **Automatic Saving**: When entered via UI, keys are automatically saved to `secrets.toml`
-- **Session State**: Keys also stored in `st.session_state.deepseek_api_key` for immediate use
+- **Session State**: Keys also stored in `st.session_state.api_keys` dictionary for immediate use
 
 **Setting up API keys:**
 1. **Via UI** (Recommended): Go to Settings → API Key tab → Enter key → Click "Save API Key"
@@ -321,6 +345,111 @@ ExpertGPTs supports full theme customization through the Settings page:
 - `save_theme_settings(...)` - Save new theme colors
 - `reset_to_default_theme()` - Reset to default colors
 - Settings automatically saved to `.streamlit/config.toml` with 600 permissions
+
+### Chat History Persistence
+
+ExpertGPTs automatically persists chat conversations to disk:
+
+**Storage:**
+- Location: `chat_history/{expert_id}.json` (gitignored)
+- Format: JSON with timestamps on each message
+- Size limit: 1 MB per expert (auto-truncates, keeps minimum 10 messages)
+- File permissions: 600 (owner read/write only)
+
+**Key Features:**
+- ✅ Persists across app restarts
+- ✅ Saves after every user message and API response
+- ✅ Automatic truncation at 1 MB with binary search algorithm
+- ✅ Timestamps on each message
+- ✅ Silent error handling (corrupted files → fresh start)
+- ✅ Secure file permissions (600 for files, 700 for directory)
+
+**Key utilities in `utils/chat_history_manager.py`:**
+- `load_chat_history(expert_id)` - Load messages from file (returns [] if not exists)
+- `save_chat_history(expert_id, messages)` - Save with auto-truncation
+- `delete_chat_history(expert_id)` - Delete expert's chat history
+- `truncate_messages_by_size(messages, expert_id, max_size_mb)` - Binary search truncation
+- `get_chat_history_size_mb(expert_id)` - Get file size in MB
+- `has_chat_history(expert_id)` - Check if history exists
+- `clear_all_chat_history()` - Delete all chat history files
+
+**How It Works:**
+1. **App startup**: `initialize_session_state()` loads history from file for each expert
+2. **User sends message**: Saved immediately to file
+3. **Assistant responds**: Saved immediately to file
+4. **File size check**: If > 1 MB, binary search finds optimal message count
+5. **Clear chat**: Deletes both session state and file
+
+**JSON Structure:**
+```json
+{
+  "expert_id": "1001_python_expert",
+  "created_at": "2026-01-17T10:30:00.000000",
+  "last_updated": "2026-01-17T15:45:30.123456",
+  "messages": [
+    {
+      "role": "user",
+      "content": "How do I read a file in Python?",
+      "timestamp": "2026-01-17T15:45:00.000000"
+    },
+    {
+      "role": "assistant",
+      "content": "You can use the `open()` function...",
+      "timestamp": "2026-01-17T15:45:30.000000"
+    }
+  ]
+}
+```
+
+**Error Handling:**
+- File doesn't exist: Returns empty list (normal for new experts)
+- Corrupted JSON: Returns empty list (silently starts fresh)
+- Write failures: Prints warning, continues without persistence
+
+### Multi-Provider LLM Architecture
+
+ExpertGPTs supports multiple LLM providers through a unified client interface:
+
+**Supported Providers:**
+- **DeepSeek** (default): `deepseek-chat`, `deepseek-reasoner`
+- **OpenAI**: `gpt-5`, `gpt-5-mini`, `gpt-5-nano`
+- **Z.AI**: `glm-4.7`
+
+**Provider Configuration:**
+All providers configured in `utils/constants.py`:
+- API endpoints, models, max tokens
+- Provider-specific thinking/reasoning modes
+- Display names and icons
+
+**Client Pool Pattern:**
+```python
+from utils.client_pool import get_cached_client
+
+# Get cached client for provider (performance optimization)
+client = get_cached_client(provider="deepseek", api_key=key)
+
+# Stream response with provider-specific settings
+for chunk in client.chat_stream(
+    messages=messages,
+    temperature=temperature,
+    model=model,
+    system_prompt=system_prompt,
+    thinking_level=thinking_level  # Provider-specific
+):
+    response += chunk
+```
+
+**Thinking Mode by Provider:**
+- **DeepSeek**: `"thinking": {"type": "enabled"}` or `"disabled"`
+- **OpenAI**: `"reasoning": {"effort": "none"}` or `"low"`, `"medium"`, `"high"`, `"xhigh"`
+- **Z.AI**: `"thinking": {"type": "enabled"}` or `"disabled"`
+
+**Key utilities:**
+- `utils/llm_client.py`: `LLMClient` - Unified client for all providers
+- `utils/llm_base.py`: Base classes and interfaces
+- `utils/client_pool.py`: Connection pooling for performance
+- `utils/constants.py`: `LLM_PROVIDERS`, `MAX_TOKENS`, etc.
+- `utils/token_manager.py`: Token counting and context usage statistics
 
 ### Internationalization (i18n)
 
