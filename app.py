@@ -24,11 +24,11 @@ def check_first_run():
     """
     pages_dir = Path(__file__).parent / "pages"
 
-    # Check if expert pages exist (excluding Home and Settings)
+    # Check if expert pages exist (excluding Home, Settings, and Help)
     if pages_dir.exists():
         expert_pages = [
             f for f in pages_dir.glob("*.py")
-            if f.name not in ["1000_Home.py", "9999_Settings.py"]
+            if f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
             and not f.name.startswith("_")
         ]
         return len(expert_pages) == 0
@@ -107,9 +107,16 @@ def main():
 
     # Define Settings page
     settings = st.Page(
-        "pages/9999_Settings.py",
+        "pages/9998_Settings.py",
         title=i18n.t("nav.settings"),
         icon=":material/settings:"
+    )
+
+    # Define Help page
+    help_page = st.Page(
+        "pages/9999_Help.py",
+        title=i18n.t("nav.help", default="Help"),
+        icon=":material/help:"
     )
 
     # Dynamically load all expert pages
@@ -140,8 +147,8 @@ def main():
             )
         )
 
-    # Create page list: Home + Experts + Settings
-    pages = [home] + expert_pages + [settings]
+    # Create page list: Home + Experts + Settings + Help
+    pages = [home] + expert_pages + [settings, help_page]
 
     # Set up navigation
     pg = st.navigation(pages)

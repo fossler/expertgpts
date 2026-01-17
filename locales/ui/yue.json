@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "主頁",
-    "settings": "設定"
+    "settings": "設定",
+    "help": "幫助"
   },
   "home": {
     "title": "歡迎嚟到 ExpertGPTs",
@@ -348,5 +349,14 @@
       "translation_expert": "翻譯專家",
       "spell_checker": "拼寫檢查器"
     }
+  },
+  "help": {
+    "documentation": "文件",
+    "quick_links": "快速連結",
+    "by_category": "按類別",
+    "title": "幫助與文件",
+    "doc_not_found": "搵唔到文件",
+    "go_home": "返到文件主頁",
+    "tip": "提示：用左邊欄嚟瀏覽文件"
   }
 }

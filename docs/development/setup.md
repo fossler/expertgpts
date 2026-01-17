@@ -71,7 +71,8 @@ expertgpts/
 ├── app.py                      # Entry point
 ├── pages/                      # Streamlit pages
 │   ├── 1000_Home.py           # Home (permanent)
-│   ├── 9999_Settings.py       # Settings (permanent)
+│   ├── 9998_Settings.py       # Settings (permanent)
+│   ├── 9999_Help.py           # Help (permanent)
 │   └── 1XXX_*.py             # Expert pages (generated)
 ├── templates/
 │   └── template.py            # Expert page template

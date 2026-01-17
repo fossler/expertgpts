@@ -468,7 +468,7 @@ def render_general_settings_section():
     if st.session_state.get("trigger_page_reload", False):
         st.session_state.trigger_page_reload = False
         # Switch to current page to force complete reload (re-reads config.toml)
-        st.switch_page("pages/9999_Settings.py")
+        st.switch_page("pages/9998_Settings.py")
 
     # Single button to save and apply theme settings
     col1, col2, col3 = st.columns([2, 2, 4])
@@ -1033,7 +1033,7 @@ def render_danger_zone_section():
                     if pages_dir.exists():
                         for page_file in pages_dir.glob("*.py"):
                             # Keep core application files (Home and Settings)
-                            if page_file.name not in ["1000_Home.py", "9999_Settings.py"]:
+                            if page_file.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]:
                                 page_file.unlink()
 
                     # Recreate example experts using scripts/setup.py

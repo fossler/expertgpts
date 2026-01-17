@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "Ana Sayfa",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "help": "Yardım"
   },
   "home": {
     "title": "ExpertGPTs'a Hoş Geldiniz",
@@ -348,5 +349,14 @@
       "translation_expert": "Çeviri Uzmanı",
       "spell_checker": "Yazım Denetimi"
     }
+  },
+  "help": {
+    "documentation": "Belgeler",
+    "quick_links": "Hızlı Bağlantılar",
+    "by_category": "Kategoriye Göre",
+    "title": "Yardım ve Belgeler",
+    "doc_not_found": "Belgeler bulunamadı",
+    "go_home": "Ana Sayfaya Git",
+    "tip": "İpucu: Belgelere göz atmak için sol kenar çubuğunu kullanın"
   }
 }

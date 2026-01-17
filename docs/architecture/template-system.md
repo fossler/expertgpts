@@ -196,10 +196,15 @@ echo "yes" | python3 scripts/reset_application.py
 - Contains expert management UI
 - "Add Chat" functionality
 
-**Settings Page** (`pages/9999_Settings.py`):
+**Settings Page** (`pages/9998_Settings.py`):
 - Not generated from template
 - Manually maintained
 - Settings for API keys, theme, language, defaults
+
+**Help Page** (`pages/9999_Help.py`):
+- Not generated from template
+- Manually maintained
+- Displays documentation from `docs/` directory
 
 **Characteristics**:
 - Committed to git

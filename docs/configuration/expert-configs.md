@@ -20,7 +20,7 @@ Each expert in ExpertGPTs is defined by a **YAML configuration file** stored in 
 - `configs/1005_sql_expert.yaml`
 
 **Expert ID Format**: `{number}_{sanitized_name}`
-- Number: 1001+ (reserved: 1000=Home, 9999=Settings)
+- Number: 1001-9997 (reserved: 1000=Home, 9998=Settings, 9999=Help)
 - Sanitized name: Lowercase, spaces/hyphens to underscores
 
 ### Example Configuration
@@ -65,8 +65,8 @@ metadata:
 
 **Constraints**:
 - Must be unique across all experts
-- Must start with number (1001-9998)
-- Cannot use 1000 (Home) or 9999 (Settings)
+- Must start with number (1001-9997)
+- Cannot use 1000 (Home), 9998 (Settings), or 9999 (Help)
 - Sanitized: lowercase, underscores only
 
 **Auto-Generated**: Created automatically when expert is added via UI

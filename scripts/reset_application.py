@@ -67,10 +67,10 @@ def delete_pages():
         print("❌ Pages directory not found!")
         return False
 
-    # Get all Python files, excluding Home (1000), Settings (9999), and hidden files (starting with _)
+    # Get all Python files, excluding Home (1000), Settings (9998), Help (9999), and hidden files (starting with _)
     page_files = [
         f for f in pages_dir.glob("*.py")
-        if not f.name.startswith("_") and f.name not in ["1000_Home.py", "9999_Settings.py"]
+        if not f.name.startswith("_") and f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
     ]
 
     if not page_files:

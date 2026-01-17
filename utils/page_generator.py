@@ -53,7 +53,8 @@ class PageGenerator:
             if (file.name.startswith("_") or
                 file.name == "template.py" or
                 file.name == "1000_Home.py" or
-                file.name == "9999_Settings.py"):
+                file.name == "9998_Settings.py" or
+                file.name == "9999_Help.py"):
                 continue
 
             try:
@@ -130,11 +131,12 @@ class PageGenerator:
         # Get existing page numbers
         existing_numbers = []
         for file in self.pages_dir.glob("*.py"):
-            # Skip hidden files, template, Home page, and Settings page
+            # Skip hidden files, template, Home page, Settings page, and Help page
             if (file.name.startswith("_") or
                 file.name == "template.py" or
                 file.name == "1000_Home.py" or
-                file.name == "9999_Settings.py"):
+                file.name == "9998_Settings.py" or
+                file.name == "9999_Help.py"):
                 continue
             try:
                 # Extract number prefix (e.g., "1003_Coding_Expert.py" -> 1003)
@@ -215,7 +217,7 @@ class PageGenerator:
             # Skip system pages
             if (page_file.name.startswith("_") or
                 page_file.name == "template.py" or
-                page_file.name in ["1000_Home.py", "9999_Settings.py"]):
+                page_file.name in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]):
                 continue
 
             # Parse filename to extract page number and expert name

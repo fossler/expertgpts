@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "Home",
-    "settings": "Settings"
+    "settings": "Settings",
+    "help": "Help"
   },
   "home": {
     "title": "Welcome to ExpertGPTs",
@@ -348,5 +349,14 @@
     "config_not_found": "Configuration not found for expert: {expert_id}",
     "total_tokens": "Total: {total} / {max} tokens",
     "of_tokens": "of {max} tokens"
+  },
+  "help": {
+    "documentation": "Documentation",
+    "quick_links": "Quick Links",
+    "by_category": "By Category",
+    "title": "Help & Documentation",
+    "doc_not_found": "Documentation not found",
+    "go_home": "Go to Documentation Home",
+    "tip": "Tip: Use the sidebar on the left to browse documentation"
   }
 }

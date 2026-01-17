@@ -14,7 +14,8 @@ expertgpts/
 │   ├── 1000_Home.py               # Home page (permanent, committed)
 │   ├── 1001_python_expert.py      # Expert pages (generated)
 │   ├── 1002_data_scientist.py     # More expert pages...
-│   └── 9999_Settings.py           # Settings page (permanent, committed)
+│   ├── 9998_Settings.py           # Settings page (permanent, committed)
+│   └── 9999_Help.py               # Help page (permanent, committed)
 │
 ├── templates/
 │   └── template.py                 # Master template for expert pages
@@ -91,7 +92,8 @@ expertgpts/
 **Always committed**:
 - `app.py` - Main entry point
 - `pages/1000_Home.py` - Home page
-- `pages/9999_Settings.py` - Settings page
+- `pages/9998_Settings.py` - Settings page
+- `pages/9999_Help.py` - Help page
 - `templates/template.py` - Expert page template
 - `utils/*.py` - All utility modules
 - `configs/*.yaml` - Expert configurations

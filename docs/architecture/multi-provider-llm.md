@@ -385,7 +385,7 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
 
 ### Step 3: Add API Key UI
 
-**File**: `pages/9999_Settings.py`
+**File**: `pages/9998_Settings.py`
 
 **Add tab in API Keys section**:
 ```python

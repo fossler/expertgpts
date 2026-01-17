@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "Início",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "help": "Ajuda"
   },
   "home": {
     "title": "Bem-vindo ao ExpertGPTs",
@@ -348,5 +349,14 @@
       "translation_expert": "Especialista em Tradução",
       "spell_checker": "Corretor Ortográfico"
     }
+  },
+  "help": {
+    "documentation": "Documentação",
+    "quick_links": "Links Rápidos",
+    "by_category": "Por Categoria",
+    "title": "Ajuda e Documentação",
+    "doc_not_found": "Documentação não encontrada",
+    "go_home": "Ir para a Página Inicial",
+    "tip": "Dica: Use a barra lateral esquerda para navegar na documentação"
   }
 }

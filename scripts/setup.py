@@ -28,7 +28,7 @@ def should_create_example_experts() -> bool:
     # Check if expert pages exist (excluding Home and Settings)
     expert_pages = [
         f for f in pages_dir.glob("*.py")
-        if f.name not in ["1000_Home.py", "9999_Settings.py"]
+        if f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
         and not f.name.startswith("_")
     ]
 
@@ -137,14 +137,14 @@ if __name__ == "__main__":
 
     # Verify Home and Settings exist (they should be in git)
     home_page = Path("pages/1000_Home.py")
-    settings_page = Path("pages/9999_Settings.py")
+    settings_page = Path("pages/9998_Settings.py")
 
     if not home_page.exists():
         print("⚠️  Warning: Home page not found at pages/1000_Home.py")
         print("   This file should be in the repository. Please check your git checkout.")
 
     if not settings_page.exists():
-        print("⚠️  Warning: Settings page not found at pages/9999_Settings.py")
+        print("⚠️  Warning: Settings page not found at pages/9998_Settings.py")
         print("   This file should be in the repository. Please check your git checkout.")
 
     print()

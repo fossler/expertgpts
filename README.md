@@ -59,7 +59,8 @@ expertgpts/
 ├── pages/
 │   ├── 1000_Home.py              # Home page (permanent)
 │   ├── 1001_*.py                 # Expert pages (generated from template)
-│   └── 9999_Settings.py          # Settings page (permanent)
+│   ├── 9998_Settings.py          # Settings page (permanent)
+│   └── 9999_Help.py              # Help page (permanent)
 ├── templates/template.py          # Template for expert pages
 ├── configs/{expert_id}.yaml       # Expert configurations
 ├── utils/                         # Business logic modules
@@ -162,7 +163,7 @@ pytest --cov=utils --cov-report=html
 
 **Modify Expert Pages**: Edit `templates/template.py`, then run `echo "yes" | python3 scripts/reset_application.py`
 
-**Modify Home/Settings**: Edit `pages/1000_Home.py` or `pages/9999_Settings.py` directly
+**Modify Home/Settings/Help**: Edit `pages/1000_Home.py`, `pages/9998_Settings.py`, or `pages/9999_Help.py` directly
 
 **Development Guide**: [Adding Features Documentation](docs/development/adding-features.md)
 

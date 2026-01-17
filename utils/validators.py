@@ -267,15 +267,15 @@ def validate_page_number(page_number: int) -> int:
         ValidationError: If the page number is invalid
 
     Note:
-        Page numbers must be between 1001 and 9998 (1000 is Home, 9999 is Settings)
+        Page numbers must be between 1001 and 9997 (1000 is Home, 9998 is Settings, 9999 is Help)
     """
     if not isinstance(page_number, int):
         raise ValidationError("Page number must be an integer")
 
-    if not (1001 <= page_number <= 9998):
+    if not (1001 <= page_number <= 9997):
         raise ValidationError(
-            f"Page number must be between 1001 and 9998 (got {page_number}). "
-            "Note: 1000 is reserved for Home, 9999 for Settings."
+            f"Page number must be between 1001 and 9997 (got {page_number}). "
+            "Note: 1000 is reserved for Home, 9998 for Settings, 9999 for Help."
         )
 
     return page_number

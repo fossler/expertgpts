@@ -402,7 +402,7 @@ def render_add_chat_dialog():
         """)
 
         if st.button(f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"):
-            st.switch_page("pages/9999_Settings.py")
+            st.switch_page("pages/9998_Settings.py")
 
         return
 

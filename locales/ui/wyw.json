@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "首頁",
-    "settings": "設置"
+    "settings": "設置",
+    "help": "帮助"
   },
   "home": {
     "title": "歡迎至 ExpertGPTs",
@@ -348,5 +349,14 @@
       "translation_expert": "翻譯專家",
       "spell_checker": "拼字檢查器"
     }
+  },
+  "help": {
+    "documentation": "文档",
+    "quick_links": "快速链接",
+    "by_category": "按类别",
+    "title": "帮助搭文档",
+    "doc_not_found": "寻勿着文档",
+    "go_home": "转去文档首页",
+    "tip": "提示：用左边栏浏览文档"
   }
 }

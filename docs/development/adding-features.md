@@ -24,8 +24,8 @@ This guide explains how to add new features to ExpertGPTs.
 3. Run `reset_application.py` to regenerate all
 4. Test multiple experts
 
-**When modifying Home/Settings**:
-- Edit directly: `pages/1000_Home.py` or `pages/9999_Settings.py`
+**When modifying Home/Settings/Help**:
+- Edit directly: `pages/1000_Home.py`, `pages/9998_Settings.py`, or `pages/9999_Help.py`
 - No regeneration needed
 
 ### 3. Use Utility Modules
@@ -105,7 +105,7 @@ This guide explains how to add new features to ExpertGPTs.
    - Add thinking parameter handling
    - Support provider-specific features
 
-3. Add API key UI in `pages/9999_Settings.py`
+3. Add API key UI in `pages/9998_Settings.py`
 
 4. Update `.streamlit/secrets.toml.example`
 
@@ -148,7 +148,7 @@ This guide explains how to add new features to ExpertGPTs.
    - Add `get_max_tokens_preference()`
    - Add `save_max_tokens_preference()`
 
-3. Add UI in `pages/9999_Settings.py`:
+3. Add UI in `pages/9998_Settings.py`:
    ```python
    max_tokens = st.slider("Max Tokens", 1, 8192, get_max_tokens_preference())
    if st.button("Save"):

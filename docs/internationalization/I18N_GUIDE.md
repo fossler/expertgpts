@@ -469,7 +469,7 @@ This syncs all locale files with `en.json`.
 | `utils/app_defaults_manager.py` | Language and LLM defaults persistence |
 | `templates/template.py` | Language prefix injection at runtime |
 | `utils/llm_client.py` | Language prefix in AI-powered generation |
-| `pages/9999_Settings.py` | Settings page with language selector |
+| `pages/9998_Settings.py` | Settings page with language selector |
 | `scripts/update_translations.py` | Sync locales with en.json |
 | `scripts/test_i18n_refactoring.py` | Test i18n implementation |
 

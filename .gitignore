@@ -56,8 +56,9 @@ logs/
 chat_history/
 llm_comm/
 
-# Expert pages only (not Home/Settings which are permanent)
+# Expert pages only (not Home/Settings/Help which are permanent)
 pages/*.py
 !pages/1000_Home.py
-!pages/9999_Settings.py
+!pages/9998_Settings.py
+!pages/9999_Help.py
 

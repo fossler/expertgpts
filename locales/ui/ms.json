@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "Laman Utama",
-    "settings": "Tetapan"
+    "settings": "Tetapan",
+    "help": "Bantuan"
   },
   "home": {
     "title": "Selamat Datang ke ExpertGPTs",
@@ -348,5 +349,14 @@
       "translation_expert": "Pakar Terjemahan",
       "spell_checker": "Penyemak Ejaan"
     }
+  },
+  "help": {
+    "documentation": "Dokumentasi",
+    "quick_links": "Pautan Pantas",
+    "by_category": "Mengikut Kategori",
+    "title": "Bantuan & Dokumentasi",
+    "doc_not_found": "Dokumentasi tidak ditemui",
+    "go_home": "Ke Laman Utama",
+    "tip": "Tip: Gunakan sidebar di sebelah kiri untuk melayari dokumentasi"
   }
 }
