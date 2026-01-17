@@ -13,8 +13,8 @@ from typing import List, Dict
 # Secure file permissions: read/write for owner only (600)
 SECURE_FILE_PERMISSIONS = 0o600
 
-# Default maximum chat history file size (10 MB)
-DEFAULT_MAX_FILE_SIZE_MB = 10
+# Default maximum chat history file size (1 MB)
+DEFAULT_MAX_FILE_SIZE_MB = 1
 
 # Minimum messages to preserve even if over size limit
 MINIMUM_MESSAGES_PRESERVE = 10
