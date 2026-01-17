@@ -23,8 +23,6 @@ This allows the user to review changes before they're committed to the repositor
 
 1. **Before writing any code:**
    - Search for existing implementations that do the same thing
-   - Use `Grep` tool to find similar patterns across files
-   - Check `utils/dialogs.py` and `utils/constants.py` for shared functions
 
 2. **When you find duplicated code:**
    - Extract it to a shared function in the appropriate `utils/` module
@@ -43,17 +41,8 @@ This allows the user to review changes before they're committed to the repositor
 4. **Checklist before committing:**
    - [ ] Did I search for existing implementations?
    - [ ] Is this code duplicated anywhere else?
-   - [ ] Should this be in `utils/dialogs.py`, `utils/constants.py`, or another shared module?
    - [ ] Did I update all templates?
    - [ ] Did I update all generated pages?
-
-#### Consequences of Violating DRY:
-
-- Maintenance burden: Bug fixes require changes in multiple places
-- Inconsistency risk: Changes might not be synchronized
-- User will catch it and ask for fixes! 😊
-
-**Remember:** The user values DRY compliance highly and will notice violations.
 
 ### No Backward Compatibility
 
@@ -70,16 +59,6 @@ When refactoring or changing data structures:
 - Configs are easy to regenerate
 - Backward compatibility adds complexity and technical debt
 - Clean code is more valuable than supporting old data formats
-
-**Example:**
-```python
-# ❌ BAD - Don't do this
-if isinstance(thinking_level, bool):
-    thinking_level = "medium" if thinking_level else "none"
-
-# ✅ GOOD - Just use the new format
-thinking_level = thinking_level  # Always a string
-```
 
 
 ## Project Overview
@@ -118,12 +97,6 @@ Critical pattern for expert isolation:
 - **Page creation**: New pages require `st.rerun()` to be discovered by the navigation system
 - **Navigation icons**: Uses Material Design icons (e.g., `:material/home:`, `:material/psychology:`)
 
-### DeepSeek API Integration
-- Uses OpenAI-compatible client with custom `base_url="https://api.deepseek.com"`
-- System prompts automatically prepended to message history
-- Streaming responses via `client.chat.completions.create(stream=True)`
-- Temperature and system prompt come from expert's YAML config
-
 ## Essential Commands
 
 ### Development Setup
@@ -161,14 +134,6 @@ echo "yes" | ./scripts/reset_application.py
 - Configs and pages become out of sync or corrupted
 - Starting fresh for development/testing
 
-**IMPORTANT:** Always use `echo "yes" |` prefix when running scripts/reset_application.py, as it requires interactive confirmation that won't work in non-interactive environments.
-- Restoring application to initial example state
-
-The script will:
-1. Ask for confirmation (type "yes" to proceed)
-2. Delete all YAML configs from `configs/`
-3. Delete all expert pages from `pages/` (keeps Home.py)
-4. Run `scripts/setup.py` to recreate 7 default experts
 
 ### Testing
 ```bash
@@ -271,8 +236,11 @@ page_path = page_generator.generate_page(
   - **`app_defaults.toml.example`**: Template file for app defaults
 
 **Important**:
-- Both `configs/` and `pages/` are in `.gitignore` since they're auto-generated
-- To recreate them, run `scripts/setup.py` or `scripts/reset_application.py`
+- `configs/` is fully in `.gitignore` since configs are auto-generated
+- `pages/` contains both permanent files (committed to git) and auto-generated files (gitignored):
+  - Permanent: `pages/1000_Home.py` and `pages/9999_Settings.py` (committed to git)
+  - Auto-generated: Expert pages like `pages/1001_*.py`, `pages/1002_*.py`, etc. (gitignored)
+- To recreate auto-generated content, run `scripts/setup.py` or `scripts/reset_application.py`
 - `.streamlit/app_defaults.toml` contains user preferences (not auto-generated, but gitignored for privacy)
 
 ## Key Implementation Details
