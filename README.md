@@ -181,3 +181,11 @@ This project is open source and available under the Apache License 2.0.
 ## Support
 
 For issues, questions, or contributions, visit the [GitHub repository](https://github.com/fossler/expertgpts).
+
+---
+
+## ☕ Buy Me a Coffee
+
+If you find this project helpful and would like to support its development, consider buying me a coffee!
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/fossler)
