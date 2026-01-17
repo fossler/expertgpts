@@ -11,6 +11,11 @@ from utils.session_state import initialize_shared_session_state
 from utils.token_manager import TokenManager
 from utils.i18n import i18n
 from utils.helpers import translate_expert_name
+from utils.chat_history_manager import (
+    load_chat_history,
+    save_chat_history,
+    delete_chat_history
+)
 from utils.constants import (
     LLM_PROVIDERS,
     get_provider_display_name,
@@ -30,14 +35,19 @@ EXPERT_NAME = "{{EXPERT_NAME}}"
 
 
 def initialize_session_state():
-    """Initialize session state variables."""
+    """Initialize session state variables.
+
+    Loads chat history from file on first run, ensuring persistence
+    across app restarts.
+    """
     # Initialize shared state first (API key, navigation, etc.)
     initialize_shared_session_state()
 
     # Initialize messages key for this specific expert
     messages_key = f"messages_{EXPERT_ID}"
     if messages_key not in st.session_state:
-        st.session_state[messages_key] = []
+        # Load from file if exists, otherwise start empty
+        st.session_state[messages_key] = load_chat_history(EXPERT_ID)
 
     return messages_key
 
@@ -150,6 +160,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
         # Add user message to chat history
         st.session_state[messages_key].append({"role": "user", "content": prompt})
 
+        # Persist to file
+        save_chat_history(EXPERT_ID, st.session_state[messages_key])
+
         # Display user message
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -200,6 +213,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     "content": response
                 })
 
+                # Persist to file
+                save_chat_history(EXPERT_ID, st.session_state[messages_key])
+
                 # Rerun to update context usage with new message
                 st.rerun()
 
@@ -211,6 +227,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     "role": "assistant",
                     "content": f"❌ {error_msg}"
                 })
+                # Persist to file
+                save_chat_history(EXPERT_ID, st.session_state[messages_key])
             except ValueError as e:
                 error_msg = i18n.t("errors.api_response_error", error=str(e))
                 message_placeholder.error(f"❌ {error_msg}")
@@ -218,6 +236,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     "role": "assistant",
                     "content": f"❌ {error_msg}"
                 })
+                # Persist to file
+                save_chat_history(EXPERT_ID, st.session_state[messages_key])
             except Exception as e:
                 error_msg = i18n.t("errors.unexpected_error", type=type(e).__name__, message=str(e))
                 message_placeholder.error(f"❌ {error_msg}")
@@ -225,17 +245,26 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     "role": "assistant",
                     "content": f"❌ {error_msg}"
                 })
+                # Persist to file
+                save_chat_history(EXPERT_ID, st.session_state[messages_key])
             st.rerun()
 
 
 def clear_chat_history(messages_key: str):
     """Clear the chat history for this expert.
 
+    Clears both session state and persistent file storage.
+
     Args:
         messages_key: Session state key for this expert's messages
     """
     if st.sidebar.button(f"🗑️ {i18n.t('sidebar.clear_chat_history')}"):
+        # Clear from session state
         st.session_state[messages_key] = []
+
+        # Delete from file
+        delete_chat_history(EXPERT_ID)
+
         st.rerun()
 
 

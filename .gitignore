@@ -57,6 +57,7 @@ credentials.json
 # Auto-generated content
 configs/
 logs/
+chat_history/
 
 # Expert pages only (not Home/Settings which are permanent)
 pages/*.py
