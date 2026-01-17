@@ -2,18 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+ExpertGPTs is a multi-expert AI chat application built with Streamlit that provides access to domain-specific AI experts (Python, Data Science, Writing, etc.) with support for multiple LLM providers (DeepSeek, OpenAI, Z.AI), full internationalization (13 languages), template-based page generation, and persistent chat history.
+
 ## Working Guidelines
-
-### Commit Policy
-**IMPORTANT: Do NOT commit changes automatically.**
-
-When making changes to the codebase:
-1. Make the requested changes
-2. Show what was modified
-3. Wait for user review
-4. Only commit when user explicitly requests it with "commit" or similar command
-
-This allows the user to review changes before they're committed to the repository.
 
 ### DRY Principle (Don't Repeat Yourself)
 
@@ -61,525 +54,306 @@ When refactoring or changing data structures:
 - Clean code is more valuable than supporting old data formats
 
 
-## Project Overview
+## Development Commands
 
-ExpertGPTs is a multi-expert AI chat application built with Streamlit, powered by multiple LLM providers (DeepSeek, OpenAI, Z.AI). It uses a **template-based architecture** where each domain-specific expert agent is generated from a single template, with behavior controlled by YAML configuration files.
-
-## Key Architecture Concepts
-
-### Template-Based Page Generation
-- **All expert pages** are generated from `templates/template.py`
-- **Home and Settings pages** are permanent files in `pages/` (not generated)
-- **PageGenerator** creates numbered Python files (e.g., `1001_python_expert.py`) from the template
-  - Format: 4-digit number + underscore + lowercase name
-  - Example: `1001_python_expert.py`, `1002_data_scientist.py`
-- Placeholders `{{EXPERT_ID}}` and `{{EXPERT_NAME}}` are replaced during generation
-- **Never manually edit expert pages** - changes will be lost when regenerated
-- To modify all experts, edit `templates/template.py` instead
-
-### Expert Configuration System
-Each expert has a corresponding YAML config file in `configs/`:
-- **Format**: `{timestamp}_{safe_name}.yaml`
-- **Contains**: expert_id, expert_name, description, temperature, system_prompt, metadata
-- **System prompts** are auto-generated from description if not provided
-- Config is loaded at runtime via `ConfigManager.load_config()`
-
-### Session State Architecture
-Critical pattern for expert isolation:
-- **Chat history per expert**: `st.session_state[f"messages_{EXPERT_ID}"]` - prevents cross-contamination
-- **API keys dictionary**: `st.session_state.api_keys` - dictionary of provider → API key mappings
-  - Providers: `"deepseek"`, `"openai"`, `"zai"`
-  - Loaded from `st.secrets` on startup (DEEPSEEK_API_KEY, OPENAI_API_KEY, ZAI_API_KEY)
-  - Managed through Settings page
-- **Navigation state**: `st.session_state.pending_expert_page` - for auto-navigation after creation
-
-### Streamlit Navigation Architecture
-- **Modern approach**: Uses `st.navigation()` API in `app.py` for page management
-- **Home page**: `pages/1000_Home.py` (permanent file, committed to git)
-- **Expert pages**: `pages/1001_*.py`, `pages/1002_*.py`, etc. (generated from `templates/template.py`)
-- **Settings page**: `pages/9999_Settings.py` (permanent file, committed to git)
-- **Dynamic loading**: Expert pages discovered automatically via `PageGenerator.list_pages()`
-- **Page creation**: New pages require `st.rerun()` to be discovered by the navigation system
-- **Navigation icons**: Uses Material Design icons (e.g., `:material/home:`, `:material/psychology:`)
-
-## Essential Commands
-
-### Development Setup
+### Setup & Installation
 ```bash
-# Always use .venv
+# Create and activate virtual environment
+python3 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install -r requirements-dev.txt  # Development (includes watchdog, pytest, black)
-pip install -r requirements.txt        # Production only
+pip install -r requirements-dev.txt  # Development (includes watchdog, pytest)
+pip install -r requirements.txt       # Production only
 
-# Set up API keys (optional - can also do via Settings page)
-cp .streamlit/secrets.toml.example .streamlit/secrets.toml
-# Then edit .streamlit/secrets.toml and add your API keys:
-# DEEPSEEK_API_KEY = "your_key_here"
-# OPENAI_API_KEY = "your_key_here" (optional)
-# ZAI_API_KEY = "your_key_here" (optional)
-
-# Run the app (first run will automatically create example experts)
-streamlit run app.py
+# First-time setup (creates 7 example experts)
+python3 scripts/setup.py
 ```
 
-### Application Reset
+### Running the Application
 ```bash
-# Reset application to factory default state
-# WARNING: This deletes all configs, expert pages, and chat history, then recreates example experts
-# IMPORTANT: Home and Settings pages are preserved (they're permanent files)
-# IMPORTANT: Always use echo "yes" | to auto-confirm (required for non-interactive environments)
-echo "yes" | python3 scripts/reset_application.py
+# Start the Streamlit app
+streamlit run app.py
 
-# Or make executable and run directly
-chmod +x scripts/reset_application.py
-echo "yes" | ./scripts/reset_application.py
+# With enhanced file watching (faster reload during development)
+streamlit run app.py --server.fileWatcherType=watchdog
 ```
-
-**Use scripts/reset_application.py when:**
-- After modifying `templates/template.py` and need to regenerate all expert pages
-- Configs and pages become out of sync or corrupted
-- Starting fresh for development/testing
-
 
 ### Testing
 ```bash
-# Run all tests
-pytest
-
-# Run with verbose output
-pytest -v
-
-# Run specific test file
-pytest tests/test_agent_generation.py
-
-# Run specific test
-pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
-
-# Run with coverage
-pytest --cov=utils --cov-report=html
-
-# Quick test run
+# Run all tests (recommended)
 ./scripts/run_tests.sh
+
+# Direct pytest commands
+source .venv/bin/activate
+python -m pytest -v                           # All tests
+python -m pytest -v -m "unit"                # Unit tests only
+python -m pytest -v -m "integration"         # Integration tests only
+python -m pytest -v -m "not slow"            # Exclude slow tests
 ```
 
 ### Code Quality
 ```bash
-# Format code (if black is installed)
+# Format code with Black
 black .
 
-# Check import issues
-python -m pytest --collect-only  # Verifies imports without running tests
+# Check formatting without making changes
+black --check .
 ```
 
-## Important Workflows
+### Administrative Scripts
+```bash
+# Reset application - regenerates all expert pages from template
+echo "yes" | python3 scripts/reset_application.py
 
-### Creating a New Expert Agent
-When users create an expert through the UI:
-1. Form submission → `ConfigManager.create_config()` generates YAML config with unique ID
-2. `PageGenerator.generate_page()` creates numbered page file from template
-3. `st.rerun()` triggers Streamlit to discover the new page
-4. `st.switch_page()` automatically navigates to the new expert
+# Update translations - syncs English source with all locale files
+python3 scripts/update_translations.py
+```
 
-**Manual expert creation** (for testing):
+## Architecture Patterns
+
+### 1. Template-Based Expert System
+
+The application uses a **template-driven architecture** where expert pages are generated from a single template:
+
+- **Permanent pages** (committed to git): `pages/1000_Home.py` and `pages/9999_Settings.py`
+- **Generated expert pages** (auto-generated): `pages/1001_*.py` and higher
+- **Template source**: `templates/template.py` with `{{EXPERT_ID}}` and `{{EXPERT_NAME}}` placeholders
+- **Configuration files**: Each expert has a YAML config in `configs/{expert_id}.yaml`
+- **Page numbering scheme**: Home (1000) → Experts (1001+) → Settings (9999)
+
+**Key insight**: When modifying expert page UI/UX, edit the template and regenerate all pages. When modifying Home/Settings, edit the permanent files directly.
+
+### 2. Multi-Provider LLM Abstraction
+
+A unified client interface supports multiple LLM providers through OpenAI-compatible APIs:
+
+- **Client implementation**: `utils/llm_client.py` - `LLMClient` class
+- **Provider-specific thinking parameters**:
+  - **OpenAI**: `reasoning_effort` (low/medium/high) - passed as direct parameter
+  - **DeepSeek**: `thinking.type` (enabled/disabled) - determined by model selection (`deepseek-chat` vs `deepseek-reasoner`)
+  - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter
+- **Provider configuration**: Centralized in `utils/constants.py` with O(1) lookup tables
+- **Connection pooling**: `utils/client_pool.py` caches client instances for performance
+
+**Key insight**: All three providers use the OpenAI Python client with custom `base_url`. Provider differences are handled in `_prepare_thinking_param()` method.
+
+### 3. State Management
+
+Multi-layered state system with different lifetimes:
+
+- **Shared session state** (initialized once per session):
+  - API keys for all providers (`st.session_state["api_keys"]`)
+  - Default LLM settings (provider, model, temperature)
+  - Language preference
+  - Navigation state
+
+- **Per-expert session state** (separate for each expert):
+  - Messages history: `st.session_state[f"messages_{expert_id}"]`
+  - Provider selection: `st.session_state[f"provider_{expert_id}"]`
+  - Model selection: `st.session_state[f"model_{expert_id}"]`
+  - Temperature: `st.session_state[f"temperature_{expert_id}"]`
+  - Thinking level: `st.session_state[f"thinking_{expert_id}"]`
+
+- **Persistent storage** (survives app restarts):
+  - Chat history: `chat_history/{expert_id}.json` (1MB file size limit)
+  - Expert configurations: `configs/{expert_id}.yaml`
+  - User preferences: `.streamlit/app_defaults.toml`
+  - Theme settings: `.streamlit/config.toml`
+
+**Key insight**: Session state initialization happens in two phases - shared state first (via `initialize_shared_session_state()`), then per-expert state with chat history loading.
+
+### 4. Three-Layer Internationalization
+
+Clean separation of concerns for 13-language support:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. STORAGE LAYER (configs/*.yaml)                      │
+│  Expert content in English - Single Source of Truth     │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  2. TRANSLATION LAYER (locales/ui/*.json)               │
+│  UI translations ONLY - Buttons, labels, messages       │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  3. RUNTIME LAYER (template.py, i18n.py)                │
+│  Language prefix injection: "Respond in German"         │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Implementation**: `i18n.get_language_prefix()` injects language instruction into system prompts at runtime, ensuring AI responds in user's selected language while expert content remains in English.
+
+**Key insight**: Never translate expert content in YAML configs. Only UI elements go in locale files. Language selection auto-detects on first run and persists in `app_defaults.toml`.
+
+### 5. Performance Optimizations
+
+- **Client connection pooling**: `utils/client_pool.py` caches OpenAI client instances per provider/api_key combination
+- **Configuration caching**: Expert configs loaded with `@st.cache_data(ttl=CONFIG_CACHE_TTL)` in template
+- **Pre-computed lookup tables**: `utils/constants.py` has O(1) dictionaries for provider/model lookups (eliminates nested dict access)
+- **Lazy page loading**: Streamlit's navigation system only loads the active page
+- **Cache invalidation**: `st.session_state[f"cache_version_{expert_id}"]` incremented when config edited, forcing reload
+
+**Key insight**: Use `get_cached_client()` from client_pool instead of instantiating LLMClient directly.
+
+## Critical Files Reference
+
+### Core Application
+- **`app.py`** - Main entry point using `st.navigation()`; handles first-run detection and dynamic page loading
+- **`templates/template.py`** - Master template for all expert pages; edit here then regenerate to update all experts
+- **`pages/1000_Home.py`** - Home page with expert list and "Add Chat" functionality (permanent file)
+- **`pages/9999_Settings.py`** - Settings page for API keys, themes, language, provider defaults (permanent file)
+
+### Utilities (`utils/`)
+- **`config_manager.py`** - Expert YAML config operations (load, update, delete, list)
+- **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs
+- **`llm_client.py`** - Multi-provider LLM client; handles thinking parameter differences via `_prepare_thinking_param()`
+- **`client_pool.py`** - Cached client connections; use `get_cached_client()` instead of direct instantiation
+- **`secrets_manager.py`** - Secure API key management; reads/writes `.streamlit/secrets.toml` with 600 permissions
+- **`app_defaults_manager.py`** - User preferences management (default provider, model, language)
+- **`config_toml_manager.py`** - Theme configuration management for `.streamlit/config.toml`
+- **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit
+- **`session_state.py`** - Initializes shared session state (API keys, navigation, defaults)
+- **`token_manager.py`** - Token counting and context usage tracking; calculates percentage of context used
+- **`i18n.py`** - Internationalization engine; loads locale files and injects language prefixes
+- **`constants.py`** - Provider/model configurations; defines `LLM_PROVIDERS` dict and O(1) lookup tables
+- **`helpers.py`** - Utility functions including `translate_expert_name()` for default expert names
+
+### Configuration Files
+- **`.streamlit/secrets.toml`** - API keys (gitignored, auto-set to 600 permissions)
+- **`.streamlit/config.toml`** - Theme settings (gitignored)
+- **`.streamlit/app_defaults.toml`** - User preferences (gitignored)
+- **`.streamlit/*.example`** - Template files for configuration (committed to git)
+- **`configs/{expert_id}.yaml`** - Expert-specific configurations (name, description, system_prompt, temperature, metadata)
+
+### Documentation
+- **`README.md`** - Comprehensive user and developer documentation (455 lines)
+- **`docs/I18N_GUIDE.md`** - Internationalization architecture and implementation guide
+- **`docs/testing.md`** - Testing instructions and guidelines
+
+## Important Development Workflows
+
+### Modifying Expert Pages
+
+**To update ALL expert pages** (UI, layout, functionality):
+1. Edit `templates/template.py`
+2. Run `echo "yes" | python3 scripts/reset_application.py`
+3. All expert pages (1001+) are regenerated from the updated template
+
+**To update Home or Settings pages only**:
+- Edit `pages/1000_Home.py` or `pages/9999_Settings.py` directly (these are permanent files)
+- No regeneration needed
+
+**Key insight**: The template uses `{{EXPERT_ID}}` and `{{EXPERT_NAME}}` placeholders. The page generator replaces these when creating new expert pages.
+
+### Adding a New LLM Provider
+
+1. **Add provider configuration** in `utils/constants.py`:
+   - Add entry to `LLM_PROVIDERS` dict with name, base_url, default_model, models dict
+   - Models must include: display_name, max_tokens, thinking_param
+
+2. **Update thinking parameter handling** in `utils/llm_client.py`:
+   - Modify `_prepare_thinking_param()` method if provider uses custom thinking parameters
+   - Return format: `(extra_body_dict, direct_params_dict)`
+
+3. **Add API key UI** in `pages/9999_Settings.py`:
+   - Add input field in API Keys tab for new provider
+
+4. **Update secrets template**:
+   - Add `{PROVIDER}_API_KEY = ""` to `.streamlit/secrets.toml.example`
+
+5. **Update lookup tables** in `utils/constants.py`:
+   - Existing code automatically generates lookup tables from `LLM_PROVIDERS`
+
+### Creating a New Expert
+
+**Via UI** (recommended):
+1. Go to Home page
+2. Click "➕ Add Chat" in sidebar
+3. Fill form: name, description, temperature, optional custom system prompt
+4. Page automatically generated and navigated to
+
+**Programmatically**:
 ```python
-from utils.config_manager import ConfigManager
 from utils.page_generator import PageGenerator
 
-config_manager = ConfigManager()
-page_generator = PageGenerator()
-
-expert_id = config_manager.create_config(
-    expert_name="Test Expert",
-    description="An expert in testing...",
+generator = PageGenerator()
+expert_id = generator.generate_page(
+    expert_name="My Expert",
+    description="Expert in...",
     temperature=0.7,
-)
-
-page_path = page_generator.generate_page(
-    expert_id=expert_id,
-    expert_name="Test Expert",
+    system_prompt="Custom prompt...",
+    provider="deepseek",
+    model="deepseek-chat"
 )
 ```
 
-### Understanding Chat Flow
-1. User input → stored in `st.session_state[f"messages_{EXPERT_ID}"]`
-2. LLMClient initialized with provider-specific API key (from client pool)
-3. `client.chat_stream()` sends messages with system prompt to LLM provider API
-4. Streaming response accumulated character by character
-5. Complete response added to session state for context
+### Internationalization
 
-### Modifying Expert Behavior
-- **Temperature**: Edit YAML config file or use UI when creating
-- **System Prompt**: Provide custom prompt via "Advanced: Custom System Prompt" field
-- **All Experts**: Edit `templates/template.py` (changes require regenerating pages)
-  - After modifying template, run `python3 scripts/reset_application.py` to regenerate all experts
-- **Single Expert**: Edit specific page file directly (but loses template consistency)
+**Adding a new UI string translation**:
+1. Add string to all locale files: `locales/ui/{language}.json`
+2. Use in code: `i18n.t("key.path")`
+3. Update `scripts/update_translations.py` if needed
 
-## File Structure Notes
+**Key principle**:
+- **Expert content** (name, description, system_prompt): Keep in English in YAML configs
+- **UI elements** (buttons, labels, errors): Translate in locale files
+- **AI responses**: Automatically in user's language via runtime prefix injection
 
-- **`templates/template.py`**: Master template for expert pages - edit this to change all expert pages
-- **`pages/`**: Contains both permanent and generated pages
-  - **`pages/1000_Home.py`**: Home page (permanent, committed to git)
-  - **`pages/1001_*.py`**: Expert pages (auto-generated from template, gitignored)
-  - **`pages/9999_Settings.py`**: Settings page (permanent, committed to git)
-- **`configs/`**: YAML configs - **gitignored** (regenerated by setup scripts)
-- **`icons/`**: Application icons (OpenAI logos, etc.)
-- **`utils/`**: Shared business logic - modular, testable components
-  - **`utils/secrets_manager.py`**: Manages `.streamlit/secrets.toml` for API key storage
-  - **`utils/config_toml_manager.py`**: Manages `.streamlit/config.toml` for theme settings
-  - **`utils/app_defaults_manager.py`**: Manages `.streamlit/app_defaults.toml` for user preferences (LLM defaults, language)
-  - **`utils/session_state.py`**: Manages shared session state initialization
-  - **`utils/dialogs.py`**: Shared dialog components (DRY compliance)
-  - **`utils/constants.py`**: Shared constants and documentation (DRY compliance)
-  - **`utils/chat_history_manager.py`**: Manages chat history persistence (JSON files, truncation)
-  - **`utils/llm_client.py`**: Multi-provider LLM client (unified interface for DeepSeek, OpenAI, Z.AI)
-  - **`utils/llm_base.py`**: Base LLM client classes and interfaces
-  - **`utils/client_pool.py`**: Connection pooling for LLM clients (performance optimization)
-  - **`utils/token_manager.py`**: Token counting and context usage statistics
-  - **`utils/i18n.py`**: Internationalization manager (13 languages)
-  - **`utils/helpers.py`**: Helper functions (expert name translation, etc.)
-  - **`utils/validators.py`**: Input validation functions
-  - **`utils/exceptions.py`**: Custom exception classes
-  - **`utils/types.py`**: Type definitions and aliases
-  - **`utils/logging.py`**: Logging configuration
-  - **`utils/page_generator.py`**: Expert page generation from templates
-  - **`utils/config_manager.py`**: Expert configuration file management
-- **`tests/`**: Test suite using pytest with temporary directories for isolation
-- **`scripts/setup.py`**: Sets up the application (creates 7 default example experts on first run)
-- **`scripts/reset_application.py`**: Resets app to factory state (deletes configs, pages, and chat history, then runs setup.py)
-- **`.streamlit/`**: Streamlit configuration directory
-  - **`secrets.toml`**: API keys and secrets - **gitignored** (auto-created by app)
-  - **`secrets.toml.example`**: Template file for manual setup
-  - **`config.toml`**: Theme and appearance settings - **gitignored** (managed through Settings page)
-  - **`config.toml.example`**: Template file for theme settings
-  - **`app_defaults.toml`**: User preferences (LLM defaults, language) - **gitignored** (auto-created by app)
-  - **`app_defaults.toml.example`**: Template file for app defaults
+### Debugging Common Issues
 
-**Important**:
-- `configs/` is fully in `.gitignore` since configs are auto-generated
-- `pages/` contains both permanent files (committed to git) and auto-generated files (gitignored):
-  - Permanent: `pages/1000_Home.py` and `pages/9999_Settings.py` (committed to git)
-  - Auto-generated: Expert pages like `pages/1001_*.py`, `pages/1002_*.py`, etc. (gitignored)
-- To recreate auto-generated content, run `scripts/setup.py` or `scripts/reset_application.py`
-- `.streamlit/app_defaults.toml` contains user preferences (not auto-generated, but gitignored for privacy)
+**Expert not appearing in navigation**:
+- Check expert page file exists in `pages/` with correct numbering (1001+)
+- Verify corresponding config exists in `configs/`
+- Streamlit auto-discovers pages; may need momentary wait
 
-## Key Implementation Details
+**"Configuration not found" error**:
+- Run `python3 scripts/setup.py` to create example experts
+- Verify `configs/{expert_id}.yaml` exists
 
-### Session State Isolation Pattern
-```python
-# WRONG - shared across all experts
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+**API key errors**:
+- Check `.streamlit/secrets.toml` exists and has valid key (min 20 characters)
+- Verify permissions: `ls -la .streamlit/secrets.toml` should show `-rw-------`
+- Set key via Settings page for automatic permission management
 
-# RIGHT - isolated per expert
-messages_key = f"messages_{EXPERT_ID}"
-if messages_key not in st.session_state:
-    st.session_state[messages_key] = []
+**Chat history not persisting**:
+- Check `chat_history/` directory exists
+- Verify file size under 1MB limit
+- Check `save_chat_history()` and `load_chat_history()` in `chat_history_manager.py`
+
+## Security Considerations
+
+- **API keys**: Stored in `.streamlit/secrets.toml` (gitignored, 600 permissions)
+- **No hardcoded credentials**: All secrets through Streamlit secrets API
+- **Input validation**: API keys validated for minimum length (20 characters)
+- **File permissions**: Secrets file automatically set to 600 (owner read/write only) on creation/modification
+- **Sanitization**: Expert IDs and filenames sanitized to prevent path traversal
+
+## Performance Guidelines
+
+- **Use connection pooling**: Always use `get_cached_client()` from `client_pool.py` instead of creating new `LLMClient` instances
+- **Leverage caching**: Expert configs cached with TTL; invalidate by incrementing `cache_version_{expert_id}` in session state
+- **Pre-computed lookups**: Use utility functions from `constants.py` (`get_provider_config()`, `get_model_config()`, etc.) for O(1) access
+- **Chat history limits**: 1MB file size limit enforced; old messages auto-trimmed when exceeded
+- **Lazy loading**: Streamlit only loads active page; no need to implement additional lazy loading
+
+## Git Workflow Notes
+
+- **Permanent pages**: `pages/1000_Home.py` and `pages/9999_Settings.py` are committed to git
+- **Generated pages**: `pages/1001_*.py` and higher are auto-generated; typically gitignored or regenerated via `setup.py`
+- **Template changes**: After modifying `templates/template.py`, run `reset_application.py` and commit regenerated pages
+- **Configurations**: Expert YAML configs in `configs/` are committed to git (contain prompts, not secrets)
+
+## File Watching During Development
+
+For faster development workflow:
+```bash
+streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
-### Page Discovery Timing
-After creating a new page file, Streamlit won't see it until rerun:
-```python
-# Create page
-page_path = page_generator.generate_page(...)
-
-# Store for navigation after rerun
-st.session_state.pending_expert_page = page_path
-
-# Trigger rerun (Streamlit discovers new page)
-st.rerun()
-
-# Next run: check for pending navigation and switch
-if st.session_state.get("pending_expert_page"):
-    st.switch_page(st.session_state.pending_expert_page)
-```
-
-### API Key Management with Streamlit Secrets
-**ExpertGPTs uses Streamlit's recommended secrets management system:**
-
-- **Storage**: API keys stored in `.streamlit/secrets.toml` (gitignored)
-- **Access**: Keys accessed via provider-specific environment variables:
-  - `st.secrets["DEEPSEEK_API_KEY"]`
-  - `st.secrets["OPENAI_API_KEY"]`
-  - `st.secrets["ZAI_API_KEY"]`
-- **UI Management**: Users can set/clear API keys through the Settings page
-- **Automatic Saving**: When entered via UI, keys are automatically saved to `secrets.toml`
-- **Session State**: Keys also stored in `st.session_state.api_keys` dictionary for immediate use
-
-**Setting up API keys:**
-1. **Via UI** (Recommended): Go to Settings → API Key tab → Enter key → Click "Save API Key"
-2. **Manually**: Copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and add your key
-
-**Key utilities in `utils/secrets_manager.py`:**
-- `save_provider_api_key(provider, api_key)` - Saves provider-specific API key to secrets.toml with secure 600 permissions
-- `get_provider_api_key(provider)` - Reads provider API key directly from file (for status display)
-- `has_provider_api_key(provider)` - Checks if provider API key exists in file
-- `get_all_provider_api_keys()` - Returns dictionary of all provider API keys
-- `ensure_secrets_file_exists()` - Creates .streamlit directory and file if needed
-- `set_secure_permissions(file_path)` - Sets 600 permissions (owner read/write only)
-
-**IMPORTANT:**
-- Never commit `.streamlit/secrets.toml` to git (it's in .gitignore)
-- API keys are accessed via `st.secrets` using provider-specific environment variable names (e.g., `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, `ZAI_API_KEY`)
-
-### Theme Customization
-
-ExpertGPTs supports full theme customization through the Settings page:
-
-**Accessing Theme Settings:**
-1. Go to Settings → General tab
-2. Use color pickers to customize:
-   - **Buttons and interactive Elements**: Color for buttons and interactive elements
-   - **Background Color**: Main background
-   - **Secondary Background**: Sidebar and secondary areas
-   - **Text Color**: Main text throughout the app
-
-**Preset Themes:**
-- Light themes: Red, Blue, Green, Purple
-- Dark themes: Dark Blue, Dark Gray
-- Click any preset to instantly apply
-
-**Key utilities in `utils/config_toml_manager.py`:**
-- `get_theme_settings()` - Get current theme colors
-- `save_theme_settings(...)` - Save new theme colors
-- `reset_to_default_theme()` - Reset to default colors
-- Settings automatically saved to `.streamlit/config.toml` with 600 permissions
-
-### Chat History Persistence
-
-ExpertGPTs automatically persists chat conversations to disk:
-
-**Storage:**
-- Location: `chat_history/{expert_id}.json` (gitignored)
-- Format: JSON with timestamps on each message
-- Size limit: 1 MB per expert (auto-truncates, keeps minimum 10 messages)
-- File permissions: 600 (owner read/write only)
-
-**Key Features:**
-- ✅ Persists across app restarts
-- ✅ Saves after every user message and API response
-- ✅ Automatic truncation at 1 MB with binary search algorithm
-- ✅ Timestamps on each message
-- ✅ Silent error handling (corrupted files → fresh start)
-- ✅ Secure file permissions (600 for files, 700 for directory)
-
-**Key utilities in `utils/chat_history_manager.py`:**
-- `load_chat_history(expert_id)` - Load messages from file (returns [] if not exists)
-- `save_chat_history(expert_id, messages)` - Save with auto-truncation
-- `delete_chat_history(expert_id)` - Delete expert's chat history
-- `truncate_messages_by_size(messages, expert_id, max_size_mb)` - Binary search truncation
-- `get_chat_history_size_mb(expert_id)` - Get file size in MB
-- `has_chat_history(expert_id)` - Check if history exists
-- `clear_all_chat_history()` - Delete all chat history files
-
-**How It Works:**
-1. **App startup**: `initialize_session_state()` loads history from file for each expert
-2. **User sends message**: Saved immediately to file
-3. **Assistant responds**: Saved immediately to file
-4. **File size check**: If > 1 MB, binary search finds optimal message count
-5. **Clear chat**: Deletes both session state and file
-
-**JSON Structure:**
-```json
-{
-  "expert_id": "1001_python_expert",
-  "created_at": "2026-01-17T10:30:00.000000",
-  "last_updated": "2026-01-17T15:45:30.123456",
-  "messages": [
-    {
-      "role": "user",
-      "content": "How do I read a file in Python?",
-      "timestamp": "2026-01-17T15:45:00.000000"
-    },
-    {
-      "role": "assistant",
-      "content": "You can use the `open()` function...",
-      "timestamp": "2026-01-17T15:45:30.000000"
-    }
-  ]
-}
-```
-
-**Error Handling:**
-- File doesn't exist: Returns empty list (normal for new experts)
-- Corrupted JSON: Returns empty list (silently starts fresh)
-- Write failures: Prints warning, continues without persistence
-
-### Multi-Provider LLM Architecture
-
-ExpertGPTs supports multiple LLM providers through a unified client interface:
-
-**Supported Providers:**
-- **DeepSeek** (default): `deepseek-chat`, `deepseek-reasoner`
-- **OpenAI**: `gpt-5`, `gpt-5-mini`, `gpt-5-nano`
-- **Z.AI**: `glm-4.7`
-
-**Provider Configuration:**
-All providers configured in `utils/constants.py`:
-- API endpoints, models, max tokens
-- Provider-specific thinking/reasoning modes
-- Display names and icons
-
-**Client Pool Pattern:**
-```python
-from utils.client_pool import get_cached_client
-
-# Get cached client for provider (performance optimization)
-client = get_cached_client(provider="deepseek", api_key=key)
-
-# Stream response with provider-specific settings
-for chunk in client.chat_stream(
-    messages=messages,
-    temperature=temperature,
-    model=model,
-    system_prompt=system_prompt,
-    thinking_level=thinking_level  # Provider-specific
-):
-    response += chunk
-```
-
-**Thinking Mode by Provider:**
-- **DeepSeek**: `"thinking": {"type": "enabled"}` or `"disabled"`
-- **OpenAI**: `"reasoning": {"effort": "none"}` or `"low"`, `"medium"`, `"high"`, `"xhigh"`
-- **Z.AI**: `"thinking": {"type": "enabled"}` or `"disabled"`
-
-**Key utilities:**
-- `utils/llm_client.py`: `LLMClient` - Unified client for all providers
-- `utils/llm_base.py`: Base classes and interfaces
-- `utils/client_pool.py`: Connection pooling for performance
-- `utils/constants.py`: `LLM_PROVIDERS`, `MAX_TOKENS`, etc.
-- `utils/token_manager.py`: Token counting and context usage statistics
-
-### Internationalization (i18n)
-
-ExpertGPTs supports 13 languages with a comprehensive i18n system:
-
-**Architecture:**
-- **Storage Layer**: Expert content (YAML configs) stored in English only
-- **Translation Layer**: UI translations in JSON files (`locales/ui/{lang}.json`)
-- **Runtime Layer**: Language prefix dynamically injected for AI responses
-
-**Key Features:**
-- ✅ Auto-detection of system language
-- ✅ Instant language switching (no expert regeneration needed)
-- ✅ All UI elements translated (buttons, labels, errors, success messages)
-- ✅ Default expert names translated to all 13 languages
-- ✅ Professional logging instead of print statements
-- ✅ Cached language access for performance (~50% reduction in lookups)
-
-**Important i18n utilities:**
-- `utils/i18n.py`: `I18nManager` class with translation and language detection
-- `utils/helpers.py`: `translate_expert_name()` - Dynamic expert name translation
-- `utils/app_defaults_manager.py`: `get_language_preference()` / `save_language_preference()`
-- `scripts/update_translations.py`: Sync all locale files with `en.json`
-
-**Best Practices for i18n:**
-- **Always** import `i18n` at module level (never inline in functions)
-- **Always** use `i18n.t('key')` for UI strings, never hardcode
-- **Always** add new translation keys to `en.json` first (source of truth)
-- **Always** run `update_translations.py` after adding new keys
-- **Never** add expert content (system prompts) to locale files
-- **Never** create duplicate expert name mappings - use `sanitize_name()` dynamically
-
-**Example Usage:**
-```python
-# ✅ GOOD - Module level import
-from utils.i18n import i18n
-
-# Simple translation
-text = i18n.t('home.title')
-
-# With parameters
-text = i18n.t('errors.error', error=str(e))
-
-# Access current language (cached)
-lang = i18n.current_language
-```
-
-**For detailed i18n documentation**, see `docs/I18N_GUIDE.md`
-
-### Application Defaults
-
-ExpertGPTs persists user preferences in `.streamlit/app_defaults.toml`:
-
-**What's Stored:**
-- **LLM Defaults**: Default provider, model, and thinking level
-- **Language**: Interface language preference
-- **Future**: UI preferences, feature flags, etc.
-
-**File Structure:**
-```toml
-[llm]
-provider = "deepseek"
-model = "deepseek-chat"
-thinking_level = "none"
-
-[language]
-code = "en"
-```
-
-**Key utilities:**
-- `utils/app_defaults_manager.py`: All app defaults persistence
-  - `get_llm_defaults()` / `save_llm_defaults()`
-  - `get_language_preference()` / `save_language_preference()`
-  - `has_app_defaults()` / `reset_app_defaults()`
-
-**How It Works:**
-1. **On startup**: `initialize_shared_session_state()` loads defaults from TOML
-2. **When changed**: Settings page saves to TOML on "Save" button click
-3. **Persistence**: Settings survive app restarts and browser closes
-
-**Security:**
-- File permissions: 600 (owner read/write only)
-- Location: `.streamlit/` (gitignored)
-- No secrets: Only preferences, not API keys
-
-**Example Usage:**
-```python
-from utils.app_defaults_manager import (
-    get_llm_defaults,
-    save_llm_defaults,
-    get_language_preference,
-    save_language_preference
-)
-
-# Load defaults
-llm = get_llm_defaults()
-lang = get_language_preference()
-
-# Save defaults
-save_llm_defaults("openai", "gpt-5", "medium")
-save_language_preference("de")
-```
-
-## Common Pitfalls
-
-1. **Editing expert pages directly** - Changes lost on regeneration
-2. **Not using .venv** - Dependencies or versions may be incorrect
-3. **Forgetting `st.rerun()`** after page creation - New page won't be discoverable
-4. **Shared session state keys** - Chat history contaminates between experts
-5. **Hardcoding paths** - Use `Path(__file__).parent` for relative paths
-6. **Not regenerating pages** after template changes - Old pages use outdated code
-   - Solution: Run `python3 scripts/reset_application.py` after modifying template
-7. **Importing i18n inline** - Violates DRY and hurts performance
-   - Solution: Always import `i18n` at module level
-8. **Hardcoding UI strings** - Breaks i18n and creates maintenance burden
-   - Solution: Always use `i18n.t('key')` for user-facing text
-9. **Creating duplicate expert name mappings** - Violates DRY principle
-   - Solution: Use `sanitize_name()` to generate translation keys dynamically
-
-## Testing Approach
-
-Tests use **temporary directories** via `tmp_path` fixture to avoid polluting the project:
-- Temporary configs directory
-- Temporary pages directory
-- Copy of actual template
-- Automatic cleanup after tests
-
-Always use **fictitious test data**, never real user information.
-
----
+Requires `watchdog` package (included in `requirements-dev.txt`). Provides instant reload when Python files change.
 
 ## Recent Architectural Changes
 
