@@ -84,12 +84,16 @@ def main():
 
     ### {i18n.t('home.features.title')}
 
-    - 🎯 **{i18n.t('home.features.domain_expertise')}**: {i18n.t('home.features.domain_expertise_desc')}
-    - 🔧 **{i18n.t('home.features.customizable')}**: {i18n.t('home.features.customizable_desc')}
-    - 🌡️ **{i18n.t('home.features.temperature')}**: {i18n.t('home.features.temperature_desc')}
+    - 🤖 **{i18n.t('home.features.multiple_experts')}**: {i18n.t('home.features.multiple_experts_desc')}
+    - 🔄 **{i18n.t('home.features.multi_provider')}**: {i18n.t('home.features.multi_provider_desc')}
+    - 🌍 **{i18n.t('home.features.internationalization')}**: {i18n.t('home.features.internationalization_desc')}
+    - 📝 **{i18n.t('home.features.template_architecture')}**: {i18n.t('home.features.template_architecture_desc')}
+    - 🎨 **{i18n.t('home.features.theme_customization')}**: {i18n.t('home.features.theme_customization_desc')}
+    - 🔒 **{i18n.t('home.features.secure_api_keys')}**: {i18n.t('home.features.secure_api_keys_desc')}
     - 💾 **{i18n.t('home.features.chat_history')}**: {i18n.t('home.features.chat_history_desc')}
-    - 🔐 **{i18n.t('home.features.secure_secrets')}**: {i18n.t('home.features.secure_secrets_desc')}
-    - 🎨 **{i18n.t('home.features.custom_themes')}**: {i18n.t('home.features.custom_themes_desc')}
+    - ⚙️ **{i18n.t('home.features.temperature')}**: {i18n.t('home.features.temperature_desc')}
+    - 🚀 **{i18n.t('home.features.modern_navigation')}**: {i18n.t('home.features.modern_navigation_desc')}
+    - 📂 **{i18n.t('home.features.file_config')}**: {i18n.t('home.features.file_config_desc')}
     """)
 
     st.divider()

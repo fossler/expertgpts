@@ -34,6 +34,23 @@ EXPERT_ID = "{{EXPERT_ID}}"
 EXPERT_NAME = "{{EXPERT_NAME}}"
 
 
+def get_provider_avatar(provider: str) -> str:
+    """Get avatar icon path for a provider.
+
+    Args:
+        provider: Provider name (deepseek, openai, zai)
+
+    Returns:
+        Path to avatar icon relative to project root
+    """
+    avatars = {
+        "deepseek": "icons/deepseek_icon_blue.png",
+        "openai": "icons/OpenAI-black-monoblossom.png",
+        "zai": "icons/zai_logo.svg"
+    }
+    return avatars.get(provider.lower(), "icons/deepseek_icon_blue.png")
+
+
 def initialize_session_state():
     """Initialize session state variables.
 
@@ -131,9 +148,16 @@ def render_chat_interface(config: dict, messages_key: str):
         st.divider()
 
     # Display chat messages
+    metadata = config.get("metadata", {})
     for message in st.session_state[messages_key]:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        if message["role"] == "assistant":
+            provider = metadata.get("provider", "deepseek")
+            avatar = get_provider_avatar(provider)
+            with st.chat_message("assistant", avatar=avatar):
+                st.markdown(message["content"])
+        else:
+            with st.chat_message("user"):
+                st.markdown(message["content"])
 
 
 def handle_user_input(api_key: str, config: dict, messages_key: str):
@@ -168,7 +192,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
             st.markdown(prompt)
 
         # Generate assistant response
-        with st.chat_message("assistant"):
+        avatar = get_provider_avatar(provider)
+        with st.chat_message("assistant", avatar=avatar):
             message_placeholder = st.empty()
 
             try:

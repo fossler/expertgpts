@@ -1083,11 +1083,16 @@ def render_about_section():
     **{i18n.t('about.version')}**
 
     **{i18n.t('about.features_title')}:**
-    - 🎯 {i18n.t('about.feature_domain_experts')}
-    - 🔧 {i18n.t('about.feature_customizable')}
-    - 🌡️ {i18n.t('about.feature_temperature')}
+    - 🤖 {i18n.t('about.feature_multiple_experts')}
+    - 🔄 {i18n.t('about.feature_multi_provider')}
+    - 🌍 {i18n.t('about.feature_internationalization')}
+    - 📝 {i18n.t('about.feature_template_architecture')}
+    - 🎨 {i18n.t('about.feature_theme_customization')}
+    - 🔒 {i18n.t('about.feature_secure_api_keys')}
     - 💾 {i18n.t('about.feature_chat_history')}
-    - 📋 {i18n.t('about.feature_template_generation')}
+    - ⚙️ {i18n.t('about.feature_temperature')}
+    - 🚀 {i18n.t('about.feature_modern_navigation')}
+    - 📂 {i18n.t('about.feature_file_config')}
 
     ### {i18n.t('about.development')}
     """)
