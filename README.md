@@ -1,442 +1,170 @@
 # ExpertGPTs
 
-A multi-expert AI chat application built with Streamlit and powered by the DeepSeek API. ExpertGPTs provides access to multiple domain-specific expert AI agents, each specialized in different fields.
+A multi-expert AI chat application built with Streamlit, providing access to domain-specific AI experts with support for multiple LLM providers, full internationalization, and persistent chat history.
 
-## Features
+## Overview
 
-- **Multiple Expert Agents**: Chat with domain-specific AI experts, each specialized in different areas
-- **Custom Expert Creation**: Easily create your own expert agents with custom domains and descriptions
-- **Modern Navigation**: Material Design icons in navigation using Streamlit's `st.navigation()` API
-- **Wide Mode**: Expansive content layout enabled by default
-- **Theme Customization**: Customize colors through the Settings page with preset themes
-- **Secure Secrets Management**: API keys stored securely in `.streamlit/secrets.toml`
-- **File-Based Configuration**: Each expert has its own configuration file for easy management
-- **Template-Based Pages**: Expert pages are generated from a master template
-- **Chat History**: Maintain conversation context throughout your session
-- **Adjustable Temperature**: Control response creativity and focus for each expert
+ExpertGPTs is a powerful AI chat interface that lets you create and interact with specialized AI experts. Each expert has deep knowledge in specific domains—from Python programming to career coaching—and maintains independent conversation history. Switch between LLM providers (DeepSeek, OpenAI, Z.AI) per expert, customize responses with temperature controls, and enjoy a fully internationalized interface supporting 13 languages.
 
-## Architecture
+## Key Features
+
+- **🤖 Multiple Expert Agents** - Chat with domain-specific AI experts, each specialized in different areas
+- **🔄 Multi-Provider Support** - Choose between DeepSeek, OpenAI, and Z.AI per expert
+- **🌍 Full Internationalization** - 13 languages with automatic detection and AI language response
+- **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
+- **🎨 Theme Customization** - Personalize colors and appearance with preset themes
+- **🔒 Secure API Key Management** - API keys stored securely with automatic file permissions
+- **💾 Persistent Chat History** - Conversations saved automatically per expert
+- **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0) for each expert
+- **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
+- **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
+
+## Quick Start
+
+Get ExpertGPTs up and running in 5 minutes:
+
+```bash
+# Clone and navigate
+git clone <repository-url>
+cd expertgpts
+
+# Create virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements-dev.txt  # Development (includes watchdog)
+# OR
+pip install -r requirements.txt       # Production only
+
+# Run the app
+streamlit run app.py
+```
+
+**First run?** The app automatically creates 7 example experts and detects your system language.
+
+**Get your API key**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
+
+Set it via **Settings → API Keys** in the app.
+
+**That's it!** Start chatting with experts.
+
+**Detailed setup**: [Installation Guide](docs/getting-started/installation.md)
+
+## Architecture Overview
 
 ```
 expertgpts/
 ├── app.py                         # Main entry point with st.navigation()
 ├── pages/
-│   ├── 1000_Home.py              # Home page (permanent, committed to git)
-│   ├── 1001_Python_Expert.py     # Expert pages (generated from template)
-│   ├── 1002_Data_Scientist.py
+│   ├── 1000_Home.py              # Home page (permanent)
+│   ├── 1001_*.py                 # Expert pages (generated from template)
+│   └── 9999_Settings.py          # Settings page (permanent)
+├── templates/template.py          # Template for expert pages
+├── configs/{expert_id}.yaml       # Expert configurations
+├── utils/                         # Business logic modules
+│   ├── llm_client.py             # Multi-provider LLM client
+│   ├── client_pool.py            # Connection pooling
+│   ├── config_manager.py         # Config operations
+│   ├── page_generator.py         # Page generation
 │   └── ...
-│   └── 9999_Settings.py          # Settings page (permanent, committed to git)
-├── templates/
-│   └── template.py               # Template for expert pages only
-├── configs/
-│   └── {expert_id}.yaml          # Config files for each expert
-├── utils/
-│   ├── config_manager.py         # Config file operations
-│   ├── page_generator.py         # Page generation logic
-│   ├── llm_client.py             # Multi-provider LLM client (DeepSeek, OpenAI, Z.AI)
-│   ├── client_pool.py            # Client connection pooling for performance
-│   ├── secrets_manager.py        # Streamlit secrets management
-│   ├── config_toml_manager.py    # Theme configuration management
-│   └── app_defaults_manager.py   # User preferences management (LLM defaults, language)
-├── .streamlit/
-│   ├── secrets.toml              # API keys and secrets (gitignored)
-│   ├── secrets.toml.example      # Template for secrets file
-│   ├── config.toml               # Theme settings (gitignored)
-│   ├── config.toml.example       # Template for theme settings
-│   ├── app_defaults.toml         # User preferences (gitignored)
-│   └── app_defaults.toml.example # Template for app defaults
-├── requirements.txt
-├── scripts/                      # Administrative scripts
-│   ├── setup.py                 # Script to set up the application
-│   └── reset_application.py     # Script to reset application
-└── README.md
+└── locales/ui/*.json             # UI translations (13 languages)
 ```
 
-## Internationalization (i18n)
-
-ExpertGPTs supports **13 languages** with automatic language detection and runtime language injection.
-
-### Supported Languages
-
-- 🇺🇸 **English** (en)
-- 🇩🇪 **German** (Deutsch) (de)
-- 🇪🇸 **Spanish** (Español) (es)
-- 🇫🇷 **French** (Français) (fr)
-- 🇮🇹 **Italian** (Italiano) (it)
-- 🇮🇩 **Indonesian** (Bahasa Indonesia) (id)
-- 🇲🇾 **Malay** (Bahasa Melayu) (ms)
-- 🇵🇹 **Portuguese** (Português) (pt)
-- 🇷🇺 **Russian** (Русский) (ru)
-- 🇹🇷 **Turkish** (Türkçe) (tr)
-- 🇨🇳 **Simplified Chinese** (简体中文) (zh-CN)
-- 🇹🇼 **Traditional Chinese** (繁體中文) (zh-TW)
-- 🇭🇰 **Cantonese** (粵語) (yue)
-- 🗣️ **Wu Chinese** (文言文) (wyw)
+**Key Architecture Principles**:
+- **Template-Based**: Single template generates all expert pages
+- **Multi-Provider Abstraction**: Unified client interface for DeepSeek, OpenAI, Z.AI
+- **DRY Configuration**: Expert content in YAML (English only), UI in locale files
+- **State Management**: Multi-layered session state with persistent storage
 
-### How It Works
-
-ExpertGPTs uses a **clean three-layer architecture** for internationalization:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  1. STORAGE LAYER (configs/*.yaml)                      │
-│  Expert content in English - Single Source of Truth     │
-└─────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────┐
-│  2. TRANSLATION LAYER (locales/ui/*.json)               │
-│  UI translations ONLY - Buttons, labels, messages       │
-└─────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────┐
-│  3. RUNTIME LAYER (template.py, i18n.py)                │
-│  Language prefix injection: "Respond in German (Deutsch)"│
-└─────────────────────────────────────────────────────────┘
-```
-
-**Key Features:**
-
-1. **Auto-Detection**: First run detects system language automatically
-2. **Manual Selection**: Users can change language in Settings
-3. **Persistent Preference**: Language choice saved to `.streamlit/app_defaults.toml`
-4. **AI Language Respect**: Experts automatically respond in user's language
-5. **No Duplication**: Expert content exists ONLY in YAML configs (not in locales)
-
-### Language Preference
-
-The app stores your language preference in `.streamlit/app_defaults.toml`:
-
-```toml
-[llm]
-provider = "deepseek"
-model = "deepseek-chat"
-thinking_level = "none"
-
-[language]
-code = "de"  # German
-```
-
-**First Run:**
-- App auto-detects system language
-- Saves detected language to `app_defaults.toml`
-- Starts app in detected language
-
-**Manual Change:**
-- Go to Settings → Language
-- Select your preferred language
-- Preference saved to `app_defaults.toml`
-- App restarts in selected language
-
-### Creating Multilingual Experts
+**Detailed architecture**: [Architecture Documentation](docs/architecture/overview.md)
 
-You can create experts in ANY language:
+## Internationalization
 
-1. **Expert Name**: Use name in your language (e.g., "Datenexperte")
-2. **Description**: Write description in your language
-3. **System Prompt**: Write prompt in your language
-4. **AI Response**: Expert will respond in the user's selected language
-
-**Example (German):**
-```yaml
-expert_name: Datenexperte
-description: Experte für Datenanalyse und Visualisierung
-system_prompt: |
-  Sie sind Datenexperte, spezialisiert auf Datenanalyse...
-```
-
-### Language Prefix Injection
-
-When you chat with an expert, the app automatically adds a language prefix to the system prompt:
-
-```
-You must respond in German (Deutsch).
-
-You are Python Expert, a domain-specific expert AI assistant.
-Expert in Python programming, software development...
-```
+ExpertGPTs supports **13 languages** with automatic detection:
 
-This ensures AI responds in the user's preferred language while maintaining expert context.
+🇺🇸 English | 🇩🇪 German | 🇪🇸 Spanish | 🇫🇷 French | 🇮🇹 Italian | 🇮🇩 Indonesian | 🇲🇾 Malay | 🇵🇹 Portuguese | 🇷🇺 Russian | 🇹🇷 Turkish | 🇨🇳 Simplified Chinese | 🇹🇼 Traditional Chinese | 🇭🇰 Cantonese | 🗣️ Wu Chinese
 
-### File Structure
+**How it works**: Language prefix injected at runtime ensures AI responds in your selected language, while expert content remains in English (single source of truth).
 
-```
-locales/ui/
-├── en.json         # English UI translations (buttons, labels, messages)
-├── de.json         # German UI translations
-├── es.json         # Spanish UI translations
-├── fr.json         # French UI translations
-└── ... (10 more language files)
-```
+**Full guide**: [Internationalization Documentation](docs/internationalization/I18N_GUIDE.md)
 
-**Important:** Locale files contain ONLY UI translations, not expert content.
-
-## Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd expertgpts
-   ```
-
-2. **Create a virtual environment** (recommended):
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
+## Documentation
 
-3. **Install dependencies**:
+### For Users
 
-   **For development (includes watchdog for faster file watching):**
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-
-   **For production only:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Create example expert agents** (optional):
-   ```bash
-   python3 scripts/setup.py
-   ```
+- **[Quick Start Guide](docs/getting-started/quickstart.md)** - 5-minute setup
+- **[Installation Guide](docs/getting-started/installation.md)** - Detailed installation
+- **[User Guide](docs/user-guide/basics.md)** - Using experts, navigation, provider selection
+- **[Creating Experts](docs/user-guide/creating-experts.md)** - Custom expert creation
+- **[Customization](docs/user-guide/customization.md)** - Themes, language, settings
+- **[Troubleshooting](docs/reference/troubleshooting.md)** - Common issues
 
-This will create 7 example experts:
-- Python Expert
-- Data Scientist
-- Writing Assistant
-- Linux System Admin
-- Career Coach
-- Translation Expert
-- Spell Checker
-
-## Usage
-
-### Running the Application
-
-Start the application with:
-```bash
-streamlit run app.py
-```
-
-**First run?** The app will automatically create 7 example expert agents on first launch.
-
-The app will open in your browser at `http://localhost:8501`
-
-**Note**: ExpertGPTs uses Streamlit's modern `st.navigation()` API with Material Design icons for a polished user experience. Wide mode is enabled by default for maximum content visibility.
-
-### Setting Your API Key
-
-ExpertGPTs uses Streamlit's secure secrets management system. You can set your DeepSeek API key in two ways:
+### For Developers
 
-**Option 1: Via Settings Page (Recommended)**
-1. Navigate to **Settings** in the app
-2. Go to the **API Key** tab
-3. Enter your DeepSeek API key
-4. Click **"Save API Key"**
-5. The key will be automatically saved to `.streamlit/secrets.toml`
+- **[Development Setup](docs/development/setup.md)** - Development environment
+- **[Architecture Overview](docs/architecture/overview.md)** - System architecture
+- **[Project Structure](docs/development/project-structure.md)** - File organization
+- **[Adding Features](docs/development/adding-features.md)** - Feature development guidelines
+- **[Testing Guide](docs/development/testing.md)** - Testing documentation
 
-**Option 2: Manual Configuration**
-1. Copy the example file:
-   ```bash
-   cp .streamlit/secrets.toml.example .streamlit/secrets.toml
-   ```
-2. Edit `.streamlit/secrets.toml` and add your API key:
-   ```toml
-   DEEPSEEK_API_KEY = "your_actual_api_key_here"
-   ```
+### Technical Reference
 
-Get your API key from [https://platform.deepseek.com/](https://platform.deepseek.com/)
+- **[Configuration](docs/configuration/overview.md)** - Configuration system
+- **[API Providers](docs/api/providers.md)** - LLM provider integration
+- **[Template System](docs/architecture/template-system.md)** - Page generation
+- **[Scripts Reference](docs/reference/scripts.md)** - Administrative scripts
 
-> **Security Note**: The `.streamlit/secrets.toml` file is gitignored and will never be committed to version control. The file is automatically set to 600 permissions (read/write for owner only) when created or modified.
+**Full documentation**: [docs/](docs/)
 
-### Customizing the Theme
+## Multi-Provider LLM Support
 
-ExpertGPTs allows you to customize the app's appearance through the Settings page:
+ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs:
 
-1. Go to **Settings** → **General** tab
-2. Use the color pickers to adjust:
-   - **Buttons and interactive Elements**: Color for buttons and interactive elements
-   - **Background Color**: Main background color
-   - **Secondary Background**: Sidebar and secondary areas
-   - **Text Color**: Main text color
-3. Click **"Apply Changes"** to save your theme
+| Provider | Default Model | Characteristics |
+|----------|---------------|-----------------|
+| **DeepSeek** | `deepseek-chat` | Cost-effective, high quality |
+| **OpenAI** | `o3-mini` | Advanced reasoning capabilities |
+| **Z.AI** | `glm-4.7` | GLM models, Chinese optimization |
 
-**Preset Themes:**
-- 🎨 **Light Themes**: Red, Blue, Green, Purple
-- 🌙 **Dark Themes**: Dark Blue, Dark Gray
-- Click any preset to instantly apply the theme
+**Per-Expert Selection**: Each expert can use a different provider/model. Switch via the sidebar dropdown.
 
-**Default Theme:**
-The app comes with a modern Indigo theme by default:
-- Buttons: Indigo (#6366F1)
-- Background: White (#FFFFFF)
-- Sidebar: Light Gray (#F3F4F6)
-- Text: Dark Gray (#1F2937)
+**Connection Pooling**: Client instances cached for ~50% performance improvement.
 
-The theme settings are automatically saved to `.streamlit/config.toml` with secure permissions.
-
-### Chatting with Experts
-
-1. **Select an Expert**: Choose an expert from the navigation menu in the sidebar
-2. **Start Chatting**: Type your question or prompt in the chat input
-3. **Continue Conversation**: The expert maintains context throughout your session
-
-### Creating New Expert Agents
-
-1. Navigate to the **Home** page (the "Add Chat" button is only available there)
-2. Click the **"➕ Add Chat"** button in the sidebar
-3. Fill in the form:
-   - **Expert Name**: A descriptive name for the expert (e.g., "Legal Advisor")
-   - **Agent Description**: Describe the expert's domain and capabilities
-   - **Temperature**: Set response creativity (0.0 = focused, 2.0 = creative)
-   - **Custom System Prompt** (optional): Provide a custom system prompt
-4. Click **"Create Expert"**
-5. You'll be automatically navigated to your new expert page and can start chatting immediately!
-
-## Configuration
-
-Each expert agent is configured via a YAML file in the `configs/` directory. Example configuration:
-
-```yaml
-expert_id: "1001_python_expert"
-expert_name: "Python Expert"
-description: "Expert in Python programming, software development..."
-temperature: 0.7
-system_prompt: |
-  You are Python Expert, a domain-specific expert AI assistant.
-
-  ## Your Expertise
-  Expert in Python programming, software development, debugging, and best practices...
-
-  ## Guidelines
-  - Provide accurate, expert-level information in your domain
-  - If you're unsure about something, acknowledge it honestly
-  - Use clear, professional language appropriate for your domain
-created_at: "2025-12-30T22:13:25.123456"
-metadata:
-  version: "1.0"
-  model: "deepseek-chat"
-```
-
-## Customization
-
-### Modifying the Page Template
-
-The `templates/template.py` file defines the structure of all expert pages. You can modify this template to change the UI/UX for all experts.
-
-### Changing System Prompts
-
-You can customize system prompts in two ways:
-
-1. **Auto-generated**: The system automatically generates prompts from the description
-2. **Custom**: Use the "Advanced: Custom System Prompt" field when creating an expert
-
-### Adding New Features
-
-The modular structure makes it easy to add new features:
-
-- **ConfigManager** (`utils/config_manager.py`): Manage expert configurations
-- **PageGenerator** (`utils/page_generator.py`): Generate new expert pages
-- **LLMClient** (`utils/llm_client.py`): Multi-provider LLM client (DeepSeek, OpenAI, Z.AI)
-- **ClientPool** (`utils/client_pool.py`): Client connection pooling for performance
-- **SecretsManager** (`utils/secrets_manager.py`): Manage Streamlit secrets file
-- **ConfigTomlManager** (`utils/config_toml_manager.py`): Manage theme configuration
-
-## API Integration
-
-ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
-
-- **DeepSeek** (default): `https://api.deepseek.com` with `deepseek-chat` model
-- **OpenAI**: `https://api.openai.com/v1` with `o3-mini` model
-- **Z.AI**: `https://api.z.ai/v1` with `glm-4.7` model
-
-The app uses the official OpenAI Python client with provider-specific base URLs. Each provider is configured in `utils/constants.py`.
-
-**Default Provider**: DeepSeek (configurable in Settings)
-
-For more information:
-- [DeepSeek API Documentation](https://api-docs.deepseek.com/)
-- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
-- [Z.AI Documentation](https://z.ai/)
-
-## Best Practices
-
-### Creating Effective Experts
-
-1. **Clear Descriptions**: Provide detailed, specific descriptions of the expert's domain
-2. **Appropriate Temperature**:
-   - 0.0-0.7: For technical, factual topics (e.g., coding, mathematics)
-   - 0.7-1.3: For general advice and explanations (default)
-   - 1.3-2.0: For creative tasks (e.g., brainstorming, creative writing)
-3. **Custom System Prompts**: For advanced use cases, craft custom prompts that define the expert's behavior precisely
-
-### Security Considerations
-
-- **API Keys**: Never commit API keys to version control
-- **Streamlit Secrets**: API keys are stored in `.streamlit/secrets.toml` which is gitignored
-- **UI Management**: Use the Settings page to manage API keys securely
-- **Automatic File Permissions**: The app automatically sets 600 permissions (owner read/write only) on `secrets.toml` when created or modified
-- **Manual Verification**: You can verify permissions with `ls -la .streamlit/secrets.toml` (should show `-rw-------`)
-
-## Troubleshooting
-
-### Common Issues
-
-**Issue**: "Configuration not found" error
-- **Solution**: Run `python3 scripts/setup.py` to create example experts
-
-**Issue**: API key errors
-- **Solution**: Verify your DeepSeek API key is valid and has sufficient credits
-
-**Issue**: New expert not appearing in navigation
-- **Solution**: The app should auto-navigate to newly created experts. If it doesn't, wait a moment for the page to be discovered.
-
-**Issue**: Import errors
-- **Solution**: Ensure all dependencies are installed: `pip install -r requirements.txt`
+**API Documentation**: [Provider Reference](docs/api/providers.md)
 
 ## Development
 
-### Project Structure
+### Running the App
 
-- **app.py**: Main application entry point using `st.navigation()` for modern navigation
-- **templates/**: Template file for expert pages only
-- **pages/**: Home (1000) and Settings (9999) are permanent; expert pages (1001+) are auto-generated
-- **utils/**: Shared utilities and business logic
-- **configs/**: YAML configuration files for each expert
-
-### Adding New Features
-
-1. **New Utility**: Add to `utils/` directory
-2. **UI Changes for Experts**: Modify `templates/template.py`, then run `echo "yes" | python3 scripts/reset_application.py` to regenerate expert pages
-3. **UI Changes for Home/Settings**: Edit directly in `pages/1000_Home.py` or `pages/9999_Settings.py` (permanent files)
-4. **New Expert Pages**: Generate via Settings UI or programmatically using `PageGenerator`
-
-### Template-Based Architecture
-
-ExpertGPTs uses a template-based architecture for expert pages:
-
-- **Home & Settings**: Permanent files in `pages/` (committed to git)
-- **Expert Pages**: Generated from `templates/template.py` with placeholders replaced
-- **Numbering**: Home (1000) → Experts (1001+) → Settings (9999)
-
-When modifying the expert template:
-1. Edit `templates/template.py`
-2. Run `echo "yes" | python3 scripts/reset_application.py` to regenerate all expert pages
-3. Changes will be reflected across all generated expert pages
-
-### Testing
-
-The project includes automated tests using pytest. For detailed testing instructions, see [Testing Guide](docs/testing.md).
-
-Quick test run:
 ```bash
-./scripts/run_tests.sh
+# Standard
+streamlit run app.py
+
+# With enhanced file watching (faster during development)
+streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
-### Contributing
+### Running Tests
 
-Contributions are welcome! Please feel free to submit pull requests or open issues.
+```bash
+# Run all tests
+./scripts/run_tests.sh
+
+# Direct pytest
+pytest -v
+
+# With coverage
+pytest --cov=utils --cov-report=html
+```
+
+### Adding Features
+
+**Modify Expert Pages**: Edit `templates/template.py`, then run `echo "yes" | python3 scripts/reset_application.py`
+
+**Modify Home/Settings**: Edit `pages/1000_Home.py` or `pages/9999_Settings.py` directly
+
+**Development Guide**: [Adding Features Documentation](docs/development/adding-features.md)
 
 ## License
 
@@ -445,10 +173,10 @@ This project is open source and available under the Apache License 2.0.
 ## Acknowledgments
 
 - Built with [Streamlit](https://streamlit.io/)
-- Powered by [DeepSeek API](https://www.deepseek.com/)
+- Powered by [DeepSeek API](https://www.deepseek.com/), [OpenAI API](https://openai.com/), and [Z.AI](https://z.ai/)
 - Inspired by OpenAI's GPTs explore functionality
-- Developed with [Z.AI](https://z.ai/subscribe?ic=JGTYCX7ZO7) - Advanced AI platform for intelligent context engineering
+- Developed with [Z.AI](https://z.ai/subscribe?ic=JGTYCX7ZO7) - Advanced AI platform
 
 ## Support
 
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/fossler/expertgpts).
+For issues, questions, or contributions, visit the [GitHub repository](https://github.com/fossler/expertgpts).
