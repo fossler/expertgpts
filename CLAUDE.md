@@ -231,8 +231,8 @@ page_path = page_generator.generate_page(
 
 ### Understanding Chat Flow
 1. User input → stored in `st.session_state[f"messages_{EXPERT_ID}"]`
-2. DeepSeekClient initialized with shared API key
-3. `client.chat_stream()` sends messages with system prompt to DeepSeek API
+2. LLMClient initialized with provider-specific API key (from client pool)
+3. `client.chat_stream()` sends messages with system prompt to LLM provider API
 4. Streaming response accumulated character by character
 5. Complete response added to session state for context
 

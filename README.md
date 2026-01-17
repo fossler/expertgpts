@@ -33,7 +33,8 @@ expertgpts/
 ├── utils/
 │   ├── config_manager.py         # Config file operations
 │   ├── page_generator.py         # Page generation logic
-│   ├── deepseek_client.py        # DeepSeek API wrapper
+│   ├── llm_client.py             # Multi-provider LLM client (DeepSeek, OpenAI, Z.AI)
+│   ├── client_pool.py            # Client connection pooling for performance
 │   ├── secrets_manager.py        # Streamlit secrets management
 │   ├── config_toml_manager.py    # Theme configuration management
 │   └── app_defaults_manager.py   # User preferences management (LLM defaults, language)
@@ -337,18 +338,27 @@ The modular structure makes it easy to add new features:
 
 - **ConfigManager** (`utils/config_manager.py`): Manage expert configurations
 - **PageGenerator** (`utils/page_generator.py`): Generate new expert pages
-- **DeepSeekClient** (`utils/deepseek_client.py`): Handle API interactions
+- **LLMClient** (`utils/llm_client.py`): Multi-provider LLM client (DeepSeek, OpenAI, Z.AI)
+- **ClientPool** (`utils/client_pool.py`): Client connection pooling for performance
 - **SecretsManager** (`utils/secrets_manager.py`): Manage Streamlit secrets file
 - **ConfigTomlManager** (`utils/config_toml_manager.py`): Manage theme configuration
 
 ## API Integration
 
-ExpertGPTs uses the DeepSeek API, which is compatible with the OpenAI API format. The app uses the official OpenAI Python client with a custom base URL.
+ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 
-**API Endpoint**: `https://api.deepseek.com`
-**Model**: `deepseek-chat`
+- **DeepSeek** (default): `https://api.deepseek.com` with `deepseek-chat` model
+- **OpenAI**: `https://api.openai.com/v1` with `o3-mini` model
+- **Z.AI**: `https://api.z.ai/v1` with `glm-4.7` model
 
-For more information on the DeepSeek API, see the [official documentation](https://api-docs.deepseek.com/).
+The app uses the official OpenAI Python client with provider-specific base URLs. Each provider is configured in `utils/constants.py`.
+
+**Default Provider**: DeepSeek (configurable in Settings)
+
+For more information:
+- [DeepSeek API Documentation](https://api-docs.deepseek.com/)
+- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+- [Z.AI Documentation](https://z.ai/)
 
 ## Best Practices
 
