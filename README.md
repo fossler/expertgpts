@@ -51,6 +51,55 @@ Set it via **Settings → API Keys** in the app.
 
 **Detailed setup**: [Installation Guide](docs/getting-started/installation.md)
 
+## Pay Only for What You Use: The Economic and Strategic Advantages of API-Based AI Chats
+
+API-based AI chats operate on a **pay-as-you-go (PAYG)** model—meaning you pay **only for actual usage**, not for access. There are no fixed monthly fees, no long-term commitments, and no costs when the service isn't used. This makes PAYG inherently more transparent, flexible, and cost-efficient than traditional subscription models.
+
+### Why PAYG Is Often Significantly Cheaper Than Flat-Rate Subscriptions
+
+**Full Cost Transparency & Control**
+Spending scales directly with usage. You decide how much you pay simply by how much you use the system.
+
+**Perfect for Variable Demand**
+Whether usage is sporadic or comes in bursts, PAYG adapts instantly. You never overpay during low-usage periods.
+
+**Concrete Cost Example**
+Around **180 requests to DeepSeek can cost as little as ~$0.06**. Even with higher-priced APIs like OpenAI—often several times more expensive—PAYG remains economical because **you are billed only when requests are made**.
+
+In contrast, subscription-based AI chats charge the same monthly fee regardless of whether the service is used heavily, lightly, or not at all.
+
+### Combine Providers, Optimize Performance, Reduce Costs
+
+An application that **supports multiple AI providers** unlocks even greater advantages:
+
+- Select the **most cost-effective model** for routine tasks
+- Switch to **more powerful models** only when complexity truly requires it
+- Avoid vendor lock-in and dynamically balance cost, quality, and speed
+
+This strategy ensures optimal results without unnecessary expense.
+
+### What Can Smaller, Cost-Efficient Models Handle?
+
+For many everyday use cases, lightweight models are more than sufficient, including:
+
+- **Text summarization**
+- **Email and short-text drafting**
+- **Standard programming questions** (e.g., "How do I write an if-clause in language X?")
+- **Concept explanations** (e.g., "What are the advantages of microservices?")
+
+Reserving large, expensive models only for genuinely complex tasks leads to **dramatic cost savings without sacrificing quality**.
+
+### Conclusion
+
+Why pay for an expensive flat-rate AI subscription when an **API-based, multi-provider chat solution** gives you:
+
+- Precise cost control
+- Maximum flexibility
+- No unused capacity
+- Optimal performance per task
+
+With PAYG, **you stay in control—financially and technically—at all times**.
+
 ## Architecture Overview
 
 ```
