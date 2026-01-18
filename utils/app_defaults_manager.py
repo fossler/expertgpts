@@ -8,33 +8,12 @@ preferences for LLM providers, models, language, and other app defaults.
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
+from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
 
 try:
     import tomllib  # Python 3.11+
 except ImportError:
     import tomli as tomllib  # Fallback for Python < 3.11
-
-
-# Secure file permissions: read/write for owner only (600)
-SECURE_FILE_PERMISSIONS = 0o600
-
-
-def set_secure_permissions(file_path: Path) -> None:
-    """Set secure permissions (600) on the given file.
-
-    Args:
-        file_path: Path to the file to secure
-
-    Note:
-        600 permissions means:
-        - Owner: read + write
-        - Group: no permissions
-        - Others: no permissions
-    """
-    try:
-        file_path.chmod(SECURE_FILE_PERMISSIONS)
-    except OSError as e:
-        print(f"Warning: Could not set secure permissions on {file_path}: {e}")
 
 
 def get_app_defaults_path() -> Path:
@@ -43,8 +22,7 @@ def get_app_defaults_path() -> Path:
     Returns:
         Path: Path to .streamlit/app_defaults.toml in project root
     """
-    project_root = Path(__file__).parent.parent
-    return project_root / ".streamlit" / "app_defaults.toml"
+    return get_streamlit_path("app_defaults.toml")
 
 
 def ensure_app_defaults_file_exists() -> Path:
@@ -55,16 +33,7 @@ def ensure_app_defaults_file_exists() -> Path:
     Returns:
         Path: Path to app_defaults.toml file
     """
-    defaults_path = get_app_defaults_path()
-    defaults_dir = defaults_path.parent
-
-    # Create .streamlit directory if it doesn't exist
-    if not defaults_dir.exists():
-        defaults_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create app_defaults.toml file if it doesn't exist
-    if not defaults_path.exists():
-        default_content = """# Application Default Settings
+    default_content = """# Application Default Settings
 # This file persists your default LLM and other app-wide settings
 
 [llm]
@@ -82,10 +51,7 @@ thinking_level = "none"
 # Options: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
 code = "en"
 """
-        defaults_path.write_text(default_content)
-        set_secure_permissions(defaults_path)
-
-    return defaults_path
+    return ensure_file_exists(get_app_defaults_path(), default_content=default_content)
 
 
 def get_llm_defaults() -> Dict[str, Any]:

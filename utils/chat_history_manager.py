@@ -9,9 +9,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
-
-# Secure file permissions: read/write for owner only (600)
-SECURE_FILE_PERMISSIONS = 0o600
+from utils.file_ops import set_secure_permissions, get_project_root
 
 # Default maximum chat history file size (1 MB)
 DEFAULT_MAX_FILE_SIZE_MB = 1
@@ -23,33 +21,13 @@ MINIMUM_MESSAGES_PRESERVE = 10
 CHAT_HISTORY_DIR = "chat_history"
 
 
-def set_secure_permissions(file_path: Path) -> None:
-    """Set secure permissions (600) on the given file.
-
-    Args:
-        file_path: Path to the file to secure
-
-    Note:
-        600 permissions means:
-        - Owner: read + write
-        - Group: no permissions
-        - Others: no permissions
-    """
-    try:
-        file_path.chmod(SECURE_FILE_PERMISSIONS)
-    except OSError as e:
-        # Log warning but don't fail - non-blocking
-        print(f"Warning: Could not set secure permissions on {file_path}: {e}")
-
-
 def get_chat_history_dir() -> Path:
     """Get the path to the chat history directory.
 
     Returns:
         Path: Path to chat_history/ directory in project root
     """
-    project_root = Path(__file__).parent.parent
-    return project_root / CHAT_HISTORY_DIR
+    return get_project_root() / CHAT_HISTORY_DIR
 
 
 def ensure_chat_history_dir_exists() -> Path:

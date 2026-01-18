@@ -7,30 +7,7 @@ way to manage secrets in production.
 
 import os
 from pathlib import Path
-
-
-# Secure file permissions: read/write for owner only (600)
-SECURE_FILE_PERMISSIONS = 0o600
-
-
-def set_secure_permissions(file_path: Path) -> None:
-    """Set secure file permissions (600) on the given file.
-
-    Args:
-        file_path: Path to the file to secure
-
-    Note:
-        600 permissions means:
-        - Owner: read + write
-        - Group: no permissions
-        - Others: no permissions
-    """
-    try:
-        file_path.chmod(SECURE_FILE_PERMISSIONS)
-    except OSError as e:
-        # Log warning but don't fail if we can't set permissions
-        # (e.g., on Windows or filesystems that don't support Unix permissions)
-        print(f"Warning: Could not set secure permissions on {file_path}: {e}")
+from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
 
 
 def get_secrets_path() -> Path:
@@ -39,9 +16,7 @@ def get_secrets_path() -> Path:
     Returns:
         Path: Path to .streamlit/secrets.toml in project root
     """
-    # Get the project root (parent of utils directory)
-    project_root = Path(__file__).parent.parent
-    return project_root / ".streamlit" / "secrets.toml"
+    return get_streamlit_path("secrets.toml")
 
 
 def ensure_secrets_file_exists() -> Path:
@@ -53,20 +28,7 @@ def ensure_secrets_file_exists() -> Path:
     Returns:
         Path: Path to secrets.toml file
     """
-    secrets_path = get_secrets_path()
-    secrets_dir = secrets_path.parent
-
-    # Create .streamlit directory if it doesn't exist
-    if not secrets_dir.exists():
-        secrets_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create secrets.toml file if it doesn't exist
-    if not secrets_path.exists():
-        secrets_path.write_text("")
-        # Set secure permissions on newly created file
-        set_secure_permissions(secrets_path)
-
-    return secrets_path
+    return ensure_file_exists(get_secrets_path(), default_content="")
 
 def save_provider_api_key(provider: str, api_key: str) -> None:
     """Save API key for a specific provider to secrets.toml file.

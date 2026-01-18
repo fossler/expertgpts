@@ -7,29 +7,7 @@ This module provides functions to read and write theme settings to the
 from pathlib import Path
 from typing import Optional
 import os
-
-
-# Secure file permissions: read/write for owner only (600)
-SECURE_FILE_PERMISSIONS = 0o600
-
-
-def set_secure_permissions(file_path: Path) -> None:
-    """Set secure file permissions (600) on the given file.
-
-    Args:
-        file_path: Path to the file to secure
-
-    Note:
-        600 permissions means:
-        - Owner: read + write
-        - Group: no permissions
-        - Others: no permissions
-    """
-    try:
-        file_path.chmod(SECURE_FILE_PERMISSIONS)
-    except OSError as e:
-        # Log warning but don't fail if we can't set permissions
-        print(f"Warning: Could not set secure permissions on {file_path}: {e}")
+from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
 
 
 def get_config_path() -> Path:
@@ -38,9 +16,7 @@ def get_config_path() -> Path:
     Returns:
         Path: Path to .streamlit/config.toml in project root
     """
-    # Get the project root (parent of utils directory)
-    project_root = Path(__file__).parent.parent
-    return project_root / ".streamlit" / "config.toml"
+    return get_streamlit_path("config.toml")
 
 
 def ensure_config_file_exists() -> Path:
@@ -51,20 +27,7 @@ def ensure_config_file_exists() -> Path:
     Returns:
         Path: Path to config.toml file
     """
-    config_path = get_config_path()
-    config_dir = config_path.parent
-
-    # Create .streamlit directory if it doesn't exist
-    if not config_dir.exists():
-        config_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create config.toml file if it doesn't exist
-    if not config_path.exists():
-        config_path.write_text("[theme]\n")
-        # Set secure permissions on newly created file
-        set_secure_permissions(config_path)
-
-    return config_path
+    return ensure_file_exists(get_config_path(), default_content="[theme]\n")
 
 
 def get_theme_settings() -> dict:

@@ -38,7 +38,9 @@ expertgpts/
 │   ├── token_manager.py           # Token counting
 │   ├── i18n.py                    # Internationalization
 │   ├── constants.py               # Provider/model configurations
-│   └── helpers.py                 # Utility functions
+│   ├── helpers.py                 # Utility functions
+│   ├── file_ops.py                # File system operations (NEW)
+│   └── format_ops.py              # File format operations (NEW)
 │
 ├── locales/                        # UI translations
 │   └── ui/
@@ -153,6 +155,18 @@ expertgpts/
 - Generates new expert pages
 - Creates unique expert IDs
 - Replaces template placeholders
+
+**utils/file_ops.py**:
+- Shared file system operations
+- Secure permission management (600)
+- Path resolution utilities
+- File/directory creation helpers
+
+**utils/format_ops.py**:
+- Shared file format operations
+- TOML read/write with error handling
+- YAML read/write for configs
+- JSON read/write for chat history
 
 ### Configuration Files
 
