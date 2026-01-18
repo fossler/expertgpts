@@ -289,3 +289,50 @@ def save_theme_settings(base: str) -> None:
 def reset_to_default_theme() -> None:
     """Reset theme settings to default theme (ocean_blue)."""
     save_theme_settings(base=".streamlit/themes/ocean_blue.toml")
+
+
+def get_current_theme_name() -> Optional[str]:
+    """Get the current theme name from config.toml base parameter.
+
+    Reads the config.toml file and extracts the theme name from the base parameter.
+    For example, if base = ".streamlit/themes/ocean_blue.toml", returns "ocean_blue".
+
+    Returns:
+        Theme name (e.g., "ocean_blue", "modern_red") or None if not set
+    """
+    config_path = get_config_path()
+
+    if not config_path.exists():
+        return None
+
+    content = config_path.read_text()
+
+    # Parse config.toml to find base parameter
+    in_theme_section = False
+
+    for line in content.split('\n'):
+        line = line.strip()
+
+        # Check if we're in the [theme] section
+        if line == "[theme]":
+            in_theme_section = True
+            continue
+        elif line.startswith("[") and line != "[theme]":
+            in_theme_section = False
+            continue
+
+        # Look for base parameter
+        if in_theme_section and "=" in line:
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+
+            if key == "base":
+                # Extract theme name from path
+                # Expected format: ".streamlit/themes/THEME_NAME.toml"
+                if "/themes/" in value:
+                    theme_file = value.split("/themes/")[-1]
+                    theme_name = theme_file.replace(".toml", "")
+                    return theme_name
+
+    return None

@@ -345,41 +345,52 @@ def render_general_settings_section():
 
     # Initialize session state for selected theme KEY (language-independent) and colors
     if "selected_theme_key" not in st.session_state:
-        # Read current theme colors from config file
-        current_config = config_toml_manager.get_theme_settings()
+        # First, try to get the theme name directly from config.toml base parameter
+        current_theme_name = config_toml_manager.get_current_theme_name()
 
-        # Get current colors from config
-        current_primary = current_config.get("primaryColor", "#F59E0B")
-        current_background = current_config.get("backgroundColor", "#FFFBEB")
-        current_secondary = current_config.get("secondaryBackgroundColor", "#FEF3C7")
-        current_text = current_config.get("textColor", "#78350F")
-
-        # Try to match current colors against predefined themes
-        matched_theme = None
-        for theme_key, theme_data in themes.items():
-            if theme_key == "custom":
-                continue
-            if (theme_data["primary"] == current_primary and
-                theme_data["background"] == current_background and
-                theme_data["secondary"] == current_secondary and
-                theme_data["text"] == current_text):
-                matched_theme = theme_key
-                break
-
-        if matched_theme:
-            # Found a matching predefined theme
-            st.session_state.selected_theme_key = matched_theme
-            st.session_state.theme_primary_color = themes[matched_theme]["primary"]
-            st.session_state.theme_background_color = themes[matched_theme]["background"]
-            st.session_state.theme_secondary_background_color = themes[matched_theme]["secondary"]
-            st.session_state.theme_text_color = themes[matched_theme]["text"]
+        if current_theme_name and current_theme_name in themes:
+            # Found a valid theme name in config.toml
+            st.session_state.selected_theme_key = current_theme_name
+            st.session_state.theme_primary_color = themes[current_theme_name]["primary"]
+            st.session_state.theme_background_color = themes[current_theme_name]["background"]
+            st.session_state.theme_secondary_background_color = themes[current_theme_name]["secondary"]
+            st.session_state.theme_text_color = themes[current_theme_name]["text"]
         else:
-            # Use Custom theme with current config values
-            st.session_state.selected_theme_key = "custom"
-            st.session_state.theme_primary_color = current_primary
-            st.session_state.theme_background_color = current_background
-            st.session_state.theme_secondary_background_color = current_secondary
-            st.session_state.theme_text_color = current_text
+            # Fallback: Read current theme colors from config file and try to match
+            current_config = config_toml_manager.get_theme_settings()
+
+            # Get current colors from config
+            current_primary = current_config.get("primaryColor", "#F59E0B")
+            current_background = current_config.get("backgroundColor", "#FFFBEB")
+            current_secondary = current_config.get("secondaryBackgroundColor", "#FEF3C7")
+            current_text = current_config.get("textColor", "#78350F")
+
+            # Try to match current colors against predefined themes
+            matched_theme = None
+            for theme_key, theme_data in themes.items():
+                if theme_key == "custom":
+                    continue
+                if (theme_data["primary"] == current_primary and
+                    theme_data["background"] == current_background and
+                    theme_data["secondary"] == current_secondary and
+                    theme_data["text"] == current_text):
+                    matched_theme = theme_key
+                    break
+
+            if matched_theme:
+                # Found a matching predefined theme
+                st.session_state.selected_theme_key = matched_theme
+                st.session_state.theme_primary_color = themes[matched_theme]["primary"]
+                st.session_state.theme_background_color = themes[matched_theme]["background"]
+                st.session_state.theme_secondary_background_color = themes[matched_theme]["secondary"]
+                st.session_state.theme_text_color = themes[matched_theme]["text"]
+            else:
+                # Use Custom theme with current config values
+                st.session_state.selected_theme_key = "custom"
+                st.session_state.theme_primary_color = current_primary
+                st.session_state.theme_background_color = current_background
+                st.session_state.theme_secondary_background_color = current_secondary
+                st.session_state.theme_text_color = current_text
 
     # Get the current display name for the selected theme key (in current language)
     current_theme_display = f"{themes[st.session_state.selected_theme_key]['icon']} {i18n.t(f'theme.{st.session_state.selected_theme_key}')}"
