@@ -20,6 +20,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from utils.constants import EXAMPLE_EXPERTS_COUNT
+from utils.file_ops import validate_cwd
 
 
 def confirm_reset():
@@ -118,13 +119,16 @@ def run_setup():
         setup_script = script_dir / "setup.py"
         project_root = script_dir.parent
 
+        # Validate working directory before subprocess execution
+        safe_cwd = validate_cwd(project_root)
+
         # Run setup.py as a subprocess
         result = subprocess.run(
             [sys.executable, str(setup_script)],
             check=True,
             capture_output=False,
             text=True,
-            cwd=project_root  # Set working directory to project root
+            cwd=safe_cwd  # Use validated working directory
         )
         return result.returncode == 0
     except subprocess.CalledProcessError as e:
@@ -132,6 +136,9 @@ def run_setup():
         return False
     except FileNotFoundError:
         print("❌ setup.py not found!")
+        return False
+    except ValueError as e:
+        print(f"❌ Invalid working directory: {e}")
         return False
 
 

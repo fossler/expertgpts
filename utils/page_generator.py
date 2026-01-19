@@ -7,6 +7,7 @@ import streamlit as st
 
 from utils.helpers import sanitize_name
 from utils.types import PageInfo
+from utils.file_ops import safe_path_join
 
 
 class PageGenerator:
@@ -167,12 +168,16 @@ class PageGenerator:
                 continue
 
             try:
-                with open(page_file, "r", encoding="utf-8") as f:
+                # Validate the page file path is safe before reading
+                safe_page_path = safe_path_join(self.pages_dir, page_file.name)
+
+                with open(safe_page_path, "r", encoding="utf-8") as f:
                     content = f.read()
 
                 # Check if this page belongs to the expert
                 if f'EXPERT_ID = "{expert_id}"' in content:
-                    page_file.unlink()
+                    # Validate path again before deletion (defense in depth)
+                    safe_page_path.unlink()
                     # Clear cache after deletion
                     self.clear_page_cache()
                     return True

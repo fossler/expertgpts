@@ -1,2 +1,17 @@
 [theme]
 base = ".streamlit/themes/modern_red.toml"
+
+[logger]
+
+# Level of logging for Streamlit's internal logger: "error", "warning", "info", "debug"
+# Default: "info"
+level = "info"
+
+# String format for logging messages
+# Default: "%(asctime)s %(message)s"
+messageFormat = "%(asctime)s %(name)s %(levelname)s %(message)s"
+
+# Timestamp format for log messages
+# Uses Python strftime format: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+# Default: "%Y-%m-%d %H:%M:%S"
+datetimeFormat = "%Y-%m-%d %H:%M:%S"

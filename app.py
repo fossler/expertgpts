@@ -15,6 +15,7 @@ from utils.session_state import initialize_shared_session_state, handle_pending_
 from utils.constants import EXAMPLE_EXPERTS_COUNT
 from utils.i18n import i18n
 from utils.helpers import translate_expert_name
+from utils.file_ops import validate_cwd
 
 
 def check_first_run():
@@ -48,9 +49,12 @@ def run_first_time_setup():
     """)
 
     try:
+        # Validate working directory before subprocess execution
+        safe_cwd = validate_cwd(project_root)
+
         result = subprocess.run(
             [sys.executable, "scripts/setup.py"],
-            cwd=project_root,
+            cwd=safe_cwd,
             check=True,
             capture_output=True,
             text=True

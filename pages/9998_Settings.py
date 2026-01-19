@@ -17,6 +17,7 @@ from utils.helpers import sanitize_name, translate_expert_name
 from utils import secrets_manager
 from utils import config_toml_manager
 from utils.session_state import initialize_shared_session_state, handle_pending_navigation
+from utils.file_ops import safe_path_join, validate_cwd
 
 
 def initialize_session_state():
@@ -1033,11 +1034,14 @@ def render_danger_zone_section():
         with col1:
             if st.button(f"✅ {i18n.t('buttons.yes_reset_everything')}", key="confirm_reset_button", type="primary"):
                 try:
-                    # Delete all configs
+                    # Delete all configs (with path validation)
                     configs_dir = Path(__file__).parent.parent / "configs"
                     if configs_dir.exists():
                         for config_file in configs_dir.glob("*.yaml"):
-                            config_file.unlink()
+                            # Validate the config file path is safe before deletion
+                            safe_config_path = safe_path_join(configs_dir, config_file.name)
+                            if safe_config_path.exists():
+                                safe_config_path.unlink()
 
                     # Delete all expert pages (except Home.py and Settings.py)
                     pages_dir = Path(__file__).parent
@@ -1045,10 +1049,17 @@ def render_danger_zone_section():
                         for page_file in pages_dir.glob("*.py"):
                             # Keep core application files (Home and Settings)
                             if page_file.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]:
-                                page_file.unlink()
+                                # Validate the page file path is safe before deletion
+                                safe_page_path = safe_path_join(pages_dir, page_file.name)
+                                if safe_page_path.exists():
+                                    safe_page_path.unlink()
 
                     # Recreate example experts using scripts/setup.py
                     st.info(f"🔄 {i18n.t('status.recreating_experts')}")
+
+                    # Validate working directory before subprocess execution
+                    project_root = Path(__file__).parent.parent
+                    safe_cwd = validate_cwd(project_root)
 
                     # Run scripts/setup.py as a subprocess
                     result = subprocess.run(
@@ -1056,7 +1067,7 @@ def render_danger_zone_section():
                         check=True,
                         capture_output=True,
                         text=True,
-                        cwd=Path(__file__).parent.parent
+                        cwd=safe_cwd
                     )
 
                     st.success(f"✅ {i18n.t('success.application_reset')}")
