@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Optional
 from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
+from utils.constants import DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL
 
 try:
     import tomllib  # Python 3.11+
@@ -33,15 +34,15 @@ def ensure_app_defaults_file_exists() -> Path:
     Returns:
         Path: Path to app_defaults.toml file
     """
-    default_content = """# Application Default Settings
+    default_content = f"""# Application Default Settings
 # This file persists your default LLM and other app-wide settings
 
 [llm]
 # Default LLM provider (deepseek, openai, zai)
-provider = "deepseek"
+provider = "{DEFAULT_LLM_PROVIDER}"
 
 # Default model for the provider
-model = "deepseek-chat"
+model = "{DEFAULT_LLM_MODEL}"
 
 # Default thinking/reasoning level for OpenAI models (none, low, medium, high, xhigh)
 thinking_level = "none"
@@ -66,8 +67,8 @@ def get_llm_defaults() -> Dict[str, Any]:
     if not defaults_path.exists():
         # Return hardcoded defaults if file doesn't exist
         return {
-            "provider": "deepseek",
-            "model": "deepseek-chat",
+            "provider": DEFAULT_LLM_PROVIDER,
+            "model": DEFAULT_LLM_MODEL,
             "thinking_level": "none"
         }
 
@@ -79,16 +80,16 @@ def get_llm_defaults() -> Dict[str, Any]:
         llm_section = data.get("llm", {})
 
         return {
-            "provider": llm_section.get("provider", "deepseek"),
-            "model": llm_section.get("model", "deepseek-chat"),
+            "provider": llm_section.get("provider", DEFAULT_LLM_PROVIDER),
+            "model": llm_section.get("model", DEFAULT_LLM_MODEL),
             "thinking_level": llm_section.get("thinking_level", "none")
         }
     except Exception as e:
         print(f"Warning: Error reading app_defaults.toml: {e}")
         # Return hardcoded defaults on error
         return {
-            "provider": "deepseek",
-            "model": "deepseek-chat",
+            "provider": DEFAULT_LLM_PROVIDER,
+            "model": DEFAULT_LLM_MODEL,
             "thinking_level": "none"
         }
 
@@ -270,8 +271,8 @@ def save_language_preference(lang_code: str) -> bool:
             if "llm" in data:
                 lines.append("[llm]")
                 llm = data["llm"]
-                lines.append(f'provider = "{llm.get("provider", "deepseek")}"')
-                lines.append(f'model = "{llm.get("model", "deepseek-chat")}"')
+                lines.append(f'provider = "{llm.get("provider", DEFAULT_LLM_PROVIDER)}"')
+                lines.append(f'model = "{llm.get("model", DEFAULT_LLM_MODEL)}"')
                 lines.append(f'thinking_level = "{llm.get("thinking_level", "none")}"')
                 lines.append("")
 

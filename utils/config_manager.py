@@ -6,6 +6,8 @@ from typing import Dict, List, Optional
 from datetime import datetime
 
 from utils.helpers import sanitize_name
+from utils.constants import SYSTEM_PROMPT_TEMPLATE
+from utils.app_defaults_manager import get_llm_defaults
 
 
 class ConfigManager:
@@ -28,7 +30,7 @@ class ConfigManager:
         temperature: float = 1.0,
         system_prompt: Optional[str] = None,
         api_key: Optional[str] = None,
-        provider: str = "deepseek",
+        provider: Optional[str] = None,
         model: Optional[str] = None,
         thinking_level: str = "none",
     ) -> str:
@@ -41,7 +43,7 @@ class ConfigManager:
             temperature: Temperature for AI responses (0.0-2.0)
             system_prompt: Optional custom system prompt (None triggers AI generation)
             api_key: API key for system prompt generation (provider-specific)
-            provider: LLM provider (e.g., "deepseek", "openai", "zai")
+            provider: LLM provider (e.g., "deepseek", "openai", "zai"). If None, uses user's default.
             model: Model to use (if None, uses provider default)
             thinking_level: Thinking/reasoning effort level ("none", "low", "medium", "high", "xhigh")
 
@@ -50,6 +52,10 @@ class ConfigManager:
         """
         # Import here for provider defaults
         from utils.constants import get_default_model_for_provider
+
+        # Use user's default provider if not specified
+        if provider is None:
+            provider = get_llm_defaults()["provider"]
 
         # Generate expert_id based on page number and name (matches filename)
         safe_name = sanitize_name(expert_name)
@@ -205,7 +211,7 @@ class ConfigManager:
         description: str,
         temperature: float = 1.0,
         api_key: Optional[str] = None,
-        provider: str = "deepseek",
+        provider: Optional[str] = None,
         model: Optional[str] = None,
     ) -> str:
         """Generate a system prompt using AI or fallback template.
@@ -215,7 +221,7 @@ class ConfigManager:
             description: Description of the expert's domain
             temperature: Temperature for AI generation
             api_key: API key for system prompt generation (provider-specific)
-            provider: LLM provider to use for generation
+            provider: LLM provider to use for generation. If None, uses user's default.
             model: Model to use for generation (if None, uses provider default)
 
         Returns:
@@ -223,6 +229,10 @@ class ConfigManager:
         """
         # Import here to avoid circular dependency
         from utils.llm_client import LLMClient
+
+        # Use user's default provider if not specified
+        if provider is None:
+            provider = get_llm_defaults()["provider"]
 
         # If no API key provided, use template directly
         if not api_key:
@@ -246,15 +256,7 @@ class ConfigManager:
         Returns:
             Template system prompt
         """
-        return f"""You are {expert_name}, a domain-specific expert AI assistant.
-
-{description}
-
-## Guidelines
-- Provide accurate, expert-level information in your domain
-- If you're unsure about something, acknowledge it honestly
-- Use clear, professional language appropriate for your domain
-- Ask clarifying questions when needed to provide better assistance
-- Provide practical, actionable advice when applicable
-
-Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information."""
+        return SYSTEM_PROMPT_TEMPLATE.format(
+            expert_name=expert_name,
+            description=description
+        )

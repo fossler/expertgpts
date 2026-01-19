@@ -19,6 +19,7 @@ from utils.constants import (
     get_provider_config,
     get_model_config,
     get_provider_base_url,
+    SYSTEM_PROMPT_TEMPLATE,
 )
 from utils.i18n import i18n
 
@@ -267,33 +268,13 @@ class LLMClient:
         generation_prompt = f"""{language_prefix}
 
 Create a system prompt, the output must be in Markdown:
-You are {expert_name}, a domain-specific expert AI assistant.
-
-Role description:
-{description}
-
-## Guidelines
-- Provide accurate, expert-level information in your domain
-- If you're unsure about something, acknowledge it honestly
-- Use clear, professional language appropriate for your domain
-- Ask clarifying questions when needed to provide better assistance
-- Provide practical, actionable advice when applicable
-
-Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information."""
+{SYSTEM_PROMPT_TEMPLATE.format(expert_name=expert_name, description=description)}"""
 
         # Fallback template - clean system prompt for direct use
-        fallback_template = f"""You are {expert_name}, a domain-specific expert AI assistant.
-
-{description}
-
-## Guidelines
-- Provide accurate, expert-level information in your domain
-- If you're unsure about something, acknowledge it honestly
-- Use clear, professional language appropriate for your domain
-- Ask clarifying questions when needed to provide better assistance
-- Provide practical, actionable advice when applicable
-
-Remember: You are a specialized expert. Stay within your domain of expertise and provide high-quality, accurate information."""
+        fallback_template = SYSTEM_PROMPT_TEMPLATE.format(
+            expert_name=expert_name,
+            description=description
+        )
 
         try:
             # Ask LLM to generate an enhanced system prompt

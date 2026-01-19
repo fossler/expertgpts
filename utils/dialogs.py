@@ -9,6 +9,7 @@ import streamlit as st
 from pathlib import Path
 from utils.config_manager import ConfigManager
 from utils.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+from utils.app_defaults_manager import get_llm_defaults
 from utils.page_generator import PageGenerator
 from utils.helpers import sanitize_name
 from utils.i18n import i18n
@@ -280,7 +281,7 @@ def create_new_expert(
     temperature: float,
     custom_system_prompt: str = None,
     api_key: str = None,
-    provider: str = "deepseek",
+    provider: str = None,
     model: str = None,
     thinking_level: str = "none"
 ):
@@ -292,7 +293,7 @@ def create_new_expert(
         temperature: Temperature setting
         custom_system_prompt: Optional custom system prompt
         api_key: API key for AI system prompt generation (provider-specific)
-        provider: LLM provider (e.g., "deepseek", "openai", "zai")
+        provider: LLM provider (e.g., "deepseek", "openai", "zai"). If None, uses user's default.
         model: Model to use (if None, uses provider default)
         thinking_level: Thinking/reasoning effort level ("none"|"low"|"medium"|"high"|"xhigh")
 
@@ -302,6 +303,10 @@ def create_new_expert(
     Raises:
         ValueError: If an expert with the same name already exists
     """
+    # Use user's default provider if not specified
+    if provider is None:
+        provider = get_llm_defaults()["provider"]
+
     config_manager = ConfigManager()
     page_generator = PageGenerator()
 
