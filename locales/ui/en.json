@@ -162,7 +162,8 @@
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
-    "unexpected_error": "Unexpected error: {type}: {message}"
+    "unexpected_error": "Unexpected error: {type}: {message}",
+    "background_stream_error": "Background streaming error"
   },
   "success": {
     "expert_created": "Expert '{name}' created successfully!",
@@ -171,7 +172,8 @@
     "api_key_cleared": "{provider} API key cleared successfully!",
     "settings_saved": "Settings saved successfully!",
     "defaults_saved": "Defaults saved! New experts will use {provider} - {model}",
-    "application_reset": "Application reset successfully!"
+    "application_reset": "Application reset successfully!",
+    "background_stream_complete": "Response completed from background stream"
   },
   "info": {
     "navigating": "Navigating to your new expert...",

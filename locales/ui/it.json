@@ -162,7 +162,8 @@
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
-    "unexpected_error": "Unexpected error: {type}: {message}"
+    "unexpected_error": "Unexpected error: {type}: {message}",
+    "background_stream_error": "Background streaming error"
   },
   "success": {
     "expert_created": "Esperto '{name}' creato con successo!",
@@ -171,7 +172,8 @@
     "settings_saved": "Impostazioni salvate con successo!",
     "api_key_cleared": "Chiave API {provider} cancellata con successo!",
     "defaults_saved": "Predefiniti salvati! I nuovi esperti useranno {provider} - {model}",
-    "application_reset": "Applicazione reimpostata con successo!"
+    "application_reset": "Applicazione reimpostata con successo!",
+    "background_stream_complete": "Response completed from background stream"
   },
   "info": {
     "navigating": "Navigazione verso il tuo nuovo esperto...",
@@ -257,7 +259,9 @@
     "feature_theme_customization": "Personalizzazione Tema",
     "feature_secure_api_keys": "Gestione Chiave API Sicura",
     "feature_modern_navigation": "Navigazione Moderna",
-    "feature_file_config": "Configurazione Basata su File"
+    "feature_file_config": "Configurazione Basata su File",
+    "feature_chat_history": "Persistent Chat History",
+    "feature_temperature": "Adjustable Temperature"
   },
   "dialogs": {
     "add_chat": {

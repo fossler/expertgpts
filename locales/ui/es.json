@@ -162,7 +162,8 @@
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
-    "unexpected_error": "Unexpected error: {type}: {message}"
+    "unexpected_error": "Unexpected error: {type}: {message}",
+    "background_stream_error": "Background streaming error"
   },
   "success": {
     "expert_created": "¡Experto '{name}' creado exitosamente!",
@@ -171,7 +172,8 @@
     "settings_saved": "¡Configuración guardada exitosamente!",
     "api_key_cleared": "¡Clave API {provider} limpiada exitosamente!",
     "defaults_saved": "¡Valores predeterminados guardados! Los nuevos expertos usarán {provider} - {model}",
-    "application_reset": "¡Aplicación restablecida exitosamente!"
+    "application_reset": "¡Aplicación restablecida exitosamente!",
+    "background_stream_complete": "Response completed from background stream"
   },
   "info": {
     "navigating": "Navegando a tu nuevo experto...",
@@ -257,7 +259,9 @@
     "feature_theme_customization": "Personalización de Temas",
     "feature_secure_api_keys": "Gestión Segura de Claves API",
     "feature_modern_navigation": "Navegación Moderna",
-    "feature_file_config": "Configuración Basada en Archivos"
+    "feature_file_config": "Configuración Basada en Archivos",
+    "feature_chat_history": "Persistent Chat History",
+    "feature_temperature": "Adjustable Temperature"
   },
   "links": {
     "deepseek_chat": "https://chat.deepseek.com/",

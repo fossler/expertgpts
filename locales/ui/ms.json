@@ -162,7 +162,8 @@
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
-    "unexpected_error": "Unexpected error: {type}: {message}"
+    "unexpected_error": "Unexpected error: {type}: {message}",
+    "background_stream_error": "Background streaming error"
   },
   "success": {
     "expert_created": "Pakar '{name}' berjaya dicipta!",
@@ -171,7 +172,8 @@
     "settings_saved": "Tetapan berjaya disimpan!",
     "api_key_cleared": "Kunci API {provider} berjaya dikosongkan!",
     "defaults_saved": "Lalai disimpan! Pakar baharu akan menggunakan {provider} - {model}",
-    "application_reset": "Aplikasi berjaya ditetapkan semula!"
+    "application_reset": "Aplikasi berjaya ditetapkan semula!",
+    "background_stream_complete": "Response completed from background stream"
   },
   "info": {
     "navigating": "Menavigasi ke pakar baharu anda...",
@@ -257,7 +259,9 @@
     "feature_theme_customization": "Penyesuaian Tema",
     "feature_secure_api_keys": "Pengurusan Kunci API Selamat",
     "feature_modern_navigation": "Navigasi Moden",
-    "feature_file_config": "Konfigurasi Berasaskan Fail"
+    "feature_file_config": "Konfigurasi Berasaskan Fail",
+    "feature_chat_history": "Persistent Chat History",
+    "feature_temperature": "Adjustable Temperature"
   },
   "dialogs": {
     "add_chat": {

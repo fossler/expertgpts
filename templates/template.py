@@ -4,7 +4,9 @@ This template is used to generate individual expert pages.
 Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 """
 
+import time
 import streamlit as st
+from pathlib import Path
 from utils.config_manager import ConfigManager
 from utils.llm_client import LLMClient
 from utils.session_state import initialize_shared_session_state
@@ -27,6 +29,7 @@ from utils.constants import (
     CONTEXT_USAGE_COLORS,
     CONFIG_CACHE_TTL
 )
+from utils.streaming_cache import StreamingCache
 
 
 # Expert Configuration
@@ -127,6 +130,197 @@ def load_expert_config() -> dict:
     return config
 
 
+def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
+    """Check for and display cached responses from background streams.
+
+    This function is called on page load to detect if any background streams
+    completed while the user were navigating away.
+
+    Args:
+        config: Expert configuration dictionary
+        messages_key: Session state key for this expert's messages
+
+    Returns:
+        True if cached responses were found or if polling is in progress
+    """
+    import json
+
+    cache_dir = Path("streaming_cache")
+    if not cache_dir.exists():
+        return False
+
+    # Check for the fixed "latest" cache file for this expert
+    expert_id = config.get("expert_id", "")
+    cache_file = cache_dir / f"{expert_id}_latest.txt"
+    metadata_file = cache_dir / f"{expert_id}_latest.meta"
+
+    if not cache_file.exists():
+        return False
+
+    try:
+        # Check if streaming is complete
+        is_complete = False
+        has_error = False
+        if metadata_file.exists():
+            try:
+                with open(metadata_file, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+                    is_complete = metadata.get("status") == "complete"
+                    has_error = metadata.get("status") == "error"
+            except Exception:
+                pass
+
+        # Handle completed streams
+        if is_complete:
+            response = cache_file.read_text(encoding='utf-8')
+
+            # Check for error marker
+            if "[STREAMING ERROR:" in response:
+                st.warning(f"⚠️ {i18n.t('errors.background_stream_error')}")
+                # Extract error message if available
+                if metadata_file.exists():
+                    try:
+                        with open(metadata_file, 'r', encoding='utf-8') as f:
+                            metadata = json.load(f)
+                            error = metadata.get('error')
+                            if error:
+                                st.error(f"Error: {error}")
+                    except Exception:
+                        pass
+
+                # Clean up error files
+                cache_file.unlink(missing_ok=True)
+                metadata_file.unlink(missing_ok=True)
+                return True
+
+            # Check if already in chat history (avoid duplicates)
+            already_displayed = any(
+                msg.get("content") == response
+                for msg in st.session_state[messages_key]
+            )
+
+            if not already_displayed and response.strip():
+                # Add to chat history
+                st.session_state[messages_key].append({
+                    "role": "assistant",
+                    "content": response
+                })
+
+                # Save to persistent chat history
+                save_chat_history(expert_id, st.session_state[messages_key])
+
+                # Show notification
+                st.success(f"✅ {i18n.t('success.background_stream_complete')}")
+
+                # Clean up cache files
+                cache_file.unlink(missing_ok=True)
+                metadata_file.unlink(missing_ok=True)
+
+                # Trigger rerun to display the new message
+                st.rerun()
+                return True
+
+        # Handle incomplete streams - start polling
+        elif not is_complete and not has_error:
+            # Stream is still in progress, start polling for it
+            poll_incomplete_stream(expert_id, messages_key)
+            return True
+
+    except Exception as e:
+        # Log error and clean up corrupt file
+        st.error(f"Error reading cached response: {str(e)}")
+        try:
+            cache_file.unlink(missing_ok=True)
+            metadata_file.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    return False
+
+
+def poll_stream_and_display(cache: "StreamingCache", expert_id: str, messages_key: str, message_placeholder) -> str:
+    """Poll cache file and display streaming response.
+
+    This is a shared function used by both new streams and resumed streams.
+
+    Args:
+        cache: StreamingCache instance
+        expert_id: Expert identifier
+        messages_key: Session state key for messages
+        message_placeholder: Streamlit empty container for updates
+
+    Returns:
+        Final response text
+    """
+    response = ""
+    start_time = time.time()
+    timeout = 300  # 5 minutes max
+
+    while time.time() - start_time < timeout:
+        # Read current cache content
+        current = cache.read_cache()
+
+        # Update display if cache has new content
+        if current != response:
+            response = current
+            message_placeholder.markdown(response + "▌")
+
+        # Check if streaming is complete
+        if cache.is_complete():
+            break
+
+        # Check for errors
+        if cache.has_error():
+            error_msg = cache.get_error()
+            st.error(f"Streaming error: {error_msg}")
+            break
+
+        # Small delay to avoid busy waiting (battery optimization)
+        time.sleep(0.1)  # 100ms
+
+    # Final display (remove cursor)
+    message_placeholder.markdown(response)
+
+    return response
+
+
+def poll_incomplete_stream(expert_id: str, messages_key: str) -> None:
+    """Poll and display an incomplete stream from background thread.
+
+    This function is called when the user navigates back to a page
+    where a background stream is still in progress.
+
+    Args:
+        expert_id: Expert identifier
+        messages_key: Session state key for messages
+    """
+    from utils.streaming_cache import StreamingCache
+
+    # Create a cache instance to reuse its methods
+    cache = StreamingCache(expert_id)
+
+    # Create a message placeholder for real-time updates
+    message_placeholder = st.empty()
+
+    # Poll and display the stream
+    response = poll_stream_and_display(cache, expert_id, messages_key, message_placeholder)
+
+    # Only add to chat history if response is not empty
+    if response.strip():
+        # Add assistant response to chat history
+        st.session_state[messages_key].append({
+            "role": "assistant",
+            "content": response
+        })
+
+        # Persist to file
+        save_chat_history(expert_id, st.session_state[messages_key])
+
+        # Clean up cache files
+        cache.cleanup()
+
+        # Rerun to update context usage with new message
+        st.rerun()
 
 
 def render_chat_interface(config: dict, messages_key: str):
@@ -219,30 +413,38 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 language_prefix = i18n.get_language_prefix()
                 system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
 
-                response = ""
-                for chunk in client.chat_stream(
+                # Initialize streaming cache
+                cache = StreamingCache(EXPERT_ID)
+
+                # Start background thread with streaming to file
+                cache.start_streaming_to_file(
+                    client=client,
                     messages=api_messages,
                     temperature=api_temperature,
                     model=model,
                     system_prompt=system_prompt_with_lang,
                     thinking_level=thinking_level
-                ):
-                    response += chunk
-                    message_placeholder.markdown(response + "▌")
+                )
 
-                message_placeholder.markdown(response)
+                # Poll cache file for updates (battery-optimized: file I/O)
+                response = poll_stream_and_display(cache, EXPERT_ID, messages_key, message_placeholder)
 
-                # Add assistant response to chat history
-                st.session_state[messages_key].append({
-                    "role": "assistant",
-                    "content": response
-                })
+                # Only add to chat history if response is not empty
+                if response.strip():  # Prevent empty responses
+                    # Add assistant response to chat history
+                    st.session_state[messages_key].append({
+                        "role": "assistant",
+                        "content": response
+                    })
 
-                # Persist to file
-                save_chat_history(EXPERT_ID, st.session_state[messages_key])
+                    # Persist to file
+                    save_chat_history(EXPERT_ID, st.session_state[messages_key])
 
-                # Rerun to update context usage with new message
-                st.rerun()
+                    # Clean up cache files
+                    cache.cleanup()
+
+                    # Rerun to update context usage with new message
+                    st.rerun()
 
             except (ConnectionError, TimeoutError) as e:
                 provider_name = get_provider_display_name(provider)
@@ -498,7 +700,11 @@ def main():
     # Display context usage in sidebar (at the bottom)
     display_context_usage(config, messages_key)
 
-    # Render main interface
+    # Check for completed background streams (from cache files) FIRST
+    # This ensures cached responses are loaded before rendering the interface
+    check_and_display_cached_responses(config, messages_key)
+
+    # Render main interface (will show any cached responses that were just loaded)
     render_chat_interface(config, messages_key)
 
     # Handle user input

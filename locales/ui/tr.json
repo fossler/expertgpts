@@ -162,7 +162,8 @@
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
-    "unexpected_error": "Unexpected error: {type}: {message}"
+    "unexpected_error": "Unexpected error: {type}: {message}",
+    "background_stream_error": "Background streaming error"
   },
   "success": {
     "expert_created": "Uzman '{name}' başarıyla oluşturuldu!",
@@ -171,7 +172,8 @@
     "settings_saved": "Ayarlar başarıyla kaydedildi!",
     "api_key_cleared": "{provider} API anahtarı başarıyla temizlendi!",
     "defaults_saved": "Varsayılanlar kaydedildi! Yeni uzmanlar {provider} - {model} kullanacak",
-    "application_reset": "Uygulama başarıyla sıfırlandı!"
+    "application_reset": "Uygulama başarıyla sıfırlandı!",
+    "background_stream_complete": "Response completed from background stream"
   },
   "info": {
     "navigating": "Yeni uzmanınıza gidiliyor...",
@@ -257,7 +259,9 @@
     "feature_theme_customization": "Tema Özelleştirme",
     "feature_secure_api_keys": "Güvenli API Anahtarı Yönetimi",
     "feature_modern_navigation": "Modern Navigasyon",
-    "feature_file_config": "Dosya Tabanlı Yapılandırma"
+    "feature_file_config": "Dosya Tabanlı Yapılandırma",
+    "feature_chat_history": "Persistent Chat History",
+    "feature_temperature": "Adjustable Temperature"
   },
   "links": {
     "deepseek_chat": "https://chat.deepseek.com/",

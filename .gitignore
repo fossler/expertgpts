@@ -36,6 +36,7 @@ env/
 
 # Streamlit - keep everything except secrets.toml
 .streamlit/secrets.toml
+.streamlit/app_defaults.toml
 
 # Testing
 .pytest_cache/
@@ -55,6 +56,7 @@ configs/
 logs/
 chat_history/
 llm_comm/
+streaming_cache/
 
 # Expert pages only (not Home/Settings/Help which are permanent)
 pages/*.py

@@ -162,7 +162,8 @@
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
-    "unexpected_error": "Unexpected error: {type}: {message}"
+    "unexpected_error": "Unexpected error: {type}: {message}",
+    "background_stream_error": "Background streaming error"
   },
   "success": {
     "expert_created": "專家 '{name}' 建立成功！",
@@ -171,7 +172,8 @@
     "settings_saved": "設定儲存成功！",
     "api_key_cleared": "{provider} API金鑰清除成功！",
     "defaults_saved": "預設值已儲存！新專家將使用{provider} - {model}",
-    "application_reset": "應用程式重設成功！"
+    "application_reset": "應用程式重設成功！",
+    "background_stream_complete": "Response completed from background stream"
   },
   "info": {
     "navigating": "正在導覽到您的新專家...",
@@ -257,7 +259,9 @@
     "feature_theme_customization": "主題自訂",
     "feature_secure_api_keys": "安全API金鑰管理",
     "feature_modern_navigation": "現代導航",
-    "feature_file_config": "基於檔案的設定"
+    "feature_file_config": "基於檔案的設定",
+    "feature_chat_history": "Persistent Chat History",
+    "feature_temperature": "Adjustable Temperature"
   },
   "dialogs": {
     "add_chat": {

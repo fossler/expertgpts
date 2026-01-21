@@ -4,7 +4,8 @@ This script completely resets the application by:
 1. Deleting all expert configurations from configs/
 2. Deleting all expert pages from pages/
 3. Deleting all chat history files from chat_history/
-4. Running setup.py to recreate the example experts
+4. Deleting all streaming cache files from streaming_cache/
+5. Running setup.py to recreate the example experts
 
 Use this script when you want to start fresh or restore the application to its
 initial state with the default example experts.
@@ -25,12 +26,13 @@ from utils.file_ops import validate_cwd
 
 def confirm_reset():
     """Ask user to confirm the reset operation."""
-    print("⚠️  WARNING: This will DELETE ALL configs, pages, and chat history!")
+    print("⚠️  WARNING: This will DELETE ALL configs, pages, chat history, and cache!")
     print("-" * 60)
     print("This action will:")
     print("  • Delete all YAML config files in configs/")
     print("  • Delete all expert page files in pages/")
     print("  • Delete all chat history files in chat_history/")
+    print("  • Delete all streaming cache files in streaming_cache/")
     print(f"  • Recreate {EXAMPLE_EXPERTS_COUNT} example experts from scratch")
     print("-" * 60)
 
@@ -108,6 +110,24 @@ def delete_chat_history():
     return True
 
 
+def delete_streaming_cache():
+    """Delete all streaming cache files and directory."""
+    cache_dir = Path("streaming_cache")
+
+    if not cache_dir.exists():
+        print("ℹ️  Streaming cache directory not found (no cache to delete).")
+        return True
+
+    # Delete the entire directory and all contents
+    try:
+        shutil.rmtree(cache_dir)
+        print(f"\n🗑️  Deleted streaming cache directory (and all contents).")
+        return True
+    except Exception as e:
+        print(f"❌ Error deleting streaming cache directory: {e}")
+        return False
+
+
 def run_setup():
     """Run the setup.py script to perform application setup."""
     print("\n🔄 Running scripts/setup.py to set up the application...\n")
@@ -168,6 +188,11 @@ def main():
     # Delete chat history
     if not delete_chat_history():
         print("\n❌ Failed to delete chat history. Aborting.")
+        return 1
+
+    # Delete streaming cache
+    if not delete_streaming_cache():
+        print("\n❌ Failed to delete streaming cache. Aborting.")
         return 1
 
     # Recreate example experts
