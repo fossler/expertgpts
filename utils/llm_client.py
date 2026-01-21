@@ -266,8 +266,6 @@ class LLMClient:
 
         # Generation prompt - instructions for LLM
         generation_prompt = f"""{language_prefix}
-
-Create a system prompt, the output must be in Markdown:
 {SYSTEM_PROMPT_TEMPLATE.format(expert_name=expert_name, description=description)}"""
 
         # Fallback template - clean system prompt for direct use

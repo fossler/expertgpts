@@ -1,7 +1,7 @@
 [llm]
-provider = "zai"
-model = "glm-4.7"
+provider = "deepseek"
+model = "deepseek-chat"
 thinking_level = "none"
 
 [language]
-code = "en"
+code = "de"
