@@ -72,7 +72,7 @@ def get_theme_settings() -> dict:
 
             if key == "base":
                 # Load theme from external file
-                theme_file_path = Path(__file__).parent.parent / ".streamlit" / value
+                theme_file_path = Path(__file__).parent.parent.parent / ".streamlit" / value
                 return load_theme_file(theme_file_path)
 
     # No base parameter found - return default theme
@@ -151,7 +151,7 @@ def update_custom_theme(
         secondaryBackgroundColor: Background color for sidebar
         textColor: Main text color
     """
-    custom_theme_path = Path(__file__).parent.parent / ".streamlit" / "themes" / "custom.toml"
+    custom_theme_path = Path(__file__).parent.parent.parent / ".streamlit" / "themes" / "custom.toml"
 
     # Create themes directory if it doesn't exist
     custom_theme_path.parent.mkdir(parents=True, exist_ok=True)

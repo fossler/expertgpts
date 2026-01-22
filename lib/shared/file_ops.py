@@ -10,14 +10,14 @@ from typing import Optional
 
 # Constants
 SECURE_FILE_PERMISSIONS = 0o600
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def get_project_root() -> Path:
     """Get the project root directory.
 
     Returns:
-        Path: Project root directory (parent of utils/)
+        Path: Project root directory (parent of lib/)
     """
     return PROJECT_ROOT
 

@@ -206,7 +206,7 @@ class I18nManager:
 
     def load_translations(self):
         """Load translation files from locales/ directory."""
-        locales_dir = Path(__file__).parent.parent / "locales" / "ui"
+        locales_dir = Path(__file__).parent.parent.parent / "locales" / "ui"
 
         if not locales_dir.exists():
             print(f"Warning: Locales directory not found: {locales_dir}")
