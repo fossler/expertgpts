@@ -97,7 +97,7 @@ expertgpts/
 - `pages/9998_Settings.py` - Settings page
 - `pages/9999_Help.py` - Help page
 - `templates/template.py` - Expert page template
-- `utils/*.py` - All utility modules
+- `lib/*.py` - All utility modules
 - `configs/*.yaml` - Expert configurations
 - `tests/*.py` - Test files
 - `locales/ui/*.json` - UI translations
@@ -138,25 +138,25 @@ expertgpts/
 
 ### Business Logic Files
 
-**utils/llm_client.py**:
+**lib/llm/llm_client.py**:
 - Multi-provider LLM client
 - Handles provider-specific parameters
 - Manages API calls
 
-**utils/client_pool.py**:
+**lib/llm/client_pool.py**:
 - Caches LLM client instances
 - Performance optimization
 
-**utils/config_manager.py**:
+**lib/config/config_manager.py**:
 - CRUD operations for expert configs
 - YAML file operations
 
-**utils/page_generator.py**:
+**lib/shared/page_generator.py**:
 - Generates new expert pages
 - Creates unique expert IDs
 - Replaces template placeholders
 
-**utils/file_ops.py**:
+**lib/shared/file_ops.py**:
 - Shared file system operations
 - Secure permission management (600)
 - Path resolution utilities
@@ -263,7 +263,7 @@ from utils.i18n import i18n
 **Application manages**:
 - Expert pages (generated from template)
 - Template (`templates/template.py`)
-- Utilities (`utils/*.py`)
+- Utilities (`lib/*.py`)
 
 ## Permissions
 

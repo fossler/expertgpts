@@ -7,18 +7,17 @@ Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 import time
 import streamlit as st
 from pathlib import Path
-from utils.config_manager import ConfigManager
-from utils.llm_client import LLMClient
-from utils.session_state import initialize_shared_session_state
-from utils.token_manager import TokenManager
-from utils.i18n import i18n
-from utils.helpers import translate_expert_name
-from utils.chat_history_manager import (
+from lib.config import ConfigManager
+from lib.llm import LLMClient, TokenManager
+from lib.shared.session_state import initialize_shared_session_state
+from lib.i18n import i18n
+from lib.shared.helpers import translate_expert_name
+from lib.storage import (
     load_chat_history,
     save_chat_history,
     delete_chat_history
 )
-from utils.constants import (
+from lib.shared import (
     LLM_PROVIDERS,
     get_provider_display_name,
     get_model_display_name,
@@ -29,7 +28,7 @@ from utils.constants import (
     CONTEXT_USAGE_COLORS,
     CONFIG_CACHE_TTL
 )
-from utils.streaming_cache import StreamingCache
+from lib.storage import StreamingCache
 
 
 # Expert Configuration
@@ -136,6 +135,9 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     This function is called on page load to detect if any background streams
     completed while the user were navigating away.
 
+    OPTIMIZATION: Only performs file system checks if there's a flag
+    indicating active streams, avoiding unnecessary I/O on normal page loads.
+
     Args:
         config: Expert configuration dictionary
         messages_key: Session state key for this expert's messages
@@ -145,8 +147,15 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     """
     import json
 
+    # FAST PATH: Skip file system checks if no streams are active
+    # This avoids 3-4 file system operations on every page load
+    if not st.session_state.get("has_active_streams", False):
+        return False
+
     cache_dir = Path("streaming_cache")
     if not cache_dir.exists():
+        # No cache directory exists, clear the flag
+        st.session_state["has_active_streams"] = False
         return False
 
     # Check for the fixed "latest" cache file for this expert
@@ -155,6 +164,8 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     metadata_file = cache_dir / f"{expert_id}_latest.meta"
 
     if not cache_file.exists():
+        # No cache file for this expert, but other experts might have active streams
+        # Don't clear the flag yet
         return False
 
     try:
@@ -215,6 +226,9 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
                 # Clean up cache files
                 cache_file.unlink(missing_ok=True)
                 metadata_file.unlink(missing_ok=True)
+
+                # Clear active streams flag (this was the last/only active stream)
+                st.session_state["has_active_streams"] = False
 
                 # Trigger rerun to display the new message
                 st.rerun()
@@ -294,7 +308,7 @@ def poll_incomplete_stream(expert_id: str, messages_key: str) -> None:
         expert_id: Expert identifier
         messages_key: Session state key for messages
     """
-    from utils.streaming_cache import StreamingCache
+    from lib.storage.streaming_cache import StreamingCache
 
     # Create a cache instance to reuse its methods
     cache = StreamingCache(expert_id)
@@ -318,6 +332,9 @@ def poll_incomplete_stream(expert_id: str, messages_key: str) -> None:
 
         # Clean up cache files
         cache.cleanup()
+
+        # Clear active streams flag (stream is now complete)
+        st.session_state["has_active_streams"] = False
 
         # Rerun to update context usage with new message
         st.rerun()
@@ -392,7 +409,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
             try:
                 # Get LLM client from pool (cached for performance)
-                from utils.client_pool import get_cached_client
+                from lib.llm.client_pool import get_cached_client
                 client = get_cached_client(provider=provider, api_key=api_key)
 
                 # Convert messages to format expected by API
@@ -415,6 +432,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
                 # Initialize streaming cache
                 cache = StreamingCache(EXPERT_ID)
+
+                # Mark that we have active streams (enables check_and_display_cached_responses)
+                st.session_state["has_active_streams"] = True
 
                 # Start background thread with streaming to file
                 cache.start_streaming_to_file(
@@ -442,6 +462,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
                     # Clean up cache files
                     cache.cleanup()
+
+                    # Clear active streams flag (no more active streams)
+                    st.session_state["has_active_streams"] = False
 
                     # Rerun to update context usage with new message
                     st.rerun()
@@ -515,7 +538,7 @@ def display_model_settings(config: dict, messages_key: str):
     st.sidebar.markdown(f"### ⚙️ {i18n.t('sidebar.model_settings')}")
 
     # Model selection (filtered by current provider)
-    from utils.constants import LLM_PROVIDERS, get_default_model_for_provider
+    from lib.shared.constants import LLM_PROVIDERS, get_default_model_for_provider
     model_options = list(LLM_PROVIDERS[provider]["models"].keys())
     current_model_index = model_options.index(model) if model in model_options else 0
 

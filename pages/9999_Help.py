@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 import streamlit as st
-from utils.session_state import initialize_shared_session_state
+from lib.shared.session_state import initialize_shared_session_state
 
 
 def get_all_markdown_files(docs_dir: Path) -> list:
@@ -91,7 +91,7 @@ def get_docs_structure() -> dict:
 
 def render_doc_toc():
     """Render the documentation table of contents in the sidebar."""
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     docs_dir = Path(__file__).parent.parent / "docs"
 
@@ -220,7 +220,7 @@ def main():
     # Initialize shared session state
     initialize_shared_session_state()
 
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     # Page config
     st.set_page_config(

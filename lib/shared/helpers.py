@@ -3,7 +3,7 @@
 from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
-from utils.i18n import i18n
+from lib.i18n.i18n import i18n
 
 
 def sanitize_name(name: str) -> str:

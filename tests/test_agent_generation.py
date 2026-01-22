@@ -5,8 +5,8 @@ import pytest
 import shutil
 from pathlib import Path
 
-from utils.config_manager import ConfigManager
-from utils.page_generator import PageGenerator
+from lib.config import ConfigManager
+from lib.shared.page_generator import PageGenerator
 
 
 class TestAgentGeneration:

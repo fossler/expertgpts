@@ -36,9 +36,9 @@ This guide explains how to add new features to ExpertGPTs.
 - Common operations
 
 **Example utility functions**:
-- `utils/helpers.py`: Generic helpers
-- `utils/config_manager.py`: Config operations
-- `utils/llm_client.py`: LLM operations
+- `lib/shared/helpers.py`: Generic helpers
+- `lib/config/config_manager.py`: Config operations
+- `lib/llm/llm_client.py`: LLM operations
 
 ## Common Feature Additions
 
@@ -67,7 +67,7 @@ This guide explains how to add new features to ExpertGPTs.
 **Scenario**: Add function to validate expert names
 
 **Steps**:
-1. Add to `utils/helpers.py`:
+1. Add to `lib/shared/helpers.py`:
    ```python
    def validate_expert_name(name: str) -> bool:
        # Validation logic
@@ -91,7 +91,7 @@ This guide explains how to add new features to ExpertGPTs.
 **Scenario**: Add support for "NewProvider" LLM
 
 **Steps**:
-1. Add provider config to `utils/constants.py`:
+1. Add provider config to `lib/shared/constants.py`:
    ```python
    LLM_PROVIDERS["newprovider"] = {
        "name": "NewProvider",
@@ -101,7 +101,7 @@ This guide explains how to add new features to ExpertGPTs.
    }
    ```
 
-2. Update `utils/llm_client.py`:
+2. Update `lib/llm/llm_client.py`:
    - Add thinking parameter handling
    - Support provider-specific features
 
@@ -116,7 +116,7 @@ This guide explains how to add new features to ExpertGPTs.
 **Scenario**: Add support for Japanese
 
 **Steps**:
-1. Add to `utils/i18n.py`:
+1. Add to `lib/i18n/i18n.py`:
    ```python
    LANGUAGE_METADATA["ja"] = {
        "name": "Japanese",
@@ -144,7 +144,7 @@ This guide explains how to add new features to ExpertGPTs.
    max_tokens = 4096
    ```
 
-2. Update `utils/app_defaults_manager.py`:
+2. Update `lib/config/app_defaults_manager.py`:
    - Add `get_max_tokens_preference()`
    - Add `save_max_tokens_preference()`
 

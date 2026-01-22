@@ -8,8 +8,8 @@ preferences for LLM providers, models, language, and other app defaults.
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
-from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
-from utils.constants import DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL
+from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
+from lib.shared.constants import DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL
 
 try:
     import tomllib  # Python 3.11+
@@ -198,7 +198,7 @@ def get_language_preference() -> Optional[str]:
         return None
 
     try:
-        from utils.i18n import LANGUAGE_METADATA
+        from lib.i18n.i18n import LANGUAGE_METADATA
 
         content = defaults_path.read_text()
         data = tomllib.loads(content)

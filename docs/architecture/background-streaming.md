@@ -46,7 +46,7 @@ CLEANUP: Save to chat history → Delete cache file
 
 ## Key Components
 
-### 1. StreamingCache Class (`utils/streaming_cache.py`)
+### 1. StreamingCache Class (`lib/storage/streaming_cache.py`)
 
 Manages file-based caching for streaming LLM responses.
 
@@ -603,7 +603,7 @@ top -pid $(pgrep -f streamlit)
 
 ## Implementation Details
 
-- **Core module:** `utils/streaming_cache.py`
+- **Core module:** `lib/storage/streaming_cache.py`
 - **Template integration:** `templates/template.py`
 - **Test suite:** `tests/test_streaming_cache.py`
 - **Cache directory:** `streaming_cache/` (gitignored)

@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
-from utils.file_ops import set_secure_permissions, get_project_root
+from lib.shared.file_ops import set_secure_permissions, get_project_root
 
 # Default maximum chat history file size (1 MB)
 DEFAULT_MAX_FILE_SIZE_MB = 1

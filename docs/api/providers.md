@@ -107,7 +107,7 @@ response = client.chat.completions.create(
 
 ExpertGPTs caches client instances per provider/api_key combination.
 
-**Implementation**: `utils/client_pool.py`
+**Implementation**: `lib/llm/client_pool.py`
 
 **Benefit**: ~50% reduction in client creation overhead
 

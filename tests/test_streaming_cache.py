@@ -44,7 +44,7 @@ def temp_cache_dir(monkeypatch):
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
         # Patch STREAMING_CACHE_DIR before importing the module
-        import utils.streaming_cache
+        import lib.storage.streaming_cache
         monkeypatch.setattr(utils.streaming_cache, 'STREAMING_CACHE_DIR', tmpdir_path)
         yield tmpdir_path
 
@@ -54,7 +54,7 @@ class TestStreamingCache:
 
     def test_init_creates_cache_directory(self, temp_cache_dir):
         """Test that initializing StreamingCache creates cache directory."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         cache = StreamingCache("test_expert")
         assert temp_cache_dir.exists()
@@ -65,7 +65,7 @@ class TestStreamingCache:
 
     def test_start_streaming_to_file(self, temp_cache_dir):
         """Test starting a background streaming thread."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         mock_client = MockLLMClient(["Hello", " world", "!"], delay=0.05)
         cache = StreamingCache("test_expert")
@@ -87,7 +87,7 @@ class TestStreamingCache:
 
     def test_read_cache_during_streaming(self, temp_cache_dir):
         """Test reading cache while streaming is in progress."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         mock_client = MockLLMClient(["Hello", " world", "!"], delay=0.1)
         cache = StreamingCache("test_expert")
@@ -117,7 +117,7 @@ class TestStreamingCache:
 
     def test_is_complete(self, temp_cache_dir):
         """Test completion detection."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         mock_client = MockLLMClient(["Test"], delay=0.05)
         cache = StreamingCache("test_expert")
@@ -144,7 +144,7 @@ class TestStreamingCache:
 
     def test_cleanup_removes_cache_files(self, temp_cache_dir):
         """Test that cleanup removes cache and metadata files."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         mock_client = MockLLMClient(["Test"], delay=0.05)
         cache = StreamingCache("test_expert")
@@ -173,7 +173,7 @@ class TestStreamingCache:
 
     def test_cleanup_old_cache_files(self, temp_cache_dir):
         """Test cleanup removes existing cache files before starting new stream."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         cache = StreamingCache("test_expert")
 
@@ -196,7 +196,7 @@ class TestStreamingCache:
 
     def test_error_handling_in_background_thread(self, temp_cache_dir):
         """Test that errors in background thread are handled correctly."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         # Create a mock client that raises an exception
         mock_client = MagicMock()
@@ -226,7 +226,7 @@ class TestStreamingCache:
 
     def test_metadata_tracking(self, temp_cache_dir):
         """Test that metadata is correctly written and read."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         cache = StreamingCache("test_expert")
 
@@ -244,7 +244,7 @@ class TestStreamingCache:
 
     def test_multiple_cache_files_coexist(self, temp_cache_dir):
         """Test that multiple cache files can coexist for different experts."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         cache1 = StreamingCache("expert_1")
         cache2 = StreamingCache("expert_2")
@@ -266,7 +266,7 @@ class TestStreamingCache:
 
     def test_concurrent_streaming_different_experts(self, temp_cache_dir):
         """Test that concurrent streaming for different experts works correctly."""
-        from utils.streaming_cache import StreamingCache
+        from lib.storage.streaming_cache import StreamingCache
 
         # Create two caches for different experts
         cache1 = StreamingCache("expert_1")

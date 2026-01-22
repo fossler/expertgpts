@@ -5,9 +5,9 @@ from typing import Optional, Tuple, Dict, List
 import re
 import streamlit as st
 
-from utils.helpers import sanitize_name
-from utils.types import PageInfo
-from utils.file_ops import safe_path_join
+from lib.shared.helpers import sanitize_name
+from lib.shared.types import PageInfo
+from lib.shared.file_ops import safe_path_join
 
 
 class PageGenerator:

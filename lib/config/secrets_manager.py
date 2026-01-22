@@ -7,7 +7,7 @@ way to manage secrets in production.
 
 import os
 from pathlib import Path
-from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
+from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
 
 
 def get_secrets_path() -> Path:
@@ -42,7 +42,7 @@ def save_provider_api_key(provider: str, api_key: str) -> None:
         The application will need to rerun for the new key to be loaded via st.secrets.
         Secure 600 permissions will be set on the file after writing.
     """
-    from utils.constants import get_provider_api_key_env
+    from lib.shared.constants import get_provider_api_key_env
 
     secrets_path = ensure_secrets_file_exists()
 
@@ -84,7 +84,7 @@ def get_provider_api_key(provider: str) -> str | None:
     Returns:
         str | None: The API key if found, None otherwise
     """
-    from utils.constants import get_provider_api_key_env
+    from lib.shared.constants import get_provider_api_key_env
 
     secrets_path = get_secrets_path()
 
@@ -113,7 +113,7 @@ def get_all_provider_api_keys() -> dict[str, str]:
         dict: Dictionary mapping provider keys to their API keys
                (e.g., {"deepseek": "sk-abc...", "openai": "sk-def..."})
     """
-    from utils.constants import LLM_PROVIDERS
+    from lib.shared.constants import LLM_PROVIDERS
 
     api_keys = {}
 

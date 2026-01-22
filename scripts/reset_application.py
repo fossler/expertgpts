@@ -20,8 +20,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from utils.constants import EXAMPLE_EXPERTS_COUNT
-from utils.file_ops import validate_cwd
+from lib.shared.constants import EXAMPLE_EXPERTS_COUNT
+from lib.shared.file_ops import validate_cwd
 
 
 def confirm_reset():

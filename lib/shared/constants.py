@@ -4,7 +4,7 @@ This module centralizes all magic numbers, thresholds, and configuration
 values used throughout the application.
 """
 
-from utils.i18n import i18n
+from lib.i18n.i18n import i18n
 
 # LLM Provider Configuration
 LLM_PROVIDERS = {

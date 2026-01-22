@@ -15,7 +15,7 @@ except ImportError:
 
 import yaml
 
-from utils.file_ops import set_secure_permissions
+from lib.shared.file_ops import set_secure_permissions
 
 
 def read_toml(file_path: Path) -> Dict[str, Any]:

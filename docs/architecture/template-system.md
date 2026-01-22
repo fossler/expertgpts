@@ -153,7 +153,7 @@ if f"messages_1005_sql_expert" not in st.session_state:
 - Remove special characters
 - Limit to alphanumeric and underscores
 
-**Implementation**: `utils/helpers.py` - `sanitize_name()` function
+**Implementation**: `lib/shared/helpers.py` - `sanitize_name()` function
 
 ## Regenerating Expert Pages
 

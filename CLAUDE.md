@@ -128,13 +128,13 @@ The application uses a **template-driven architecture** where expert pages are g
 
 A unified client interface supports multiple LLM providers through OpenAI-compatible APIs:
 
-- **Client implementation**: `utils/llm_client.py` - `LLMClient` class
+- **Client implementation**: `lib/llm/llm_client.py` - `LLMClient` class
 - **Provider-specific thinking parameters**:
   - **OpenAI**: `reasoning_effort` (low/medium/high) - passed as direct parameter
   - **DeepSeek**: `thinking.type` (enabled/disabled) - determined by model selection (`deepseek-chat` vs `deepseek-reasoner`)
   - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter
-- **Provider configuration**: Centralized in `utils/constants.py` with O(1) lookup tables
-- **Connection pooling**: `utils/client_pool.py` caches client instances for performance
+- **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
+- **Connection pooling**: `lib/llm/client_pool.py` caches client instances for performance
 
 **Key insight**: All three providers use the OpenAI Python client with custom `base_url`. Provider differences are handled in `_prepare_thinking_param()` method.
 
@@ -167,7 +167,7 @@ Multi-layered state system with different lifetimes:
 
 Battery-optimized file-based caching that allows LLM responses to complete in the background when users navigate away:
 
-- **Implementation**: `utils/streaming_cache.py` - `StreamingCache` class
+- **Implementation**: `lib/storage/streaming_cache.py` - `StreamingCache` class
 - **Fixed filenames**: `{expert_id}_latest.txt` and `{expert_id}_latest.meta` per expert
 - **Daemon threads**: Background threads write chunks to cache files with `fsync()` for crash resilience
 - **Polling mechanism**: Foreground polls cache files every 100ms (battery-optimized: 2-3% CPU vs 5-10% for session state polling)
@@ -224,9 +224,9 @@ Clean separation of concerns for 13-language support:
 
 ### 6. Performance Optimizations
 
-- **Client connection pooling**: `utils/client_pool.py` caches OpenAI client instances per provider/api_key combination
+- **Client connection pooling**: `lib/llm/client_pool.py` caches OpenAI client instances per provider/api_key combination
 - **Configuration caching**: Expert configs loaded with `@st.cache_data(ttl=CONFIG_CACHE_TTL)` in template
-- **Pre-computed lookup tables**: `utils/constants.py` has O(1) dictionaries for provider/model lookups (eliminates nested dict access)
+- **Pre-computed lookup tables**: `lib/shared/constants.py` has O(1) dictionaries for provider/model lookups (eliminates nested dict access)
 - **Lazy page loading**: Streamlit's navigation system only loads the active page
 - **Cache invalidation**: `st.session_state[f"cache_version_{expert_id}"]` incremented when config edited, forcing reload
 
@@ -288,11 +288,11 @@ Clean separation of concerns for 13-language support:
 
 ### Adding a New LLM Provider
 
-1. **Add provider configuration** in `utils/constants.py`:
+1. **Add provider configuration** in `lib/shared/constants.py`:
    - Add entry to `LLM_PROVIDERS` dict with name, base_url, default_model, models dict
    - Models must include: display_name, max_tokens, thinking_param
 
-2. **Update thinking parameter handling** in `utils/llm_client.py`:
+2. **Update thinking parameter handling** in `lib/llm/llm_client.py`:
    - Modify `_prepare_thinking_param()` method if provider uses custom thinking parameters
    - Return format: `(extra_body_dict, direct_params_dict)`
 
@@ -302,7 +302,7 @@ Clean separation of concerns for 13-language support:
 4. **Update secrets template**:
    - Add `{PROVIDER}_API_KEY = ""` to `.streamlit/secrets.toml.example`
 
-5. **Update lookup tables** in `utils/constants.py`:
+5. **Update lookup tables** in `lib/shared/constants.py`:
    - Existing code automatically generates lookup tables from `LLM_PROVIDERS`
 
 ### Creating a New Expert
@@ -422,8 +422,8 @@ A comprehensive codebase optimization eliminated ~1,500 lines of duplicated and 
 
 **Key changes:**
 - **Removed 4 unused modules** (1,010 lines): `logging.py`, `llm_base.py`, `validators.py`, `exceptions.py`
-- **Created `utils/file_ops.py`**: Shared file system operations (permissions, paths, directory creation)
-- **Created `utils/format_ops.py`**: Shared file format operations (TOML, YAML, JSON read/write)
+- **Created `lib/shared/file_ops.py`**: Shared file system operations (permissions, paths, directory creation)
+- **Created `lib/shared/format_ops.py`**: Shared file format operations (TOML, YAML, JSON read/write)
 - **Refactored 4 manager files**: `secrets_manager.py`, `app_defaults_manager.py`, `chat_history_manager.py`, `config_toml_manager.py` now use shared utilities
 
 **Benefits:**
@@ -433,7 +433,7 @@ A comprehensive codebase optimization eliminated ~1,500 lines of duplicated and 
 - **Better consistency**: All manager files handle files the same way
 
 **Impact on development:**
-- When adding new file operations, use `utils/file_ops.py` and `utils/format_ops.py` instead of duplicating code
+- When adding new file operations, use `lib/shared/file_ops.py` and `lib/shared/format_ops.py` instead of duplicating code
 - All file permission handling now uses `set_secure_permissions()` from `file_ops.py`
 - All TOML/YAML/JSON operations should use format-specific functions from `format_ops.py`
 
@@ -442,7 +442,7 @@ A comprehensive codebase optimization eliminated ~1,500 lines of duplicated and 
 A battery-optimized background streaming system was added to allow LLM responses to complete when users navigate away from the expert page.
 
 **Key changes:**
-- **Created `utils/streaming_cache.py`** (250 lines): File-based caching with daemon threads
+- **Created `lib/storage/streaming_cache.py`** (250 lines): File-based caching with daemon threads
 - **Added to `templates/template.py`**: Shared polling logic (`poll_stream_and_display()`, `poll_incomplete_stream()`, `check_and_display_cached_responses()`)
 - **Created `tests/test_streaming_cache.py`** (270 lines): Comprehensive test suite with 10 tests
 - **Added i18n keys**: `errors.background_stream_error` and `success.background_stream_complete` across 13 languages

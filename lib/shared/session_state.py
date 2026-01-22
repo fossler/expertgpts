@@ -6,8 +6,8 @@ session state across all pages in the application.
 
 import streamlit as st
 from typing import Optional
-from utils.types import MessagesList
-from utils.i18n import i18n
+from lib.shared.types import MessagesList
+from lib.i18n.i18n import i18n
 
 
 def initialize_shared_session_state():
@@ -28,11 +28,11 @@ def initialize_shared_session_state():
     executes once per session.
     """
     # Import LLM_PROVIDERS to get all provider keys
-    from utils.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
+    from lib.shared.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
 
     # Initialize language with saved preference or auto-detection
     if "language" not in st.session_state:
-        from utils.app_defaults_manager import get_language_preference, save_language_preference
+        from lib.config.app_defaults_manager import get_language_preference, save_language_preference
 
         # Try to load saved preference first
         saved_lang = get_language_preference()
@@ -65,7 +65,7 @@ def initialize_shared_session_state():
 
     # Initialize default LLM settings in session state
     # Try to load from app_defaults.toml first, fall back to constants
-    from utils.app_defaults_manager import get_llm_defaults
+    from lib.config.app_defaults_manager import get_llm_defaults
 
     if "default_provider" not in st.session_state:
         llm_defaults = get_llm_defaults()
@@ -108,7 +108,7 @@ def initialize_expert_session_state(expert_id: str) -> None:
 
     if model_key not in st.session_state:
         # Use default model for the selected provider
-        from utils.constants import get_default_model_for_provider
+        from lib.shared.constants import get_default_model_for_provider
         provider = st.session_state[provider_key]
         st.session_state[model_key] = get_default_model_for_provider(provider)
 

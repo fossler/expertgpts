@@ -240,7 +240,7 @@ git commit -m "Description"
 
 ### Adding a New Utility
 
-1. Create file in `utils/`
+1. Create file in `lib/`
 2. Add functionality
 3. Write tests in `tests/`
 4. Run tests to verify

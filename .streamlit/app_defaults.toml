@@ -4,4 +4,4 @@ model = "deepseek-chat"
 thinking_level = "none"
 
 [language]
-code = "de"
+code = "en"

@@ -318,7 +318,7 @@ class I18nManager:
             lang: Language code to set (e.g., 'de', 'en')
         """
         if lang in LANGUAGE_METADATA:
-            from utils.app_defaults_manager import save_language_preference
+            from lib.config.app_defaults_manager import save_language_preference
 
             # Update session state
             st.session_state.language = lang

@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from utils.llm_client import LLMClient
+from lib.llm.llm_client import LLMClient
 
 STREAMING_CACHE_DIR = Path("streaming_cache")
 

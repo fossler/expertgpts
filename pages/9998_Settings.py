@@ -9,15 +9,15 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 import streamlit as st
-from utils.config_manager import ConfigManager
-from utils.page_generator import PageGenerator
-from utils.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
-from utils.dialogs import create_new_expert, render_add_chat_dialog, render_llm_configuration
-from utils.helpers import sanitize_name, translate_expert_name
-from utils import secrets_manager
-from utils import config_toml_manager
-from utils.session_state import initialize_shared_session_state, handle_pending_navigation
-from utils.file_ops import safe_path_join, validate_cwd
+from lib.config import ConfigManager
+from lib.shared.page_generator import PageGenerator
+from lib.shared.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
+from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
+from lib.shared.helpers import sanitize_name, translate_expert_name
+from lib.config import secrets_manager
+from lib.config import config_toml_manager
+from lib.shared.session_state import initialize_shared_session_state, handle_pending_navigation
+from lib.shared.file_ops import safe_path_join, validate_cwd
 
 
 def initialize_session_state():
@@ -39,8 +39,8 @@ def initialize_session_state():
 
 def render_api_key_section():
     """Render the multi-provider API Key management section."""
-    from utils.i18n import i18n
-    from utils.constants import LLM_PROVIDERS, get_provider_display_name
+    from lib.i18n import i18n
+    from lib.shared.constants import LLM_PROVIDERS, get_provider_display_name
 
     st.subheader(f"🔑 {i18n.t('api_key.title')}")
 
@@ -134,7 +134,7 @@ def render_api_key_section():
     # Resources links
     st.subheader(f"📚 {i18n.t('api_key.resources')}")
 
-    from utils.constants import get_provider_display_name
+    from lib.shared.constants import get_provider_display_name
 
     # Provider name and links (one-liner)
     provider_name = get_provider_display_name(selected_provider)
@@ -149,8 +149,8 @@ def render_api_key_section():
 
 def render_default_llm_settings_section():
     """Render the Default LLM Settings section for configuring global defaults."""
-    from utils.i18n import i18n
-    from utils.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+    from lib.i18n import i18n
+    from lib.shared.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 
     st.subheader(f"⚙️ {i18n.t('default_llm.title')}")
 
@@ -256,7 +256,7 @@ def render_default_llm_settings_section():
 
     # Save defaults button
     if st.button(f"💾 {i18n.t('buttons.save_defaults')}", type="primary", key="save_defaults"):
-        from utils.app_defaults_manager import save_llm_defaults
+        from lib.config.app_defaults_manager import save_llm_defaults
 
         # Update session state
         st.session_state.default_provider = default_provider
@@ -277,7 +277,7 @@ def render_default_llm_settings_section():
 
 def render_general_settings_section():
     """Render the General Settings section for theme and language customization."""
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     # Theme Customization
     st.subheader(f"🎨 {i18n.t('theme.title')}")
@@ -630,7 +630,7 @@ def render_edit_expert_dialog():
         return
 
     # Load the expert's config
-    from utils.i18n import i18n
+    from lib.i18n import i18n
     config_manager = ConfigManager()
     try:
         expert_config = config_manager.load_config(editing_expert_id)
@@ -808,7 +808,7 @@ def render_edit_expert_dialog():
 
 def render_expert_management_section():
     """Render the Expert Management section."""
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     st.subheader(f"🤖 {i18n.t('experts.management.title')}")
 
@@ -851,7 +851,7 @@ def render_expert_management_section():
         thinking_level = metadata.get('thinking_level', 'none')
 
         # Import for display helpers
-        from utils.constants import get_provider_display_name, get_model_display_name
+        from lib.shared.constants import get_provider_display_name, get_model_display_name
 
         provider_name = get_provider_display_name(provider)
         model_name = get_model_display_name(provider, model)
@@ -925,7 +925,7 @@ def render_expert_management_section():
                 if st.button(f"✅ {i18n.t('buttons.yes_delete')}", key=f"confirm_{expert['expert_id']}", type="primary"):
                     try:
                         # Import PageGenerator
-                        from utils.page_generator import PageGenerator
+                        from lib.shared.page_generator import PageGenerator
 
                         # Delete the config file using ConfigManager
                         config_manager = ConfigManager()
@@ -991,7 +991,7 @@ def get_configs_as_zip():
 
 def render_danger_zone_section():
     """Render the Danger Zone section for destructive actions."""
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     st.subheader(f"⚠️ {i18n.t('danger_zone.title')}")
 
@@ -1093,7 +1093,7 @@ def render_danger_zone_section():
 
 def render_about_section():
     """Render the About section."""
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     st.subheader(f"ℹ️ {i18n.t('about.title')}")
 
@@ -1184,7 +1184,7 @@ def main():
         render_add_chat_dialog()
         return
 
-    from utils.i18n import i18n
+    from lib.i18n import i18n
 
     st.title(f"⚙️ {i18n.t('settings.title')}")
 

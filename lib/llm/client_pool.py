@@ -8,7 +8,7 @@ a hash of the API key (for security).
 import hashlib
 import streamlit as st
 from typing import Dict, Optional
-from utils.llm_client import LLMClient
+from lib.llm.llm_client import LLMClient
 
 
 class ClientPool:

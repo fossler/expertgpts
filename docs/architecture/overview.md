@@ -132,7 +132,7 @@ expertgpts/
 
 **See also**: [Template System Guide](template-system.md)
 
-### 3. Multi-Provider LLM Client (`utils/llm_client.py`)
+### 3. Multi-Provider LLM Client (`lib/llm/llm_client.py`)
 
 **Purpose**: Unified interface for multiple LLM providers
 
@@ -153,7 +153,7 @@ expertgpts/
 
 **See also**: [Multi-Provider LLM Guide](multi-provider-llm.md)
 
-### 4. Configuration Management (`utils/config_manager.py`)
+### 4. Configuration Management (`lib/config/config_manager.py`)
 
 **Purpose**: Manage expert YAML configurations
 
@@ -167,7 +167,7 @@ expertgpts/
 
 **See also**: [Configuration Guide](../configuration/expert-configs.md)
 
-### 5. Page Generator (`utils/page_generator.py`)
+### 5. Page Generator (`lib/shared/page_generator.py`)
 
 **Purpose**: Generate new expert pages from template
 
@@ -179,7 +179,7 @@ expertgpts/
 
 **Auto-Navigation**: Automatically navigates to new expert after creation
 
-### 6. Internationalization (`utils/i18n.py`)
+### 6. Internationalization (`lib/i18n/i18n.py`)
 
 **Purpose**: Multi-language support (13 languages)
 
@@ -206,7 +206,7 @@ expertgpts/
 
 **See also**: [Internationalization Guide](../internationalization/I18N_GUIDE.md)
 
-### 7. Session State Management (`utils/session_state.py`)
+### 7. Session State Management (`lib/shared/session_state.py`)
 
 **Purpose**: Initialize and manage session state
 
@@ -227,7 +227,7 @@ expertgpts/
 
 **See also**: [State Management Guide](state-management.md)
 
-### 8. Chat History Manager (`utils/chat_history_manager.py`)
+### 8. Chat History Manager (`lib/storage/chat_history_manager.py`)
 
 **Purpose**: Persistent conversation storage
 
@@ -311,7 +311,7 @@ Render expert interface
 **Applied to**:
 - **Expert pages**: Single template for all experts
 - **Configuration**: Centralized in YAML files
-- **Utilities**: Shared functions in `utils/`
+- **Utilities**: Shared functions in `lib/`
 - **i18n**: Single source of truth for expert content
 
 ### 2. Separation of Concerns
@@ -370,7 +370,7 @@ Render expert interface
 
 ### 1. Connection Pooling
 
-**File**: `utils/client_pool.py`
+**File**: `lib/llm/client_pool.py`
 
 **Purpose**: Cache LLM client instances
 
@@ -390,7 +390,7 @@ Render expert interface
 
 ### 4. Pre-computed Lookup Tables
 
-**File**: `utils/constants.py`
+**File**: `lib/shared/constants.py`
 
 **Purpose**: O(1) provider/model lookups
 
@@ -439,7 +439,7 @@ Render expert interface
 ### Adding New LLM Providers
 
 **Steps**:
-1. Add provider configuration to `utils/constants.py`
+1. Add provider configuration to `lib/shared/constants.py`
 2. Update `_prepare_thinking_param()` in `llm_client.py`
 3. Add API key UI in Settings page
 4. Update secrets template
@@ -458,7 +458,7 @@ Render expert interface
 ### Adding New Languages
 
 **Steps**:
-1. Add language metadata to `utils/i18n.py`
+1. Add language metadata to `lib/i18n/i18n.py`
 2. Create locale file: `locales/ui/{code}.json`
 3. Add language names to all locale files
 4. Test with `update_translations.py`

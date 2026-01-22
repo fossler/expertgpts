@@ -4,9 +4,9 @@ Welcome page for the ExpertGPTs multi-expert AI chat application.
 """
 
 import streamlit as st
-from utils.config_manager import ConfigManager
-from utils.dialogs import render_add_chat_dialog
-from utils.i18n import i18n
+from lib.config import ConfigManager
+from lib.ui import render_add_chat_dialog
+from lib.i18n import i18n
 
 
 def render_expert_list():

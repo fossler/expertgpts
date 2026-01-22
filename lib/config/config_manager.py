@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
 
-from utils.helpers import sanitize_name
-from utils.constants import SYSTEM_PROMPT_TEMPLATE
-from utils.app_defaults_manager import get_llm_defaults
+from lib.shared.helpers import sanitize_name
+from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE
+from lib.config.app_defaults_manager import get_llm_defaults
 
 
 class ConfigManager:
@@ -51,7 +51,7 @@ class ConfigManager:
             expert_id: Unique ID for the created expert (matches filename without extension)
         """
         # Import here for provider defaults
-        from utils.constants import get_default_model_for_provider
+        from lib.shared.constants import get_default_model_for_provider
 
         # Use user's default provider if not specified
         if provider is None:
@@ -228,7 +228,7 @@ class ConfigManager:
             Generated system prompt (AI-generated or template fallback)
         """
         # Import here to avoid circular dependency
-        from utils.llm_client import LLMClient
+        from lib.llm.llm_client import LLMClient
 
         # Use user's default provider if not specified
         if provider is None:

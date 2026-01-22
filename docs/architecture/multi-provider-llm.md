@@ -30,12 +30,12 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
                               │
 ┌─────────────────────────────┴───────────────────────────────┐
 │                  LLMClient Interface                        │
-│           (utils/llm_client.py - Unified API)              │
+│           (lib/llm/llm_client.py - Unified API)              │
 └─────────────────────────────┬───────────────────────────────┘
                               │
 ┌─────────────────────────────┴───────────────────────────────┐
 │                 Connection Pool                             │
-│          (utils/client_pool.py - Caching)                  │
+│          (lib/llm/client_pool.py - Caching)                  │
 └─────────────────────────────┬───────────────────────────────┘
                               │
 ┌─────────────────────────────┴───────────────────────────────┐
@@ -56,7 +56,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 
 ### Core Class: `LLMClient`
 
-**Location**: `utils/llm_client.py`
+**Location**: `lib/llm/llm_client.py`
 
 **Purpose**: Unified interface for all LLM providers
 
@@ -64,7 +64,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 
 ### Provider Configuration
 
-**Location**: `utils/constants.py`
+**Location**: `lib/shared/constants.py`
 
 **Structure**:
 ```python
@@ -207,7 +207,7 @@ def _prepare_thinking_param(provider, model, thinking_level):
 
 ### Unified Implementation
 
-**Location**: `utils/llm_client.py`
+**Location**: `lib/llm/llm_client.py`
 
 ```python
 def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str):
@@ -242,7 +242,7 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
 
 ### Client Pool Implementation
 
-**Location**: `utils/client_pool.py`
+**Location**: `lib/llm/client_pool.py`
 
 **Purpose**: Cache and reuse LLM client instances
 
@@ -344,7 +344,7 @@ response = llm_client.generate_response(
 
 ### Step 1: Add Provider Configuration
 
-**File**: `utils/constants.py`
+**File**: `lib/shared/constants.py`
 
 ```python
 LLM_PROVIDERS = {
@@ -367,7 +367,7 @@ LLM_PROVIDERS = {
 
 ### Step 2: Update Thinking Parameter Handling
 
-**File**: `utils/llm_client.py`
+**File**: `lib/llm/llm_client.py`
 
 **Add to `_prepare_thinking_param()`**:
 ```python
@@ -416,7 +416,7 @@ NEW_PROVIDER_API_KEY = ""
 
 ### Step 5: Update Lookup Tables
 
-**File**: `utils/constants.py`
+**File**: `lib/shared/constants.py`
 
 ```python
 # Provider names to IDs
@@ -570,7 +570,7 @@ if model not in get_models_for_provider(provider):
 
 **Possible Cause**: Model not configured for provider
 
-**Solution**: Check `utils/constants.py` for model configuration
+**Solution**: Check `lib/shared/constants.py` for model configuration
 
 ### Connection Pool Issues
 

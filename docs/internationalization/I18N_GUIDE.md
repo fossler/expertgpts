@@ -65,7 +65,7 @@ ExpertGPTs uses a clean three-layer architecture for internationalization:
 
 ### 1. Language Prefix Generation
 
-**File**: `utils/i18n.py` - `get_language_prefix()` method
+**File**: `lib/i18n/i18n.py` - `get_language_prefix()` method
 
 The language prefix is generated dynamically based on user's language preference:
 
@@ -97,7 +97,7 @@ You are Python Expert, a domain-specific expert AI assistant...
 
 ### 3. Expert Name Translation
 
-**Files**: `utils/helpers.py`, `app.py`, `templates/template.py`
+**Files**: `lib/shared/helpers.py`, `app.py`, `templates/template.py`
 
 Default expert names are translated for display in navigation and page titles using **dynamic key generation**:
 
@@ -126,7 +126,7 @@ Custom expert names (user-created) are displayed as-is without translation.
 
 ### 4. Language Persistence
 
-**File**: `.streamlit/app_defaults.toml` - Managed by `utils/app_defaults_manager.py`
+**File**: `.streamlit/app_defaults.toml` - Managed by `lib/config/app_defaults_manager.py`
 
 Language preference is automatically saved when changed through the Settings page:
 
@@ -140,7 +140,7 @@ save_language_preference("de")  # Saves to app_defaults.toml
 On app startup, language is loaded automatically:
 
 ```python
-# utils/session_state.py - initialize_shared_session_state()
+# lib/shared/session_state.py - initialize_shared_session_state()
 from utils.app_defaults_manager import get_language_preference
 
 saved_lang = get_language_preference()
@@ -238,7 +238,7 @@ The i18n infrastructure has been optimized for performance and maintainability:
 
 ### 1. Language Caching
 
-**File**: `utils/i18n.py` - `I18nManager.current_language` property
+**File**: `lib/i18n/i18n.py` - `I18nManager.current_language` property
 
 The current language is cached to avoid repeated session state lookups:
 
@@ -266,7 +266,7 @@ def invalidate_cache(self):
 All i18n imports have been consolidated to module level:
 
 ```python
-# ✅ GOOD - Module level (utils/i18n.py)
+# ✅ GOOD - Module level (lib/i18n/i18n.py)
 from utils.i18n import i18n
 
 # ❌ BAD - Inline import (removed)
@@ -402,7 +402,7 @@ This verifies:
 
 To add support for a new language:
 
-1. **Add Language Metadata** in `utils/i18n.py`:
+1. **Add Language Metadata** in `lib/i18n/i18n.py`:
 
 ```python
 LANGUAGE_METADATA = {
@@ -442,9 +442,9 @@ Copy `en.json` as template and translate all strings.
 **Problem**: AI not responding in selected language
 
 **Solutions**:
-1. Check `utils/i18n.py:get_language_prefix()` returns correct prefix
+1. Check `lib/i18n/i18n.py:get_language_prefix()` returns correct prefix
 2. Verify `templates/template.py` is calling `get_language_prefix()`
-3. Check `utils/llm_client.py` includes language prefix in generation prompt
+3. Check `lib/llm/llm_client.py` includes language prefix in generation prompt
 4. Test with `python3 scripts/test_i18n_refactoring.py`
 
 ### Missing Translation Keys
@@ -464,11 +464,11 @@ This syncs all locale files with `en.json`.
 
 | File | Purpose |
 |------|---------|
-| `utils/i18n.py` | I18nManager class, language prefix generation |
-| `utils/helpers.py` | Expert name translation function |
-| `utils/app_defaults_manager.py` | Language and LLM defaults persistence |
+| `lib/i18n/i18n.py` | I18nManager class, language prefix generation |
+| `lib/shared/helpers.py` | Expert name translation function |
+| `lib/config/app_defaults_manager.py` | Language and LLM defaults persistence |
 | `templates/template.py` | Language prefix injection at runtime |
-| `utils/llm_client.py` | Language prefix in AI-powered generation |
+| `lib/llm/llm_client.py` | Language prefix in AI-powered generation |
 | `pages/9998_Settings.py` | Settings page with language selector |
 | `scripts/update_translations.py` | Sync locales with en.json |
 | `scripts/test_i18n_refactoring.py` | Test i18n implementation |

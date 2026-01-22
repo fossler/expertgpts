@@ -15,13 +15,13 @@ except ImportError:
         "OpenAI package is required. Install with: pip install openai"
     )
 
-from utils.constants import (
+from lib.shared.constants import (
     get_provider_config,
     get_model_config,
     get_provider_base_url,
     SYSTEM_PROMPT_TEMPLATE,
 )
-from utils.i18n import i18n
+from lib.i18n.i18n import i18n
 
 
 @dataclass

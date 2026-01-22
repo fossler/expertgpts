@@ -12,8 +12,8 @@ import json
 import pytest
 from pathlib import Path
 
-from utils.i18n import I18nManager
-from utils.config_manager import ConfigManager
+from lib.i18n import I18nManager
+from lib.config import ConfigManager
 
 
 class TestI18nLanguagePrefix:

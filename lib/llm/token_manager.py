@@ -6,7 +6,7 @@ counting, caching, and usage statistics calculation.
 
 import streamlit as st
 import tiktoken
-from utils.constants import (
+from lib.shared.constants import (
     DEEPSEEK_MAX_CONTEXT_TOKENS,
     CONTEXT_USAGE_ALERT_THRESHOLD,
     CONTEXT_USAGE_WARNING_THRESHOLD,

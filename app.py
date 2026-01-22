@@ -10,12 +10,12 @@ import sys
 import subprocess
 import streamlit as st
 from pathlib import Path
-from utils.page_generator import PageGenerator
-from utils.session_state import initialize_shared_session_state, handle_pending_navigation
-from utils.constants import EXAMPLE_EXPERTS_COUNT
-from utils.i18n import i18n
-from utils.helpers import translate_expert_name
-from utils.file_ops import validate_cwd
+from lib.shared.page_generator import PageGenerator
+from lib.shared.session_state import initialize_shared_session_state, handle_pending_navigation
+from lib.shared.constants import EXAMPLE_EXPERTS_COUNT
+from lib.i18n import i18n
+from lib.shared.helpers import translate_expert_name
+from lib.shared.file_ops import validate_cwd
 
 
 def check_first_run():

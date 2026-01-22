@@ -7,12 +7,12 @@ across multiple pages.
 import re
 import streamlit as st
 from pathlib import Path
-from utils.config_manager import ConfigManager
-from utils.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
-from utils.app_defaults_manager import get_llm_defaults
-from utils.page_generator import PageGenerator
-from utils.helpers import sanitize_name
-from utils.i18n import i18n
+from lib.config.config_manager import ConfigManager
+from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+from lib.config.app_defaults_manager import get_llm_defaults
+from lib.shared.page_generator import PageGenerator
+from lib.shared.helpers import sanitize_name
+from lib.i18n.i18n import i18n
 
 
 def validate_expert_name(name: str) -> tuple[bool, str]:

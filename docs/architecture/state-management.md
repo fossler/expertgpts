@@ -44,7 +44,7 @@ ExpertGPTs uses a **multi-layered state system** with different lifetimes and pu
 
 **Lifetime**: Application session (browser tab)
 
-**Initialized By**: `utils/session_state.py` - `initialize_shared_session_state()`
+**Initialized By**: `lib/shared/session_state.py` - `initialize_shared_session_state()`
 
 **State Variables**:
 
@@ -197,7 +197,7 @@ if f"cache_version_{EXPERT_ID}" not in st.session_state:
 ]
 ```
 
-**Manager**: `utils/chat_history_manager.py`
+**Manager**: `lib/storage/chat_history_manager.py`
 
 **Operations**:
 - `load_chat_history(expert_id)` - Load from file
@@ -254,7 +254,7 @@ metadata:
   model: "deepseek-chat"
 ```
 
-**Manager**: `utils/config_manager.py`
+**Manager**: `lib/config/config_manager.py`
 
 **Operations**:
 - `load_config(expert_id)` - Load YAML file
@@ -280,7 +280,7 @@ thinking_level = "none"
 code = "en"
 ```
 
-**Manager**: `utils/app_defaults_manager.py`
+**Manager**: `lib/config/app_defaults_manager.py`
 
 **Operations**:
 - `get_provider_preference()` - Get default provider
@@ -307,7 +307,7 @@ textColor = "#1F2937"
 font = "sans serif"
 ```
 
-**Manager**: `utils/config_toml_manager.py`
+**Manager**: `lib/config/config_toml_manager.py`
 
 **Operations**:
 - `load_theme()` - Load theme settings

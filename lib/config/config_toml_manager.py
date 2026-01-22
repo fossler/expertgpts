@@ -7,7 +7,7 @@ This module provides functions to read and write theme settings to the
 from pathlib import Path
 from typing import Optional
 import os
-from utils.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
+from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
 
 
 def get_config_path() -> Path:

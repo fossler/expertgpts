@@ -10,10 +10,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from utils.config_manager import ConfigManager
-from utils.page_generator import PageGenerator
-from utils.helpers import sanitize_name
-from utils.constants import EXAMPLE_EXPERTS_COUNT
+from lib.config import ConfigManager
+from lib.shared.page_generator import PageGenerator
+from lib.shared.helpers import sanitize_name
+from lib.shared.constants import EXAMPLE_EXPERTS_COUNT
 
 
 def should_create_example_experts() -> bool:
