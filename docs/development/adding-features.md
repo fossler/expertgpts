@@ -28,17 +28,27 @@ This guide explains how to add new features to ExpertGPTs.
 - Edit directly: `pages/1000_Home.py`, `pages/9998_Settings.py`, or `pages/9999_Help.py`
 - No regeneration needed
 
-### 3. Use Utility Modules
+### 3. Use Core Library Modules
 
-**Add to utils/** for:
-- Shared business logic
-- Reusable functions
-- Common operations
+**Add to `lib/` subdirectories** based on functionality:
 
-**Example utility functions**:
-- `lib/shared/helpers.py`: Generic helpers
-- `lib/config/config_manager.py`: Config operations
-- `lib/llm/llm_client.py`: LLM operations
+- **`lib/llm/`** - LLM providers, client management, token counting
+- **`lib/config/`** - Configuration, secrets, app defaults, themes
+- **`lib/i18n/`** - Language detection, translations
+- **`lib/storage/`** - Data persistence, caching
+- **`lib/ui/`** - Dialogs, shared UI components
+- **`lib/shared/`** - Cross-cutting utilities (constants, helpers, file ops)
+
+**When adding new functionality**:
+1. Check if it fits an existing domain
+2. If yes, add to that domain's subdirectory
+3. If no (generic utility), add to `lib/shared/`
+4. Only create a new domain if you have 3+ related modules forming a coherent subsystem
+
+**Example locations**:
+- `lib/shared/helpers.py`: Generic helpers (name sanitization, etc.)
+- `lib/config/config_manager.py`: Expert config operations
+- `lib/llm/llm_client.py`: LLM provider interactions
 
 ## Common Feature Additions
 
@@ -166,12 +176,11 @@ This guide explains how to add new features to ExpertGPTs.
 - Settings: Configuration UI
 - Expert pages: Chat interface (generated from template)
 
-**utils/**: Business logic and utilities
-- `config_manager.py`: Config operations
-- `llm_client.py`: LLM API calls
-- `page_generator.py`: Page generation
-- `helpers.py`: Generic helpers
-- `i18n.py`: Internationalization
+**lib/**: Business logic and utilities (domain-driven)
+- `lib/config/`: Config operations
+- `lib/llm/`: LLM API calls
+- `lib/shared/`: Page generation, generic helpers
+- `lib/i18n/`: Internationalization
 
 **templates/**: Page templates
 - `template.py`: Expert page template

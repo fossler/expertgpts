@@ -65,16 +65,30 @@ expertgpts/
 │   ├── 1001_python_expert.yaml
 │   ├── 1002_data_scientist.yaml
 │   └── ...
-├── utils/                          # Shared utilities
-│   ├── llm_client.py               # Multi-provider LLM client
-│   ├── client_pool.py              # Connection pooling
-│   ├── config_manager.py           # Config file operations
-│   ├── page_generator.py           # Page generation logic
-│   ├── secrets_manager.py          # Secrets management
-│   ├── chat_history_manager.py     # Chat history persistence
-│   ├── session_state.py            # Session state initialization
-│   ├── i18n.py                     # Internationalization
-│   └── helpers.py                  # Utility functions
+├── lib/                            # Core library (domain-driven)
+│   ├── llm/                       # LLM operations
+│   │   ├── llm_client.py           # Multi-provider LLM client
+│   │   ├── client_pool.py          # Connection pooling
+│   │   └── token_manager.py        # Token counting
+│   ├── config/                    # Configuration
+│   │   ├── config_manager.py       # Config operations
+│   │   ├── secrets_manager.py      # Secrets management
+│   │   ├── app_defaults_manager.py # User preferences
+│   │   └── config_toml_manager.py  # Theme config
+│   ├── i18n/                      # Internationalization
+│   │   └── i18n.py                 # Language/translation
+│   ├── storage/                   # Data persistence
+│   │   ├── chat_history_manager.py # Chat history
+│   │   └── streaming_cache.py      # Response caching
+│   ├── ui/                        # UI components
+│   │   └── dialogs.py             # Shared dialogs
+│   └── shared/                    # Shared utilities
+│       ├── page_generator.py      # Page generation
+│       ├── session_state.py       # Session state
+│       ├── constants.py           # Config constants
+│       ├── helpers.py             # Utilities
+│       ├── file_ops.py            # File operations
+│       └── types.py               # Type definitions
 ├── locales/                        # UI translations
 │   └── ui/
 │       ├── en.json                 # English (source of truth)

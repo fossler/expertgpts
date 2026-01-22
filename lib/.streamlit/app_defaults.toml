@@ -1,0 +1,7 @@
+[llm]
+provider = "deepseek"
+model = "deepseek-chat"
+thinking_level = "none"
+
+[language]
+code = "en"

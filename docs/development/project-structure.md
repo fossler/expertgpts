@@ -25,22 +25,31 @@ expertgpts/
 │   ├── 1002_data_scientist.yaml
 │   └── ...
 │
-├── utils/                          # Shared utilities and business logic
-│   ├── llm_client.py              # Multi-provider LLM client
-│   ├── client_pool.py             # Connection pooling
-│   ├── config_manager.py          # Expert config operations
-│   ├── page_generator.py          # Expert page generation
-│   ├── secrets_manager.py         # API key management
-│   ├── config_toml_manager.py     # Theme configuration
-│   ├── app_defaults_manager.py    # User preferences
-│   ├── chat_history_manager.py    # Chat history persistence
-│   ├── session_state.py           # Session state initialization
-│   ├── token_manager.py           # Token counting
-│   ├── i18n.py                    # Internationalization
-│   ├── constants.py               # Provider/model configurations
-│   ├── helpers.py                 # Utility functions
-│   ├── file_ops.py                # File system operations (NEW)
-│   └── format_ops.py              # File format operations (NEW)
+├── lib/                            # Core library (domain-driven structure)
+│   ├── llm/                       # LLM-related modules
+│   │   ├── llm_client.py          # Multi-provider LLM client
+│   │   ├── client_pool.py         # Connection pooling
+│   │   └── token_manager.py       # Token counting and context management
+│   ├── config/                    # Configuration management
+│   │   ├── config_manager.py      # Expert config operations
+│   │   ├── secrets_manager.py     # API key management
+│   │   ├── app_defaults_manager.py # User preferences
+│   │   └── config_toml_manager.py # Theme configuration
+│   ├── i18n/                      # Internationalization
+│   │   └── i18n.py                # Language detection and translation
+│   ├── storage/                   # Data persistence
+│   │   ├── chat_history_manager.py # Chat history persistence
+│   │   └── streaming_cache.py     # Background response caching
+│   ├── ui/                        # UI components
+│   │   └── dialogs.py             # Shared dialog rendering
+│   └── shared/                    # Shared utilities
+│       ├── constants.py           # Provider/model configurations
+│       ├── file_ops.py            # File system operations
+│       ├── format_ops.py          # File format operations (TOML, YAML, JSON)
+│       ├── helpers.py             # Utility functions
+│       ├── page_generator.py      # Expert page generation
+│       ├── session_state.py       # Session state initialization
+│       └── types.py               # Type definitions
 │
 ├── locales/                        # UI translations
 │   └── ui/
@@ -86,6 +95,118 @@ expertgpts/
 ├── requirements-dev.txt            # Development dependencies
 └── .gitignore                      # Git ignore patterns
 ```
+
+## lib/ Domain-Driven Structure
+
+The `lib/` directory is organized into 6 domain-specific subdirectories to group related functionality and improve code discoverability.
+
+### `lib/llm/` - LLM Operations
+**Purpose**: All LLM provider interactions, client management, and token tracking.
+
+**When to use**: Adding new LLM providers, modifying client behavior, implementing token counting strategies.
+
+**Modules**:
+- `llm_client.py` - Multi-provider LLM client (DeepSeek, OpenAI, Z.AI)
+- `client_pool.py` - Connection pooling for performance
+- `token_manager.py` - Token counting and context usage tracking
+
+**Imports**:
+```python
+from lib.llm import LLMClient, TokenManager, get_cached_client
+```
+
+### `lib/config/` - Configuration Management
+**Purpose**: Expert configurations, API keys, user preferences, and theme settings.
+
+**When to use**: Adding new configuration options, managing secrets, updating app defaults.
+
+**Modules**:
+- `config_manager.py` - Expert YAML config CRUD operations
+- `secrets_manager.py` - API key storage in `.streamlit/secrets.toml`
+- `app_defaults_manager.py` - User preferences (provider, model, language)
+- `config_toml_manager.py` - Theme configuration management
+
+**Imports**:
+```python
+from lib.config import ConfigManager
+from lib.config import secrets_manager, config_toml_manager
+```
+
+### `lib/i18n/` - Internationalization
+**Purpose**: Language detection, translations, and locale management.
+
+**When to use**: Adding new languages, modifying translation behavior, updating locale handling.
+
+**Modules**:
+- `i18n.py` - Language detection, locale loading, language prefix injection
+
+**Imports**:
+```python
+from lib.i18n import i18n, I18nManager
+```
+
+### `lib/storage/` - Data Persistence
+**Purpose**: Long-term and short-term data storage (chat history, caching).
+
+**When to use**: Adding new persistence mechanisms, modifying storage backends, implementing caching strategies.
+
+**Modules**:
+- `chat_history_manager.py` - Chat conversation persistence (JSON files)
+- `streaming_cache.py` - Background streaming response caching
+
+**Imports**:
+```python
+from lib.storage import load_chat_history, save_chat_history, StreamingCache
+```
+
+### `lib/ui/` - UI Components
+**Purpose**: Shared UI rendering functions, dialogs, and interactive components.
+
+**When to use**: Adding new dialog types, creating reusable UI components, modifying shared rendering logic.
+
+**Modules**:
+- `dialogs.py` - Dialog rendering (add expert, delete expert, LLM configuration)
+
+**Imports**:
+```python
+from lib.ui import render_add_chat_dialog, render_llm_configuration
+```
+
+### `lib/shared/` - Shared Utilities
+**Purpose**: Cross-cutting utilities used by multiple domains (constants, file ops, helpers).
+
+**When to use**:
+- Adding application-wide constants
+- Creating reusable helper functions
+- Implementing shared file operations
+- Defining types and interfaces
+
+**Modules**:
+- `constants.py` - Provider/model configurations, thresholds, lookup tables
+- `file_ops.py` - File system operations (permissions, paths, directories)
+- `format_ops.py` - File format operations (TOML, YAML, JSON)
+- `helpers.py` - Utility functions (name sanitization, translation)
+- `page_generator.py` - Expert page generation from template
+- `session_state.py` - Session state initialization and management
+- `types.py` - Type definitions and dataclasses
+
+**Imports**:
+```python
+from lib.shared import LLM_PROVIDERS, sanitize_name, PageGenerator
+from lib.shared.constants import get_provider_config, get_model_config
+```
+
+## When to Create a New Domain
+
+The current 6-domain structure covers most use cases. Consider adding a new domain (e.g., `lib/api/`, `lib/monitoring/`) when:
+
+1. **You're adding a major new capability** with 3+ related modules
+2. **The modules have clear interdependencies** but minimal dependencies on other domains
+3. **The functionality is conceptually distinct** from existing domains
+
+**Example**: If you were adding a REST API layer with endpoints, authentication, and rate limiting, create `lib/api/` instead of putting everything in `lib/shared/`.
+
+**Guideline**: Start with `lib/shared/` for new utilities. Only create a new domain when you have 3+ related modules that form a coherent subsystem.
 
 ## File Types
 
@@ -162,7 +283,7 @@ expertgpts/
 - Path resolution utilities
 - File/directory creation helpers
 
-**utils/format_ops.py**:
+**lib/shared/format_ops.py**:
 - Shared file format operations
 - TOML read/write with error handling
 - YAML read/write for configs

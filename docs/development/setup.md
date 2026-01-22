@@ -76,7 +76,7 @@ expertgpts/
 │   └── 1XXX_*.py             # Expert pages (generated)
 ├── templates/
 │   └── template.py            # Expert page template
-├── utils/                     # Business logic
+├── lib/                       # Core library (domain-driven)
 ├── configs/                   # Expert configurations
 ├── locales/                   # UI translations
 ├── tests/                     # Test suite
@@ -142,7 +142,7 @@ black --check .
 
 ```bash
 pip install mypy
-mypy utils/
+mypy lib/
 ```
 
 ## Development Scripts

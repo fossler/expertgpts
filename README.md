@@ -112,12 +112,13 @@ expertgpts/
 │   └── 9999_Help.py              # Help page (permanent)
 ├── templates/template.py          # Template for expert pages
 ├── configs/{expert_id}.yaml       # Expert configurations
-├── utils/                         # Business logic modules
-│   ├── llm_client.py             # Multi-provider LLM client
-│   ├── client_pool.py            # Connection pooling
-│   ├── config_manager.py         # Config operations
-│   ├── page_generator.py         # Page generation
-│   └── ...
+├── lib/                           # Core library (domain-driven structure)
+│   ├── llm/                      # LLM client, connection pooling, token management
+│   ├── config/                   # Expert config, secrets, app defaults, theme config
+│   ├── i18n/                     # Internationalization
+│   ├── storage/                  # Chat history, streaming cache
+│   ├── ui/                       # Dialogs and UI components
+│   └── shared/                   # Constants, helpers, file ops, types, session state
 └── locales/ui/*.json             # UI translations (13 languages)
 ```
 

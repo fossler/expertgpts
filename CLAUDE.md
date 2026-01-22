@@ -18,7 +18,7 @@ ExpertGPTs is a multi-expert AI chat application built with Streamlit that provi
    - Search for existing implementations that do the same thing
 
 2. **When you find duplicated code:**
-   - Extract it to a shared function in the appropriate `utils/` module
+   - Extract it to a shared function in the appropriate `lib/` subdirectory
    - Update ALL locations to use the shared function
    - Update templates AND generated pages
    - Test to ensure no regressions
@@ -240,7 +240,7 @@ Clean separation of concerns for 13-language support:
 - **`pages/1000_Home.py`** - Home page with expert list and "Add Chat" functionality (permanent file)
 - **`pages/9999_Settings.py`** - Settings page for API keys, themes, language, provider defaults (permanent file)
 
-### Utilities (`utils/`)
+### Core Library (`lib/`)
 - **`config_manager.py`** - Expert YAML config operations (load, update, delete, list)
 - **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs
 - **`llm_client.py`** - Multi-provider LLM client; handles thinking parameter differences via `_prepare_thinking_param()`
