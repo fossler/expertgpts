@@ -19,38 +19,6 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
 - **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
 
-## Quick Start
-
-Get ExpertGPTs up and running in 5 minutes:
-
-```bash
-# Clone and navigate
-git clone <repository-url>
-cd expertgpts
-
-# Create virtual environment (recommended)
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements-dev.txt  # Development (includes watchdog)
-# OR
-pip install -r requirements.txt       # Production only
-
-# Run the app
-streamlit run app.py
-```
-
-**First run?** The app automatically creates 7 example experts and detects your system language.
-
-**Get your API key**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
-
-Set it via **Settings → API Keys** in the app.
-
-**That's it!** Start chatting with experts.
-
-**Detailed setup**: [Installation Guide](docs/getting-started/installation.md)
-
 ## Pay Only for What You Use: The Economic and Strategic Advantages of API-Based AI Chats
 
 API-based AI chats operate on a **pay-as-you-go (PAYG)** model—meaning you pay **only for actual usage**, not for access. There are no fixed monthly fees, no long-term commitments, and no costs when the service isn't used. This makes PAYG inherently more transparent, flexible, and cost-efficient than traditional subscription models.
@@ -99,6 +67,40 @@ Why pay for an expensive flat-rate AI subscription when an **API-based, multi-pr
 - Optimal performance per task
 
 With PAYG, **you stay in control—financially and technically—at all times**.
+
+
+## Quick Start
+
+Get ExpertGPTs up and running in 5 minutes:
+
+```bash
+# Clone and navigate
+git clone <repository-url>
+cd expertgpts
+
+# Create virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements-dev.txt  # Development (includes watchdog)
+# OR
+pip install -r requirements.txt       # Production only
+
+# Run the app
+streamlit run app.py
+```
+
+**First run?** The app automatically creates 7 example experts and detects your system language.
+
+**Get your API key**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
+
+Set it via **Settings → API Keys** in the app.
+
+**That's it!** Start chatting with experts.
+
+**Detailed setup**: [Installation Guide](docs/getting-started/installation.md)
+
 
 ## Architecture Overview
 
@@ -220,6 +222,20 @@ pytest --cov=utils --cov-report=html
 ## License
 
 This project is open source and available under the Apache License 2.0.
+
+## Why Streamlit and Its Limitations
+
+I chose Streamlit because it makes creating beautiful interfaces remarkably easy, and Streamlit itself actively promotes it for AI and LLM applications ([chat tutorials](https://docs.streamlit.io/develop/tutorials/chat-and-llm-apps), [30 Days of AI Challenge](https://discuss.streamlit.io/t/the-30-days-of-ai-challenge-starts-today/120455)). Since the framework is Python-based, it also gave me an opportunity to delve deeper into Python development. However, I wasn't aware of Streamlit's architectural limitations before starting this project, and they significantly shaped the implementation.
+
+The three biggest challenges are:
+
+1. **No Asynchronicity**: Streamlit doesn't support `async/await`, meaning all LLM streaming requests are blocking. I had to implement a file-based background streaming system with daemon threads just to allow responses to complete when users navigate away—a 250-line solution for what should be a simple async operation.
+
+2. **Execution Model**: Streamlit reruns your entire script from top to bottom on every interaction. This means changing session state doesn't update the UI until you explicitly call `st.rerun()`. ExpertGPTs has 36 such calls—for everything from toggling dialogs to reloading API keys—because the script can't re-evaluate conditionals mid-execution.
+
+3. **State Management Complexity**: Session state doesn't persist across app restarts, and external file changes (configs, API keys) aren't detected automatically. I built a multi-layered state system with manual cache invalidation to work around this.
+
+Would I choose Streamlit again? For data dashboards and simple prototypes, absolutely—it's perfect for those. But for an AI chatbot with real-time streaming, complex state management, and background processing? I'd rather do a rewrite with a modern stack like **React and Bun**, which handle these requirements natively with better performance and developer experience.
 
 ## Acknowledgments
 
