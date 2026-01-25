@@ -356,13 +356,15 @@
       "confirm_delete": "Adakah anda pasti mahu memadam pakar '{name}'?"
     },
     "names": {
-      "python_expert": "Pakar Python",
-      "data_scientist": "Pakar Data",
-      "writing_assistant": "Penulis Penolong",
-      "linux_admin": "Pentadbir Linux",
-      "general_assistant": "Penolong Umum",
-      "translation_expert": "Pakar Terjemahan",
-      "spell_checker": "Penyemak Ejaan"
+      "helpful_assistant": "Pembantu Berguna",
+      "email_assistant": "Pembantu E-mel",
+      "translation_expert_en_de": "Pakar Terjemahan EN-DE",
+      "spell_checker": "Penyemak Ejaan",
+      "copywriter": "Penulis Iklan",
+      "text_summarizer": "Ringkasan Teks",
+      "data_scientist": "Saintis Data",
+      "linux_system_engineer": "Jurutera Sistem Linux",
+      "python_expert": "Pakar Python"
     }
   },
   "help": {

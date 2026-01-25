@@ -226,7 +226,7 @@ ExpertGPTs uses multi-layered state management:
 Select the expert that best matches your domain:
 - **Python Expert** - For Python-specific questions
 - **Data Scientist** - For data analysis questions
-- **Writing Assistant** - For text improvement
+- **Copywriter** - For marketing and content creation
 
 ### 2. Provide Clear Context
 
@@ -272,7 +272,7 @@ Expert: [Compares recursion vs iteration]
 
 ### Workflow 2: Improve Writing
 
-1. Navigate to **Writing Assistant**
+1. Navigate to **Copywriter**
 2. Set temperature to **0.7** (balanced)
 3. Paste your text
 4. Ask for specific improvements (grammar, clarity, tone)

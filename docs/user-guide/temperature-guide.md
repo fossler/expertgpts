@@ -201,7 +201,7 @@ Response: Fascinating, speculative scenarios
 
 | Expert | Temperature | Rationale |
 |--------|-------------|-----------|
-| **Career Coach** | 0.6 - 0.8 | Motivational but grounded |
+| **Helpful Assistant** | 0.8 - 1.2 | Flexible for various tasks |
 | **Business Consultant** | 0.5 - 0.7 | Professional but engaging |
 | **Financial Advisor** | 0.4 - 0.6 | Accurate but approachable |
 | **Life Coach** | 0.7 - 0.9 | Encouraging and supportive |
@@ -210,7 +210,7 @@ Response: Fascinating, speculative scenarios
 
 | Expert | Temperature | Rationale |
 |--------|-------------|-----------|
-| **Writing Assistant** | 0.8 - 1.2 | Balance creativity and clarity |
+| **Copywriter** | 0.8 - 1.2 | Marketing and creative content |
 | **Storyteller** | 1.2 - 1.6 | Maximize originality |
 | **Brainstormer** | 1.0 - 1.4 | Generate diverse ideas |
 | **Creative Writer** | 1.4 - 1.8 | Highly creative output |

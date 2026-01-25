@@ -356,13 +356,15 @@
       "confirm_delete": "您確定要刪除專家 '{name}' 嗎？"
     },
     "names": {
-      "python_expert": "Python 專家",
+      "helpful_assistant": "得力助手",
+      "email_assistant": "電郵助手",
+      "translation_expert_en_de": "英德翻譯專家",
+      "spell_checker": "拼寫檢查",
+      "copywriter": "文案撰稿人",
+      "text_summarizer": "文本摘要",
       "data_scientist": "數據科學家",
-      "writing_assistant": "寫作助手",
-      "linux_admin": "Linux 系統管理員",
-      "general_assistant": "通用助手",
-      "translation_expert": "翻譯專家",
-      "spell_checker": "拼寫檢查器"
+      "linux_system_engineer": "Linux系統工程師",
+      "python_expert": "Python專家"
     }
   },
   "help": {

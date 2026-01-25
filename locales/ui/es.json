@@ -356,13 +356,15 @@
       "confirm_delete": "¿Está seguro de que desea eliminar el experto '{name}'?"
     },
     "names": {
-      "python_expert": "Experto en Python",
+      "helpful_assistant": "Asistente Útil",
+      "email_assistant": "Asistente de Correo Electrónico",
+      "translation_expert_en_de": "Experto en Traducción EN-DE",
+      "spell_checker": "Corrector Ortográfico",
+      "copywriter": "Redactor Publicitario",
+      "text_summarizer": "Resumen de Texto",
       "data_scientist": "Científico de Datos",
-      "writing_assistant": "Asistente de Escritura",
-      "linux_admin": "Administrador de Linux",
-      "general_assistant": "Asistente General",
-      "translation_expert": "Experto en Traducción",
-      "spell_checker": "Corrector Ortográfico"
+      "linux_system_engineer": "Ingeniero de Sistemas Linux",
+      "python_expert": "Experto en Python"
     }
   },
   "help": {

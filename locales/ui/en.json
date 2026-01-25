@@ -228,13 +228,15 @@
       "confirm_delete": "Are you sure you want to delete expert '{name}'?"
     },
     "names": {
-      "python_expert": "Python Expert",
+      "helpful_assistant": "Helpful Assistant",
+      "email_assistant": "Email Assistant",
+      "translation_expert_en_de": "Translation Expert EN-DE",
+      "spell_checker": "Spell Checker",
+      "copywriter": "Copywriter",
+      "text_summarizer": "Text Summarizer",
       "data_scientist": "Data Scientist",
-      "writing_assistant": "Writing Assistant",
-      "linux_admin": "Linux System Admin",
-      "general_assistant": "General Assistant",
-      "translation_expert": "Translation Expert",
-      "spell_checker": "Spell Checker"
+      "linux_system_engineer": "Linux System Engineer",
+      "python_expert": "Python Expert"
     }
   },
   "theme": {

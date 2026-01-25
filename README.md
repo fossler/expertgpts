@@ -91,7 +91,7 @@ pip install -r requirements.txt       # Production only
 streamlit run app.py
 ```
 
-**First run?** The app automatically creates 7 example experts and detects your system language.
+**First run?** The app automatically creates 9 example experts and detects your system language.
 
 **Get your API key**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
 

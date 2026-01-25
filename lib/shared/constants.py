@@ -123,7 +123,7 @@ DEFAULT_MODEL = "deepseek-chat"
 DEFAULT_TEMPERATURE = 1.0
 
 # Example Experts Configuration
-EXAMPLE_EXPERTS_COUNT = 7  # Number of default/example experts created during setup
+EXAMPLE_EXPERTS_COUNT = 9  # Number of default/example experts created during setup
 
 # Context Usage Thresholds (percentages)
 CONTEXT_USAGE_SAFE_THRESHOLD = 50

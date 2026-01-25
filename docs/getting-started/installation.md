@@ -55,20 +55,22 @@ pip install -r requirements.txt
 
 ### 4. Create Example Expert Agents (Optional)
 
-On first run, the application will automatically create 7 example experts. To create them manually:
+On first run, the application will automatically create 9 example experts. To create them manually:
 
 ```bash
 python3 scripts/setup.py
 ```
 
 This creates the following experts:
-- Python Expert
-- Data Scientist
-- Writing Assistant
-- Linux System Admin
-- Career Coach
-- Translation Expert
+- Helpful Assistant
+- Email Assistant
+- Translation Expert EN-DE
 - Spell Checker
+- Copywriter
+- Text Summarizer
+- Data Scientist
+- Linux System Engineer
+- Python Expert
 
 ## Verification
 

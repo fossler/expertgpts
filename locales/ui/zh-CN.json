@@ -356,13 +356,15 @@
       "confirm_delete": "您确定要删除专家 '{name}' 吗？"
     },
     "names": {
-      "python_expert": "Python 专家",
+      "helpful_assistant": "得力助手",
+      "email_assistant": "邮件助手",
+      "translation_expert_en_de": "英德翻译专家",
+      "spell_checker": "拼写检查",
+      "copywriter": "文案撰稿人",
+      "text_summarizer": "文本摘要",
       "data_scientist": "数据科学家",
-      "writing_assistant": "写作助手",
-      "linux_admin": "Linux 系统管理员",
-      "general_assistant": "通用助手",
-      "translation_expert": "翻译专家",
-      "spell_checker": "拼写检查器"
+      "linux_system_engineer": "Linux系统工程师",
+      "python_expert": "Python专家"
     }
   },
   "help": {

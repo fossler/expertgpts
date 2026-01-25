@@ -43,7 +43,7 @@ pip install -r requirements-dev.txt
 python3 scripts/setup.py
 ```
 
-This creates 7 example experts.
+This creates 9 example experts.
 
 ## Development Workflow
 

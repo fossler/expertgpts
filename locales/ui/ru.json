@@ -356,13 +356,15 @@
       "confirm_delete": "Вы уверены, что хотите удалить эксперта '{name}'?"
     },
     "names": {
-      "python_expert": "Эксперт по Python",
+      "helpful_assistant": "Полезный Ассистент",
+      "email_assistant": "Email Ассистент",
+      "translation_expert_en_de": "Эксперт по переводу EN-DE",
+      "spell_checker": "Проверка Орфографии",
+      "copywriter": "Копирайтер",
+      "text_summarizer": "Саммари Текста",
       "data_scientist": "Data Scientist",
-      "writing_assistant": "Помощник по письму",
-      "linux_admin": "Администратор Linux",
-      "general_assistant": "Общий помощник",
-      "translation_expert": "Эксперт по переводу",
-      "spell_checker": "Проверка орфографии"
+      "linux_system_engineer": "Инженер Систем Linux",
+      "python_expert": "Эксперт по Python"
     }
   },
   "help": {

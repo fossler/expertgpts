@@ -356,13 +356,15 @@
       "confirm_delete": "'{name}' uzmanını silmek istediğinizden emin misiniz?"
     },
     "names": {
-      "python_expert": "Python Uzmanı",
+      "helpful_assistant": "Yardımcı Asistan",
+      "email_assistant": "E-posta Asistanı",
+      "translation_expert_en_de": "Çeviri Uzmanı EN-DE",
+      "spell_checker": "Yazım Denetimi",
+      "copywriter": "Metin Yazarı",
+      "text_summarizer": "Metin Özeti",
       "data_scientist": "Veri Bilimci",
-      "writing_assistant": "Yazma Asistanı",
-      "linux_admin": "Linux Sistem Yöneticisi",
-      "general_assistant": "Genel Asistan",
-      "translation_expert": "Çeviri Uzmanı",
-      "spell_checker": "Yazım Denetimi"
+      "linux_system_engineer": "Linux Sistem Mühendisi",
+      "python_expert": "Python Uzmanı"
     }
   },
   "help": {

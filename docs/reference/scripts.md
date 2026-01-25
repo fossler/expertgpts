@@ -37,7 +37,7 @@ python3 scripts/update_translations.py
 **Purpose**: Initial application setup
 
 **What it does**:
-- Creates 7 default example experts
+- Creates 9 default example experts
 - Sets up initial configuration
 - Creates expert pages from templates
 
@@ -51,13 +51,15 @@ python3 scripts/setup.py
 ```
 
 **Creates Experts**:
-- Python Expert
-- Data Scientist
-- Writing Assistant
-- Linux System Admin
-- Career Coach
-- Translation Expert
+- Helpful Assistant
+- Email Assistant
+- Translation Expert EN-DE
 - Spell Checker
+- Copywriter
+- Text Summarizer
+- Data Scientist
+- Linux System Engineer
+- Python Expert
 
 ---
 

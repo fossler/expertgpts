@@ -356,13 +356,15 @@
       "confirm_delete": "Tem certeza de que deseja excluir o especialista '{name}'?"
     },
     "names": {
-      "python_expert": "Especialista em Python",
+      "helpful_assistant": "Assistente Útil",
+      "email_assistant": "Assistente de E-mail",
+      "translation_expert_en_de": "Especialista em Tradução EN-DE",
+      "spell_checker": "Corretor Ortográfico",
+      "copywriter": "Redator Publicitário",
+      "text_summarizer": "Resumo de Texto",
       "data_scientist": "Cientista de Dados",
-      "writing_assistant": "Assistente de Escrita",
-      "linux_admin": "Administrador Linux",
-      "general_assistant": "Assistente Geral",
-      "translation_expert": "Especialista em Tradução",
-      "spell_checker": "Corretor Ortográfico"
+      "linux_system_engineer": "Engenheiro de Sistema Linux",
+      "python_expert": "Especialista em Python"
     }
   },
   "help": {

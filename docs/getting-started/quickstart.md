@@ -51,13 +51,15 @@ Navigate to **Settings** → **API Key** tab:
 ### Step 3: Select an Expert
 
 Click on any expert in the navigation menu:
-- **Python Expert** - Python programming help
+- **Helpful Assistant** - Knowledgeable, reliable generalist assistant for accurate information
+- **Email Assistant** - Email replies based on keywords and sender tone
+- **Translation Expert EN-DE** - English-German translation specialist
+- **Spell Checker** - Multilingual spell checking with change summaries
+- **Copywriter** - Marketing, advertising, SEO, and branding content
+- **Text Summarizer** - Text summarization in multiple formats
 - **Data Scientist** - Data analysis and visualization
-- **Writing Assistant** - Writing and editing assistance
-- **Linux System Admin** - Linux system administration
-- **Career Coach** - Career guidance and advice
-- **Translation Expert** - Translation assistance
-- **Spell Checker** - Spelling and grammar checking
+- **Linux System Engineer** - Linux system administration and engineering
+- **Python Expert** - Python programming help
 
 ### Step 4: Start Chatting
 

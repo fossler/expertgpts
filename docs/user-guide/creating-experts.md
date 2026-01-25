@@ -99,7 +99,7 @@ An expert that helps with stuff.
 | **Code Expert** | 0.2 - 0.4 | Factual, accurate code |
 | **Data Analyst** | 0.3 - 0.5 | Balanced analysis |
 | **Writing Editor** | 0.4 - 0.6 | Helpful but conservative |
-| **Career Coach** | 0.6 - 0.8 | Engaging, motivational |
+| **Helpful Assistant** | 0.8 - 1.2 | Flexible for various tasks |
 | **Creative Writer** | 1.0 - 1.5 | Original, creative content |
 | **Brainstormer** | 1.2 - 1.8 | Diverse ideas |
 

@@ -356,13 +356,15 @@
       "confirm_delete": "Apakah Anda yakin ingin menghapus ahli '{name}'?"
     },
     "names": {
-      "python_expert": "Ahli Python",
+      "helpful_assistant": "Asisten Berguna",
+      "email_assistant": "Asisten Email",
+      "translation_expert_en_de": "Ahli Terjemahan EN-DE",
+      "spell_checker": "Pemeriksa Ejaan",
+      "copywriter": "Penulis Iklan",
+      "text_summarizer": "Ringkasan Teks",
       "data_scientist": "Ilmuwan Data",
-      "writing_assistant": "Asisten Penulisan",
-      "linux_admin": "Administrator Linux",
-      "general_assistant": "Asisten Umum",
-      "translation_expert": "Ahli Terjemahan",
-      "spell_checker": "Pengeja Ejaan"
+      "linux_system_engineer": "Insinyur Sistem Linux",
+      "python_expert": "Ahli Python"
     }
   },
   "help": {

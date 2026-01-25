@@ -12,7 +12,7 @@ streamlit run app.py
 
 The application will open in your browser at `http://localhost:8501`
 
-**First Run?** The app will automatically create 7 example expert agents on first launch.
+**First Run?** The app will automatically create 9 example expert agents on first launch.
 
 ## Initial Setup
 
@@ -87,17 +87,19 @@ ExpertGPTs uses Streamlit's modern navigation with Material Design icons:
 
 ### Default Experts
 
-On first run, 7 example experts are created:
+On first run, 9 example experts are created:
 
 | Expert | Specialization |
 |--------|---------------|
-| **Python Expert** | Python programming, software development, debugging |
+| **Helpful Assistant** | Knowledgeable, reliable, and supportive generalist assistant for accurate and practical information |
+| **Email Assistant** | Email replies based on keywords and sender tone |
+| **Translation Expert EN-DE** | English-German translation specialist |
+| **Spell Checker** | Multilingual spell checking with change summaries |
+| **Copywriter** | Marketing, advertising, SEO, and branding content creation |
+| **Text Summarizer** | Text summarization in multiple formats |
 | **Data Scientist** | Data analysis, visualization, statistics |
-| **Writing Assistant** | Writing, editing, content creation |
-| **Linux System Admin** | Linux system administration |
-| **Career Coach** | Career guidance and advice |
-| **Translation Expert** | Translation assistance |
-| **Spell Checker** | Spelling and grammar checking |
+| **Linux System Engineer** | Linux system administration and engineering |
+| **Python Expert** | Python programming, software development, debugging |
 
 ### Layout
 
@@ -201,8 +203,8 @@ The expert will automatically respond in the user's selected language, regardles
 Try asking the same question to different experts to see their specialized responses:
 
 - Ask **Python Expert** about a coding problem
-- Ask **Writing Assistant** to improve your text
-- Ask **Translation Expert** to translate text
+- Ask **Copywriter** to improve your marketing content
+- Ask **Translation Expert EN-DE** to translate text
 
 ### Adjust Temperature
 
