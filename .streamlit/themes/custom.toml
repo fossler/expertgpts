@@ -1,5 +1,35 @@
 [theme]
+base = "light"
+
+# Primary colors (warm amber/gold theme)
 primaryColor = "#F59E0B"
+
+# Background colors
 backgroundColor = "#FFFBEB"
 secondaryBackgroundColor = "#FEF3C7"
+
+# Text colors
 textColor = "#78350F"
+
+# Extended color palette
+orangeColor = "#F59E0B"
+grayColor = "#A3A8B8"
+
+# Border color
+borderColor = "#FDE68A"
+
+# Font
+font = "sans-serif"
+codeFont = "monospace"
+
+# Radius
+baseRadius = "0.5rem"
+buttonRadius = "0.25rem"
+
+# Dataframe styling
+dataframeBorderColor = "#FDE68A"
+dataframeHeaderBackgroundColor = "#FEF3C7"
+
+# Show borders
+showWidgetBorder = true
+showSidebarBorder = true

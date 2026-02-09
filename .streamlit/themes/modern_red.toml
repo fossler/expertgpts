@@ -1,5 +1,35 @@
 [theme]
+base = "light"
+
+# Primary colors
 primaryColor = "#FF6B6B"
+
+# Background colors
 backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
+secondaryBackgroundColor = "#FFF0F0"
+
+# Text colors
 textColor = "#262730"
+
+# Extended color palette
+redColor = "#FF6B6B"
+grayColor = "#A3A8B8"
+
+# Border color
+borderColor = "#FFE5E5"
+
+# Font
+font = "sans-serif"
+codeFont = "monospace"
+
+# Radius
+baseRadius = "0.5rem"
+buttonRadius = "0.25rem"
+
+# Dataframe styling
+dataframeBorderColor = "#FFE5E5"
+dataframeHeaderBackgroundColor = "#FFF0F0"
+
+# Show borders
+showWidgetBorder = true
+showSidebarBorder = true

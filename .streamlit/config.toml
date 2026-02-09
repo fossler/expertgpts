@@ -1,5 +1,5 @@
 [theme]
-base = ".streamlit/themes/modern_red.toml"
+base = ".streamlit/themes/dark_gray.toml"
 
 [logger]
 
