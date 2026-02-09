@@ -6,8 +6,7 @@ This module provides functions to read and write theme settings to the
 
 from pathlib import Path
 from typing import Optional
-import os
-from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
+from lib.shared.file_ops import ensure_directory_exists, get_project_root, set_secure_permissions, get_streamlit_path, ensure_streamlit_file
 
 
 def get_config_path() -> Path:
@@ -27,7 +26,7 @@ def ensure_config_file_exists() -> Path:
     Returns:
         Path: Path to config.toml file
     """
-    return ensure_file_exists(get_config_path(), default_content="[theme]\n")
+    return ensure_streamlit_file("config.toml", default_content="[theme]\n")
 
 
 def get_theme_settings() -> dict:
@@ -72,7 +71,8 @@ def get_theme_settings() -> dict:
 
             if key == "base":
                 # Load theme from external file
-                theme_file_path = Path(__file__).parent.parent.parent / ".streamlit" / value
+                project_root = get_project_root()
+                theme_file_path = project_root / ".streamlit" / value
                 return load_theme_file(theme_file_path)
 
     # No base parameter found - return default theme
@@ -151,10 +151,11 @@ def update_custom_theme(
         secondaryBackgroundColor: Background color for sidebar
         textColor: Main text color
     """
-    custom_theme_path = Path(__file__).parent.parent.parent / ".streamlit" / "themes" / "custom.toml"
+    project_root = get_project_root()
+    custom_theme_path = project_root / ".streamlit" / "themes" / "custom.toml"
 
     # Create themes directory if it doesn't exist
-    custom_theme_path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_directory_exists(custom_theme_path.parent)
 
     # Write theme settings to custom.toml
     content = f"""[theme]

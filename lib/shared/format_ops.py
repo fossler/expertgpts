@@ -23,8 +23,6 @@ def read_toml(file_path: Path) -> Dict[str, Any]:
 
     Returns empty dict if file doesn't exist or is invalid.
 
-    Duplicated in app_defaults_manager.py (~30 lines).
-
     Args:
         file_path: Path to TOML file
 
@@ -44,8 +42,6 @@ def read_toml(file_path: Path) -> Dict[str, Any]:
 
 def write_toml(file_path: Path, data: Dict[str, Any], header: str = "") -> bool:
     """Write data to a TOML file with secure permissions.
-
-    Duplicated pattern in app_defaults_manager.py (~50 lines).
 
     Args:
         file_path: Path to TOML file
@@ -86,8 +82,6 @@ def read_yaml(file_path: Path) -> Optional[Dict[str, Any]]:
 
     Returns None if file doesn't exist or is invalid.
 
-    Duplicated in config_manager.py (~12 lines).
-
     Args:
         file_path: Path to YAML file
 
@@ -107,8 +101,6 @@ def read_yaml(file_path: Path) -> Optional[Dict[str, Any]]:
 
 def write_yaml(file_path: Path, data: Dict[str, Any]) -> bool:
     """Write data to a YAML file with secure permissions.
-
-    New shared function for config_manager.py.
 
     Args:
         file_path: Path to YAML file
@@ -133,8 +125,6 @@ def read_json(file_path: Path) -> Optional[Dict[str, Any]]:
 
     Returns None if file doesn't exist or is invalid.
 
-    Duplicated in chat_history_manager.py (~12 lines).
-
     Args:
         file_path: Path to JSON file
 
@@ -157,8 +147,6 @@ def read_json(file_path: Path) -> Optional[Dict[str, Any]]:
 
 def write_json(file_path: Path, data: Any, indent: int = 2) -> bool:
     """Write data to a JSON file with secure permissions.
-
-    Duplicated in chat_history_manager.py (~20 lines).
 
     Args:
         file_path: Path to JSON file

@@ -7,7 +7,7 @@ import streamlit as st
 
 from lib.shared.helpers import sanitize_name
 from lib.shared.types import PageInfo
-from lib.shared.file_ops import safe_path_join
+from lib.shared.file_ops import ensure_directory_exists, safe_path_join
 
 
 class PageGenerator:
@@ -25,7 +25,7 @@ class PageGenerator:
             template_path: Path to template file (default: templates/template.py)
         """
         self.pages_dir = Path(pages_dir)
-        self.pages_dir.mkdir(exist_ok=True)
+        ensure_directory_exists(self.pages_dir)
 
         if template_path is None:
             template_path = "templates/template.py"

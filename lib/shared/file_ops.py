@@ -69,6 +69,43 @@ def ensure_file_exists(
     return file_path
 
 
+def ensure_directory_exists(dir_path: Path, permissions: Optional[int] = None) -> Path:
+    """Ensure a directory exists, creating it if needed.
+
+    This helper function creates directories with optional permissions,
+    reducing repetitive directory creation code across the codebase.
+
+    Args:
+        dir_path: Path to the directory
+        permissions: Optional permissions to set (e.g., 0o700 for secure directories)
+
+    Returns:
+        Path: Path to the directory
+
+    Example:
+        # Before:
+        if not chat_dir.exists():
+            chat_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                chat_dir.chmod(0o700)
+            except OSError as e:
+                print(f"Warning: Could not set permissions: {e}")
+
+        # After:
+        ensure_directory_exists(chat_dir, permissions=0o700)
+    """
+    if not dir_path.exists():
+        dir_path.mkdir(parents=True, exist_ok=True)
+
+    if permissions is not None:
+        try:
+            dir_path.chmod(permissions)
+        except OSError as e:
+            print(f"Warning: Could not set permissions on {dir_path}: {e}")
+
+    return dir_path
+
+
 def get_streamlit_path(filename: str) -> Path:
     """Get path to a file in .streamlit directory.
 
@@ -79,6 +116,23 @@ def get_streamlit_path(filename: str) -> Path:
         Path: Path to .streamlit/{filename}
     """
     return get_project_root() / ".streamlit" / filename
+
+
+def ensure_streamlit_file(filename: str, default_content: str = "") -> Path:
+    """Ensure a file in .streamlit directory exists, creating it with default content if needed.
+
+    This is a convenience helper that combines get_streamlit_path() and ensure_file_exists()
+    for .streamlit configuration files.
+
+    Args:
+        filename: Name of the file (e.g., "secrets.toml", "config.toml")
+        default_content: Default content to write if file doesn't exist
+
+    Returns:
+        Path: Path to the file
+    """
+    file_path = get_streamlit_path(filename)
+    return ensure_file_exists(file_path, default_content=default_content)
 
 
 def safe_path_join(base_dir: Path, user_path: str) -> Path:

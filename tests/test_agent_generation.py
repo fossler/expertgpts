@@ -79,16 +79,21 @@ class TestAgentGeneration:
             temp_dirs: Temporary directories fixture
             test_data: Test data fixture
         """
-        _, temp_configs_dir, _ = temp_dirs
+        temp_pages_dir, temp_configs_dir, _ = temp_dirs
         data = test_data["valid_agent"]
 
         # Create config manager with temp directory
         config_manager = ConfigManager(config_dir=str(temp_configs_dir))
 
-        # Create config
+        # Create page generator to get page number
+        page_generator = PageGenerator(pages_dir=str(temp_pages_dir))
+        page_number = page_generator.get_next_page_number()
+
+        # Create config with required page_number parameter
         expert_id = config_manager.create_config(
             expert_name=data["name"],
             description=data["description"],
+            page_number=page_number,
             temperature=data["temperature"],
             system_prompt=data["custom_prompt"],
         )
@@ -115,22 +120,24 @@ class TestAgentGeneration:
         temp_pages_dir, _, temp_template_path = temp_dirs
         data = test_data["valid_agent"]
 
-        # First create config
-        config_manager = ConfigManager(config_dir=str(temp_dirs[1]))
-        expert_id = config_manager.create_config(
-            expert_name=data["name"],
-            description=data["description"],
-            temperature=data["temperature"],
-        )
-
-        # Create page generator
+        # Create page generator first to get page number
         page_generator = PageGenerator(
             pages_dir=str(temp_pages_dir),
             template_path=str(temp_template_path)
         )
+        page_number = page_generator.get_next_page_number()
+
+        # Create config with page number
+        config_manager = ConfigManager(config_dir=str(temp_dirs[1]))
+        expert_id = config_manager.create_config(
+            expert_name=data["name"],
+            description=data["description"],
+            page_number=page_number,
+            temperature=data["temperature"],
+        )
 
         # Generate page
-        page_path = page_generator.generate_page(
+        page_path, _ = page_generator.generate_page(
             expert_id=expert_id,
             expert_name=data["name"],
         )
@@ -157,21 +164,24 @@ class TestAgentGeneration:
         data = test_data["agent_with_custom_prompt"]
 
         # Initialize managers
-        config_manager = ConfigManager(config_dir=str(temp_configs_dir))
         page_generator = PageGenerator(
             pages_dir=str(temp_pages_dir),
             template_path=str(temp_template_path)
         )
+        page_number = page_generator.get_next_page_number()
+
+        config_manager = ConfigManager(config_dir=str(temp_configs_dir))
 
         # Generate complete agent
         expert_id = config_manager.create_config(
             expert_name=data["name"],
             description=data["description"],
+            page_number=page_number,
             temperature=data["temperature"],
             system_prompt=data["custom_prompt"],
         )
 
-        page_path = page_generator.generate_page(
+        page_path, _ = page_generator.generate_page(
             expert_id=expert_id,
             expert_name=data["name"],
         )
@@ -201,16 +211,19 @@ class TestAgentGeneration:
             temp_dirs: Temporary directories fixture
             test_data: Test data fixture
         """
-        _, temp_configs_dir, _ = temp_dirs
+        temp_pages_dir, temp_configs_dir, _ = temp_dirs
         config_manager = ConfigManager(config_dir=str(temp_configs_dir))
+        page_generator = PageGenerator(pages_dir=str(temp_pages_dir))
 
         # Create multiple experts
         created_ids = []
         for key in ["valid_agent", "creative_agent"]:
             data = test_data[key]
+            page_number = page_generator.get_next_page_number()
             expert_id = config_manager.create_config(
                 expert_name=data["name"],
                 description=data["description"],
+                page_number=page_number,
                 temperature=data["temperature"],
             )
             created_ids.append(expert_id)
@@ -245,22 +258,24 @@ class TestAgentGeneration:
         pages_created = []
         for i in range(3):
             data = test_data["valid_agent"]
+            page_number = page_generator.get_next_page_number()
             expert_id = config_manager.create_config(
                 expert_name=f"{data['name']} {i}",
                 description=data["description"],
+                page_number=page_number,
                 temperature=data["temperature"],
             )
 
-            page_path = page_generator.generate_page(
+            page_path, _ = page_generator.generate_page(
                 expert_id=expert_id,
                 expert_name=f"{data['name']} {i}",
             )
             pages_created.append(Path(page_path).name)
 
-        # Verify ordering
-        assert pages_created[0].startswith("1_")
-        assert pages_created[1].startswith("2_")
-        assert pages_created[2].startswith("3_")
+        # Verify ordering (pages start from 1001 in actual implementation)
+        assert pages_created[0].startswith("1001_")
+        assert pages_created[1].startswith("1002_")
+        assert pages_created[2].startswith("1003_")
 
     def test_delete_expert(self, temp_dirs, test_data):
         """Test deleting an expert configuration.
@@ -269,15 +284,18 @@ class TestAgentGeneration:
             temp_dirs: Temporary directories fixture
             test_data: Test data fixture
         """
-        _, temp_configs_dir, _ = temp_dirs
+        temp_pages_dir, temp_configs_dir, _ = temp_dirs
         data = test_data["valid_agent"]
 
         config_manager = ConfigManager(config_dir=str(temp_configs_dir))
+        page_generator = PageGenerator(pages_dir=str(temp_pages_dir))
 
         # Create expert
+        page_number = page_generator.get_next_page_number()
         expert_id = config_manager.create_config(
             expert_name=data["name"],
             description=data["description"],
+            page_number=page_number,
             temperature=data["temperature"],
         )
 
@@ -303,15 +321,18 @@ class TestAgentGeneration:
             temp_dirs: Temporary directories fixture
             test_data: Test data fixture
         """
-        _, temp_configs_dir, _ = temp_dirs
+        temp_pages_dir, temp_configs_dir, _ = temp_dirs
         data = test_data["agent_with_custom_prompt"]
 
         config_manager = ConfigManager(config_dir=str(temp_configs_dir))
+        page_generator = PageGenerator(pages_dir=str(temp_pages_dir))
 
         # Create with custom prompt
+        page_number = page_generator.get_next_page_number()
         expert_id = config_manager.create_config(
             expert_name=data["name"],
             description=data["description"],
+            page_number=page_number,
             temperature=data["temperature"],
             system_prompt=data["custom_prompt"],
         )
@@ -327,15 +348,18 @@ class TestAgentGeneration:
             temp_dirs: Temporary directories fixture
             test_data: Test data fixture
         """
-        _, temp_configs_dir, _ = temp_dirs
+        temp_pages_dir, temp_configs_dir, _ = temp_dirs
         data = test_data["valid_agent"]
 
         config_manager = ConfigManager(config_dir=str(temp_configs_dir))
+        page_generator = PageGenerator(pages_dir=str(temp_pages_dir))
 
         # Create without custom prompt
+        page_number = page_generator.get_next_page_number()
         expert_id = config_manager.create_config(
             expert_name=data["name"],
             description=data["description"],
+            page_number=page_number,
             temperature=data["temperature"],
             system_prompt=None,  # No custom prompt
         )

@@ -3,6 +3,7 @@
 from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
+import re
 from lib.i18n.i18n import i18n
 
 
@@ -58,3 +59,48 @@ def translate_expert_name(expert_name: str) -> str:
         return translated
     except:
         return expert_name
+
+
+def validate_expert_name(name: str) -> tuple[bool, str]:
+    """Validate expert name contains only allowed characters.
+
+    Allowed characters: A-Z, a-z, 0-9, underscore (_), hyphen (-), dot (.), space ( )
+
+    Args:
+        name: The expert name to validate
+
+    Returns:
+        tuple: (is_valid, error_message) with i18n support
+    """
+    if not name:
+        return False, i18n.t('errors.expert_name_empty')
+
+    # Regex pattern for allowed characters
+    pattern = r'^[A-Za-z0-9_.\- ]+$'
+
+    if not re.match(pattern, name):
+        allowed = i18n.t('forms.allowed_characters_desc')
+        return False, i18n.t('errors.expert_name_invalid_chars', allowed=allowed)
+
+    return True, ""
+
+
+def validate_api_key(api_key: str) -> tuple[bool, str]:
+    """Validate API key format before using.
+
+    Args:
+        api_key: API key to validate
+
+    Returns:
+        tuple: (is_valid, error_message) with i18n support
+        - (True, "") if valid
+        - (False, error_message) if invalid
+    """
+    if not api_key:
+        return False, i18n.t("errors.api_key_not_set")
+
+    if len(api_key) < 20:
+        return False, i18n.t("errors.api_key_invalid")
+
+    # Generic validation - different providers have different formats
+    return True, ""

@@ -9,7 +9,8 @@ import json
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
-from lib.shared.file_ops import set_secure_permissions, get_project_root
+from lib.shared.file_ops import ensure_directory_exists, get_project_root
+from lib.shared.format_ops import read_json, write_json
 
 # Default maximum chat history file size (1 MB)
 DEFAULT_MAX_FILE_SIZE_MB = 1
@@ -39,16 +40,7 @@ def ensure_chat_history_dir_exists() -> Path:
         Path: Path to chat_history directory
     """
     chat_dir = get_chat_history_dir()
-
-    if not chat_dir.exists():
-        chat_dir.mkdir(parents=True, exist_ok=True)
-        # Set directory permissions to 700 (owner read/write/execute only)
-        try:
-            chat_dir.chmod(0o700)
-        except OSError as e:
-            print(f"Warning: Could not set secure permissions on {chat_dir}: {e}")
-
-    return chat_dir
+    return ensure_directory_exists(chat_dir, permissions=0o700)
 
 
 def get_chat_history_path(expert_id: str) -> Path:
@@ -82,45 +74,35 @@ def load_chat_history(expert_id: str) -> List[Dict]:
     """
     chat_path = get_chat_history_path(expert_id)
 
-    if not chat_path.exists():
-        # No history file - this is normal for new experts
+    # Use shared read_json function (handles errors, returns None if missing/corrupted)
+    data = read_json(chat_path)
+
+    if data is None:
+        # No history file or corrupted file - this is normal for new experts
         return []
 
-    try:
-        content = chat_path.read_text(encoding='utf-8')
-        data = json.loads(content)
-
-        # Validate structure
-        if not isinstance(data, dict):
-            print(f"Warning: Invalid chat history structure for {expert_id}")
-            return []
-
-        messages = data.get("messages", [])
-
-        # Validate messages list
-        if not isinstance(messages, list):
-            print(f"Warning: Invalid messages format for {expert_id}")
-            return []
-
-        # Ensure each message has required fields
-        validated_messages = []
-        for msg in messages:
-            if isinstance(msg, dict) and "role" in msg and "content" in msg:
-                validated_messages.append({
-                    "role": msg["role"],
-                    "content": msg["content"]
-                })
-
-        return validated_messages
-
-    except json.JSONDecodeError as e:
-        # Corrupted file - silently start fresh
-        print(f"Warning: Corrupted chat history file for {expert_id}: {e}")
+    # Validate structure
+    if not isinstance(data, dict):
+        print(f"Warning: Invalid chat history structure for {expert_id}")
         return []
-    except Exception as e:
-        # Any other error - return empty list
-        print(f"Warning: Error loading chat history for {expert_id}: {e}")
+
+    messages = data.get("messages", [])
+
+    # Validate messages list
+    if not isinstance(messages, list):
+        print(f"Warning: Invalid messages format for {expert_id}")
         return []
+
+    # Ensure each message has required fields
+    validated_messages = []
+    for msg in messages:
+        if isinstance(msg, dict) and "role" in msg and "content" in msg:
+            validated_messages.append({
+                "role": msg["role"],
+                "content": msg["content"]
+            })
+
+    return validated_messages
 
 
 def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
@@ -161,39 +143,21 @@ def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
             "messages": timestamped_messages
         }
 
-        # If file exists, preserve created_at timestamp
+        # If file exists, preserve created_at timestamp (using shared read_json)
         if chat_path.exists():
-            try:
-                existing_data = json.loads(chat_path.read_text(encoding='utf-8'))
-                if "created_at" in existing_data:
-                    file_data["created_at"] = existing_data["created_at"]
-            except:
-                pass  # Use new timestamp if can't read existing
+            existing_data = read_json(chat_path)
+            if existing_data and "created_at" in existing_data:
+                file_data["created_at"] = existing_data["created_at"]
 
-        # Check file size before writing
-        json_content = json.dumps(file_data, indent=2, ensure_ascii=False)
-        temp_size = len(json_content.encode('utf-8'))
+        # Truncate if needed (checks size internally)
+        file_data["messages"] = truncate_messages_by_size(
+            file_data["messages"],
+            expert_id,
+            DEFAULT_MAX_FILE_SIZE_MB
+        )
 
-        # Convert to MB
-        size_mb = temp_size / (1024 * 1024)
-
-        # Truncate if needed
-        if size_mb > DEFAULT_MAX_FILE_SIZE_MB:
-            file_data["messages"] = truncate_messages_by_size(
-                file_data["messages"],
-                expert_id,
-                DEFAULT_MAX_FILE_SIZE_MB
-            )
-            # Re-serialize after truncation
-            json_content = json.dumps(file_data, indent=2, ensure_ascii=False)
-
-        # Write to file
-        chat_path.write_text(json_content, encoding='utf-8')
-
-        # Set secure permissions
-        set_secure_permissions(chat_path)
-
-        return True
+        # Write using shared function (handles permissions and encoding)
+        return write_json(chat_path, file_data, indent=2)
 
     except Exception as e:
         print(f"Warning: Error saving chat history for {expert_id}: {e}")
@@ -313,16 +277,14 @@ def has_chat_history(expert_id: str) -> bool:
     """
     chat_path = get_chat_history_path(expert_id)
 
-    if not chat_path.exists():
+    # Use shared read_json function
+    data = read_json(chat_path)
+
+    if data is None:
         return False
 
-    try:
-        content = chat_path.read_text(encoding='utf-8')
-        data = json.loads(content)
-        messages = data.get("messages", [])
-        return len(messages) > 0
-    except:
-        return False
+    messages = data.get("messages", [])
+    return len(messages) > 0
 
 
 def clear_all_chat_history() -> int:

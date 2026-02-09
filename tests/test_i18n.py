@@ -14,6 +14,7 @@ from pathlib import Path
 
 from lib.i18n import I18nManager
 from lib.config import ConfigManager
+from lib.shared.format_ops import read_json
 
 
 class TestI18nLanguagePrefix:
@@ -175,8 +176,8 @@ class TestI18nLocaleFiles:
         locale_files = sorted(locale_dir.glob("*.json"))
 
         for locale_file in locale_files:
-            with open(locale_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            data = read_json(locale_file)
+            assert data is not None, f"Could not read {locale_file.name}"
 
             # Should not have top-level expert content sections
             assert 'expert_names' not in data, (

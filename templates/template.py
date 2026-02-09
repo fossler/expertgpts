@@ -28,6 +28,8 @@ from lib.shared import (
     CONTEXT_USAGE_COLORS,
     CONFIG_CACHE_TTL
 )
+from lib.shared.format_ops import read_json
+from lib.shared.helpers import validate_api_key
 from lib.storage import StreamingCache
 
 
@@ -69,27 +71,6 @@ def initialize_session_state():
         st.session_state[messages_key] = load_chat_history(EXPERT_ID)
 
     return messages_key
-
-
-def validate_api_key(api_key: str) -> tuple:
-    """Validate API key format before using.
-
-    Args:
-        api_key: API key to validate
-
-    Returns:
-        tuple: (is_valid, error_message)
-        - (True, "") if valid
-        - (False, error_message) if invalid
-    """
-    if not api_key:
-        return False, i18n.t("errors.api_key_not_set")
-
-    if len(api_key) < 20:
-        return False, i18n.t("errors.api_key_invalid")
-
-    # Generic validation - different providers have different formats
-    return True, ""
 
 
 @st.cache_data(ttl=CONFIG_CACHE_TTL, show_spinner="Loading expert configuration...")
@@ -145,7 +126,6 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     Returns:
         True if cached responses were found or if polling is in progress
     """
-    import json
 
     # FAST PATH: Skip file system checks if no streams are active
     # This avoids 3-4 file system operations on every page load
@@ -174,8 +154,8 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
         has_error = False
         if metadata_file.exists():
             try:
-                with open(metadata_file, 'r', encoding='utf-8') as f:
-                    metadata = json.load(f)
+                metadata = read_json(metadata_file)
+                if metadata is not None:
                     is_complete = metadata.get("status") == "complete"
                     has_error = metadata.get("status") == "error"
             except Exception:
@@ -191,8 +171,8 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
                 # Extract error message if available
                 if metadata_file.exists():
                     try:
-                        with open(metadata_file, 'r', encoding='utf-8') as f:
-                            metadata = json.load(f)
+                        metadata = read_json(metadata_file)
+                        if metadata is not None:
                             error = metadata.get('error')
                             if error:
                                 st.error(f"Error: {error}")

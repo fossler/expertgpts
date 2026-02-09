@@ -2,7 +2,6 @@
 
 import io
 import os
-import re
 import subprocess
 import sys
 import zipfile
@@ -13,11 +12,22 @@ from lib.config import ConfigManager
 from lib.shared.page_generator import PageGenerator
 from lib.shared.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
 from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
-from lib.shared.helpers import sanitize_name, translate_expert_name
+from lib.shared.helpers import sanitize_name, translate_expert_name, validate_expert_name
 from lib.config import secrets_manager
 from lib.config import config_toml_manager
 from lib.shared.session_state import initialize_shared_session_state, handle_pending_navigation
 from lib.shared.file_ops import safe_path_join, validate_cwd
+
+
+def _set_dialog_state(dialog_name: str, expert_id: str, value: bool = False) -> None:
+    """Set a dialog state variable for a specific expert.
+
+    Args:
+        dialog_name: Name of the dialog (e.g., "editing_expert", "confirm_delete")
+        expert_id: Expert ID to append to state key
+        value: Value to set (default: False)
+    """
+    st.session_state[f"{dialog_name}_{expert_id}"] = value
 
 
 def initialize_session_state():
@@ -25,9 +35,9 @@ def initialize_session_state():
     # Initialize shared session state (API key, navigation, etc.)
     initialize_shared_session_state()
 
-    # Initialize add chat dialog state
-    if "show_add_chat_dialog" not in st.session_state:
-        st.session_state.show_add_chat_dialog = False
+    # Initialize add chat dialog state (using shared helper)
+    from lib.shared.session_state import ensure_dialog_state
+    ensure_dialog_state("add_chat")
 
     # Initialize active tab state
     if "settings_active_tab" not in st.session_state:
@@ -589,30 +599,6 @@ def render_general_settings_section():
                 i18n.set_language(code)
 
 
-def validate_expert_name(name: str) -> tuple[bool, str]:
-    """Validate expert name contains only allowed characters.
-
-    Allowed characters: A-Z, a-z, 0-9, underscore (_), hyphen (-), dot (.), space ( )
-
-    Args:
-        name: The expert name to validate
-
-    Returns:
-        tuple: (is_valid, error_message)
-    """
-    if not name:
-        return False, "Expert name cannot be empty"
-
-    # Regex pattern for allowed characters
-    pattern = r'^[A-Za-z0-9_.\- ]+$'
-
-    if not re.match(pattern, name):
-        allowed = "letters (A-Z, a-z), numbers (0-9), underscore (_), hyphen (-), dot (.), and space"
-        return False, f"Expert name can only contain: {allowed}"
-
-    return True, ""
-
-
 def render_edit_expert_dialog():
     """Render the Edit Expert dialog.
 
@@ -790,7 +776,7 @@ def render_edit_expert_dialog():
                 st.session_state[f"cache_version_{editing_expert_id}"] = st.session_state.get(f"cache_version_{editing_expert_id}", 0) + 1
 
                 # Clear the editing state
-                st.session_state[f"editing_expert_{editing_expert_id}"] = False
+                _set_dialog_state("editing_expert", editing_expert_id)
 
                 st.success(f"✅ {i18n.t('status.expert_updated', name=chat_name)}")
                 st.info(f"🔄 {i18n.t('status.refreshing')}")
@@ -802,7 +788,7 @@ def render_edit_expert_dialog():
 
         if cancel_button:
             # Clear the editing state
-            st.session_state[f"editing_expert_{editing_expert_id}"] = False
+            _set_dialog_state("editing_expert", editing_expert_id)
             st.rerun()
 
 
@@ -954,7 +940,7 @@ def render_expert_management_section():
                         # Get translated name for success message
                         translated_name = translate_expert_name(expert['expert_name'])
                         st.success(f"✅ {i18n.t('success.expert_deleted', name=translated_name)}")
-                        st.session_state[f"confirm_delete_{expert['expert_id']}"] = False
+                        _set_dialog_state("confirm_delete", expert['expert_id'])
                         st.rerun()
 
                     except Exception as e:
@@ -962,7 +948,7 @@ def render_expert_management_section():
 
             with col2:
                 if st.button(f"❌ {i18n.t('buttons.cancel')}", key=f"cancel_{expert['expert_id']}"):
-                    st.session_state[f"confirm_delete_{expert['expert_id']}"] = False
+                    _set_dialog_state("confirm_delete", expert['expert_id'])
                     st.rerun()
 
 

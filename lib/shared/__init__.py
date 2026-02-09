@@ -21,7 +21,7 @@ from lib.shared.constants import (
     get_expert_behavior_docs,
     get_expert_behavior_docs_edit,
 )
-from lib.shared.helpers import sanitize_name, translate_expert_name
+from lib.shared.helpers import sanitize_name, translate_expert_name, validate_expert_name, validate_api_key
 from lib.shared.file_ops import (
     get_project_root,
     get_streamlit_path,
@@ -29,6 +29,7 @@ from lib.shared.file_ops import (
     validate_cwd,
     set_secure_permissions,
     ensure_file_exists,
+    ensure_directory_exists,
 )
 from lib.shared.format_ops import (
     read_toml,
@@ -97,6 +98,8 @@ __all__ = [
     # Helpers
     "sanitize_name",
     "translate_expert_name",
+    "validate_expert_name",
+    "validate_api_key",
     # File operations
     "get_project_root",
     "get_streamlit_path",
@@ -104,6 +107,7 @@ __all__ = [
     "validate_cwd",
     "set_secure_permissions",
     "ensure_file_exists",
+    "ensure_directory_exists",
     # Format operations
     "read_toml",
     "write_toml",

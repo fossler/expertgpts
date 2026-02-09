@@ -45,7 +45,7 @@ def temp_cache_dir(monkeypatch):
         tmpdir_path = Path(tmpdir)
         # Patch STREAMING_CACHE_DIR before importing the module
         import lib.storage.streaming_cache
-        monkeypatch.setattr(utils.streaming_cache, 'STREAMING_CACHE_DIR', tmpdir_path)
+        monkeypatch.setattr(lib.storage.streaming_cache, 'STREAMING_CACHE_DIR', tmpdir_path)
         yield tmpdir_path
 
 

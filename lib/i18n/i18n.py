@@ -3,12 +3,13 @@
 Supports 13 languages with automatic system language detection.
 """
 
-import json
 import locale
 import logging
 import streamlit as st
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
+
+from lib.shared.format_ops import read_json
 
 logger = logging.getLogger(__name__)
 
@@ -215,8 +216,9 @@ class I18nManager:
         for lang_file in locales_dir.glob("*.json"):
             lang = lang_file.stem
             try:
-                with open(lang_file, "r", encoding="utf-8") as f:
-                    self.translations[lang] = json.load(f)
+                data = read_json(lang_file)
+                if data is not None:
+                    self.translations[lang] = data
                     logger.info(f"Loaded translations for {lang}")
             except Exception as e:
                 logger.error(f"Error loading {lang}: {e}")

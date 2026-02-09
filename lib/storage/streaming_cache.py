@@ -11,7 +11,6 @@ Key benefits:
 - Thread-safe: OS-level file locking prevents corruption
 """
 
-import json
 import os
 import threading
 import time
@@ -19,6 +18,8 @@ from pathlib import Path
 from typing import Optional
 
 from lib.llm.llm_client import LLMClient
+from lib.shared.format_ops import read_json, write_json
+from lib.shared.file_ops import ensure_directory_exists
 
 STREAMING_CACHE_DIR = Path("streaming_cache")
 
@@ -44,8 +45,7 @@ class StreamingCache:
         self.metadata_file = STREAMING_CACHE_DIR / f"{expert_id}_latest.meta"
 
         # Ensure cache directory exists with secure permissions
-        STREAMING_CACHE_DIR.mkdir(exist_ok=True)
-        STREAMING_CACHE_DIR.chmod(0o700)  # Owner read/write/execute only
+        ensure_directory_exists(STREAMING_CACHE_DIR, permissions=0o700)
 
     def start_streaming_to_file(
         self,
@@ -229,8 +229,7 @@ class StreamingCache:
             existing_metadata = self._read_metadata()
             existing_metadata.update(data)
 
-            with open(self.metadata_file, 'w', encoding='utf-8') as f:
-                json.dump(existing_metadata, f, indent=2)
+            write_json(self.metadata_file, existing_metadata)
         except Exception:
             pass
 
@@ -242,8 +241,8 @@ class StreamingCache:
         """
         try:
             if self.metadata_file.exists():
-                with open(self.metadata_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                metadata = read_json(self.metadata_file)
+                return metadata if metadata is not None else {}
         except Exception:
             pass
         return {}

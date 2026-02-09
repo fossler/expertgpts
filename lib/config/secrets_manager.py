@@ -5,9 +5,8 @@ This module provides functions to read and write API keys to the
 way to manage secrets in production.
 """
 
-import os
 from pathlib import Path
-from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_file_exists
+from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_streamlit_file
 
 
 def get_secrets_path() -> Path:
@@ -28,7 +27,7 @@ def ensure_secrets_file_exists() -> Path:
     Returns:
         Path: Path to secrets.toml file
     """
-    return ensure_file_exists(get_secrets_path(), default_content="")
+    return ensure_streamlit_file("secrets.toml", default_content="")
 
 def save_provider_api_key(provider: str, api_key: str) -> None:
     """Save API key for a specific provider to secrets.toml file.

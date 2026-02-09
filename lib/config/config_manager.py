@@ -1,6 +1,5 @@
 """Configuration manager for Domain Expert Agents."""
 
-import yaml
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -8,6 +7,8 @@ from datetime import datetime
 from lib.shared.helpers import sanitize_name
 from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE
 from lib.config.app_defaults_manager import get_llm_defaults
+from lib.shared.format_ops import read_yaml, write_yaml
+from lib.shared.file_ops import ensure_directory_exists
 
 
 class ConfigManager:
@@ -20,7 +21,7 @@ class ConfigManager:
             config_dir: Directory to store configuration files
         """
         self.config_dir = Path(config_dir)
-        self.config_dir.mkdir(exist_ok=True)
+        ensure_directory_exists(self.config_dir)
 
     def create_config(
         self,
@@ -88,8 +89,7 @@ class ConfigManager:
 
         # Config filename matches expert_id
         config_path = self.config_dir / f"{expert_id}.yaml"
-        with open(config_path, "w", encoding="utf-8") as f:
-            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        write_yaml(config_path, config)
 
         return expert_id
 
@@ -110,8 +110,9 @@ class ConfigManager:
         if not config_path.exists():
             raise FileNotFoundError(f"Configuration not found: {expert_id}")
 
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = yaml.safe_load(f)
+        config = read_yaml(config_path)
+        if config is None:
+            raise FileNotFoundError(f"Configuration not found: {expert_id}")
 
         return config
 
@@ -158,8 +159,7 @@ class ConfigManager:
 
         # Save config file
         config_path = self.config_dir / f"{expert_id}.yaml"
-        with open(config_path, "w", encoding="utf-8") as f:
-            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        write_yaml(config_path, config)
 
     def list_experts(self) -> List[Dict]:
         """List all available experts.
@@ -228,7 +228,7 @@ class ConfigManager:
             Generated system prompt (AI-generated or template fallback)
         """
         # Import here to avoid circular dependency
-        from lib.llm.llm_client import LLMClient
+        from lib.llm.client_pool import get_cached_client
 
         # Use user's default provider if not specified
         if provider is None:
@@ -240,7 +240,7 @@ class ConfigManager:
 
         try:
             # Try AI generation with specified provider and model
-            client = LLMClient(provider=provider, api_key=api_key)
+            client = get_cached_client(provider=provider, api_key=api_key)
             return client.generate_system_prompt(expert_name, description, temperature, model)
         except Exception:
             # Silent fallback to template
