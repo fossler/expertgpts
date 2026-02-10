@@ -10,6 +10,22 @@ from lib.shared.types import PageInfo
 from lib.shared.file_ops import ensure_directory_exists, safe_path_join
 
 
+# System pages that should not be treated as expert pages
+SYSTEM_PAGES = {"1000_Home.py", "9998_Settings.py", "9999_Help.py"}
+
+
+def is_system_page(filename: str) -> bool:
+    """Check if file is a system page (not an expert page).
+
+    Args:
+        filename: Name of the file to check
+
+    Returns:
+        bool: True if file is a system page, False otherwise
+    """
+    return filename.startswith("_") or filename in SYSTEM_PAGES
+
+
 class PageGenerator:
     """Generates new Streamlit pages for expert agents."""
 
@@ -50,12 +66,8 @@ class PageGenerator:
         existing_numbers = []
 
         for file in self.pages_dir.glob("*.py"):
-            # Skip system pages
-            if (file.name.startswith("_") or
-                file.name == "template.py" or
-                file.name == "1000_Home.py" or
-                file.name == "9998_Settings.py" or
-                file.name == "9999_Help.py"):
+            # Skip system pages using helper
+            if is_system_page(file.name) or file.name == "template.py":
                 continue
 
             try:
@@ -132,12 +144,8 @@ class PageGenerator:
         # Get existing page numbers
         existing_numbers = []
         for file in self.pages_dir.glob("*.py"):
-            # Skip hidden files, template, Home page, Settings page, and Help page
-            if (file.name.startswith("_") or
-                file.name == "template.py" or
-                file.name == "1000_Home.py" or
-                file.name == "9998_Settings.py" or
-                file.name == "9999_Help.py"):
+            # Skip system pages using helper
+            if is_system_page(file.name) or file.name == "template.py":
                 continue
             try:
                 # Extract number prefix (e.g., "1003_Coding_Expert.py" -> 1003)
@@ -164,7 +172,8 @@ class PageGenerator:
             True if deleted, False if not found
         """
         for page_file in self.pages_dir.glob("*.py"):
-            if page_file.name.startswith("_") or page_file.name == "template.py":
+            # Skip system pages using helper
+            if is_system_page(page_file.name):
                 continue
 
             try:
@@ -219,10 +228,8 @@ class PageGenerator:
             return index
 
         for page_file in _self.pages_dir.glob("*.py"):
-            # Skip system pages
-            if (page_file.name.startswith("_") or
-                page_file.name == "template.py" or
-                page_file.name in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]):
+            # Skip system pages using helper
+            if is_system_page(page_file.name) or page_file.name == "template.py":
                 continue
 
             # Parse filename to extract page number and expert name

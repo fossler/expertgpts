@@ -528,3 +528,50 @@ ensure_dialog_state("add_chat", "edit")
 - Use `read_toml()`/`write_toml()` for TOML operations instead of inline parsing
 - Use `read_json()`/`write_json()` for JSON operations instead of inline parsing
 - Path wrapper functions (`get_*_path()`) are kept for semantic clarity and maintainability
+
+### DRY Optimization Phase 2 (February 2026)
+
+Further DRY optimizations eliminated ~200+ lines of duplicated code across UI components, templates, and helper functions.
+
+**Key changes:**
+- **Removed duplicate `validate_expert_name()`** from `lib/ui/dialogs.py` (20 lines): Now uses shared function from `lib/shared/helpers.py`
+- **Added provider links to constants**: Created `PROVIDER_LINKS` dict and `get_provider_links()` function in `lib/shared/constants.py`
+- **Added avatar mapping to constants**: Created `PROVIDER_AVATARS` dict and `get_provider_avatar()` function in `lib/shared/constants.py`
+- **Added `get_system_prompt_with_language()` helper** to `lib/i18n/i18n.py`: Injects language prefix into system prompts
+- **Added `get_llm_metadata()` helper** to `lib/config/config_manager.py`: Extracts provider, model, and thinking_level with defaults
+- **Added `is_system_page()` helper** to `lib/shared/page_generator.py`: Centralizes system page filtering logic
+- **Updated `pages/9998_Settings.py`**: Now uses `get_provider_links()` for consistent provider link rendering
+- **Updated `templates/template.py`**:
+  - Removed duplicate `get_provider_avatar()` function
+  - Now uses `get_provider_avatar()`, `get_provider_links()`, `get_system_prompt_with_language()`, and `get_llm_metadata()` from shared modules
+  - Simplified metadata extraction in multiple functions
+
+**Benefits:**
+- **Eliminated ~200+ lines** of duplicated code
+- **Single source of truth** for provider links, avatars, and metadata extraction
+- **Easier maintenance**: Provider link/avatar changes now need to be made in one place only
+- **Better consistency**: All UI components render provider information identically
+- **Improved testability**: Shared functions are easier to unit test
+
+**New shared helper functions:**
+```python
+# lib/shared/constants.py
+get_provider_links(provider) -> str  # Returns markdown links to provider chat/platform
+get_provider_avatar(provider) -> str  # Returns path to provider avatar icon
+
+# lib/i18n/i18n.py
+get_system_prompt_with_language(raw_system_prompt) -> str  # Adds language prefix
+
+# lib/config/config_manager.py
+get_llm_metadata(config) -> tuple[str, str, str]  # Returns (provider, model, thinking_level)
+
+# lib/shared/page_generator.py
+is_system_page(filename) -> bool  # Checks if file is a system page (not expert page)
+```
+
+**Impact on development:**
+- Use `get_provider_links()` instead of inline provider link markdown
+- Use `get_provider_avatar()` instead of hardcoding avatar paths
+- Use `get_system_prompt_with_language()` instead of manually concatenating language prefix
+- Use `get_llm_metadata()` instead of repeatedly extracting metadata from config dict
+- Use `is_system_page()` instead of duplicating system page filtering logic

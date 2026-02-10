@@ -144,17 +144,12 @@ def render_api_key_section():
     # Resources links
     st.subheader(f"📚 {i18n.t('api_key.resources')}")
 
-    from lib.shared.constants import get_provider_display_name
+    from lib.shared.constants import get_provider_display_name, get_provider_links
 
     # Provider name and links (one-liner)
     provider_name = get_provider_display_name(selected_provider)
-
-    if selected_provider == "deepseek":
-        st.markdown(f"**{provider_name}:** [Chat](https://chat.deepseek.com/) | [Platform](https://platform.deepseek.com/usage)")
-    elif selected_provider == "openai":
-        st.markdown(f"**{provider_name}:** [Chat](https://chatgpt.com/) | [Platform](https://platform.openai.com/usage)")
-    elif selected_provider == "zai":
-        st.markdown(f"**{provider_name}:** [Chat](https://chat.z.ai/) | [Platform](https://z.ai/manage-apikey/subscription)")
+    provider_links_md = get_provider_links(selected_provider)
+    st.markdown(f"**{provider_name}:** {provider_links_md}")
 
 
 def render_default_llm_settings_section():

@@ -67,6 +67,22 @@ LLM_PROVIDERS = {
     }
 }
 
+# Provider Platform Links (for API usage monitoring and chat interfaces)
+PROVIDER_LINKS = {
+    "deepseek": {
+        "chat": "https://chat.deepseek.com/",
+        "platform": "https://platform.deepseek.com/usage"
+    },
+    "openai": {
+        "chat": "https://chatgpt.com/",
+        "platform": "https://platform.openai.com/usage"
+    },
+    "zai": {
+        "chat": "https://chat.z.ai/",
+        "platform": "https://z.ai/manage-apikey/subscription"
+    }
+}
+
 # Performance Optimization: Pre-computed lookup tables for O(1) access
 # These eliminate nested dictionary lookups and provide direct access paths
 
@@ -452,3 +468,38 @@ def get_default_model_for_provider(provider: str) -> str:
     if provider not in DEFAULT_MODELS:
         raise ValueError(f"Unknown provider: {provider}. Available: {list(DEFAULT_MODELS.keys())}")
     return DEFAULT_MODELS[provider]
+
+
+def get_provider_links(provider: str) -> str:
+    """Get provider platform links as markdown.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str: Markdown-formatted links to provider chat and platform
+    """
+    links = PROVIDER_LINKS.get(provider, {})
+    chat_url = links.get("chat", "#")
+    platform_url = links.get("platform", "#")
+    return f"[Chat]({chat_url}) | [Platform]({platform_url})"
+
+
+# Provider Avatar Icons
+PROVIDER_AVATARS = {
+    "deepseek": "icons/deepseek_icon_blue.png",
+    "openai": "icons/OpenAI-black-monoblossom.png",
+    "zai": "icons/zai_logo.svg"
+}
+
+
+def get_provider_avatar(provider: str) -> str:
+    """Get avatar icon path for a provider.
+
+    Args:
+        provider: Provider key (e.g., "deepseek", "openai", "zai")
+
+    Returns:
+        str: Path to avatar icon relative to project root
+    """
+    return PROVIDER_AVATARS.get(provider.lower(), "icons/deepseek_icon_blue.png")

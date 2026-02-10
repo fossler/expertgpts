@@ -4,37 +4,14 @@ This module contains reusable dialog components to avoid code duplication
 across multiple pages.
 """
 
-import re
 import streamlit as st
 from pathlib import Path
 from lib.config.config_manager import ConfigManager
 from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
-from lib.shared.helpers import sanitize_name
+from lib.shared.helpers import sanitize_name, validate_expert_name
 from lib.i18n.i18n import i18n
-
-
-def validate_expert_name(name: str) -> tuple[bool, str]:
-    """Validate expert name for alphanumerics and special characters.
-
-    Args:
-        name: Expert name to validate
-
-    Returns:
-        tuple: (is_valid, error_message)
-    """
-    if not name:
-        return False, i18n.t('errors.expert_name_empty')
-
-    # Regex pattern for allowed characters
-    pattern = r'^[A-Za-z0-9_.\- ]+$'
-
-    if not re.match(pattern, name):
-        allowed = i18n.t('forms.allowed_characters_desc')
-        return False, i18n.t('errors.expert_name_invalid_chars', allowed=allowed)
-
-    return True, ""
 
 
 def render_temperature_input(value: float = 1.0, provider: str = None) -> float:

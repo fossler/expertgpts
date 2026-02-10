@@ -260,3 +260,20 @@ class ConfigManager:
             expert_name=expert_name,
             description=description
         )
+
+
+def get_llm_metadata(config: dict) -> tuple[str, str, str]:
+    """Extract LLM metadata with defaults.
+
+    Args:
+        config: Expert configuration dictionary
+
+    Returns:
+        tuple: (provider, model, thinking_level) with defaults
+    """
+    metadata = config.get("metadata", {})
+    return (
+        metadata.get("provider", "deepseek"),
+        metadata.get("model", "deepseek-chat"),
+        metadata.get("thinking_level", "none")
+    )

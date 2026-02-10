@@ -20,6 +20,8 @@ from lib.shared.constants import (
     get_default_model_for_provider,
     get_expert_behavior_docs,
     get_expert_behavior_docs_edit,
+    get_provider_links,
+    get_provider_avatar,
 )
 from lib.shared.helpers import sanitize_name, translate_expert_name, validate_expert_name, validate_api_key
 from lib.shared.file_ops import (
@@ -95,6 +97,8 @@ __all__ = [
     "get_default_model_for_provider",
     "get_expert_behavior_docs",
     "get_expert_behavior_docs_edit",
+    "get_provider_links",
+    "get_provider_avatar",
     # Helpers
     "sanitize_name",
     "translate_expert_name",

@@ -8,6 +8,7 @@ import time
 import streamlit as st
 from pathlib import Path
 from lib.config import ConfigManager
+from lib.config.config_manager import get_llm_metadata
 from lib.llm import LLMClient, TokenManager
 from lib.shared.session_state import initialize_shared_session_state
 from lib.i18n import i18n
@@ -21,6 +22,8 @@ from lib.shared import (
     LLM_PROVIDERS,
     get_provider_display_name,
     get_model_display_name,
+    get_provider_avatar,
+    get_provider_links,
     get_max_tokens,
     CONTEXT_USAGE_ALERT_THRESHOLD,
     CONTEXT_USAGE_WARNING_THRESHOLD,
@@ -36,23 +39,6 @@ from lib.storage import StreamingCache
 # Expert Configuration
 EXPERT_ID = "{{EXPERT_ID}}"
 EXPERT_NAME = "{{EXPERT_NAME}}"
-
-
-def get_provider_avatar(provider: str) -> str:
-    """Get avatar icon path for a provider.
-
-    Args:
-        provider: Provider name (deepseek, openai, zai)
-
-    Returns:
-        Path to avatar icon relative to project root
-    """
-    avatars = {
-        "deepseek": "icons/deepseek_icon_blue.png",
-        "openai": "icons/OpenAI-black-monoblossom.png",
-        "zai": "icons/zai_logo.svg"
-    }
-    return avatars.get(provider.lower(), "icons/deepseek_icon_blue.png")
 
 
 def initialize_session_state():
@@ -339,10 +325,9 @@ def render_chat_interface(config: dict, messages_key: str):
         st.divider()
 
     # Display chat messages
-    metadata = config.get("metadata", {})
+    provider, _, _ = get_llm_metadata(config)
     for message in st.session_state[messages_key]:
         if message["role"] == "assistant":
-            provider = metadata.get("provider", "deepseek")
             avatar = get_provider_avatar(provider)
             with st.chat_message("assistant", avatar=avatar):
                 st.markdown(message["content"])
@@ -360,10 +345,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
         messages_key: Session state key for this expert's messages
     """
     # Get provider and model from config metadata
-    metadata = config.get("metadata", {})
-    provider = metadata.get("provider", "deepseek")
-    model = metadata.get("model", "deepseek-chat")
-    thinking_level = metadata.get("thinking_level", "none")
+    provider, model, thinking_level = get_llm_metadata(config)
 
     if prompt := st.chat_input(i18n.t("home.chat_input_placeholder")):
         # Validate API key format
@@ -404,11 +386,10 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 if provider == "openai":
                     api_temperature = 1.0
 
-                # Get system prompt from config and inject language prefix
+                # Get system prompt with language prefix
                 # This ensures AI responds in the user's preferred language
                 raw_system_prompt = config.get("system_prompt", "")
-                language_prefix = i18n.get_language_prefix()
-                system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
+                system_prompt_with_lang = i18n.get_system_prompt_with_language(raw_system_prompt)
 
                 # Initialize streaming cache
                 cache = StreamingCache(EXPERT_ID)
@@ -506,10 +487,7 @@ def display_model_settings(config: dict, messages_key: str):
         messages_key: Session state key for this expert's messages
     """
     # Get provider and model from config metadata
-    metadata = config.get("metadata", {})
-    provider = metadata.get("provider", "deepseek")
-    model = metadata.get("model", "deepseek-chat")
-    thinking_level = metadata.get("thinking_level", "none")
+    provider, model, thinking_level = get_llm_metadata(config)
 
     # Get cache version for dynamic widget keys (ensures fresh state after save)
     cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
@@ -579,12 +557,7 @@ def display_model_settings(config: dict, messages_key: str):
         )
 
     # Display provider links below temperature
-    if provider == "deepseek":
-        st.sidebar.markdown("[Chat](https://chat.deepseek.com/) | [Platform](https://platform.deepseek.com/usage)")
-    elif provider == "openai":
-        st.sidebar.markdown("[Chat](https://chatgpt.com/) | [Platform](https://platform.openai.com/usage)")
-    elif provider == "zai":
-        st.sidebar.markdown("[Chat](https://chat.z.ai/) | [Platform](https://z.ai/manage-apikey/subscription)")
+    st.sidebar.markdown(get_provider_links(provider))
 
     # Save button if any setting changed
     if (new_model != model or
@@ -618,9 +591,7 @@ def display_context_usage(config: dict, messages_key: str):
         messages_key: Session state key for this expert's messages
     """
     # Get provider and model from config metadata
-    metadata = config.get("metadata", {})
-    provider = metadata.get("provider", "deepseek")
-    model = metadata.get("model", "deepseek-chat")
+    provider, model, _ = get_llm_metadata(config)
 
     # Get provider/model-specific max tokens
     max_tokens = get_max_tokens(provider, model)
@@ -628,8 +599,7 @@ def display_context_usage(config: dict, messages_key: str):
     # Calculate usage statistics using TokenManager
     # Use system prompt with language prefix for accurate token counting
     raw_system_prompt = config.get("system_prompt", "")
-    language_prefix = i18n.get_language_prefix()
-    system_prompt = f"{language_prefix}\n\n{raw_system_prompt}"
+    system_prompt = i18n.get_system_prompt_with_language(raw_system_prompt)
     messages = st.session_state.get(messages_key, [])
 
     try:
@@ -678,9 +648,8 @@ def main():
         st.error(i18n.t("sidebar.config_not_found", expert_id=EXPERT_ID))
         st.stop()
 
-    # Get provider and model from config metadata
-    metadata = config.get("metadata", {})
-    provider = metadata.get("provider", "deepseek")
+    # Get provider from config metadata
+    provider, _, _ = get_llm_metadata(config)
 
     # Get provider-specific API key from session state
     api_keys = st.session_state.get("api_keys", {})

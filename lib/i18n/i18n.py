@@ -313,6 +313,18 @@ class I18nManager:
             # Different names (e.g., French / Français, Italian / Italiano)
             return f"You must respond in {english_name} ({native_name})."
 
+    def get_system_prompt_with_language(self, raw_system_prompt: str) -> str:
+        """Inject language prefix into system prompt.
+
+        Args:
+            raw_system_prompt: The system prompt from expert configuration
+
+        Returns:
+            str: System prompt with language instruction prepended
+        """
+        language_prefix = self.get_language_prefix()
+        return f"{language_prefix}\n\n{raw_system_prompt}"
+
     def set_language(self, lang: str):
         """Set current language, persist it, and rerun app.
 
