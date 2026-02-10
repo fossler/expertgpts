@@ -12,10 +12,16 @@ from lib.config import ConfigManager
 from lib.shared.page_generator import PageGenerator
 from lib.shared.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
 from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
+from lib.ui.dialogs import render_thinking_mode_ui, render_model_selection
 from lib.shared.helpers import sanitize_name, translate_expert_name, validate_expert_name
 from lib.config import secrets_manager
 from lib.config import config_toml_manager
-from lib.shared.session_state import initialize_shared_session_state, handle_pending_navigation
+from lib.shared.session_state import (
+    initialize_shared_session_state,
+    handle_pending_navigation,
+    invalidate_expert_cache,
+    ensure_dialog_state
+)
 from lib.shared.file_ops import safe_path_join, validate_cwd
 
 
@@ -36,7 +42,6 @@ def initialize_session_state():
     initialize_shared_session_state()
 
     # Initialize add chat dialog state (using shared helper)
-    from lib.shared.session_state import ensure_dialog_state
     ensure_dialog_state("add_chat")
 
     # Initialize active tab state
@@ -221,43 +226,18 @@ def render_default_llm_settings_section():
     if st.session_state.get("default_model") != default_model:
         st.session_state.default_model = default_model
 
-    # Default thinking mode - show different UI based on provider
+    # Default thinking mode (using shared helper)
     current_thinking = st.session_state.get("default_thinking_level", "none")
 
-    if default_provider == "openai":
-        # Show selectbox for OpenAI (use half width like temperature)
-        col1, col2 = st.columns(2)
-        with col1:
-            effort_options = ["none", "low", "medium", "high", "xhigh"]
-            effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
-            default_thinking_level = st.selectbox(
-                f"🧠 {i18n.t('default_llm.select_thinking_mode')}",
-                options=effort_options,
-                index=effort_index,
-                help=i18n.t('default_llm.thinking_mode_help'),
-                key="default_thinking_selector"
-            )
-    elif default_provider == "zai":
-        # Show selectbox for Z.AI (optional thinking mode)
-        col1, col2 = st.columns(2)
-        with col1:
-            thinking_options = [i18n.t('sidebar.disabled'), i18n.t('sidebar.enabled')]
-            # Map current_thinking to index ("none" -> 0, "medium" -> 1)
-            option_index = 1 if current_thinking and current_thinking != "none" else 0
-            selected_option = st.selectbox(
-                f"🧠 {i18n.t('default_llm.thinking_mode')}",
-                options=thinking_options,
-                index=option_index,
-                help=i18n.t('default_llm.thinking_mode_help_zai'),
-                key="default_thinking_selector"
-            )
-            # Convert back to string ("Disabled" -> "none", "Enabled" -> "medium")
-            default_thinking_level = "medium" if selected_option == i18n.t('sidebar.enabled') else "none"
-    else:
-        # DeepSeek: Thinking mode depends on model (no default setting needed)
-        # deepseek-chat: no thinking support
-        # deepseek-reasoner: thinking always enabled
-        default_thinking_level = "none"
+    # Note: We use "default" label for Settings page context
+    default_thinking_level = render_thinking_mode_ui(
+        provider=default_provider,
+        current_thinking=current_thinking,
+        widget_key="default_thinking_selector",
+        label=f"🧠 {i18n.t('default_llm.thinking_mode') if default_provider == 'zai' else i18n.t('default_llm.select_thinking_mode')}",
+        help_text=i18n.t('default_llm.thinking_mode_help') if default_provider == "openai" else i18n.t('default_llm.thinking_mode_help_zai') if default_provider == "zai" else None,
+        use_sidebar=False
+    )
 
     # Save defaults button
     if st.button(f"💾 {i18n.t('buttons.save_defaults')}", type="primary", key="save_defaults"):
@@ -767,8 +747,8 @@ def render_edit_expert_dialog():
                     }
                 )
 
-                # Invalidate cache for this expert
-                st.session_state[f"cache_version_{editing_expert_id}"] = st.session_state.get(f"cache_version_{editing_expert_id}", 0) + 1
+                # Invalidate cache for this expert (using shared helper)
+                invalidate_expert_cache(editing_expert_id)
 
                 # Clear the editing state
                 _set_dialog_state("editing_expert", editing_expert_id)

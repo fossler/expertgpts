@@ -14,47 +14,165 @@ from lib.shared.helpers import sanitize_name, validate_expert_name
 from lib.i18n.i18n import i18n
 
 
-def render_temperature_input(value: float = 1.0, provider: str = None) -> float:
-    """Render temperature slider input field with half width.
+def render_thinking_mode_ui(
+    provider: str,
+    current_thinking: str,
+    widget_key: str,
+    label: str = None,
+    help_text: str = None,
+    use_sidebar: bool = False
+) -> str:
+    """Render thinking mode UI based on provider.
+
+    This helper function centralizes thinking mode rendering logic,
+    eliminating duplication across template.py, Settings.py, and dialogs.py.
+
+    Args:
+        provider: LLM provider (openai, zai, deepseek)
+        current_thinking: Current thinking level
+        widget_key: Unique key for the widget
+        label: Optional label (auto-generated if None)
+        help_text: Optional help text
+        use_sidebar: If True, use st.sidebar instead of st
+
+    Returns:
+        str: The thinking level value
+    """
+    st_func = st.sidebar if use_sidebar else st
+
+    if provider == "openai":
+        effort_options = ["none", "low", "medium", "high", "xhigh"]
+        effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
+        thinking_level = st_func.selectbox(
+            label or i18n.t("sidebar.thinking_mode"),
+            options=effort_options,
+            index=effort_index,
+            format_func=lambda x: x.capitalize(),
+            help=help_text,
+            key=widget_key
+        )
+        return thinking_level
+    elif provider == "zai":
+        thinking_options = [i18n.t("sidebar.disabled"), i18n.t("sidebar.enabled")]
+        option_index = 1 if current_thinking and current_thinking != "none" else 0
+        selected_option = st_func.selectbox(
+            label or i18n.t("sidebar.thinking_mode"),
+            options=thinking_options,
+            index=option_index,
+            help=help_text,
+            key=widget_key
+        )
+        return "medium" if selected_option == i18n.t("sidebar.enabled") else "none"
+    else:
+        # DeepSeek or other providers: no thinking mode control
+        return current_thinking or "none"
+
+
+def render_model_selection(
+    provider: str,
+    current_model: str,
+    widget_key: str,
+    label: str = None,
+    help_text: str = None,
+    use_sidebar: bool = False,
+    update_session_state: bool = False,
+    session_state_key: str = None
+) -> str:
+    """Render model selection dropdown for a provider.
+
+    This helper function centralizes model selection logic,
+    eliminating duplication across Settings.py, template.py, and dialogs.py.
+
+    Args:
+        provider: LLM provider
+        current_model: Currently selected model
+        widget_key: Unique widget key
+        label: Optional label (auto-generated if None)
+        help_text: Optional help text
+        use_sidebar: If True, use st.sidebar
+        update_session_state: If True, update session state
+        session_state_key: Session state key to update (e.g., "default_model")
+
+    Returns:
+        str: Selected model
+    """
+    st_func = st.sidebar if use_sidebar else st
+    model_options = list(LLM_PROVIDERS[provider]["models"].keys())
+
+    # Handle model not in options
+    if current_model not in model_options:
+        current_model = get_default_model_for_provider(provider)
+        if update_session_state and session_state_key:
+            st.session_state[session_state_key] = current_model
+
+    model_index = model_options.index(current_model) if current_model in model_options else 0
+
+    selected_model = st_func.selectbox(
+        label or i18n.t("sidebar.model"),
+        options=model_options,
+        index=model_index,
+        format_func=lambda x: get_model_display_name(provider, x),
+        help=help_text,
+        key=widget_key
+    )
+
+    if update_session_state and session_state_key:
+        st.session_state[session_state_key] = selected_model
+
+    return selected_model
+
+
+def render_temperature_input(
+    value: float = 1.0,
+    provider: str = None,
+    use_sidebar: bool = False,
+    widget_key: str = None,
+    show_help: bool = True
+) -> float:
+    """Render temperature input field.
 
     Args:
         value: Current temperature value (default: 1.0)
         provider: LLM provider (to disable slider for OpenAI)
+        use_sidebar: If True, render in sidebar
+        widget_key: Unique widget key
+        show_help: If True, show help expander
 
     Returns:
         float: Temperature value from user input
     """
-    # Use half width (1/2) for temperature field
-    col1, col2 = st.columns(2)
+    st_func = st.sidebar if use_sidebar else st
 
-    with col1:
-        # OpenAI models only support temperature=1.0
-        if provider == "openai":
-            temperature = st.number_input(
-                i18n.t('forms.temperature'),
-                min_value=0.0,
-                max_value=2.0,
-                value=1.0,
-                step=0.01,
-                help=i18n.t('dialogs.temperature.fixed_for_openai'),
-                disabled=True,
-                format="%.2f"
-            )
+    # OpenAI models only support temperature=1.0
+    if provider == "openai":
+        temperature = st_func.number_input(
+            i18n.t('forms.temperature'),
+            min_value=0.0,
+            max_value=2.0,
+            value=1.0,
+            step=0.01,
+            help=i18n.t('dialogs.temperature.fixed_for_openai') if show_help else None,
+            disabled=True,
+            format="%.2f",
+            key=widget_key
+        )
+        if show_help:
             st.caption(f"⚠️ {i18n.t('dialogs.temperature.openai_warning')}")
-        else:
-            temperature = st.number_input(
-                i18n.t('forms.temperature'),
-                min_value=0.0,
-                max_value=2.0,
-                value=value,
-                step=0.1,
-                help=i18n.t('dialogs.temperature.help_creativity'),
-                format="%.1f"
-            )
+    else:
+        temperature = st_func.number_input(
+            i18n.t('forms.temperature'),
+            min_value=0.0,
+            max_value=2.0,
+            value=value,
+            step=0.1,
+            help=i18n.t('dialogs.temperature.help_creativity') if show_help else None,
+            format="%.1f",
+            key=widget_key
+        )
 
         # Add expander with detailed temperature guidance (only for non-OpenAI)
-        if provider != "openai":
-            with st.expander(f"📖 {i18n.t('dialogs.temperature.recommended_values')}", expanded=False):
+        if show_help:
+            with (st.sidebar if use_sidebar else st).expander(f"📖 {i18n.t('dialogs.temperature.recommended_values')}", expanded=False):
                 st.markdown(f"**{i18n.t('dialogs.temperature.use_case_guidelines')}**\n")
                 st.markdown(f"• **0.0** - {i18n.t('dialogs.temperature.coding')}")
                 st.markdown(f"• **1.0** - {i18n.t('dialogs.temperature.data_analysis')}")
@@ -349,9 +467,8 @@ def create_new_expert(
     page_generator.clear_page_cache()
 
     # Invalidate cache for this expert
-    if f"cache_version_{expert_id}" not in st.session_state:
-        st.session_state[f"cache_version_{expert_id}"] = 0
-    st.session_state[f"cache_version_{expert_id}"] += 1
+    from lib.shared.session_state import invalidate_expert_cache
+    invalidate_expert_cache(expert_id)
 
     return expert_id, page_path
 

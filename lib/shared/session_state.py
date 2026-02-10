@@ -217,3 +217,25 @@ def ensure_dialog_state(*dialog_names: str) -> None:
         key = f"show_{name}_dialog"
         if key not in st.session_state:
             st.session_state[key] = False
+
+
+def invalidate_expert_cache(expert_id: str) -> None:
+    """Increment cache version for an expert to force config reload.
+
+    This helper function centralizes cache invalidation logic, ensuring
+    consistent behavior across all pages when expert configs are modified.
+
+    Args:
+        expert_id: The expert's unique identifier
+
+    Example:
+        # Before (inconsistent approaches):
+        if f"cache_version_{expert_id}" not in st.session_state:
+            st.session_state[f"cache_version_{expert_id}"] = 0
+        st.session_state[f"cache_version_{expert_id}"] += 1
+
+        # After (using helper):
+        invalidate_expert_cache(expert_id)
+    """
+    cache_key = f"cache_version_{expert_id}"
+    st.session_state[cache_key] = st.session_state.get(cache_key, 0) + 1

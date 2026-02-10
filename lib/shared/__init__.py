@@ -46,6 +46,8 @@ from lib.shared.format_ops import (
 from lib.shared.session_state import (
     initialize_shared_session_state,
     handle_pending_navigation,
+    invalidate_expert_cache,
+    ensure_dialog_state,
 )
 
 # Page generation
@@ -122,6 +124,8 @@ __all__ = [
     # Session state
     "initialize_shared_session_state",
     "handle_pending_navigation",
+    "invalidate_expert_cache",
+    "ensure_dialog_state",
     # Page generation
     "PageGenerator",
     # Types

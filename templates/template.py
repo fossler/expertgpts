@@ -31,6 +31,8 @@ from lib.shared import (
     CONTEXT_USAGE_COLORS,
     CONFIG_CACHE_TTL
 )
+from lib.ui.dialogs import render_temperature_input, render_thinking_mode_ui, render_model_selection
+from lib.shared.session_state import invalidate_expert_cache
 from lib.shared.format_ops import read_json
 from lib.shared.helpers import validate_api_key
 from lib.storage import StreamingCache
@@ -495,66 +497,31 @@ def display_model_settings(config: dict, messages_key: str):
     # Display model settings (editable)
     st.sidebar.markdown(f"### ⚙️ {i18n.t('sidebar.model_settings')}")
 
-    # Model selection (filtered by current provider)
-    from lib.shared.constants import LLM_PROVIDERS, get_default_model_for_provider
-    model_options = list(LLM_PROVIDERS[provider]["models"].keys())
-    current_model_index = model_options.index(model) if model in model_options else 0
-
-    new_model = st.sidebar.selectbox(
-        i18n.t("sidebar.model"),
-        options=model_options,
-        index=current_model_index,
-        format_func=lambda x: get_model_display_name(provider, x),
-        key=f"{EXPERT_ID}_model_selector_v{cache_version}"
+    # Model selection (using shared helper)
+    new_model = render_model_selection(
+        provider=provider,
+        current_model=model,
+        widget_key=f"{EXPERT_ID}_model_selector_v{cache_version}",
+        use_sidebar=True
     )
 
-    # Thinking Mode Level (provider-specific)
-    new_thinking_level = thinking_level
-    if provider == "openai":
-        effort_options = ["none", "low", "medium", "high", "xhigh"]
-        effort_index = effort_options.index(thinking_level) if thinking_level in effort_options else 0
-        new_thinking_level = st.sidebar.selectbox(
-            i18n.t("sidebar.thinking_mode"),
-            options=effort_options,
-            index=effort_index,
-            format_func=lambda x: x.capitalize(),
-            key=f"{EXPERT_ID}_thinking_selector_v{cache_version}"
-        )
-    elif provider == "zai":
-        thinking_options = [i18n.t("sidebar.disabled"), i18n.t("sidebar.enabled")]
-        option_index = 1 if thinking_level and thinking_level != "none" else 0
-        selected_option = st.sidebar.selectbox(
-            i18n.t("sidebar.thinking_mode"),
-            options=thinking_options,
-            index=option_index,
-            key=f"{EXPERT_ID}_thinking_selector_v{cache_version}"
-        )
-        new_thinking_level = "medium" if selected_option == i18n.t("sidebar.enabled") else "none"
-    # DeepSeek: no thinking mode control
+    # Thinking Mode Level (using shared helper)
+    new_thinking_level = render_thinking_mode_ui(
+        provider=provider,
+        current_thinking=thinking_level,
+        widget_key=f"{EXPERT_ID}_thinking_selector_v{cache_version}",
+        use_sidebar=True
+    )
 
-    # Temperature (editable, but disabled for OpenAI)
+    # Temperature (using shared helper)
     current_temperature = config.get("temperature", 1.0)
-    if provider == "openai":
-        new_temperature = st.sidebar.number_input(
-            i18n.t("sidebar.temperature"),
-            min_value=0.0,
-            max_value=2.0,
-            value=1.0,
-            step=0.01,
-            disabled=True,
-            format="%.2f",
-            key=f"{EXPERT_ID}_temperature_input_v{cache_version}"
-        )
-    else:
-        new_temperature = st.sidebar.number_input(
-            i18n.t("sidebar.temperature"),
-            min_value=0.0,
-            max_value=2.0,
-            value=float(current_temperature),
-            step=0.1,
-            format="%.1f",
-            key=f"{EXPERT_ID}_temperature_input_v{cache_version}"
-        )
+    new_temperature = render_temperature_input(
+        value=float(current_temperature),
+        provider=provider,
+        use_sidebar=True,
+        widget_key=f"{EXPERT_ID}_temperature_input_v{cache_version}",
+        show_help=False
+    )
 
     # Display provider links below temperature
     st.sidebar.markdown(get_provider_links(provider))
@@ -574,9 +541,8 @@ def display_model_settings(config: dict, messages_key: str):
                         "temperature": new_temperature
                     }
                 )
-                # Invalidate cache to force reload
-                cache_key = f"cache_version_{EXPERT_ID}"
-                st.session_state[cache_key] = st.session_state.get(cache_key, 0) + 1
+                # Invalidate cache to force reload (using shared helper)
+                invalidate_expert_cache(EXPERT_ID)
                 st.success("✅ Settings saved successfully!")
                 st.rerun()
             except Exception as e:
