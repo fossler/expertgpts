@@ -370,6 +370,40 @@ def render_provider_selection(
 
     return provider, model, thinking_level
 
+def render_api_key_status(
+    show_provider_name: bool = False,
+    use_sidebar: bool = False
+) -> None:
+    """Render API key status display.
+
+    This helper function centralizes API key status display logic,
+    eliminating duplication across Home.py, Settings.py, and dialogs.py.
+
+    Args:
+        show_provider_name: If True, show which provider has the key
+        use_sidebar: If True, render in sidebar
+    """
+    st_func = st.sidebar if use_sidebar else st
+
+    # Check for API keys
+    api_keys = st.session_state.get("api_keys", {})
+
+    # Simple status (for sidebar and simple contexts)
+    if not show_provider_name:
+        if any(api_keys.values()):
+            st_func.success(f"✅ {i18n.t('status.api_key_configured')}")
+        else:
+            st_func.caption(f"⚠️ {i18n.t('status.api_key_not_set')}")
+    else:
+        # Detailed status (for Settings page)
+        available_providers = [p for p, key in api_keys.items() if key]
+        if available_providers:
+            providers_str = ", ".join([get_provider_display_name(p) for p in available_providers])
+            st_func.success(f"✅ {i18n.t('status.api_keys_configured_for', providers=providers_str)}")
+        else:
+            st_func.caption(f"⚠️ {i18n.t('status.api_key_not_set')}")
+
+
 def create_new_expert(
     chat_name: str,
     description: str,
@@ -504,6 +538,9 @@ def render_add_chat_dialog():
             st.switch_page("pages/9998_Settings.py")
 
         return
+
+    # Show API key status (using shared helper)
+    render_api_key_status(show_provider_name=True)
 
     # LLM Configuration (Provider, Model, Temperature, Thinking)
     provider, model, temperature, thinking_level = render_llm_configuration()

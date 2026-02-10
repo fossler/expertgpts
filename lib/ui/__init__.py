@@ -7,6 +7,7 @@ from lib.ui.dialogs import (
     render_temperature_input,
     render_thinking_mode_ui,
     render_model_selection,
+    render_api_key_status,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "render_temperature_input",
     "render_thinking_mode_ui",
     "render_model_selection",
+    "render_api_key_status",
 ]

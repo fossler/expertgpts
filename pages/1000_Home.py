@@ -5,7 +5,7 @@ Welcome page for the ExpertGPTs multi-expert AI chat application.
 
 import streamlit as st
 from lib.config import ConfigManager
-from lib.ui import render_add_chat_dialog
+from lib.ui import render_add_chat_dialog, render_api_key_status
 from lib.i18n import i18n
 
 
@@ -47,12 +47,8 @@ def main():
         # Status section
         st.caption(f"**{i18n.t('home.status')}**")
 
-        # API Key status (check if any provider key is set)
-        api_keys = st.session_state.get("api_keys", {})
-        if any(api_keys.values()):
-            st.success(f"✅ {i18n.t('status.api_key_configured')}")
-        else:
-            st.caption(f"⚠️ {i18n.t('status.api_key_not_set')}")
+        # API Key status (using shared helper)
+        render_api_key_status(use_sidebar=True)
 
         st.divider()
 

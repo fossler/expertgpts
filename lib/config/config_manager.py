@@ -277,3 +277,24 @@ def get_llm_metadata(config: dict) -> tuple[str, str, str]:
         metadata.get("model", "deepseek-chat"),
         metadata.get("thinking_level", "none")
     )
+
+
+def get_expert_config_safe(expert_id: str) -> dict:
+    """Load expert configuration with safe error handling.
+
+    This helper function centralizes config loading logic with consistent
+    error handling, eliminating duplicated try/except patterns across
+    template.py, Settings.py, and dialogs.py.
+
+    Args:
+        expert_id: Unique ID of the expert
+
+    Returns:
+        Configuration dictionary, or empty dict if not found
+    """
+    config_manager = ConfigManager()
+    try:
+        config = config_manager.load_config(expert_id)
+        return config
+    except FileNotFoundError:
+        return {}
