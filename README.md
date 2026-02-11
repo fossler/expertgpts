@@ -13,11 +13,15 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 - **🌍 Full Internationalization** - 13 languages with automatic detection and AI language response
 - **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
-- **🔒 Secure API Key Management** - API keys stored securely with automatic file permissions
 - **💾 Persistent Chat History** - Conversations saved automatically per expert
 - **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0) for each expert
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
 - **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
+
+## Code Hosting
+
+- **GitHub**: [https://github.com/fossler/expertgpts](https://github.com/fossler/expertgpts) (primary)
+- **Gitee**: [https://gitee.com/mirzet/expertgpts](https://gitee.com/mirzet/expertgpts) (mirror)
 
 ## Pay Only for What You Use: The Economic and Strategic Advantages of API-Based AI Chats
 
