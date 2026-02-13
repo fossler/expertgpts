@@ -199,8 +199,8 @@ class ConfigManager:
     def _load_config_partial(self, expert_id: str) -> Optional[Dict]:
         """Load only metadata fields from expert config.
 
-        Parses first 30 lines of YAML to extract expert_id, name,
-        description, and metadata without loading the full system_prompt.
+        Loads the full config but extracts only the fields needed for
+        list display, discarding system_prompt to save memory.
 
         Args:
             expert_id: Unique ID of the expert
@@ -214,24 +214,21 @@ class ConfigManager:
             return None
 
         try:
-            # Read only first 30 lines (metadata is at the top)
-            with open(config_path, 'r', encoding='utf-8') as f:
-                header_lines = []
-                for i, line in enumerate(f):
-                    if i >= 30:
-                        break
-                    header_lines.append(line)
+            config = read_yaml(config_path)
 
-            partial_yaml = ''.join(header_lines)
-
-            import yaml
-            data = yaml.safe_load(partial_yaml)
-
-            # Ensure required fields exist
-            if not data or "expert_id" not in data:
+            if not config or "expert_id" not in config:
                 return None
 
-            return data
+            # Return only fields needed for list display
+            return {
+                "expert_id": config["expert_id"],
+                "expert_name": config["expert_name"],
+                "description": config["description"],
+                "temperature": config.get("temperature", 1.0),
+                "metadata": config.get("metadata", {}),
+                "created_at": config.get("created_at", "Unknown"),
+                # Note: system_prompt intentionally excluded
+            }
         except Exception:
             return None
 
