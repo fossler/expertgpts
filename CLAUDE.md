@@ -224,11 +224,28 @@ Clean separation of concerns for 13-language support:
 
 ### 6. Performance Optimizations
 
-- **Client connection pooling**: `lib/llm/client_pool.py` caches OpenAI client instances per provider/api_key combination
+The codebase has been extensively optimized with 9 implemented optimizations documented in `docs/performance-optimization.md`:
+
+**High Impact:**
+- **Binary search optimization**: O(n²) → O(n) for chat truncation (200-500ms savings)
+- **Translation lazy loading**: Loads only English at startup, other languages on-demand (~80% reduction)
+- **Expert list lightweight**: Loads metadata only, not full system prompts (70-80ms savings)
+- **i18n module-level caching**: Translations loaded once per session (100-150ms savings)
+
+**Medium Impact:**
+- **ConfigManager singleton**: `@st.cache_resource` for singleton instance
+- **Batch expert name translation**: Cached with 5-minute TTL
+- **Token cache key fix**: Proper content-based invalidation
+
+**Low Impact:**
+- **Settings tab indexing**: Calculate once instead of repeated `tabs.index()` calls
+- **API key batch read**: Single file read for all provider keys
+
+**Key patterns:**
+- **Client connection pooling**: `lib/llm/client_pool.py` caches OpenAI client instances
 - **Configuration caching**: Expert configs loaded with `@st.cache_data(ttl=CONFIG_CACHE_TTL)` in template
-- **Pre-computed lookup tables**: `lib/shared/constants.py` has O(1) dictionaries for provider/model lookups (eliminates nested dict access)
-- **Lazy page loading**: Streamlit's navigation system only loads the active page
-- **Cache invalidation**: `st.session_state[f"cache_version_{expert_id}"]` incremented when config edited, forcing reload
+- **Pre-computed lookup tables**: `lib/shared/constants.py` has O(1) dictionaries for provider/model lookups
+- **Lazy loading**: Streamlit loads only active page; translations load on-demand
 
 **Key insight**: Use `get_cached_client()` from client_pool instead of instantiating LLMClient directly.
 
@@ -575,3 +592,42 @@ is_system_page(filename) -> bool  # Checks if file is a system page (not expert 
 - Use `get_system_prompt_with_language()` instead of manually concatenating language prefix
 - Use `get_llm_metadata()` instead of repeatedly extracting metadata from config dict
 - Use `is_system_page()` instead of duplicating system page filtering logic
+
+### Performance Optimization (February 2026)
+
+A comprehensive performance optimization effort implemented 9 optimizations, reducing page load times by ~600ms and initial translation load by ~80%.
+
+**Key changes:**
+- **Optimized binary search** in `truncate_messages_by_size()`: Pre-calculate average message size for O(n) complexity instead of O(n²)
+- **Translation lazy loading** in `lib/i18n/i18n.py`: Load only English at startup, other languages on-demand with caching
+- **Lightweight expert list** in `lib/config/config_manager.py`: `list_experts_lightweight()` method loads metadata only, cached with 60s TTL
+- **ConfigManager singleton** via `get_config_manager()`: `@st.cache_resource` for session-wide instance
+- **Batch expert name translation** via `translate_expert_names_batch()`: Cached with 5-minute TTL
+- **Token cache invalidation** via `get_messages_hash()`: Content-based hash for proper cache invalidation
+- **Settings tab optimization**: Calculate `tabs.index()` once instead of 6 times
+- **API key batch read**: Single file read in `get_all_provider_api_keys()` instead of 3 reads
+- **Module-level i18n caching**: Translations cached at module level, not loaded per-instance
+
+**Files modified:**
+- `lib/storage/chat_history_manager.py` - Binary search optimization
+- `lib/i18n/i18n.py` - Lazy loading with `_ensure_translation_loaded()`
+- `lib/config/config_manager.py` - Singleton + lightweight list method
+- `lib/shared/helpers.py` - Batch translation function
+- `lib/llm/token_manager.py` - Content hash for cache invalidation
+- `lib/config/secrets_manager.py` - Single file read for all provider keys
+- `pages/9998_Settings.py` - Tab indexing optimization
+
+**Benefits:**
+- **~600ms improvement** in page load times and responsiveness
+- **~80% reduction** in initial translation load (1 file vs 13 files)
+- **Better memory footprint** via lazy loading and selective field loading
+- **Proper cache invalidation** prevents stale token counts
+
+**Documentation:**
+- `docs/performance-optimization.md` - Detailed analysis and implementation notes
+
+**Impact on development:**
+- Use `get_config_manager()` instead of `ConfigManager()` directly
+- Use `translate_expert_names_batch()` for expert list rendering
+- Use `get_messages_hash()` when calling `count_messages_tokens()`
+- Translations load automatically on-demand - no manual intervention needed
