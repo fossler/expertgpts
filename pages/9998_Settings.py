@@ -795,7 +795,7 @@ def render_expert_management_section():
 
     # Load experts (not cached to avoid tab switching issues)
     config_manager = ConfigManager()
-    experts = config_manager.list_experts()
+    experts = config_manager.list_experts_lightweight()
 
     if not experts:
         st.info(f"🔍 {i18n.t('info.create_first_expert')}")

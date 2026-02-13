@@ -12,7 +12,7 @@ from lib.i18n import i18n
 def render_expert_list():
     """Render a list of available expert agents."""
     config_manager = ConfigManager()
-    experts = config_manager.list_experts()
+    experts = config_manager.list_experts_lightweight()
 
     if not experts:
         st.info(f"🔍 {i18n.t('home.no_experts')}")

@@ -440,7 +440,7 @@ def create_new_expert(
     page_generator = PageGenerator()
 
     # Check for duplicate expert name (case-insensitive)
-    existing_experts = config_manager.list_experts()
+    existing_experts = config_manager.list_experts_lightweight()
     sanitized_input = sanitize_name(chat_name).lower()
 
     for expert in existing_experts:
