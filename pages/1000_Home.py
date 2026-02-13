@@ -85,7 +85,6 @@ def main():
     - 🌍 **{i18n.t('home.features.internationalization')}**: {i18n.t('home.features.internationalization_desc')}
     - 📝 **{i18n.t('home.features.template_architecture')}**: {i18n.t('home.features.template_architecture_desc')}
     - 🎨 **{i18n.t('home.features.theme_customization')}**: {i18n.t('home.features.theme_customization_desc')}
-    - 🔒 **{i18n.t('home.features.secure_api_keys')}**: {i18n.t('home.features.secure_api_keys_desc')}
     - 💾 **{i18n.t('home.features.chat_history')}**: {i18n.t('home.features.chat_history_desc')}
     - ⚙️ **{i18n.t('home.features.temperature')}**: {i18n.t('home.features.temperature_desc')}
     - 🚀 **{i18n.t('home.features.modern_navigation')}**: {i18n.t('home.features.modern_navigation_desc')}

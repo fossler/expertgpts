@@ -131,7 +131,7 @@ expertgpts/
 **Key Architecture Principles**:
 - **Template-Based**: Single template generates all expert pages
 - **Multi-Provider Abstraction**: Unified client interface for DeepSeek, OpenAI, Z.AI
-- **DRY Configuration**: Expert content in YAML (English only), UI in locale files
+- **Clean Architecture**: Expert content in YAML (English), UI in locale files
 - **State Management**: Multi-layered session state with persistent storage
 
 **Detailed architecture**: [Architecture Documentation](docs/architecture/overview.md)
