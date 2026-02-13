@@ -102,10 +102,7 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     """Check for and display cached responses from background streams.
 
     This function is called on page load to detect if any background streams
-    completed while the user were navigating away.
-
-    OPTIMIZATION: Only performs file system checks if there's a flag
-    indicating active streams, avoiding unnecessary I/O on normal page loads.
+    completed while the user was navigating away.
 
     Args:
         config: Expert configuration dictionary
@@ -114,16 +111,8 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     Returns:
         True if cached responses were found or if polling is in progress
     """
-
-    # FAST PATH: Skip file system checks if no streams are active
-    # This avoids 3-4 file system operations on every page load
-    if not st.session_state.get("has_active_streams", False):
-        return False
-
     cache_dir = Path("streaming_cache")
     if not cache_dir.exists():
-        # No cache directory exists, clear the flag
-        st.session_state["has_active_streams"] = False
         return False
 
     # Check for the fixed "latest" cache file for this expert
@@ -132,8 +121,6 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     metadata_file = cache_dir / f"{expert_id}_latest.meta"
 
     if not cache_file.exists():
-        # No cache file for this expert, but other experts might have active streams
-        # Don't clear the flag yet
         return False
 
     try:
@@ -194,9 +181,6 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
                 # Clean up cache files
                 cache_file.unlink(missing_ok=True)
                 metadata_file.unlink(missing_ok=True)
-
-                # Clear active streams flag (this was the last/only active stream)
-                st.session_state["has_active_streams"] = False
 
                 # Trigger rerun to display the new message
                 st.rerun()
@@ -301,9 +285,6 @@ def poll_incomplete_stream(expert_id: str, messages_key: str) -> None:
         # Clean up cache files
         cache.cleanup()
 
-        # Clear active streams flag (stream is now complete)
-        st.session_state["has_active_streams"] = False
-
         # Rerun to update context usage with new message
         st.rerun()
 
@@ -396,9 +377,6 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 # Initialize streaming cache
                 cache = StreamingCache(EXPERT_ID)
 
-                # Mark that we have active streams (enables check_and_display_cached_responses)
-                st.session_state["has_active_streams"] = True
-
                 # Start background thread with streaming to file
                 cache.start_streaming_to_file(
                     client=client,
@@ -425,9 +403,6 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
                     # Clean up cache files
                     cache.cleanup()
-
-                    # Clear active streams flag (no more active streams)
-                    st.session_state["has_active_streams"] = False
 
                     # Rerun to update context usage with new message
                     st.rerun()
