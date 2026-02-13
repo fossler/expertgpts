@@ -7,7 +7,7 @@ Replace {{EXPERT_ID}} and {{EXPERT_NAME}} when generating new pages.
 import time
 import streamlit as st
 from pathlib import Path
-from lib.config import ConfigManager
+from lib.config.config_manager import get_config_manager
 from lib.config.config_manager import get_llm_metadata
 from lib.llm import LLMClient, TokenManager
 from lib.shared.session_state import initialize_shared_session_state
@@ -72,7 +72,7 @@ def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
     Returns:
         Configuration dictionary
     """
-    config_manager = ConfigManager()
+    config_manager = get_config_manager()
 
     try:
         config = config_manager.load_config(expert_id)
@@ -507,7 +507,7 @@ def display_model_settings(config: dict, messages_key: str):
         new_temperature != float(current_temperature)):
         if st.sidebar.button(f"💾 {i18n.t('sidebar.save_settings')}", key=f"{EXPERT_ID}_save_settings_v{cache_version}", type="primary"):
             try:
-                config_manager = ConfigManager()
+                config_manager = get_config_manager()
                 config_manager.update_config(
                     expert_id=EXPERT_ID,
                     updates={

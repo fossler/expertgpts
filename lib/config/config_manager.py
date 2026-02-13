@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import streamlit as st
 
+import streamlit as st
 from lib.shared.helpers import sanitize_name
 from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE
 from lib.config.app_defaults_manager import get_llm_defaults
@@ -383,9 +384,25 @@ def get_expert_config_safe(expert_id: str) -> dict:
     Returns:
         Configuration dictionary, or empty dict if not found
     """
-    config_manager = ConfigManager()
+    config_manager = get_config_manager()
     try:
         config = config_manager.load_config(expert_id)
         return config
     except FileNotFoundError:
         return {}
+
+
+@st.cache_resource
+def get_config_manager() -> ConfigManager:
+    """Get singleton ConfigManager instance.
+
+    Returns the same ConfigManager instance for the duration of the
+    Streamlit session, avoiding repeated instantiation overhead.
+
+    Use this function instead of instantiating ConfigManager() directly
+    to benefit from connection and resource caching.
+
+    Returns:
+        ConfigManager: Cached ConfigManager instance
+    """
+    return ConfigManager()

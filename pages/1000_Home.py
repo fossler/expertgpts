@@ -4,14 +4,14 @@ Welcome page for the ExpertGPTs multi-expert AI chat application.
 """
 
 import streamlit as st
-from lib.config import ConfigManager
+from lib.config.config_manager import get_config_manager
 from lib.ui import render_add_chat_dialog, render_api_key_status
 from lib.i18n import i18n
 
 
 def render_expert_list():
     """Render a list of available expert agents."""
-    config_manager = ConfigManager()
+    config_manager = get_config_manager()
     experts = config_manager.list_experts_lightweight()
 
     if not experts:

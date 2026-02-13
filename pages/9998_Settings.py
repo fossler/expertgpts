@@ -8,12 +8,12 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 import streamlit as st
-from lib.config import ConfigManager
+from lib.config.config_manager import get_config_manager
 from lib.shared.page_generator import PageGenerator
 from lib.shared.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
 from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
 from lib.ui.dialogs import render_thinking_mode_ui, render_model_selection
-from lib.shared.helpers import sanitize_name, translate_expert_name, validate_expert_name
+from lib.shared.helpers import sanitize_name, translate_expert_name, translate_expert_names_batch, validate_expert_name
 from lib.config import secrets_manager
 from lib.config import config_toml_manager
 from lib.shared.session_state import (
@@ -592,7 +592,7 @@ def render_edit_expert_dialog():
 
     # Load the expert's config
     from lib.i18n import i18n
-    config_manager = ConfigManager()
+    config_manager = get_config_manager()
     try:
         expert_config = config_manager.load_config(editing_expert_id)
     except FileNotFoundError:
@@ -794,7 +794,7 @@ def render_expert_management_section():
     st.divider()
 
     # Load experts (not cached to avoid tab switching issues)
-    config_manager = ConfigManager()
+    config_manager = get_config_manager()
     experts = config_manager.list_experts_lightweight()
 
     if not experts:
@@ -802,6 +802,11 @@ def render_expert_management_section():
         return
 
     st.caption(i18n.t('status.found_experts', count=len(experts)))
+
+    # Batch translate expert names (cached for 5 minutes)
+    from lib.i18n import i18n as i18n_instance
+    expert_names_tuple = tuple(e['expert_name'] for e in experts)
+    name_translations = translate_expert_names_batch(expert_names_tuple, i18n_instance.current_language)
 
     # Display experts in a table
     for idx, expert in enumerate(experts):
@@ -818,7 +823,7 @@ def render_expert_management_section():
         model_name = get_model_display_name(provider, model)
 
         # Translate expert name for display
-        translated_name = translate_expert_name(expert['expert_name'])
+        translated_name = name_translations[expert['expert_name']]
 
         with st.expander(f"📝 {translated_name}", expanded=False):
             col1, col2 = st.columns([3, 1])
@@ -889,7 +894,7 @@ def render_expert_management_section():
                         from lib.shared.page_generator import PageGenerator
 
                         # Delete the config file using ConfigManager
-                        config_manager = ConfigManager()
+                        config_manager = get_config_manager()
                         config_manager.delete_config(expert['expert_id'])
 
                         # Delete the page file using PageGenerator
