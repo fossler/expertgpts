@@ -1172,20 +1172,21 @@ def main():
     )
 
     # Update session state with the current tab
-    st.session_state.settings_active_tab = tabs.index(active_tab)
+    active_tab_index = tabs.index(active_tab)
+    st.session_state.settings_active_tab = active_tab_index
 
     # Render the appropriate section based on active tab
-    if tabs.index(active_tab) == 0:
+    if active_tab_index == 0:
         render_general_settings_section()
-    elif tabs.index(active_tab) == 1:
+    elif active_tab_index == 1:
         render_api_key_section()
-    elif tabs.index(active_tab) == 2:
+    elif active_tab_index == 2:
         render_default_llm_settings_section()
-    elif tabs.index(active_tab) == 3:
+    elif active_tab_index == 3:
         render_expert_management_section()
-    elif tabs.index(active_tab) == 4:
+    elif active_tab_index == 4:
         render_danger_zone_section()
-    elif tabs.index(active_tab) == 5:
+    elif active_tab_index == 5:
         render_about_section()
 
     # Footer

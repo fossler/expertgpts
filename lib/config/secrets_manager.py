@@ -106,20 +106,41 @@ def get_provider_api_key(provider: str) -> str | None:
 
 
 def get_all_provider_api_keys() -> dict[str, str]:
-    """Get all provider API keys from secrets.toml file.
+    """Get all provider API keys from secrets.toml file (single read).
+
+    Reads the secrets file once and extracts all provider keys,
+    avoiding repeated file I/O.
 
     Returns:
         dict: Dictionary mapping provider keys to their API keys
                (e.g., {"deepseek": "sk-abc...", "openai": "sk-def..."})
     """
-    from lib.shared.constants import LLM_PROVIDERS
+    from lib.shared.constants import LLM_PROVIDERS, get_provider_api_key_env
 
+    secrets_path = get_secrets_path()
+
+    if not secrets_path.exists():
+        return {}
+
+    # Read file once
+    content = secrets_path.read_text()
     api_keys = {}
 
+    # Extract all provider keys from content
     for provider in LLM_PROVIDERS.keys():
-        api_key = get_provider_api_key(provider)
-        if api_key:
-            api_keys[provider] = api_key
+        env_key = get_provider_api_key_env(provider)
+
+        # Parse key from content
+        for line in content.split('\n'):
+            line = line.strip()
+            if line.startswith(env_key):
+                # Extract value after '='
+                if '=' in line:
+                    value = line.split('=', 1)[1].strip()
+                    # Remove quotes
+                    value = value.strip('"').strip("'")
+                    api_keys[provider] = value
+                break
 
     return api_keys
 
