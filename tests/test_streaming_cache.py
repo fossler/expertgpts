@@ -311,3 +311,165 @@ class TestStreamingCache:
         # Clean up
         cache1.cleanup()
         cache2.cleanup()
+
+    def test_background_stream_continues_during_page_navigation(self, temp_cache_dir):
+        """Test that streaming continues in background when user navigates away.
+
+        This simulates the real-world scenario:
+        1. User starts a chat on Expert A
+        2. User navigates to Expert B while stream is still running
+        3. Stream completes in background (written to cache file)
+        4. User returns to Expert A
+        5. Cached response is available and complete
+
+        This is the key test for the battery-optimized background streaming feature.
+        """
+        from lib.storage.streaming_cache import StreamingCache
+
+        # Setup: Create a mock client with slow streaming (simulates LLM API)
+        chunks = ["This ", "is ", "a ", "long ", "response ", "from ", "the ", "AI."]
+        mock_client = MockLLMClient(chunks, delay=0.05)
+
+        # Phase 1: Start streaming on Expert A
+        cache_expert_a = StreamingCache("expert_a")
+        thread = cache_expert_a.start_streaming_to_file(
+            client=mock_client,
+            messages=[{"role": "user", "content": "Hello"}],
+            temperature=0.7,
+            model="test-model",
+            system_prompt="You are a test assistant",
+            thinking_level=None
+        )
+
+        # Verify thread started
+        assert thread.is_alive()
+
+        # Phase 2: Simulate user navigating away
+        # (No polling happens - user is on a different page)
+        # Wait just a tiny bit to ensure thread is running
+        time.sleep(0.02)
+
+        # Verify stream is NOT complete yet (still running in background)
+        assert not cache_expert_a.is_complete()
+
+        # Phase 3: Simulate the user being on Expert B's page
+        # Meanwhile, the background thread continues streaming
+        # (We just wait - simulating time passing while on another page)
+        time.sleep(0.6)  # Long enough for all chunks to complete
+
+        # Phase 4: User returns to Expert A (new page load = new StreamingCache instance)
+        # This simulates the template creating a new StreamingCache on page load
+        cache_expert_a_returned = StreamingCache("expert_a")
+
+        # Phase 5: Verify cached response is available
+        # The response should be fully available from the cache file
+        cached_response = cache_expert_a_returned.read_cache()
+        assert cached_response == "This is a long response from the AI."
+
+        # Verify stream is marked complete in metadata
+        assert cache_expert_a_returned.is_complete()
+        assert not cache_expert_a_returned.has_error()
+
+        # Cleanup
+        cache_expert_a_returned.cleanup()
+
+    def test_partial_stream_resumable_after_page_navigation(self, temp_cache_dir):
+        """Test that an incomplete stream can be resumed when user returns.
+
+        This tests the scenario where user navigates away mid-stream
+        and returns before the stream has completed.
+        """
+        from lib.storage.streaming_cache import StreamingCache
+
+        # Setup: Create a slow streaming client
+        chunks = ["First ", "Second ", "Third ", "Fourth ", "Fifth"]
+        mock_client = MockLLMClient(chunks, delay=0.15)  # Slow stream
+
+        # Phase 1: Start streaming
+        cache = StreamingCache("test_expert")
+        thread = cache.start_streaming_to_file(
+            client=mock_client,
+            messages=[],
+            temperature=0.7,
+            model="test-model",
+            system_prompt="You are a test assistant",
+            thinking_level=None
+        )
+
+        # Phase 2: Navigate away briefly (partial stream)
+        time.sleep(0.2)  # Only ~1-2 chunks written
+
+        # Phase 3: Return to page (new StreamingCache instance)
+        cache_returned = StreamingCache("test_expert")
+
+        # Verify partial content is available
+        partial_response = cache_returned.read_cache()
+        assert len(partial_response) > 0  # Some content was cached
+
+        # Stream is still in progress (not complete yet)
+        assert not cache_returned.is_complete()
+
+        # Phase 4: Poll until complete (simulates poll_incomplete_stream)
+        max_wait = 2.0
+        start = time.time()
+        while time.time() - start < max_wait:
+            if cache_returned.is_complete():
+                break
+            time.sleep(0.1)
+
+        # Phase 5: Verify complete response
+        final_response = cache_returned.read_cache()
+        assert final_response == "First Second Third Fourth Fifth"
+        assert cache_returned.is_complete()
+
+        # Cleanup
+        cache_returned.cleanup()
+
+    def test_cache_file_survives_new_instance_creation(self, temp_cache_dir):
+        """Test that creating a new StreamingCache instance doesn't lose cache data.
+
+        This verifies that the cache file is the source of truth, not the
+        StreamingCache instance itself.
+        """
+        from lib.storage.streaming_cache import StreamingCache
+
+        # Create initial cache and write some content
+        cache1 = StreamingCache("persistent_expert")
+        cache1.cache_file.write_text("Cached response content")
+        cache1._write_metadata({"status": "complete", "end_time": time.time()})
+
+        # Create a completely new instance (simulates page reload)
+        cache2 = StreamingCache("persistent_expert")
+
+        # Verify the new instance reads the same data
+        assert cache2.read_cache() == "Cached response content"
+        assert cache2.is_complete()
+
+        # Cleanup
+        cache2.cleanup()
+
+    def test_background_stream_crash_resilience(self, temp_cache_dir):
+        """Test that partially written cache files can be read.
+
+        This tests the crash resilience aspect - even if only partial
+        content was written, it should be readable.
+        """
+        from lib.storage.streaming_cache import StreamingCache
+
+        # Simulate a partial write (e.g., app crashed mid-stream)
+        cache = StreamingCache("crashed_expert")
+        cache.cache_file.write_text("This is partial content")
+        cache._write_metadata({"thread_id": 123, "start_time": time.time()})
+        # Note: status is NOT "complete" - simulating crash
+
+        # Create new instance (simulates app restart)
+        new_cache = StreamingCache("crashed_expert")
+
+        # Partial content should still be readable
+        assert new_cache.read_cache() == "This is partial content"
+
+        # Stream should NOT be marked complete
+        assert not new_cache.is_complete()
+
+        # Cleanup
+        new_cache.cleanup()
