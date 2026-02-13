@@ -174,6 +174,9 @@ def truncate_messages_by_size(
     Removes oldest messages first, but always preserves at least
     MINIMUM_MESSAGES_PRESERVE messages even if over size limit.
 
+    Uses average message size for efficient binary search (O(n))
+    instead of serializing JSON on every iteration (O(n²)).
+
     Args:
         messages: List of message dictionaries with timestamps
         expert_id: Expert ID for file path calculation
@@ -186,36 +189,44 @@ def truncate_messages_by_size(
     if len(messages) <= MINIMUM_MESSAGES_PRESERVE:
         return messages
 
-    # Calculate current size with full metadata
-    file_data = {
+    # Calculate base size (file structure without messages)
+    base_data = {
         "expert_id": expert_id,
         "created_at": datetime.now().isoformat(),
         "last_updated": datetime.now().isoformat(),
-        "messages": messages
+        "messages": []
     }
+    base_size = len(json.dumps(base_data, indent=2, ensure_ascii=False).encode('utf-8'))
+    base_size_mb = base_size / (1024 * 1024)
 
-    current_size = len(json.dumps(file_data, indent=2, ensure_ascii=False).encode('utf-8'))
-    current_size_mb = current_size / (1024 * 1024)
+    # If even base structure exceeds limit, return minimum messages
+    if base_size_mb >= max_size_mb:
+        return messages[-MINIMUM_MESSAGES_PRESERVE:]
 
-    if current_size_mb <= max_size_mb:
+    max_size_bytes = max_size_mb * (1024 * 1024)
+    available_bytes = max_size_bytes - base_size
+
+    # Pre-calculate average message size once (O(n))
+    total_msg_size = sum(
+        len(json.dumps(msg, ensure_ascii=False).encode('utf-8'))
+        for msg in messages
+    )
+    avg_msg_size = total_msg_size / len(messages)
+
+    # Quick check: if all messages fit, return as-is
+    if base_size + total_msg_size <= max_size_bytes:
         return messages
 
-    # Binary search for optimal number of messages to keep
-    # Start from minimum and work up
+    # Binary search using estimation (O(log n))
     low = MINIMUM_MESSAGES_PRESERVE
     high = len(messages)
     optimal_count = low
 
     while low <= high:
         mid = (low + high) // 2
-        truncated_messages = messages[-mid:]  # Keep most recent
+        estimated_size = base_size + (avg_msg_size * mid)
 
-        test_data = file_data.copy()
-        test_data["messages"] = truncated_messages
-        test_size = len(json.dumps(test_data, indent=2, ensure_ascii=False).encode('utf-8'))
-        test_size_mb = test_size / (1024 * 1024)
-
-        if test_size_mb <= max_size_mb:
+        if estimated_size <= max_size_bytes:
             optimal_count = mid
             low = mid + 1
         else:
