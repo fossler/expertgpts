@@ -4,6 +4,7 @@ This module provides centralized token management functionality including
 counting, caching, and usage statistics calculation.
 """
 
+import hashlib
 import streamlit as st
 import tiktoken
 from lib.shared.constants import (
@@ -15,6 +16,26 @@ from lib.shared.constants import (
     SYSTEM_PROMPT_CACHE_TTL,
     TOKEN_COUNT_CACHE_TTL
 )
+
+
+def get_messages_hash(messages: list) -> str:
+    """Generate hash of message content for cache invalidation.
+
+    Creates a lightweight hash based on message count and total
+    content length. Fast to compute but changes when messages change.
+
+    Args:
+        messages: List of chat messages
+
+    Returns:
+        8-character hex hash string
+    """
+    total_length = sum(len(str(msg.get("content", ""))) for msg in messages)
+    msg_count = len(messages)
+
+    # Create hash from count and length (changes when messages change)
+    hash_input = f"{msg_count}:{total_length}"
+    return hashlib.md5(hash_input.encode()).hexdigest()[:8]
 
 
 class TokenManager:
@@ -68,12 +89,13 @@ class TokenManager:
 
     @staticmethod
     @st.cache_data(ttl=TOKEN_COUNT_CACHE_TTL, show_spinner=False)
-    def count_messages_tokens(messages_key: str, messages: list) -> int:
+    def count_messages_tokens(messages_key: str, messages_hash: str, _messages: list) -> int:
         """Count tokens in chat messages (cached).
 
         Args:
             messages_key: Session state key for this expert's messages
-            messages: List of chat messages
+            messages_hash: Hash of message content for invalidation
+            _messages: List of chat messages (underscore = not part of cache key)
 
         Returns:
             Total token count
@@ -82,12 +104,12 @@ class TokenManager:
         The cache automatically invalidates when:
         - TTL expires
         - messages_key changes (different expert)
-        - messages content changes
+        - messages_hash changes (message content changed)
         """
         encoding = TokenManager.get_encoding()
         return sum(
             TokenManager.count_tokens(msg.get("content", ""), encoding)
-            for msg in messages
+            for msg in _messages
         )
 
     @staticmethod

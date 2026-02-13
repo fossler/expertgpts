@@ -6,7 +6,7 @@ across multiple pages.
 
 import streamlit as st
 from pathlib import Path
-from lib.config.config_manager import ConfigManager
+from lib.config.config_manager import get_config_manager
 from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
@@ -436,11 +436,11 @@ def create_new_expert(
     if provider is None:
         provider = get_llm_defaults()["provider"]
 
-    config_manager = ConfigManager()
+    config_manager = get_config_manager()
     page_generator = PageGenerator()
 
     # Check for duplicate expert name (case-insensitive)
-    existing_experts = config_manager.list_experts()
+    existing_experts = config_manager.list_experts_lightweight()
     sanitized_input = sanitize_name(chat_name).lower()
 
     for expert in existing_experts:

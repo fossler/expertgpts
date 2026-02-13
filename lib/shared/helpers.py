@@ -1,10 +1,10 @@
 """Helper functions for ExpertGPTs."""
 
+import streamlit as st
 from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
 import re
-from lib.i18n.i18n import i18n
 
 
 def sanitize_name(name: str) -> str:
@@ -46,6 +46,8 @@ def translate_expert_name(expert_name: str) -> str:
     Returns:
         Translated expert name (or original if no translation exists)
     """
+    from lib.i18n.i18n import i18n
+
     # Generate translation key directly from expert name
     sanitized = sanitize_name(expert_name)
     translation_key = f"experts.names.{sanitized}"
@@ -61,6 +63,51 @@ def translate_expert_name(expert_name: str) -> str:
         return expert_name
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def translate_expert_names_batch(expert_names: tuple, language: str) -> dict:
+    """Translate multiple expert names at once (cached).
+
+    This function is optimized for batch translation of expert names
+    with 5-minute caching. Use this when rendering expert lists to
+    avoid repeated i18n lookups.
+
+    Args:
+        expert_names: Tuple of expert names to translate (must be tuple for caching)
+        language: Current language code (included in cache key for invalidation)
+
+    Returns:
+        Dictionary mapping original names to translated names
+    """
+    from lib.i18n.i18n import i18n
+
+    return {
+        name: _translate_single_name(name, i18n)
+        for name in expert_names
+    }
+
+
+def _translate_single_name(expert_name: str, i18n) -> str:
+    """Translate a single expert name (internal helper).
+
+    Args:
+        expert_name: The expert name to translate
+        i18n: I18nManager instance
+
+    Returns:
+        Translated name or original if no translation exists
+    """
+    sanitized = sanitize_name(expert_name)
+    translation_key = f"experts.names.{sanitized}"
+
+    try:
+        translated = i18n.t(translation_key)
+        if translated == translation_key:
+            return expert_name
+        return translated
+    except (KeyError, AttributeError, Exception):
+        return expert_name
+
+
 def validate_expert_name(name: str) -> tuple[bool, str]:
     """Validate expert name contains only allowed characters.
 
@@ -72,6 +119,8 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     Returns:
         tuple: (is_valid, error_message) with i18n support
     """
+    from lib.i18n.i18n import i18n
+
     if not name:
         return False, i18n.t('errors.expert_name_empty')
 
@@ -96,6 +145,8 @@ def validate_api_key(api_key: str) -> tuple[bool, str]:
         - (True, "") if valid
         - (False, error_message) if invalid
     """
+    from lib.i18n.i18n import i18n
+
     if not api_key:
         return False, i18n.t("errors.api_key_not_set")
 

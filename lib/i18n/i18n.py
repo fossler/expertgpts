@@ -14,6 +14,87 @@ from lib.shared.format_ops import read_json
 logger = logging.getLogger(__name__)
 
 
+# Module-level cache for translations (lazy-loaded, reused across instances)
+_translations_cache: Dict[str, Dict] = {}
+
+
+def _get_locales_dir() -> Path:
+    """Get the path to the locales directory."""
+    return Path(__file__).parent.parent.parent / "locales" / "ui"
+
+
+def _load_translation(lang_code: str) -> Optional[Dict]:
+    """Load a single translation file.
+
+    Args:
+        lang_code: Language code to load (e.g., 'en', 'de')
+
+    Returns:
+        Translation dictionary or None if not found
+    """
+    locales_dir = _get_locales_dir()
+
+    if not locales_dir.exists():
+        logger.warning(f"Locales directory not found: {locales_dir}")
+        return None
+
+    lang_file = locales_dir / f"{lang_code}.json"
+
+    if not lang_file.exists():
+        logger.warning(f"Translation file not found: {lang_file}")
+        return None
+
+    try:
+        data = read_json(lang_file)
+        if data is not None:
+            logger.debug(f"Loaded translations for {lang_code}")
+        return data
+    except Exception as e:
+        logger.error(f"Error loading {lang_code}: {e}")
+        return None
+
+
+def _ensure_translation_loaded(lang_code: str) -> Optional[Dict]:
+    """Ensure a translation is loaded (lazy loading with caching).
+
+    If the translation is already cached, returns cached version.
+    Otherwise, loads it from disk and caches it.
+
+    Args:
+        lang_code: Language code to ensure is loaded
+
+    Returns:
+        Translation dictionary or None if not available
+    """
+    global _translations_cache
+
+    # Return cached translation if available
+    if lang_code in _translations_cache:
+        return _translations_cache[lang_code]
+
+    # Load and cache the translation
+    data = _load_translation(lang_code)
+    if data is not None:
+        _translations_cache[lang_code] = data
+
+    return data
+
+
+def _load_initial_translations() -> Dict[str, Dict]:
+    """Load initial translations (English only as fallback).
+
+    English is always loaded as the fallback language.
+    Other languages are loaded on-demand when first accessed.
+
+    Returns:
+        Dictionary with English translations (and any cached languages)
+    """
+    # Ensure English is loaded (it's the fallback for all translations)
+    _ensure_translation_loaded("en")
+
+    return _translations_cache
+
+
 # Language metadata with script, direction, and locale info
 LANGUAGE_METADATA = {
     "en": {
@@ -132,12 +213,17 @@ LANGUAGE_METADATA = {
 
 
 class I18nManager:
-    """Professional internationalization manager with RTL and locale support."""
+    """Professional internationalization manager with RTL and locale support.
+
+    Uses lazy loading for translations - only loads English at startup,
+    other languages are loaded on-demand when first accessed.
+    """
 
     def __init__(self):
-        self.translations: Dict[str, Dict] = {}
+        # Initialize with English only (other languages loaded on-demand)
+        _load_initial_translations()
+        self.translations: Dict[str, Dict] = _translations_cache
         self.current_lang: str = "en"
-        self.load_translations()
 
     @property
     def current_language(self) -> str:
@@ -205,24 +291,6 @@ class I18nManager:
             # If detection fails, use English
             return "en"
 
-    def load_translations(self):
-        """Load translation files from locales/ directory."""
-        locales_dir = Path(__file__).parent.parent.parent / "locales" / "ui"
-
-        if not locales_dir.exists():
-            print(f"Warning: Locales directory not found: {locales_dir}")
-            return
-
-        for lang_file in locales_dir.glob("*.json"):
-            lang = lang_file.stem
-            try:
-                data = read_json(lang_file)
-                if data is not None:
-                    self.translations[lang] = data
-                    logger.info(f"Loaded translations for {lang}")
-            except Exception as e:
-                logger.error(f"Error loading {lang}: {e}")
-
     def t(self, key: str, **kwargs) -> str:
         """Get translated string with interpolation.
 
@@ -234,6 +302,10 @@ class I18nManager:
             Translated string, or key if not found
         """
         lang = self.current_language
+
+        # Ensure the requested language is loaded (lazy loading)
+        _ensure_translation_loaded(lang)
+
         template = self._get_nested(self.translations, lang, key)
 
         if template is None:
@@ -333,6 +405,9 @@ class I18nManager:
         """
         if lang in LANGUAGE_METADATA:
             from lib.config.app_defaults_manager import save_language_preference
+
+            # Ensure the new language is loaded (lazy loading)
+            _ensure_translation_loaded(lang)
 
             # Update session state
             st.session_state.language = lang
