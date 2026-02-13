@@ -4,7 +4,6 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
 import re
-from lib.i18n.i18n import i18n
 
 
 def sanitize_name(name: str) -> str:
@@ -46,6 +45,8 @@ def translate_expert_name(expert_name: str) -> str:
     Returns:
         Translated expert name (or original if no translation exists)
     """
+    from lib.i18n.i18n import i18n
+
     # Generate translation key directly from expert name
     sanitized = sanitize_name(expert_name)
     translation_key = f"experts.names.{sanitized}"
@@ -72,6 +73,8 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     Returns:
         tuple: (is_valid, error_message) with i18n support
     """
+    from lib.i18n.i18n import i18n
+
     if not name:
         return False, i18n.t('errors.expert_name_empty')
 
@@ -96,6 +99,8 @@ def validate_api_key(api_key: str) -> tuple[bool, str]:
         - (True, "") if valid
         - (False, error_message) if invalid
     """
+    from lib.i18n.i18n import i18n
+
     if not api_key:
         return False, i18n.t("errors.api_key_not_set")
 

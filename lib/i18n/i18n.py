@@ -14,6 +14,47 @@ from lib.shared.format_ops import read_json
 logger = logging.getLogger(__name__)
 
 
+# Module-level cache for translations (loaded once, reused across instances)
+_translations_cache: Optional[Dict[str, Dict]] = None
+
+
+def _load_all_translations() -> Dict[str, Dict]:
+    """Load all translation files (cached at module level).
+
+    This function uses module-level caching to avoid repeated file I/O
+    and JSON parsing for all 13 locale files.
+
+    Returns:
+        Dictionary mapping language codes to their translation data
+    """
+    global _translations_cache
+
+    # Return cached translations if available
+    if _translations_cache is not None:
+        return _translations_cache
+
+    translations = {}
+    locales_dir = Path(__file__).parent.parent.parent / "locales" / "ui"
+
+    if not locales_dir.exists():
+        logger.warning(f"Locales directory not found: {locales_dir}")
+        _translations_cache = translations
+        return translations
+
+    for lang_file in locales_dir.glob("*.json"):
+        lang = lang_file.stem
+        try:
+            data = read_json(lang_file)
+            if data is not None:
+                translations[lang] = data
+                logger.debug(f"Loaded translations for {lang}")
+        except Exception as e:
+            logger.error(f"Error loading {lang}: {e}")
+
+    _translations_cache = translations
+    return translations
+
+
 # Language metadata with script, direction, and locale info
 LANGUAGE_METADATA = {
     "en": {
@@ -135,9 +176,8 @@ class I18nManager:
     """Professional internationalization manager with RTL and locale support."""
 
     def __init__(self):
-        self.translations: Dict[str, Dict] = {}
+        self.translations: Dict[str, Dict] = _load_all_translations()
         self.current_lang: str = "en"
-        self.load_translations()
 
     @property
     def current_language(self) -> str:
@@ -204,24 +244,6 @@ class I18nManager:
         except Exception:
             # If detection fails, use English
             return "en"
-
-    def load_translations(self):
-        """Load translation files from locales/ directory."""
-        locales_dir = Path(__file__).parent.parent.parent / "locales" / "ui"
-
-        if not locales_dir.exists():
-            print(f"Warning: Locales directory not found: {locales_dir}")
-            return
-
-        for lang_file in locales_dir.glob("*.json"):
-            lang = lang_file.stem
-            try:
-                data = read_json(lang_file)
-                if data is not None:
-                    self.translations[lang] = data
-                    logger.info(f"Loaded translations for {lang}")
-            except Exception as e:
-                logger.error(f"Error loading {lang}: {e}")
 
     def t(self, key: str, **kwargs) -> str:
         """Get translated string with interpolation.
