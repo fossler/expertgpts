@@ -19,9 +19,10 @@ provider = "deepseek"
 # Z.AI: glm-4.7
 model = "deepseek-chat"
 
-# Default thinking/reasoning level for OpenAI models
-# Options: none, low, medium, high, xhigh
-# Only applies to OpenAI models; ignored for other providers
+# Default thinking/reasoning level
+# OpenAI: none, low, medium, high, xhigh
+# Z.AI: enabled, disabled
+# DeepSeek: controlled via model selection (deepseek-chat vs deepseek-reasoner)
 thinking_level = "none"
 
 [language]
@@ -29,11 +30,3 @@ thinking_level = "none"
 # Options: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
 # The app will auto-detect your system language on first run
 code = "en"
-
-# Future sections could include:
-# [ui]
-# default_theme = "ocean_blue"
-#
-# [features]
-# auto_save_chats = true
-# show_context_usage = true

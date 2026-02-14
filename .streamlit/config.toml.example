@@ -1,28 +1,20 @@
 [theme]
-
-# Buttons and interactive Elements - color for buttons and interactive elements
-primaryColor = "#6366F1"
-
-# Background color - main background color of the application
-backgroundColor = "#FFFFFF"
-
-# Secondary background color - used for sidebar and other secondary areas
-secondaryBackgroundColor = "#F3F4F6"
-
-# Text color - main text color throughout the application
-textColor = "#1F2937"
-
-# Base font size - default font size for the application (reduced from default 16)
-baseFontSize = 14
+base = ".streamlit/themes/dark_gray.toml"
 
 [client]
 showErrorDetails = false
 # https://docs.streamlit.io/develop/api-reference/configuration/config.toml
 toolbarMode = "minimal"
 
+[browser]
+# Disable sending usage statistics to Streamlit (privacy)
+gatherUsageStats = false
 
-[language]
-# Language preference for the UI
-# Options: en, de, es, fr, it, id, ms, pt, ru, tr, wyw, yue, zh-CN, zh-TW
-# Leave empty to auto-detect from system
-code = "en"
+[logger]
+# Level of logging for Streamlit's internal logger: "error", "warning", "info", "debug"
+# Default: "info"
+level = "info"
+
+# String format for logging messages
+# Default: "%(asctime)s %(message)s"
+messageFormat = "%(asctime)s %(name)s %(levelname)s %(message)s"

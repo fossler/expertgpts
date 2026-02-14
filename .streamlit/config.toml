@@ -1,8 +1,16 @@
 [theme]
 base = ".streamlit/themes/dark_gray.toml"
 
-[logger]
+[client]
+showErrorDetails = false
+# https://docs.streamlit.io/develop/api-reference/configuration/config.toml
+toolbarMode = "minimal"
 
+[browser]
+# Disable sending usage statistics to Streamlit (privacy)
+gatherUsageStats = false
+
+[logger]
 # Level of logging for Streamlit's internal logger: "error", "warning", "info", "debug"
 # Default: "info"
 level = "info"
