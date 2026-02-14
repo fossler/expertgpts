@@ -331,8 +331,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     provider, model, thinking_level = get_llm_metadata(config)
 
     if prompt := st.chat_input(i18n.t("home.chat_input_placeholder")):
-        # Validate API key format
-        is_valid, error_msg = validate_api_key(api_key)
+        # Validate API key format with provider-specific validation
+        is_valid, error_msg = validate_api_key(api_key, provider=provider)
         if not is_valid:
             st.error(f"❌ {error_msg}")
             return

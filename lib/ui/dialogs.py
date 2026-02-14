@@ -650,8 +650,12 @@ def render_add_chat_dialog():
                 st.rerun()
 
             except ValueError as e:
-                # Show user-friendly error in UI
-                st.error(i18n.t("errors.expert_exists", name=chat_name))
+                # Show user-friendly error in UI (could be duplicate name or validation error)
+                error_msg = str(e)
+                if "already exists" in error_msg.lower():
+                    st.error(i18n.t("errors.expert_exists", name=chat_name))
+                else:
+                    st.error(f"❌ {error_msg}")
             except Exception as e:
                 # Show user-friendly error in UI
                 st.error(f"❌ {i18n.t('errors.error_creating_expert')}: {str(e)}")

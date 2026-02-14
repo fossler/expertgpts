@@ -157,6 +157,7 @@
     "error": "Error: {error}",
     "api_key_not_set": "API key is not set",
     "api_key_invalid": "API key appears to be invalid (too short)",
+    "api_key_invalid_format": "API key format is invalid. Expected format: {example}",
     "expert_config_not_found": "Configuration not found for expert: {expert_id}",
     "network_error": "Network error: Could not reach {provider_name} API. Please check your connection.",
     "api_response_error": "API response error: {error}",
