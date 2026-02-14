@@ -12,7 +12,7 @@ from lib.config.config_manager import get_llm_metadata
 from lib.llm import LLMClient, TokenManager
 from lib.shared.session_state import initialize_shared_session_state
 from lib.i18n import i18n
-from lib.shared.helpers import translate_expert_name, sanitize_error_message
+from lib.shared.helpers import translate_expert_name, sanitize_error_message, sanitize_markdown_content
 from lib.storage import (
     load_chat_history,
     save_chat_history,
@@ -313,10 +313,10 @@ def render_chat_interface(config: dict, messages_key: str):
         if message["role"] == "assistant":
             avatar = get_provider_avatar(provider)
             with st.chat_message("assistant", avatar=avatar):
-                st.markdown(message["content"])
+                st.markdown(sanitize_markdown_content(message["content"]))
         else:
             with st.chat_message("user"):
-                st.markdown(message["content"])
+                st.markdown(sanitize_markdown_content(message["content"]))
 
 
 def handle_user_input(api_key: str, config: dict, messages_key: str):

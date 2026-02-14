@@ -19,7 +19,7 @@ from typing import Optional
 
 from lib.llm.llm_client import LLMClient
 from lib.shared.format_ops import read_json, write_json
-from lib.shared.file_ops import ensure_directory_exists
+from lib.shared.file_ops import ensure_directory_exists, set_secure_permissions
 
 STREAMING_CACHE_DIR = Path("streaming_cache")
 
@@ -104,6 +104,11 @@ class StreamingCache:
         immediately after each chunk is written.
         """
         try:
+            # Create file with secure permissions if it doesn't exist
+            if not self.cache_file.exists():
+                self.cache_file.touch()
+                set_secure_permissions(self.cache_file)
+
             with open(self.cache_file, 'a', encoding='utf-8') as f:
                 for chunk in client.chat_stream(
                     messages=messages,
@@ -120,6 +125,11 @@ class StreamingCache:
             self._write_metadata({"status": "complete", "end_time": time.time()})
 
         except Exception as e:
+            # Create file with secure permissions if it doesn't exist
+            if not self.cache_file.exists():
+                self.cache_file.touch()
+                set_secure_permissions(self.cache_file)
+
             # Write error to file for debugging
             with open(self.cache_file, 'a', encoding='utf-8') as f:
                 f.write(f"\n[STREAMING ERROR: {str(e)}]")

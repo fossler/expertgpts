@@ -260,3 +260,49 @@ def sanitize_error_message(message: str) -> str:
         sanitized = re.sub(pattern, replacement, sanitized)
 
     return sanitized
+
+
+def sanitize_markdown_content(content: str) -> str:
+    """Sanitize markdown content to prevent injection attacks.
+
+    Removes potentially dangerous URL schemes (javascript:, data:, vbscript:)
+    from markdown links and images. Streamlit's st.markdown() already escapes
+    HTML by default, but this provides additional protection against malicious
+    URLs.
+
+    Args:
+        content: Markdown content that may contain malicious constructs
+
+    Returns:
+        Sanitized markdown content with dangerous URLs neutralized
+
+    Example:
+        >>> sanitize_markdown_content("[click](javascript:alert(1))")
+        '[click](about:blank#blocked)'
+    """
+    if not content:
+        return content
+
+    sanitized = content
+
+    # Dangerous URL schemes to block (case-insensitive)
+    # Pattern matches: scheme: or scheme:// anything until space or end
+    DANGEROUS_SCHEMES = [
+        r'javascript\s*:',
+        r'vbscript\s*:',
+        r'data\s*:',
+        r'file\s*:',
+    ]
+
+    # Replace dangerous schemes in markdown links and images
+    # Pattern: [text](url) or ![alt](url)
+    for scheme in DANGEROUS_SCHEMES:
+        # Match in markdown link context: ](scheme:...)
+        sanitized = re.sub(
+            rf'\]\s*\(\s*({scheme})',
+            '](about:blank#blocked)',
+            sanitized,
+            flags=re.IGNORECASE
+        )
+
+    return sanitized
