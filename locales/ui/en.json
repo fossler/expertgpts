@@ -34,7 +34,7 @@
       "multiple_experts": "Multiple Expert Agents",
       "multiple_experts_desc": "Chat with domain-specific AI experts, each specialized in different areas",
       "multi_provider": "Multi-Provider Support",
-      "multi_provider_desc": "Choose between DeepSeek, OpenAI, and Z.AI per expert",
+      "multi_provider_desc": "Choose between DeepSeek, OpenAI, Z.AI, and KIMI per expert",
       "internationalization": "Full Internationalization",
       "internationalization_desc": "13 languages with automatic detection and AI language response",
       "template_architecture": "Template-Based Architecture",

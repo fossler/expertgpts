@@ -186,6 +186,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 | **DeepSeek** | `deepseek-chat` | Cost-effective, high quality |
 | **OpenAI** | `o3-mini` | Advanced reasoning capabilities |
 | **Z.AI** | `glm-4.7` | GLM models, Chinese optimization, includes free tier |
+| **KIMI** | `kimi-k2.5` | 256K context, multimodal, thinking mode |
 
 **Per-Expert Selection**: Each expert can use a different provider/model. Switch via the sidebar dropdown.
 
@@ -247,7 +248,7 @@ Would I choose Streamlit again? For data dashboards and simple prototypes, absol
 ## Acknowledgments
 
 - Built with [Streamlit](https://streamlit.io/)
-- Powered by [DeepSeek API](https://www.deepseek.com/), [OpenAI API](https://openai.com/), and [Z.AI](https://z.ai/)
+- Powered by [DeepSeek API](https://www.deepseek.com/), [OpenAI API](https://openai.com/), [Z.AI](https://z.ai/), and [KIMI](https://www.kimi.com/)
 - Inspired by OpenAI's GPTs explore functionality
 - Developed with [Z.AI](https://z.ai/subscribe?ic=JGTYCX7ZO7) - Advanced AI platform
 

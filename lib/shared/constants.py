@@ -72,6 +72,20 @@ LLM_PROVIDERS = {
                 "thinking_param": {"thinking": {"type": "disabled"}},
             }
         }
+    },
+    "kimi": {
+        "name": "KIMI",
+        "api_key_env": "MOONSHOT_API_KEY",
+        "base_url": "https://api.moonshot.ai/v1",
+        "default_model": "kimi-k2.5",
+        "icon_path": "icons/kimi-logo.png",
+        "models": {
+            "kimi-k2.5": {
+                "display_name": "KIMI K2.5",
+                "max_tokens": 262144,
+                "thinking_param": {"thinking": {"type": "enabled"}},
+            }
+        }
     }
 }
 
@@ -88,6 +102,10 @@ PROVIDER_LINKS = {
     "zai": {
         "chat": "https://chat.z.ai/",
         "platform": "https://z.ai/manage-apikey/subscription"
+    },
+    "kimi": {
+        "chat": "https://www.kimi.com/",
+        "platform": "https://platform.moonshot.ai/console"
     }
 }
 
@@ -499,7 +517,8 @@ def get_provider_links(provider: str) -> str:
 PROVIDER_AVATARS = {
     "deepseek": "icons/deepseek_icon_blue.png",
     "openai": "icons/OpenAI-black-monoblossom.png",
-    "zai": "icons/zai_logo.svg"
+    "zai": "icons/zai_logo.svg",
+    "kimi": "icons/kimi-logo.png"
 }
 
 

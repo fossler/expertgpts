@@ -91,6 +91,12 @@ class LLMClient:
             else:
                 return {}, {}
 
+        # KIMI: use thinking type parameter (enabled/disabled) - same as Z.AI
+        if self.provider == "kimi":
+            # KIMI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}
+            # Any thinking_level other than "none" means enabled
+            return {"thinking": {"type": "enabled"}}, {}
+
         # Z.AI: use thinking type parameter (enabled/disabled)
         if self.provider == "zai":
             # Z.AI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}
