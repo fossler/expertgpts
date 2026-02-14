@@ -219,3 +219,44 @@ def validate_api_key(api_key: str, provider: str = None) -> tuple[bool, str]:
         return False, i18n.t("errors.api_key_invalid")
 
     return True, ""
+
+
+def sanitize_error_message(message: str) -> str:
+    """Sanitize error message to remove sensitive data like API keys.
+
+    Removes any strings that match API key patterns to prevent
+    accidental exposure of credentials in logs or UI.
+
+    Args:
+        message: Error message that may contain sensitive data
+
+    Returns:
+        Sanitized message with API keys replaced by [REDACTED]
+
+    Example:
+        >>> sanitize_error_message("Error with key sk-abc123xyz456")
+        'Error with key [REDACTED]'
+    """
+    if not message:
+        return message
+
+    sanitized = message
+
+    # API key patterns to redact (order matters - more specific first)
+    API_KEY_PATTERNS = [
+        # Z.AI format: 32 hex chars + dot + 16 alphanumeric
+        (r'[a-f0-9]{32}\.[a-zA-Z0-9]{16}', '[REDACTED]'),
+        # DeepSeek format: sk- + 32+ hex chars
+        (r'sk-[a-f0-9]{32,}', '[REDACTED]'),
+        # OpenAI format: sk- + 20+ alphanumeric/underscore/hyphen
+        (r'sk-[a-zA-Z0-9_-]{20,}', '[REDACTED]'),
+        # KIMI format: sk- + 20+ alphanumeric
+        (r'sk-[a-zA-Z0-9]{20,}', '[REDACTED]'),
+        # Generic sk- prefix patterns (catches most API keys)
+        (r'sk-[a-zA-Z0-9_-]{10,}', '[REDACTED]'),
+    ]
+
+    for pattern, replacement in API_KEY_PATTERNS:
+        sanitized = re.sub(pattern, replacement, sanitized)
+
+    return sanitized

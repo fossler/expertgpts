@@ -21,6 +21,7 @@ from lib.shared.constants import (
     get_provider_base_url,
     SYSTEM_PROMPT_TEMPLATE,
 )
+from lib.shared.helpers import sanitize_error_message
 from lib.i18n.i18n import i18n
 
 
@@ -173,7 +174,7 @@ class LLMClient:
             return response.choices[0].message.content
 
         except Exception as e:
-            raise Exception(f"Error calling {self.config['name']} API: {str(e)}")
+            raise Exception(f"Error calling {self.config['name']} API: {sanitize_error_message(str(e))}")
 
     def chat_stream(
         self,
@@ -239,7 +240,7 @@ class LLMClient:
                     yield chunk.choices[0].delta.content
 
         except Exception as e:
-            raise Exception(f"Error calling {self.config['name']} API: {str(e)}")
+            raise Exception(f"Error calling {self.config['name']} API: {sanitize_error_message(str(e))}")
 
     def generate_system_prompt(
         self,

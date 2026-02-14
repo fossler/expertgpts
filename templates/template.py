@@ -12,7 +12,7 @@ from lib.config.config_manager import get_llm_metadata
 from lib.llm import LLMClient, TokenManager
 from lib.shared.session_state import initialize_shared_session_state
 from lib.i18n import i18n
-from lib.shared.helpers import translate_expert_name
+from lib.shared.helpers import translate_expert_name, sanitize_error_message
 from lib.storage import (
     load_chat_history,
     save_chat_history,
@@ -150,7 +150,7 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
                         if metadata is not None:
                             error = metadata.get('error')
                             if error:
-                                st.error(f"Error: {error}")
+                                st.error(f"Error: {sanitize_error_message(error)}")
                     except Exception:
                         pass
 
@@ -194,7 +194,7 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
 
     except Exception as e:
         # Log error and clean up corrupt file
-        st.error(f"Error reading cached response: {str(e)}")
+        st.error(f"Error reading cached response: {sanitize_error_message(str(e))}")
         try:
             cache_file.unlink(missing_ok=True)
             metadata_file.unlink(missing_ok=True)
@@ -238,7 +238,7 @@ def poll_stream_and_display(cache: "StreamingCache", expert_id: str, messages_ke
         # Check for errors
         if cache.has_error():
             error_msg = cache.get_error()
-            st.error(f"Streaming error: {error_msg}")
+            st.error(f"Streaming error: {sanitize_error_message(error_msg)}")
             break
 
         # Small delay to avoid busy waiting (battery optimization)
@@ -418,7 +418,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 # Persist to file
                 save_chat_history(EXPERT_ID, st.session_state[messages_key])
             except ValueError as e:
-                error_msg = i18n.t("errors.api_response_error", error=str(e))
+                error_msg = i18n.t("errors.api_response_error", error=sanitize_error_message(str(e)))
                 message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
@@ -427,7 +427,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 # Persist to file
                 save_chat_history(EXPERT_ID, st.session_state[messages_key])
             except Exception as e:
-                error_msg = i18n.t("errors.unexpected_error", type=type(e).__name__, message=str(e))
+                error_msg = i18n.t("errors.unexpected_error", type=type(e).__name__, message=sanitize_error_message(str(e)))
                 message_placeholder.error(f"❌ {error_msg}")
                 st.session_state[messages_key].append({
                     "role": "assistant",
@@ -521,7 +521,7 @@ def display_model_settings(config: dict, messages_key: str):
                 st.success("✅ Settings saved successfully!")
                 st.rerun()
             except Exception as e:
-                st.sidebar.error(f"❌ Error saving settings: {str(e)}")
+                st.sidebar.error(f"❌ Error saving settings: {sanitize_error_message(str(e))}")
 
 
 def display_context_usage(config: dict, messages_key: str):
