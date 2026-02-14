@@ -9,7 +9,7 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 ## Key Features
 
 - **🤖 Multiple Expert Agents** - Chat with domain-specific AI experts, each specialized in different areas
-- **🔄 Multi-Provider Support** - Choose between DeepSeek, OpenAI, and Z.AI per expert
+- **🔄 Multi-Provider Support** - Choose between DeepSeek, OpenAI, and Z.AI (with free models) per expert
 - **🌍 Full Internationalization** - 13 languages with automatic detection and AI language response
 - **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
@@ -28,6 +28,9 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 API-based AI chats operate on a **pay-as-you-go (PAYG)** model—meaning you pay **only for actual usage**, not for access. There are no fixed monthly fees, no long-term commitments, and no costs when the service isn't used. This makes PAYG inherently more transparent, flexible, and cost-efficient than traditional subscription models.
 
 ### Why PAYG Is Often Significantly Cheaper Than Flat-Rate Subscriptions
+
+**FREE Models Available**
+Some providers even offer completely **free models**! Z.AI provides GLM-4.7-Flash at zero cost—no charges for input, output, or storage. This is perfect for experimentation, learning, or everyday tasks without any financial commitment.
 
 **Full Cost Transparency & Control**
 Spending scales directly with usage. You decide how much you pay simply by how much you use the system.
@@ -182,7 +185,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 |----------|---------------|-----------------|
 | **DeepSeek** | `deepseek-chat` | Cost-effective, high quality |
 | **OpenAI** | `o3-mini` | Advanced reasoning capabilities |
-| **Z.AI** | `glm-4.7` | GLM models, Chinese optimization |
+| **Z.AI** | `glm-4.7` | GLM models, Chinese optimization, includes free tier |
 
 **Per-Expert Selection**: Each expert can use a different provider/model. Switch via the sidebar dropdown.
 

@@ -61,8 +61,13 @@ LLM_PROVIDERS = {
                 "max_tokens": 200000,
                 "thinking_param": {"thinking": {"type": "disabled"}},
             },
-            "glm-5": {
+                "glm-5": {
                 "display_name": "GLM-5",
+                "max_tokens": 200000,
+                "thinking_param": {"thinking": {"type": "disabled"}},
+            },
+            "glm-4.7-flash": {
+                "display_name": "GLM-4.7-Flash (free)",
                 "max_tokens": 200000,
                 "thinking_param": {"thinking": {"type": "disabled"}},
             }
