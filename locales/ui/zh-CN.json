@@ -76,6 +76,7 @@
   "status": {
     "api_key_configured": "API密钥已配置",
     "api_key_not_set": "API密钥未设置",
+    "api_keys_configured_for": "API密钥已配置用于: {providers}",
     "no_api_key": "未找到 {provider} 的API密钥",
     "api_key_saved_in_secrets": "{provider} API密钥已保存到secrets.toml",
     "no_api_key_in_secrets": "secrets.toml中没有{provider} API密钥",

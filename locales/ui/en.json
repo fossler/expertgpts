@@ -76,6 +76,7 @@
   "status": {
     "api_key_configured": "API key configured",
     "api_key_not_set": "API key not set",
+    "api_keys_configured_for": "API keys configured for: {providers}",
     "no_api_key": "No API key found for {provider}",
     "api_key_saved_in_secrets": "{provider} API key saved in secrets.toml",
     "no_api_key_in_secrets": "No {provider} API key in secrets.toml",

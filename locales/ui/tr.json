@@ -76,6 +76,7 @@
   "status": {
     "api_key_configured": "API anahtarı yapılandırıldı",
     "api_key_not_set": "API anahtarı ayarlanmadı",
+    "api_keys_configured_for": "API anahtarları yapılandırıldı: {providers}",
     "no_api_key": "{provider} için API anahtarı bulunamadı",
     "api_key_saved_in_secrets": "{provider} API anahtarı secrets.toml dosyasına kaydedildi",
     "no_api_key_in_secrets": "secrets.toml dosyasında {provider} API anahtarı yok",

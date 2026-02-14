@@ -76,6 +76,7 @@
   "status": {
     "api_key_configured": "API-ключ настроен",
     "api_key_not_set": "API-ключ не установлен",
+    "api_keys_configured_for": "API-ключи настроены для: {providers}",
     "no_api_key": "API-ключ для {provider} не найден",
     "api_key_saved_in_secrets": "API-ключ {provider} сохранён в secrets.toml",
     "no_api_key_in_secrets": "Нет API-ключа {provider} в secrets.toml",

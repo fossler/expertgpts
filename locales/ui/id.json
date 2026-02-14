@@ -76,6 +76,7 @@
   "status": {
     "api_key_configured": "Kunci API dikonfigurasi",
     "api_key_not_set": "Kunci API tidak diset",
+    "api_keys_configured_for": "Kunci API dikonfigurasi untuk: {providers}",
     "no_api_key": "Tidak ada kunci API ditemukan untuk {provider}",
     "api_key_saved_in_secrets": "Kunci API {provider} disimpan dalam secrets.toml",
     "no_api_key_in_secrets": "Tidak ada kunci API {provider} dalam secrets.toml",

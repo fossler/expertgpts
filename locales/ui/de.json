@@ -76,6 +76,7 @@
   "status": {
     "api_key_configured": "API-Schlüssel konfiguriert",
     "api_key_not_set": "API-Schlüssel nicht festgelegt",
+    "api_keys_configured_for": "API-Schlüssel konfiguriert für: {providers}",
     "no_api_key": "Kein API-Schlüssel für {provider} gefunden",
     "api_key_saved_in_secrets": "{provider}-API-Schlüssel in secrets.toml gespeichert",
     "no_api_key_in_secrets": "Kein {provider}-API-Schlüssel in secrets.toml",
