@@ -60,6 +60,11 @@ LLM_PROVIDERS = {
                 "display_name": "GLM-4.7",
                 "max_tokens": 200000,
                 "thinking_param": {"thinking": {"type": "disabled"}},
+            },
+            "glm-5": {
+                "display_name": "GLM-5",
+                "max_tokens": 200000,
+                "thinking_param": {"thinking": {"type": "disabled"}},
             }
         }
     }
