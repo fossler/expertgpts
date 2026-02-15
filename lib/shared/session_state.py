@@ -52,16 +52,14 @@ def initialize_shared_session_state():
     if "api_keys" not in st.session_state:
         st.session_state.api_keys = {}
 
-        # Try to load all provider API keys from st.secrets
-        for provider_key, provider_config in LLM_PROVIDERS.items():
-            env_var = provider_config["api_key_env"]  # e.g., "DEEPSEEK_API_KEY"
-            try:
-                secrets_api_key = st.secrets.get(env_var, "")
-                if secrets_api_key:
-                    st.session_state.api_keys[provider_key] = secrets_api_key
-            except Exception:
-                # If secrets.toml doesn't exist or has errors, continue
-                pass
+        # Load all provider API keys from secrets.toml file only (no env var fallback)
+        # This ensures API keys only come from explicit user configuration
+        from lib.config.secrets_manager import get_all_provider_api_keys
+
+        api_keys = get_all_provider_api_keys()
+        for provider_key, api_key in api_keys.items():
+            if api_key:
+                st.session_state.api_keys[provider_key] = api_key
 
     # Initialize default LLM settings in session state
     # Try to load from app_defaults.toml first, fall back to constants
