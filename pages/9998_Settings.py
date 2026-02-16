@@ -272,59 +272,8 @@ def render_general_settings_section():
 
     st.divider()
 
-    # Define 7 complete themes with harmonious colors
-    # Using theme keys as identifiers, display names will be translated
-    themes = {
-        "modern_red": {
-            "primary": "#FF6B6B",
-            "background": "#FFFFFF",
-            "secondary": "#F0F2F6",
-            "text": "#262730",
-            "icon": "🔴"
-        },
-        "ocean_blue": {
-            "primary": "#4A90E2",
-            "background": "#FFFFFF",
-            "secondary": "#E8F0FE",
-            "text": "#1E3A8A",
-            "icon": "🔵"
-        },
-        "forest_green": {
-            "primary": "#10B981",
-            "background": "#FFFFFF",
-            "secondary": "#ECFDF5",
-            "text": "#064E3B",
-            "icon": "🟢"
-        },
-        "royal_purple": {
-            "primary": "#9B59B6",
-            "background": "#FFFFFF",
-            "secondary": "#F3E5F5",
-            "text": "#4A148C",
-            "icon": "🟣"
-        },
-        "dark_blue": {
-            "primary": "#4A90E2",
-            "background": "#0E1117",
-            "secondary": "#262730",
-            "text": "#FAFAFA",
-            "icon": "🌑"
-        },
-        "dark_gray": {
-            "primary": "#FF6B6B",
-            "background": "#1A1A1A",
-            "secondary": "#2D2D2D",
-            "text": "#FFFFFF",
-            "icon": "🖤"
-        },
-        "custom": {
-            "primary": "#F59E0B",
-            "background": "#FFFBEB",
-            "secondary": "#FEF3C7",
-            "text": "#78350F",
-            "icon": "🎨"
-        }
-    }
+    # Load available themes from .streamlit/themes/ directory
+    themes = config_toml_manager.load_available_themes()
 
     # Create theme options with icons (using translated names)
     theme_options = [f"{theme['icon']} {i18n.t(f'theme.{name}')}" for name, theme in themes.items()]

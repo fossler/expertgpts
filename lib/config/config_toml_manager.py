@@ -4,6 +4,7 @@ This module provides functions to read and write theme settings to the
 .streamlit/config.toml file, which controls the visual appearance of the app.
 """
 
+import streamlit as st
 from pathlib import Path
 from typing import Optional
 from lib.shared.file_ops import ensure_directory_exists, get_project_root, set_secure_permissions, get_streamlit_path, ensure_streamlit_file
@@ -157,8 +158,13 @@ def update_custom_theme(
     # Create themes directory if it doesn't exist
     ensure_directory_exists(custom_theme_path.parent)
 
-    # Write theme settings to custom.toml
-    content = f"""[theme]
+    # Write theme settings to custom.toml (preserving metadata section structure)
+    content = f"""# Theme metadata (not used by Streamlit, but used by the app)
+[metadata]
+icon = "🎨"
+
+[theme]
+base = "light"
 primaryColor = "{primaryColor}"
 backgroundColor = "{backgroundColor}"
 secondaryBackgroundColor = "{secondaryBackgroundColor}"
@@ -300,3 +306,85 @@ def get_current_theme_name() -> Optional[str]:
                     return theme_name
 
     return None
+
+
+@st.cache_data(ttl=60)
+def load_available_themes() -> dict:
+    """Load all available themes from .streamlit/themes/ directory.
+
+    Scans the themes directory for .toml files and extracts theme metadata
+    (primary, background, secondary, text colors, and icon).
+
+    Returns:
+        dict: Dictionary with theme names as keys, each containing:
+            - primary: Primary color hex
+            - background: Background color hex
+            - secondary: Secondary background color hex
+            - text: Text color hex
+            - icon: Emoji icon for theme selector
+    """
+    project_root = get_project_root()
+    themes_dir = project_root / ".streamlit" / "themes"
+
+    if not themes_dir.exists():
+        return {}
+
+    themes = {}
+    theme_files = sorted(themes_dir.glob("*.toml"))
+
+    # Keys to extract from [theme] section
+    color_keys = {
+        "primaryColor": "primary",
+        "backgroundColor": "background",
+        "secondaryBackgroundColor": "secondary",
+        "textColor": "text",
+    }
+
+    for theme_file in theme_files:
+        # Skip backup files
+        if theme_file.suffix == ".backup" or ".backup" in theme_file.name:
+            continue
+
+        theme_name = theme_file.stem
+        content = theme_file.read_text()
+
+        # Parse theme file with defaults
+        theme_data = {
+            "primary": "#6366F1",
+            "background": "#FFFFFF",
+            "secondary": "#F3F4F6",
+            "text": "#1F2937",
+            "icon": "🎨"
+        }
+
+        current_section = None
+        for line in content.split('\n'):
+            line = line.strip()
+
+            # Track current section
+            if line == "[theme]":
+                current_section = "theme"
+                continue
+            elif line == "[metadata]":
+                current_section = "metadata"
+                continue
+            elif line.startswith("[") and line not in ("[theme]", "[metadata]"):
+                current_section = None
+                continue
+
+            if "=" in line and current_section:
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+
+                # Extract color keys from [theme] section
+                if current_section == "theme" and key in color_keys:
+                    theme_data[color_keys[key]] = value
+
+                # Extract icon from [metadata] section
+                if current_section == "metadata" and key == "icon":
+                    theme_data["icon"] = value
+
+        themes[theme_name] = theme_data
+
+    return themes

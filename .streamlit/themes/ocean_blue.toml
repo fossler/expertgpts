@@ -1,3 +1,7 @@
+# Theme metadata (not used by Streamlit, but used by the app)
+[metadata]
+icon = "🔵"
+
 [theme]
 base = "light"
 
