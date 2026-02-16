@@ -13,7 +13,7 @@ from lib.shared.page_generator import PageGenerator
 from lib.shared.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
 from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
 from lib.ui.dialogs import render_thinking_mode_ui, render_model_selection
-from lib.shared.helpers import sanitize_name, translate_expert_name, translate_expert_names_batch, validate_expert_name
+from lib.shared.helpers import sanitize_name, translate_expert_name, translate_expert_names_batch, validate_expert_name, validate_api_key
 from lib.config import secrets_manager
 from lib.config import config_toml_manager
 from lib.shared.session_state import (
@@ -112,22 +112,27 @@ def render_api_key_section():
 
     with col1:
         if st.button(f"💾 {i18n.t('buttons.save_api_key')}", type="primary", disabled=not api_key, key=f"save_{selected_provider}"):
-            try:
-                # Save to secrets.toml file
-                secrets_manager.save_provider_api_key(selected_provider, api_key)
+            # Validate API key format before saving
+            is_valid, error_msg = validate_api_key(api_key, provider=selected_provider)
+            if not is_valid:
+                st.error(f"❌ {error_msg}")
+            else:
+                try:
+                    # Save to secrets.toml file
+                    secrets_manager.save_provider_api_key(selected_provider, api_key)
 
-                # Update session state
-                if "api_keys" not in st.session_state:
-                    st.session_state.api_keys = {}
-                st.session_state.api_keys[selected_provider] = api_key
+                    # Update session state
+                    if "api_keys" not in st.session_state:
+                        st.session_state.api_keys = {}
+                    st.session_state.api_keys[selected_provider] = api_key
 
-                st.success(f"✅ {i18n.t('success.api_key_saved')}")
-                st.info(f"🔄 {i18n.t('status.application_will_rerun')}")
+                    st.success(f"✅ {i18n.t('success.api_key_saved')}")
+                    st.info(f"🔄 {i18n.t('status.application_will_rerun')}")
 
-                # Rerun to load the new key from st.secrets
-                st.rerun()
-            except Exception as e:
-                st.error(f"❌ {i18n.t('errors.error_saving_api_key', error=str(e))}")
+                    # Rerun to load the new key from st.secrets
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ {i18n.t('errors.error_saving_api_key', error=str(e))}")
 
     with col2:
         if st.button(f"🗑️ {i18n.t('buttons.clear')}", disabled=not has_file_key, key=f"clear_{selected_provider}"):

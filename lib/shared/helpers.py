@@ -190,11 +190,11 @@ def validate_api_key(api_key: str, provider: str = None) -> tuple[bool, str]:
     # Provider-specific validation patterns
     PROVIDER_KEY_PATTERNS = {
         "deepseek": {
-            "pattern": r"^sk-[a-f0-9]{32,}$",
+            "pattern": r"^sk-[a-f0-9]{31,}$",
             "example": "sk-1234567890abcdef1234567890abcdef"
         },
         "openai": {
-            "pattern": r"^sk-[a-zA-Z0-9_-]{20,}$",
+            "pattern": r"^sk-[a-zA-Z0-9_-]{52,}$",
             "example": "sk-proj-abc123_XyZ789..."
         },
         "zai": {
@@ -202,7 +202,7 @@ def validate_api_key(api_key: str, provider: str = None) -> tuple[bool, str]:
             "example": "ab3e366bed0b468586b2bd9e7eab347a.XyZ1234567890AbC"
         },
         "kimi": {
-            "pattern": r"^sk-[a-zA-Z0-9]{20,}$",
+            "pattern": r"^sk-[a-zA-Z0-9]{46,}$",
             "example": "sk-AbCdEf123456XyZ7890GhIjKlMnOpQrStUv"
         }
     }
