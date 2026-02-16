@@ -19,6 +19,7 @@ from lib.shared.constants import (
     get_provider_config,
     get_model_config,
     get_provider_base_url,
+    get_reasoning_efforts,
     SYSTEM_PROMPT_TEMPLATE,
 )
 from lib.shared.helpers import sanitize_error_message
@@ -69,7 +70,7 @@ class LLMClient:
 
         Args:
             model: Model ID
-            thinking_level: Effort level ("none", "low", "medium", "high", "xhigh")
+            thinking_level: Effort level (varies by model, e.g., "none", "low", "medium", "high", "xhigh", "minimal")
 
         Returns:
             tuple: (extra_body_dict, direct_params_dict) - Two dictionaries for different
@@ -81,15 +82,14 @@ class LLMClient:
 
         # OpenAI: use reasoning effort parameter (direct parameter, not in extra_body)
         if self.provider == "openai":
-            # Map our effort levels to OpenAI's reasoning_effort values
-            # OpenAI accepts: "low", "medium", "high"
-            if thinking_level in ["low", "medium", "high"]:
-                # reasoning_effort is a direct parameter for OpenAI
+            # Get supported efforts for this specific model
+            supported_efforts = get_reasoning_efforts(self.provider, model)
+
+            # Validate that the thinking_level is supported by this model
+            if thinking_level in supported_efforts:
                 return {}, {"reasoning_effort": thinking_level}
-            elif thinking_level == "xhigh":
-                # Map "xhigh" to "high" for OpenAI
-                return {}, {"reasoning_effort": "high"}
             else:
+                # Effort not supported by this model, use default (no reasoning_effort param)
                 return {}, {}
 
         # KIMI: use thinking type parameter (enabled/disabled) - same as Z.AI
@@ -100,7 +100,7 @@ class LLMClient:
 
         # Z.AI: use thinking type parameter (enabled/disabled)
         if self.provider == "zai":
-            # Z.AI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}
+            # Z.AI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}}
             # Any thinking_level other than "none" means enabled
             return {"thinking": {"type": "enabled"}}, {}
 
@@ -128,7 +128,7 @@ class LLMClient:
             temperature: Sampling temperature (0.0-2.0)
             model: Model to use (if None, uses provider default)
             system_prompt: Optional system prompt to prepend
-            thinking_level: Thinking/reasoning effort level (OpenAI: "none"|"low"|"medium"|"high"|"xhigh")
+            thinking_level: Thinking/reasoning effort level (model-specific, varies by OpenAI model)
 
         Returns:
             Assistant's response text
@@ -191,7 +191,7 @@ class LLMClient:
             temperature: Sampling temperature (0.0-2.0)
             model: Model to use (if None, uses provider default)
             system_prompt: Optional system prompt to prepend
-            thinking_level: Thinking/reasoning effort level (OpenAI: "none"|"low"|"medium"|"high"|"xhigh")
+            thinking_level: Thinking/reasoning effort level (model-specific, varies by OpenAI model)
 
         Yields:
             Chunks of the assistant's response

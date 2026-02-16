@@ -226,7 +226,7 @@ def render_default_llm_settings_section():
     if st.session_state.get("default_model") != default_model:
         st.session_state.default_model = default_model
 
-    # Default thinking mode (using shared helper)
+    # Default thinking mode (using shared helper, with model-specific efforts)
     current_thinking = st.session_state.get("default_thinking_level", "none")
 
     # Note: We use "default" label for Settings page context
@@ -234,6 +234,7 @@ def render_default_llm_settings_section():
         provider=default_provider,
         current_thinking=current_thinking,
         widget_key="default_thinking_selector",
+        model=default_model,
         label=f"🧠 {i18n.t('default_llm.thinking_mode') if default_provider == 'zai' else i18n.t('default_llm.select_thinking_mode')}",
         help_text=i18n.t('default_llm.thinking_mode_help') if default_provider == "openai" else i18n.t('default_llm.thinking_mode_help_zai') if default_provider == "zai" else None,
         use_sidebar=False

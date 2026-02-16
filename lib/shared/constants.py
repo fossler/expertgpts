@@ -35,16 +35,29 @@ LLM_PROVIDERS = {
             "gpt-5": {
                 "display_name": "GPT-5",
                 "max_tokens": 400000,
-                "thinking_param": {"reasoning": {"effort": "none"}},
+                "reasoning_efforts": ["minimal", "low", "medium", "high"],
+                "reasoning_effort_default": "medium",
+                "thinking_param": {"reasoning": {"effort": "medium"}},
             },
             "gpt-5-mini": {
                 "display_name": "GPT-5 Mini",
                 "max_tokens": 200000,
+                "reasoning_efforts": ["none", "low", "medium", "high"],
+                "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5-nano": {
                 "display_name": "GPT-5 Nano",
                 "max_tokens": 400000,
+                "reasoning_efforts": ["none", "low", "medium", "high"],
+                "reasoning_effort_default": "none",
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            },
+            "gpt-5.2": {
+                "display_name": "GPT-5.2",
+                "max_tokens": 400000,
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
             }
         }
@@ -152,8 +165,8 @@ DEFAULT_LLM_PROVIDER = "deepseek"
 DEFAULT_LLM_MODEL = "deepseek-chat"
 DEFAULT_THINKING_ENABLED = False
 
-# OpenAI Reasoning Effort Levels
-OPENAI_REASONING_EFFORTS = ["none", "low", "medium", "high", "xhigh"]
+# OpenAI Reasoning Effort Levels (all possible values across models)
+OPENAI_REASONING_EFFORTS_ALL = ["minimal", "none", "low", "medium", "high", "xhigh"]
 OPENAI_REASONING_EFFORT_DEFAULT = "none"
 
 # Model Context Limits
@@ -532,3 +545,37 @@ def get_provider_avatar(provider: str) -> str:
         str: Path to avatar icon relative to project root
     """
     return PROVIDER_AVATARS.get(provider.lower(), "icons/deepseek_icon_blue.png")
+
+
+def get_reasoning_efforts(provider: str, model: str) -> list:
+    """Get supported reasoning effort levels for a specific model.
+
+    Args:
+        provider: Provider key (e.g., "openai")
+        model: Model ID (e.g., "gpt-5", "gpt-5.2")
+
+    Returns:
+        list: List of supported reasoning effort levels for the model
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    model_config = get_model_config(provider, model)
+    return model_config.get("reasoning_efforts", ["none", "low", "medium", "high"])
+
+
+def get_reasoning_effort_default(provider: str, model: str) -> str:
+    """Get default reasoning effort level for a specific model.
+
+    Args:
+        provider: Provider key (e.g., "openai")
+        model: Model ID (e.g., "gpt-5", "gpt-5.2")
+
+    Returns:
+        str: Default reasoning effort level for the model
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    model_config = get_model_config(provider, model)
+    return model_config.get("reasoning_effort_default", "none")

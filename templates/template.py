@@ -480,11 +480,12 @@ def display_model_settings(config: dict, messages_key: str):
         use_sidebar=True
     )
 
-    # Thinking Mode Level (using shared helper)
+    # Thinking Mode Level (using shared helper, with model-specific efforts)
     new_thinking_level = render_thinking_mode_ui(
         provider=provider,
         current_thinking=thinking_level,
         widget_key=f"{EXPERT_ID}_thinking_selector_v{cache_version}",
+        model=new_model,
         use_sidebar=True
     )
 

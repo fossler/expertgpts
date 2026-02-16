@@ -7,7 +7,7 @@ across multiple pages.
 import streamlit as st
 from pathlib import Path
 from lib.config.config_manager import get_config_manager
-from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
+from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider, get_reasoning_efforts
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
 from lib.shared.helpers import sanitize_name, validate_expert_name
@@ -18,11 +18,12 @@ def render_thinking_mode_ui(
     provider: str,
     current_thinking: str,
     widget_key: str,
+    model: str = None,
     label: str = None,
     help_text: str = None,
     use_sidebar: bool = False
 ) -> str:
-    """Render thinking mode UI based on provider.
+    """Render thinking mode UI based on provider and model.
 
     This helper function centralizes thinking mode rendering logic,
     eliminating duplication across template.py, Settings.py, and dialogs.py.
@@ -31,6 +32,7 @@ def render_thinking_mode_ui(
         provider: LLM provider (openai, zai, deepseek)
         current_thinking: Current thinking level
         widget_key: Unique key for the widget
+        model: Model ID (required for OpenAI to get model-specific efforts)
         label: Optional label (auto-generated if None)
         help_text: Optional help text
         use_sidebar: If True, use st.sidebar instead of st
@@ -41,8 +43,19 @@ def render_thinking_mode_ui(
     st_func = st.sidebar if use_sidebar else st
 
     if provider == "openai":
-        effort_options = ["none", "low", "medium", "high", "xhigh"]
-        effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
+        # Get model-specific reasoning efforts
+        if model:
+            effort_options = get_reasoning_efforts(provider, model)
+        else:
+            # Fallback to common efforts if model not specified
+            effort_options = ["none", "low", "medium", "high"]
+
+        # If current thinking not in options, use first option (default)
+        if current_thinking not in effort_options:
+            effort_index = 0
+        else:
+            effort_index = effort_options.index(current_thinking)
+
         thinking_level = st_func.selectbox(
             label or i18n.t("sidebar.thinking_mode"),
             options=effort_options,
