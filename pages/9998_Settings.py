@@ -1028,6 +1028,7 @@ def render_about_section():
     **{i18n.t('about.features_title')}:**
     - 🤖 {i18n.t('about.feature_multiple_experts')}
     - 🔄 {i18n.t('about.feature_multi_provider')}
+    - ✨ {i18n.t('about.feature_ai_prompts')}
     - 🌍 {i18n.t('about.feature_internationalization')}
     - 📝 {i18n.t('about.feature_template_architecture')}
     - 🎨 {i18n.t('about.feature_theme_customization')}

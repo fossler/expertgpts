@@ -82,6 +82,7 @@ def main():
 
     - 🤖 **{i18n.t('home.features.multiple_experts')}**: {i18n.t('home.features.multiple_experts_desc')}
     - 🔄 **{i18n.t('home.features.multi_provider')}**: {i18n.t('home.features.multi_provider_desc')}
+    - ✨ **{i18n.t('home.features.ai_prompts')}**: {i18n.t('home.features.ai_prompts_desc')}
     - 🌍 **{i18n.t('home.features.internationalization')}**: {i18n.t('home.features.internationalization_desc')}
     - 📝 **{i18n.t('home.features.template_architecture')}**: {i18n.t('home.features.template_architecture_desc')}
     - 🎨 **{i18n.t('home.features.theme_customization')}**: {i18n.t('home.features.theme_customization_desc')}

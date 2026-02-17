@@ -12,6 +12,7 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 
 - **🤖 Multiple Expert Agents** - Chat with domain-specific AI experts, each specialized in different areas
 - **🔄 Multi-Provider Support** - Choose between DeepSeek, OpenAI, and Z.AI (with free models) per expert
+- **✨ AI-Generated System Prompts** - Let the LLM craft expert prompts from your description—no prompt engineering required
 - **🌍 Full Internationalization** - 13 languages with automatic detection and AI language response
 - **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
