@@ -18,6 +18,13 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
 - **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
 
+## Tech Stack
+
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Framework** | [Streamlit](https://streamlit.io/) >= 1.52.0 | Web application framework |
+| **Languages** | Python 3.11+ | Primary development language |
+
 ## Code Hosting
 
 - **GitHub**: [https://github.com/fossler/expertgpts](https://github.com/fossler/expertgpts) (primary)
