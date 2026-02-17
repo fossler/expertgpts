@@ -2,6 +2,8 @@
 
 A multi-expert AI chat application built with Streamlit, providing access to domain-specific AI experts with support for multiple LLM providers, full internationalization, and persistent chat history.
 
+![ExpertGPTs App Screenshot](docs/assets/expertgps_app.png)
+
 ## Overview
 
 ExpertGPTs is a powerful AI chat interface that lets you create and interact with specialized AI experts. Each expert has deep knowledge in specific domains—from Python programming to career coaching—and maintains independent conversation history. Switch between LLM providers (DeepSeek, OpenAI, Z.AI) per expert, customize responses with temperature controls, and enjoy a fully internationalized interface supporting 13 languages.
