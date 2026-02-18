@@ -31,7 +31,6 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 ## Code Hosting
 
 - **GitHub**: [https://github.com/fossler/expertgpts](https://github.com/fossler/expertgpts) (primary)
-- **Gitee**: [https://gitee.com/mirzet/expertgpts](https://gitee.com/mirzet/expertgpts) (mirror)
 
 ## Pay Only for What You Use: The Economic and Strategic Advantages of API-Based AI Chats
 
