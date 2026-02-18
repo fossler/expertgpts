@@ -51,6 +51,9 @@ Whether usage is sporadic or comes in bursts, PAYG adapts instantly. You never o
 **Concrete Cost Example**
 Around **180 requests to DeepSeek can cost as little as ~$0.06**. Even with higher-priced APIs like OpenAI—often several times more expensive—PAYG remains economical because **you are billed only when requests are made**.
 
+**Real-World Proof**
+During the development phase (1.5 months, January to mid-February), I spent only **$0.82** across all four supported LLM providers—while actively using the app myself the entire time.
+
 In contrast, subscription-based AI chats charge the same monthly fee regardless of whether the service is used heavily, lightly, or not at all.
 
 ### Combine Providers, Optimize Performance, Reduce Costs
