@@ -23,11 +23,25 @@ def ensure_config_file_exists() -> Path:
     """Ensure the .streamlit directory and config.toml file exist.
 
     Creates the .streamlit directory and config.toml file if they don't exist.
+    Copies content from config.toml.example if available, otherwise uses minimal default.
 
     Returns:
         Path: Path to config.toml file
     """
-    return ensure_streamlit_file("config.toml", default_content="[theme]\n")
+    config_path = get_streamlit_path("config.toml")
+
+    if config_path.exists():
+        return config_path
+
+    # Try to copy from example file
+    example_path = get_streamlit_path("config.toml.example")
+    if example_path.exists():
+        default_content = example_path.read_text()
+    else:
+        # Fallback to minimal default if example doesn't exist
+        default_content = "[theme]\n"
+
+    return ensure_streamlit_file("config.toml", default_content=default_content)
 
 
 def get_theme_settings() -> dict:

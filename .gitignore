@@ -34,9 +34,10 @@ env/
 .claude_config.json
 .claude/
 
-# Streamlit - keep everything except secrets.toml
+# Streamlit - user-specific config files (not committed)
 .streamlit/secrets.toml
 .streamlit/app_defaults.toml
+.streamlit/config.toml
 
 # Testing
 .pytest_cache/

@@ -1,7 +1,0 @@
-[llm]
-provider = "zai"
-model = "glm-4.7"
-thinking_level = "none"
-
-[language]
-code = "en"

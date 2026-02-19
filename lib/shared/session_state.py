@@ -26,6 +26,10 @@ def initialize_shared_session_state():
     Performance: Cached by Streamlit's session state mechanism, only
     executes once per session.
     """
+    # Ensure config.toml exists (copies from example if needed)
+    from lib.config.config_toml_manager import ensure_config_file_exists
+    ensure_config_file_exists()
+
     # Import LLM_PROVIDERS to get all provider keys
     from lib.shared.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
 
