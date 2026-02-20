@@ -54,6 +54,26 @@ When refactoring or changing data structures:
 - Clean code is more valuable than supporting old data formats
 
 
+## Reference Documentation
+
+Read these documents when working on specific areas:
+
+| Document | When to Read |
+|----------|--------------|
+| `docs/architecture/overview.md` | Understanding overall system architecture |
+| `docs/architecture/template-system.md` | Modifying expert page templates |
+| `docs/architecture/multi-provider-llm.md` | Adding LLM providers, thinking parameters |
+| `docs/architecture/background-streaming.md` | Streaming implementation, battery optimization |
+| `docs/architecture/state-management.md` | Session state, persistent storage |
+| `docs/internationalization/I18N_GUIDE.md` | Adding translations, language handling |
+| `docs/configuration/overview.md` | Configuration files structure |
+| `docs/configuration/api-keys.md` | API key management, secrets |
+| `docs/configuration/expert-configs.md` | Expert YAML configuration format |
+| `docs/development/adding-features.md` | Step-by-step feature development |
+| `docs/development/testing.md` | Writing and running tests |
+| `docs/reference/troubleshooting.md` | Debugging common issues |
+
+
 ## Development Commands
 
 ### Setup & Installation
@@ -257,10 +277,8 @@ Clean separation of concerns for 13-language support:
 - **`configs/{expert_id}.yaml`** - Expert-specific configurations (name, description, system_prompt, temperature, metadata)
 
 ### Documentation
-- **`README.md`** - Comprehensive user and developer documentation (455 lines)
-- **`docs/architecture/background-streaming.md`** - Background streaming architecture and implementation - **NEW**
-- **`docs/I18N_GUIDE.md`** - Internationalization architecture and implementation guide
-- **`docs/testing.md`** - Testing instructions and guidelines
+- **`README.md`** - Comprehensive user and developer documentation
+- **`docs/`** - Full documentation organized by topic (see Reference Documentation section above)
 
 ## Important Development Workflows
 
