@@ -401,3 +401,9 @@ streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
 Requires `watchdog` package (included in `requirements-dev.txt`). Provides instant reload when Python files change.
+
+### Future
+
+| Todo | Priority | Problem | Solution |
+|------|----------|---------|----------|
+| Review dead code cleanup | Low | ~290 lines of unused code identified | See `llm_comm/analysis/dead-code-analysis-2026-02-20.md` |
