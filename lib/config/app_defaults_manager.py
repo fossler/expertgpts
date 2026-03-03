@@ -109,35 +109,6 @@ def save_llm_defaults(provider: str, model: str, thinking_level: str) -> bool:
     return write_toml(defaults_path, data, header=header)
 
 
-def has_app_defaults() -> bool:
-    """Check if app_defaults.toml file exists.
-
-    Returns:
-        bool: True if app_defaults.toml exists, False otherwise
-    """
-    return get_app_defaults_path().exists()
-
-
-def reset_app_defaults() -> bool:
-    """Reset app defaults to hardcoded values.
-
-    Deletes the app_defaults.toml file if it exists, causing the app
-    to fall back to hardcoded defaults on next load.
-
-    Returns:
-        bool: True if reset was successful, False otherwise
-    """
-    defaults_path = get_app_defaults_path()
-
-    try:
-        if defaults_path.exists():
-            defaults_path.unlink()
-        return True
-    except Exception as e:
-        print(f"Error resetting app defaults: {e}")
-        return False
-
-
 def get_language_preference() -> Optional[str]:
     """Get saved language preference from app_defaults.toml.
 

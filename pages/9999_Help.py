@@ -7,23 +7,6 @@ from lib.shared.session_state import initialize_shared_session_state
 from lib.shared.helpers import render_git_branch_footer
 
 
-def get_all_markdown_files(docs_dir: Path) -> list:
-    """Get all markdown files in the docs directory recursively.
-
-    Args:
-        docs_dir: Path to the docs directory
-
-    Returns:
-        List of tuples (relative_path, full_path)
-    """
-    markdown_files = []
-    for md_file in docs_dir.rglob("*.md"):
-        # Get relative path from docs_dir
-        rel_path = md_file.relative_to(docs_dir)
-        markdown_files.append((str(rel_path), md_file))
-    return sorted(markdown_files)
-
-
 def read_markdown_file(file_path: Path) -> str:
     """Read a markdown file and return its content.
 

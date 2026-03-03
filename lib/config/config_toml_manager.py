@@ -270,11 +270,6 @@ def save_theme_settings(base: str) -> None:
     set_secure_permissions(config_path)
 
 
-def reset_to_default_theme() -> None:
-    """Reset theme settings to default theme (ocean_blue)."""
-    save_theme_settings(base=".streamlit/themes/ocean_blue.toml")
-
-
 def get_current_theme_name() -> Optional[str]:
     """Get the current theme name from config.toml base parameter.
 

@@ -5,8 +5,6 @@ session state across all pages in the application.
 """
 
 import streamlit as st
-from typing import Optional
-from lib.shared.types import MessagesList
 
 
 def initialize_shared_session_state():
@@ -75,104 +73,6 @@ def initialize_shared_session_state():
         st.session_state.default_model = llm_defaults["model"]
         st.session_state.default_thinking_level = llm_defaults["thinking_level"]
         st.session_state.default_thinking_enabled = DEFAULT_THINKING_ENABLED
-
-
-def initialize_expert_session_state(expert_id: str) -> None:
-    """Initialize session state for a specific expert.
-
-    This function ensures that all required session state variables
-    exist for a given expert, initializing them to default values if needed.
-
-    Args:
-        expert_id: The expert's unique identifier
-
-    Note:
-        This function is called by expert pages to initialize their
-        specific session state variables without affecting other experts.
-    """
-    messages_key = f"messages_{expert_id}"
-
-    if messages_key not in st.session_state:
-        st.session_state[messages_key] = []
-
-    # Initialize provider/model settings for this expert if not set
-    provider_key = f"provider_{expert_id}"
-    model_key = f"model_{expert_id}"
-    thinking_key = f"thinking_{expert_id}"
-    temp_key = f"temperature_{expert_id}"
-
-    if provider_key not in st.session_state:
-        # Use default provider from shared state or constants
-        st.session_state[provider_key] = st.session_state.get(
-            "default_provider",
-            "deepseek"
-        )
-
-    if model_key not in st.session_state:
-        # Use default model for the selected provider
-        from lib.shared.constants import get_default_model_for_provider
-        provider = st.session_state[provider_key]
-        st.session_state[model_key] = get_default_model_for_provider(provider)
-
-    if thinking_key not in st.session_state:
-        st.session_state[thinking_key] = "none"
-
-    if temp_key not in st.session_state:
-        st.session_state[temp_key] = 1.0
-
-
-def get_expert_messages(expert_id: str) -> MessagesList:
-    """Get the message history for a specific expert.
-
-    Args:
-        expert_id: The expert's unique identifier
-
-    Returns:
-        List[Message]: The message history for this expert
-
-    Note:
-        Returns an empty list if the expert has no messages yet.
-    """
-    messages_key = f"messages_{expert_id}"
-    return st.session_state.get(messages_key, [])
-
-
-def get_expert_setting(expert_id: str, setting: str, default=None):
-    """Get a session state setting for a specific expert.
-
-    Args:
-        expert_id: The expert's unique identifier
-        setting: The setting key (e.g., "provider", "model", "temperature")
-        default: Default value if setting doesn't exist
-
-    Returns:
-        The setting value or default
-    """
-    setting_key = f"{setting}_{expert_id}"
-    return st.session_state.get(setting_key, default)
-
-
-def set_expert_setting(expert_id: str, setting: str, value) -> None:
-    """Set a session state setting for a specific expert.
-
-    Args:
-        expert_id: The expert's unique identifier
-        setting: The setting key (e.g., "provider", "model", "temperature")
-        value: The value to set
-    """
-    setting_key = f"{setting}_{expert_id}"
-    st.session_state[setting_key] = value
-
-
-def clear_expert_messages(expert_id: str) -> None:
-    """Clear the message history for a specific expert.
-
-    Args:
-        expert_id: The expert's unique identifier
-    """
-    messages_key = f"messages_{expert_id}"
-    if messages_key in st.session_state:
-        del st.session_state[messages_key]
 
 
 def handle_pending_navigation():

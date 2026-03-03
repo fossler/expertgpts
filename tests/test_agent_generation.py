@@ -229,7 +229,7 @@ class TestAgentGeneration:
             created_ids.append(expert_id)
 
         # List all experts
-        experts = config_manager.list_experts()
+        experts = config_manager.list_experts_lightweight()
 
         assert len(experts) == 2, "Should have 2 experts"
         assert all("expert_id" in expert for expert in experts)
