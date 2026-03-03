@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
 import streamlit as st
-
-import streamlit as st
 from lib.shared.helpers import sanitize_name
 from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE
 from lib.config.app_defaults_manager import get_llm_defaults

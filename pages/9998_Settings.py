@@ -10,10 +10,18 @@ from pathlib import Path
 import streamlit as st
 from lib.config.config_manager import get_config_manager
 from lib.shared.page_generator import PageGenerator
-from lib.shared.constants import EXPERT_BEHAVIOR_DOCS, get_expert_behavior_docs_edit
+from lib.shared.constants import (
+    EXPERT_BEHAVIOR_DOCS,
+    get_expert_behavior_docs_edit,
+    LLM_PROVIDERS,
+    get_provider_display_name,
+    get_provider_links,
+    get_model_display_name,
+    get_default_model_for_provider,
+)
 from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
 from lib.ui.dialogs import render_thinking_mode_ui, render_model_selection
-from lib.shared.helpers import sanitize_name, translate_expert_name, translate_expert_names_batch, validate_expert_name, validate_api_key
+from lib.shared.helpers import sanitize_name, translate_expert_name, translate_expert_names_batch, validate_expert_name, validate_api_key, render_git_branch_footer
 from lib.config import secrets_manager
 from lib.config import config_toml_manager
 from lib.shared.session_state import (
@@ -55,7 +63,6 @@ def initialize_session_state():
 def render_api_key_section():
     """Render the multi-provider API Key management section."""
     from lib.i18n import i18n
-    from lib.shared.constants import LLM_PROVIDERS, get_provider_display_name
 
     st.subheader(f"🔑 {i18n.t('api_key.title')}")
 
@@ -154,8 +161,6 @@ def render_api_key_section():
     # Resources links
     st.subheader(f"📚 {i18n.t('api_key.resources')}")
 
-    from lib.shared.constants import get_provider_display_name, get_provider_links
-
     # Provider name and links (one-liner)
     provider_name = get_provider_display_name(selected_provider)
     provider_links_md = get_provider_links(selected_provider)
@@ -165,7 +170,6 @@ def render_api_key_section():
 def render_default_llm_settings_section():
     """Render the Default LLM Settings section for configuring global defaults."""
     from lib.i18n import i18n
-    from lib.shared.constants import LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider
 
     st.subheader(f"⚙️ {i18n.t('default_llm.title')}")
 
@@ -771,9 +775,6 @@ def render_expert_management_section():
         model = metadata.get('model', 'deepseek-chat')
         thinking_level = metadata.get('thinking_level', 'none')
 
-        # Import for display helpers
-        from lib.shared.constants import get_provider_display_name, get_model_display_name
-
         provider_name = get_provider_display_name(provider)
         model_name = get_model_display_name(provider, model)
 
@@ -1146,6 +1147,9 @@ def main():
 
     # Footer
     st.divider()
+
+    # Git branch footer in sidebar (at very bottom)
+    render_git_branch_footer()
 
 
 if __name__ == "__main__":

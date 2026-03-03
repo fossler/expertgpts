@@ -12,7 +12,7 @@ from lib.config.config_manager import get_llm_metadata
 from lib.llm import LLMClient, TokenManager
 from lib.shared.session_state import initialize_shared_session_state
 from lib.i18n import i18n
-from lib.shared.helpers import translate_expert_name, sanitize_error_message, sanitize_markdown_content
+from lib.shared.helpers import translate_expert_name, sanitize_error_message, sanitize_markdown_content, add_error_to_history, render_git_branch_footer
 from lib.storage import (
     load_chat_history,
     save_chat_history,
@@ -411,31 +411,15 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 provider_name = get_provider_display_name(provider)
                 error_msg = i18n.t("errors.network_error", provider_name=provider_name)
                 message_placeholder.error(f"❌ {error_msg}")
-                st.session_state[messages_key].append({
-                    "role": "assistant",
-                    "content": f"❌ {error_msg}"
-                })
-                # Persist to file
-                save_chat_history(EXPERT_ID, st.session_state[messages_key])
+                add_error_to_history(EXPERT_ID, messages_key, error_msg)
             except ValueError as e:
                 error_msg = i18n.t("errors.api_response_error", error=sanitize_error_message(str(e)))
                 message_placeholder.error(f"❌ {error_msg}")
-                st.session_state[messages_key].append({
-                    "role": "assistant",
-                    "content": f"❌ {error_msg}"
-                })
-                # Persist to file
-                save_chat_history(EXPERT_ID, st.session_state[messages_key])
+                add_error_to_history(EXPERT_ID, messages_key, error_msg)
             except Exception as e:
                 error_msg = i18n.t("errors.unexpected_error", type=type(e).__name__, message=sanitize_error_message(str(e)))
                 message_placeholder.error(f"❌ {error_msg}")
-                st.session_state[messages_key].append({
-                    "role": "assistant",
-                    "content": f"❌ {error_msg}"
-                })
-                # Persist to file
-                save_chat_history(EXPERT_ID, st.session_state[messages_key])
-            st.rerun()
+                add_error_to_history(EXPERT_ID, messages_key, error_msg)
 
 
 def clear_chat_history(messages_key: str):
@@ -613,6 +597,9 @@ def main():
 
     # Display context usage in sidebar (at the bottom)
     display_context_usage(config, messages_key)
+
+    # Git branch footer in sidebar (at very bottom)
+    render_git_branch_footer()
 
     # Check for completed background streams (from cache files) FIRST
     # This ensures cached responses are loaded before rendering the interface

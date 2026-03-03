@@ -31,3 +31,8 @@ thinking_level = "none"
 # Options: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
 # The app will auto-detect your system language on first run
 code = "en"
+
+[display]
+# Show Git branch in sidebar footer
+# Set to false to hide the Git branch display
+git_branch = true

@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import streamlit as st
 from lib.shared.session_state import initialize_shared_session_state
+from lib.shared.helpers import render_git_branch_footer
 
 
 def get_all_markdown_files(docs_dir: Path) -> list:
@@ -273,6 +274,9 @@ def main():
     # Footer
     st.divider()
     st.caption(f"💡 {i18n.t('help.tip', default='Tip: Use the sidebar on the left to browse documentation')}")
+
+    # Git branch footer in sidebar (at very bottom)
+    render_git_branch_footer()
 
 
 if __name__ == "__main__":
