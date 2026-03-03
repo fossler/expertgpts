@@ -32,7 +32,9 @@ env/
 
 # Ignore Claude specific files
 .claude_config.json
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 
 # Streamlit - user-specific config files (not committed)
 .streamlit/secrets.toml
