@@ -123,6 +123,13 @@ def main():
         icon=":material/help:"
     )
 
+    # Define Voice Transcription page
+    voice_transcription = st.Page(
+        "pages/9000_Voice_Transcription_zai.py",
+        title=i18n.t("nav.voice_transcription", default="Voice Transcription"),
+        icon=":material/mic:"
+    )
+
     # Dynamically load all expert pages
     page_generator = PageGenerator()
     page_list = page_generator.list_pages()
@@ -151,8 +158,8 @@ def main():
             )
         )
 
-    # Create page list: Home + Experts + Settings + Help
-    pages = [home] + expert_pages + [settings, help_page]
+    # Create page list: Home + Experts + Voice Transcription + Settings + Help
+    pages = [home] + expert_pages + [voice_transcription, settings, help_page]
 
     # Set up navigation
     pg = st.navigation(pages)

@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "首頁",
+    "voice_transcription": "語音轉錄",
     "settings": "設置",
     "help": "帮助"
   },

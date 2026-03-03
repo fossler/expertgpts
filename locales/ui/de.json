@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "Startseite",
+    "voice_transcription": "Sprachtranskription",
     "settings": "Einstellungen",
     "help": "Hilfe"
   },

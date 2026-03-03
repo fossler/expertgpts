@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "Ana Sayfa",
+    "voice_transcription": "Ses Transkripsiyonu",
     "settings": "Ayarlar",
     "help": "Yardım"
   },

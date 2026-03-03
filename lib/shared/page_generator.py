@@ -11,7 +11,7 @@ from lib.shared.file_ops import ensure_directory_exists, safe_path_join
 
 
 # System pages that should not be treated as expert pages
-SYSTEM_PAGES = {"1000_Home.py", "9998_Settings.py", "9999_Help.py"}
+SYSTEM_PAGES = {"1000_Home.py", "9000_Voice_Transcription_zai.py", "9998_Settings.py", "9999_Help.py"}
 
 
 def is_system_page(filename: str) -> bool:

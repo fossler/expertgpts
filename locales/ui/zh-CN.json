@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "首页",
+    "voice_transcription": "语音转文字",
     "settings": "设置",
     "help": "帮助"
   },

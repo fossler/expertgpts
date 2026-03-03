@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "Beranda",
+    "voice_transcription": "Transkripsi Suara",
     "settings": "Pengaturan",
     "help": "Bantuan"
   },

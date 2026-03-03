@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "Home",
+    "voice_transcription": "Voice Transcription",
     "settings": "Settings",
     "help": "Help"
   },
@@ -377,5 +378,25 @@
     "doc_not_found": "Documentation not found",
     "go_home": "Go to Documentation Home",
     "tip": "Tip: Use the sidebar on the left to browse documentation"
+  },
+  "voice_transcription": {
+    "title": "Voice Transcription",
+    "subtitle": "Record audio and transcribe it to text using Z.AI's GLM-ASR speech recognition.",
+    "record_section": "Record Audio",
+    "record_button": "Click to record",
+    "recording_limits": "Maximum recording duration: **{max_duration} seconds**. Audio should be clear speech for best results.",
+    "duration_warning": "Your recording is approximately **{duration} seconds**, which exceeds the {max_duration} second limit. Transcription may fail.",
+    "proceed_anyway": "Try transcription anyway (not recommended)",
+    "processing": "Transcribing audio...",
+    "transcription_complete": "Transcription complete!",
+    "transcription_label": "Transcription",
+    "transcription_error": "Transcription failed: {error}",
+    "copy_hint": "Select text above to copy",
+    "new_recording": "New Recording",
+    "previous_transcription": "Previous Transcription",
+    "clear_previous": "Clear Previous",
+    "no_api_key": "Z.AI API key is required for voice transcription. Please configure your {provider} API key in Settings.",
+    "info_expander": "How it works",
+    "info_content": "### Z.AI GLM-ASR-2512\n\nThis feature uses Z.AI's GLM-ASR-2512 model for automatic speech recognition (ASR).\n\n**Best Practices:**\n- Speak clearly and at a normal pace\n- Minimize background noise\n- Keep recordings under 30 seconds\n- Use the default 16kHz sample rate\n\n**Supported Formats:**\n- WAV audio (default from browser)\n- Maximum file size: 25 MB\n\n**Privacy:**\n- Audio is sent to Z.AI servers for processing\n- Transcription is stored only in your browser session"
   }
 }
