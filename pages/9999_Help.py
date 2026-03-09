@@ -4,23 +4,7 @@ import os
 from pathlib import Path
 import streamlit as st
 from lib.shared.session_state import initialize_shared_session_state
-
-
-def get_all_markdown_files(docs_dir: Path) -> list:
-    """Get all markdown files in the docs directory recursively.
-
-    Args:
-        docs_dir: Path to the docs directory
-
-    Returns:
-        List of tuples (relative_path, full_path)
-    """
-    markdown_files = []
-    for md_file in docs_dir.rglob("*.md"):
-        # Get relative path from docs_dir
-        rel_path = md_file.relative_to(docs_dir)
-        markdown_files.append((str(rel_path), md_file))
-    return sorted(markdown_files)
+from lib.shared.helpers import render_git_branch_footer
 
 
 def read_markdown_file(file_path: Path) -> str:
@@ -273,6 +257,9 @@ def main():
     # Footer
     st.divider()
     st.caption(f"💡 {i18n.t('help.tip', default='Tip: Use the sidebar on the left to browse documentation')}")
+
+    # Git branch footer in sidebar (at very bottom)
+    render_git_branch_footer()
 
 
 if __name__ == "__main__":

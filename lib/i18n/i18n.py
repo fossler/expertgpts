@@ -321,10 +321,6 @@ class I18nManager:
         except (KeyError, ValueError):
             return template  # Return template if formatting fails
 
-    def get_available_languages(self) -> list:
-        """Get list of available language codes."""
-        return list(LANGUAGE_METADATA.keys())
-
     def get_language_info(self, code: str) -> Dict:
         """Get comprehensive language metadata."""
         return LANGUAGE_METADATA.get(code, {
@@ -335,18 +331,6 @@ class I18nManager:
             "direction": "ltr",
             "locale": code
         })
-
-    def is_rtl(self, lang: str = None) -> bool:
-        """Check if language is right-to-left."""
-        if lang is None:
-            lang = self.current_language
-        return self.get_language_info(lang)["direction"] == "rtl"
-
-    def get_text_direction(self, lang: str = None) -> str:
-        """Get text direction for CSS (ltr or rtl)."""
-        if lang is None:
-            lang = self.current_language
-        return self.get_language_info(lang)["direction"]
 
     def get_language_prefix(self, lang: str = None) -> str:
         """Generate language prefix for AI responses.

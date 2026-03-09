@@ -406,4 +406,14 @@ Requires `watchdog` package (included in `requirements-dev.txt`). Provides insta
 
 | Todo | Priority | Problem | Solution |
 |------|----------|---------|----------|
-| Review dead code cleanup | Low | ~290 lines of unused code identified | See `llm_comm/analysis/dead-code-analysis-2026-02-20.md` |
+| Regenerate expert pages | Low | Template changed with Git branch footer | Run `echo "yes" \| python3 scripts/reset_application.py` |
+
+### Recent Session (2026-03-03)
+
+**Completed:**
+- Code review fixes: duplicate imports, unreachable code, DRY violations
+- Added Git branch display in sidebar footer (configurable via `display.git_branch`)
+- Added `add_error_to_history()` helper for error persistence
+- Added `render_git_branch_footer()` helper for sidebar display
+- Added `get_display_defaults()` and `save_display_setting()` to app_defaults_manager
+- **Dead code cleanup**: Removed ~290 lines of unused code across 10 files

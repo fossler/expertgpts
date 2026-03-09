@@ -306,3 +306,68 @@ def sanitize_markdown_content(content: str) -> str:
         )
 
     return sanitized
+
+
+def add_error_to_history(
+    expert_id: str,
+    messages_key: str,
+    error_msg: str
+) -> None:
+    """Add error message to chat history and persist to file.
+
+    This helper centralizes the error persistence pattern used across
+    exception handlers, reducing code duplication.
+
+    Args:
+        expert_id: Expert identifier (e.g., "1001_python_expert")
+        messages_key: Session state key for messages (e.g., "messages_1001_python_expert")
+        error_msg: Error message to add (should already be translated/sanitized)
+    """
+    from lib.storage import save_chat_history
+
+    st.session_state[messages_key].append({
+        "role": "assistant",
+        "content": f"❌ {error_msg}"
+    })
+    save_chat_history(expert_id, st.session_state[messages_key])
+
+
+def get_git_branch() -> str | None:
+    """Get the current Git branch name if in a Git repository.
+
+    Returns:
+        str | None: Branch name if in a Git repo, None otherwise
+    """
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+    return None
+
+
+def render_git_branch_footer() -> None:
+    """Render Git branch display at the bottom of sidebar.
+
+    Shows the current Git branch if the app is running from a Git repository
+    and the display setting is enabled.
+    Should be called at the end of sidebar content rendering.
+    """
+    from lib.config.app_defaults_manager import get_display_defaults
+
+    # Check if Git branch display is enabled
+    display_settings = get_display_defaults()
+    if not display_settings.get("git_branch", True):
+        return
+
+    git_branch = get_git_branch()
+    if git_branch:
+        st.sidebar.divider()
+        st.sidebar.caption(f"🌿 `{git_branch}`")

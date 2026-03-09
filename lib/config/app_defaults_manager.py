@@ -46,6 +46,10 @@ thinking_level = "none"
 # Default interface language
 # Options: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
 code = "en"
+
+[display]
+# Show Git branch in sidebar footer
+git_branch = true
 """
     return ensure_streamlit_file("app_defaults.toml", default_content=default_content)
 
@@ -105,35 +109,6 @@ def save_llm_defaults(provider: str, model: str, thinking_level: str) -> bool:
     return write_toml(defaults_path, data, header=header)
 
 
-def has_app_defaults() -> bool:
-    """Check if app_defaults.toml file exists.
-
-    Returns:
-        bool: True if app_defaults.toml exists, False otherwise
-    """
-    return get_app_defaults_path().exists()
-
-
-def reset_app_defaults() -> bool:
-    """Reset app defaults to hardcoded values.
-
-    Deletes the app_defaults.toml file if it exists, causing the app
-    to fall back to hardcoded defaults on next load.
-
-    Returns:
-        bool: True if reset was successful, False otherwise
-    """
-    defaults_path = get_app_defaults_path()
-
-    try:
-        if defaults_path.exists():
-            defaults_path.unlink()
-        return True
-    except Exception as e:
-        print(f"Error resetting app defaults: {e}")
-        return False
-
-
 def get_language_preference() -> Optional[str]:
     """Get saved language preference from app_defaults.toml.
 
@@ -179,6 +154,54 @@ def save_language_preference(lang_code: str) -> bool:
     if "language" not in data:
         data["language"] = {}
     data["language"]["code"] = lang_code
+
+    # Write using shared function (handles permissions and errors)
+    header = "# Application Default Settings\n# This file persists your default LLM and other app-wide settings\n"
+    return write_toml(defaults_path, data, header=header)
+
+
+def get_display_defaults() -> Dict[str, Any]:
+    """Get current display settings from app_defaults.toml.
+
+    Returns:
+        dict: Dictionary with display settings (e.g., git_branch)
+              Returns hardcoded defaults if file doesn't exist or is invalid
+    """
+    defaults_path = get_app_defaults_path()
+
+    # Use shared read_toml function (handles errors, returns {} if missing)
+    data = read_toml(defaults_path)
+
+    # Extract display defaults, falling back to hardcoded values
+    display_section = data.get("display", {})
+
+    return {
+        "git_branch": display_section.get("git_branch", True)
+    }
+
+
+def save_display_setting(key: str, value: Any) -> bool:
+    """Save a display setting to app_defaults.toml.
+
+    Args:
+        key: Setting key (e.g., "git_branch")
+        value: Setting value
+
+    Returns:
+        bool: True if save was successful, False otherwise
+    """
+    defaults_path = get_app_defaults_path()
+
+    # Ensure file exists first
+    ensure_app_defaults_file_exists()
+
+    # Read existing data to preserve other sections (using shared function)
+    data = read_toml(defaults_path)
+
+    # Update display section
+    if "display" not in data:
+        data["display"] = {}
+    data["display"][key] = value
 
     # Write using shared function (handles permissions and errors)
     header = "# Application Default Settings\n# This file persists your default LLM and other app-wide settings\n"

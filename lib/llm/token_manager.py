@@ -4,7 +4,6 @@ This module provides centralized token management functionality including
 counting, caching, and usage statistics calculation.
 """
 
-import hashlib
 import streamlit as st
 import tiktoken
 from lib.shared.constants import (
@@ -13,29 +12,7 @@ from lib.shared.constants import (
     CONTEXT_USAGE_WARNING_THRESHOLD,
     CONTEXT_USAGE_SAFE_THRESHOLD,
     CONTEXT_USAGE_COLORS,
-    SYSTEM_PROMPT_CACHE_TTL,
-    TOKEN_COUNT_CACHE_TTL
 )
-
-
-def get_messages_hash(messages: list) -> str:
-    """Generate hash of message content for cache invalidation.
-
-    Creates a lightweight hash based on message count and total
-    content length. Fast to compute but changes when messages change.
-
-    Args:
-        messages: List of chat messages
-
-    Returns:
-        8-character hex hash string
-    """
-    total_length = sum(len(str(msg.get("content", ""))) for msg in messages)
-    msg_count = len(messages)
-
-    # Create hash from count and length (changes when messages change)
-    hash_input = f"{msg_count}:{total_length}"
-    return hashlib.md5(hash_input.encode()).hexdigest()[:8]
 
 
 class TokenManager:
@@ -67,50 +44,6 @@ class TokenManager:
         if encoding is None:
             encoding = TokenManager.get_encoding()
         return len(encoding.encode(text))
-
-    @staticmethod
-    @st.cache_data(ttl=SYSTEM_PROMPT_CACHE_TTL, show_spinner=False)
-    def count_system_prompt_tokens(system_prompt: str) -> int:
-        """Count tokens in system prompt (cached).
-
-        Args:
-            system_prompt: System prompt text
-
-        Returns:
-            Token count (0 if empty)
-
-        This function is cached to avoid recounting the same system prompt
-        on every rerun, as system prompts rarely change during a session.
-        """
-        if not system_prompt:
-            return 0
-        encoding = TokenManager.get_encoding()
-        return TokenManager.count_tokens(system_prompt, encoding)
-
-    @staticmethod
-    @st.cache_data(ttl=TOKEN_COUNT_CACHE_TTL, show_spinner=False)
-    def count_messages_tokens(messages_key: str, messages_hash: str, _messages: list) -> int:
-        """Count tokens in chat messages (cached).
-
-        Args:
-            messages_key: Session state key for this expert's messages
-            messages_hash: Hash of message content for invalidation
-            _messages: List of chat messages (underscore = not part of cache key)
-
-        Returns:
-            Total token count
-
-        This function is cached to avoid recounting messages on every rerun.
-        The cache automatically invalidates when:
-        - TTL expires
-        - messages_key changes (different expert)
-        - messages_hash changes (message content changed)
-        """
-        encoding = TokenManager.get_encoding()
-        return sum(
-            TokenManager.count_tokens(msg.get("content", ""), encoding)
-            for msg in _messages
-        )
 
     @staticmethod
     def calculate_usage_statistics(
@@ -181,21 +114,3 @@ class TokenManager:
             "max_tokens": max_tokens
         }
 
-    @staticmethod
-    def get_usage_color(usage_percent: float) -> str:
-        """Get emoji color based on usage percentage.
-
-        Args:
-            usage_percent: Usage percentage (0-100)
-
-        Returns:
-            Emoji color indicator
-        """
-        if usage_percent < CONTEXT_USAGE_SAFE_THRESHOLD:
-            return CONTEXT_USAGE_COLORS["safe"]
-        elif usage_percent < CONTEXT_USAGE_WARNING_THRESHOLD:
-            return CONTEXT_USAGE_COLORS["warning"]
-        elif usage_percent < CONTEXT_USAGE_ALERT_THRESHOLD:
-            return CONTEXT_USAGE_COLORS["alert"]
-        else:
-            return CONTEXT_USAGE_COLORS["critical"]

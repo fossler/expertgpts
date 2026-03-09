@@ -153,29 +153,13 @@ MAX_TOKENS = {
     for model, config in provider_config["models"].items()
 }
 
-# Thinking parameters: THINKING_PARAMS[(provider, model)] -> thinking_param
-THINKING_PARAMS = {
-    (provider, model): config["thinking_param"]
-    for provider, provider_config in LLM_PROVIDERS.items()
-    for model, config in provider_config["models"].items()
-}
-
 # Global Defaults (stored in session state)
 DEFAULT_LLM_PROVIDER = "deepseek"
 DEFAULT_LLM_MODEL = "deepseek-chat"
 DEFAULT_THINKING_ENABLED = False
 
-# OpenAI Reasoning Effort Levels (all possible values across models)
-OPENAI_REASONING_EFFORTS_ALL = ["minimal", "none", "low", "medium", "high", "xhigh"]
-OPENAI_REASONING_EFFORT_DEFAULT = "none"
-
 # Model Context Limits
 DEEPSEEK_MAX_CONTEXT_TOKENS = 128000
-DEEPSEEK_DEFAULT_MODEL = "deepseek-chat"
-OPENAI_DEFAULT_MODEL = "gpt-5"
-ZAI_DEFAULT_MODEL = "glm-4.7"
-DEFAULT_MODEL = "deepseek-chat"
-DEFAULT_TEMPERATURE = 1.0
 
 # Example Experts Configuration
 EXAMPLE_EXPERTS_COUNT = 9  # Number of default/example experts created during setup
@@ -195,8 +179,6 @@ CONTEXT_USAGE_COLORS = {
 
 # Cache TTLs (seconds)
 CONFIG_CACHE_TTL = 300
-TOKEN_COUNT_CACHE_TTL = 60
-SYSTEM_PROMPT_CACHE_TTL = 300
 
 
 # Documentation Content
@@ -257,52 +239,6 @@ Your approach:
 5. **Keep it concise** but comprehensive enough to guide behavior
 
 Remember: The more specific and clear your system prompt, the better your expert will perform!
-"""
-
-
-EXPERT_BEHAVIOR_DOCS_EDIT = """### Why is this important?
-
-The **system prompt** defines your expert's behavior, expertise, and communication style. Editing it allows you to:
-- **Refine behavior**: Improve how your expert responds based on experience
-- **Add expertise**: Expand the domain knowledge or specialize further
-- **Adjust tone**: Make responses more formal, casual, technical, or friendly
-- **Set boundaries**: Define what the expert should NOT do
-
-#### Quick Guidelines
-
-✅ **Good edits:**
-- Add new areas of expertise
-- Refine communication style
-- Add constraints or guidelines
-- Clarify the expert's role
-
-❌ **Avoid:**
-- Making it too vague or generic
-- Removing key role definitions
-- Making it overly long (experts should stay focused)
-
-#### Example Edit
-
-**Original:**
-```
-You are a Python Expert who helps with Python programming questions.
-```
-
-**Improved:**
-```
-You are a Python Expert specializing in data science and machine learning.
-
-Your expertise includes:
-- Data analysis with pandas and numpy
-- Machine learning with scikit-learn
-- Data visualization with matplotlib and seaborn
-- Jupyter notebooks and best practices
-
-Provide clear explanations with code examples, and suggest best practices
-for data science projects.
-```
-
-**Pro tip**: Test your expert after editing to ensure it behaves as expected!
 """
 
 
@@ -562,20 +498,3 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
     """
     model_config = get_model_config(provider, model)
     return model_config.get("reasoning_efforts", ["none", "low", "medium", "high"])
-
-
-def get_reasoning_effort_default(provider: str, model: str) -> str:
-    """Get default reasoning effort level for a specific model.
-
-    Args:
-        provider: Provider key (e.g., "openai")
-        model: Model ID (e.g., "gpt-5", "gpt-5.2")
-
-    Returns:
-        str: Default reasoning effort level for the model
-
-    Raises:
-        ValueError: If provider or model is not found
-    """
-    model_config = get_model_config(provider, model)
-    return model_config.get("reasoning_effort_default", "none")

@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
 import streamlit as st
-
-import streamlit as st
 from lib.shared.helpers import sanitize_name
 from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE
 from lib.config.app_defaults_manager import get_llm_defaults
@@ -168,34 +166,6 @@ class ConfigManager:
 
         # Invalidate lightweight list cache
         self._invalidate_list_cache()
-
-    def list_experts(self) -> List[Dict]:
-        """List all available experts.
-
-        Returns:
-            List of expert configurations (including temperature and system_prompt)
-        """
-        experts = []
-
-        for config_file in self.config_dir.glob("*.yaml"):
-            try:
-                config = self.load_config(config_file.stem)
-                experts.append({
-                    "expert_id": config["expert_id"],
-                    "expert_name": config["expert_name"],
-                    "description": config["description"],
-                    "temperature": config.get("temperature", 1.0),
-                    "system_prompt": config.get("system_prompt", ""),
-                    "metadata": config.get("metadata", {}),
-                    "created_at": config.get("created_at", "Unknown"),
-                })
-            except Exception as e:
-                print(f"Error loading config {config_file}: {e}")
-                continue
-
-        # Sort by creation date
-        experts.sort(key=lambda x: x["created_at"], reverse=False)
-        return experts
 
     def _load_config_partial(self, expert_id: str) -> Optional[Dict]:
         """Load only metadata fields from expert config.
