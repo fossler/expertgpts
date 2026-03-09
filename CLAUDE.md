@@ -402,19 +402,9 @@ streamlit run app.py --server.fileWatcherType=watchdog
 
 Requires `watchdog` package (included in `requirements-dev.txt`). Provides instant reload when Python files change.
 
-### Future
-
-| Todo | Priority | Problem | Solution |
-|------|----------|---------|----------|
-| Regenerate expert pages | Low | Template changed with Git branch footer | Run `echo "yes" \| python3 scripts/reset_application.py` |
-
-### Recent Session (2026-03-03)
+### Recent Session (2026-03-09)
 
 **Completed:**
-- Code review fixes: duplicate imports, unreachable code, DRY violations
-- Added Git branch display in sidebar footer (configurable via `display.git_branch`)
-- Added `add_error_to_history()` helper for error persistence
-- Added `render_git_branch_footer()` helper for sidebar display
-- Added `get_display_defaults()` and `save_display_setting()` to app_defaults_manager
+- Regenerated expert pages from template (Git branch footer now visible)
 - **Dead code cleanup**: Removed ~525 lines of unused code across 10 files
-- **PR created**: https://github.com/fossler/expertgpts/pull/4
+- **PR created & merged**: https://github.com/fossler/expertgpts/pull/4
