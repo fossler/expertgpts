@@ -15,7 +15,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | `https://api.deepseek.com` | `deepseek-chat` | Cost-effective, high quality |
-| **OpenAI** | `https://api.openai.com/v1` | `o3-mini` | Advanced reasoning, o3-series |
+| **OpenAI** | `https://api.openai.com/v1` | `gpt-5.4` | Advanced reasoning, o3-series |
 | **Z.AI** | `https://api.z.ai/v1` | `glm-4.7` | GLM models, Chinese optimization |
 
 ## Architecture
@@ -466,7 +466,7 @@ THINKING_PARAMS_BY_MODEL = {
 
 **Complex Problem Solving**:
 - Provider: OpenAI
-- Model: `o3-mini`
+- Model: `gpt-5.4`
 - Reasoning: Medium/High
 
 **Chinese Language**:

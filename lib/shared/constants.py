@@ -29,15 +29,15 @@ LLM_PROVIDERS = {
         "name": "OpenAI",
         "api_key_env": "OPENAI_API_KEY",
         "base_url": "https://api.openai.com/v1",
-        "default_model": "gpt-5",
+        "default_model": "gpt-5.4",
         "icon_path": "icons/openai_logo.png",
         "models": {
-            "gpt-5": {
-                "display_name": "GPT-5",
-                "max_tokens": 400000,
-                "reasoning_efforts": ["minimal", "low", "medium", "high"],
-                "reasoning_effort_default": "medium",
-                "thinking_param": {"reasoning": {"effort": "medium"}},
+            "gpt-5.4": {
+                "display_name": "GPT-5.4",
+                "max_tokens": 1000000,  # 1M context window
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "none",
+                "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5-mini": {
                 "display_name": "GPT-5 Mini",
@@ -50,13 +50,6 @@ LLM_PROVIDERS = {
                 "display_name": "GPT-5 Nano",
                 "max_tokens": 400000,
                 "reasoning_efforts": ["none", "low", "medium", "high"],
-                "reasoning_effort_default": "none",
-                "thinking_param": {"reasoning": {"effort": "none"}},
-            },
-            "gpt-5.2": {
-                "display_name": "GPT-5.2",
-                "max_tokens": 400000,
-                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
                 "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
             }
@@ -488,7 +481,7 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
 
     Args:
         provider: Provider key (e.g., "openai")
-        model: Model ID (e.g., "gpt-5", "gpt-5.2")
+        model: Model ID (e.g., "gpt-5.4", "glm-4.7")
 
     Returns:
         list: List of supported reasoning effort levels for the model
