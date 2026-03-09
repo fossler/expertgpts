@@ -416,4 +416,5 @@ Requires `watchdog` package (included in `requirements-dev.txt`). Provides insta
 - Added `add_error_to_history()` helper for error persistence
 - Added `render_git_branch_footer()` helper for sidebar display
 - Added `get_display_defaults()` and `save_display_setting()` to app_defaults_manager
-- **Dead code cleanup**: Removed ~290 lines of unused code across 10 files
+- **Dead code cleanup**: Removed ~525 lines of unused code across 10 files
+- **PR created**: https://github.com/fossler/expertgpts/pull/4
