@@ -6,10 +6,32 @@ This guide provides detailed installation instructions for ExpertGPTs.
 
 Before installing ExpertGPTs, ensure you have:
 
-- **Python 3.8 or higher** installed
-- **pip** (Python package installer)
+- **Python 3.11 or higher** installed
+- **uv** (Python package manager) - [Installation instructions](#installing-uv)
 - **A DeepSeek API key** - Get one free at [https://platform.deepseek.com/](https://platform.deepseek.com/)
 - Git (for cloning the repository)
+
+## Installing uv
+
+[uv](https://docs.astral.sh/uv/) is a fast Python package installer and resolver. We recommend using it for managing dependencies.
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# With pip (any platform)
+pip install uv
+```
+
+**Why uv?**
+- 10-100x faster than pip
+- Automatic dependency resolution
+- Built-in virtual environment management
+- No need to manually create/activate venv
+- Reproducible builds with `uv.lock`
 
 ## Installation Steps
 
@@ -20,45 +42,25 @@ git clone <repository-url>
 cd expertgpts
 ```
 
-### 2. Create a Virtual Environment (Recommended)
+### 2. Run the Application
 
-Using a virtual environment keeps your dependencies isolated and prevents conflicts with system packages.
+With uv, you don't need to manually create a virtual environment or install dependencies. Just run:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv run streamlit run app.py
 ```
 
-**Why use a virtual environment?**
-- Isolates project dependencies from system packages
-- Prevents version conflicts
-- Makes dependency management easier
-- Standard Python development best practice
+uv automatically:
+- Creates a virtual environment (if needed)
+- Installs all dependencies
+- Runs the command in that environment
 
-### 3. Install Dependencies
-
-ExpertGPTs offers two dependency installation options depending on your use case.
-
-**For Development** (includes testing tools and faster file watching):
-```bash
-pip install -r requirements-dev.txt
-```
-
-**For Production Only** (minimal dependencies):
-```bash
-pip install -r requirements.txt
-```
-
-**Difference**:
-- `requirements-dev.txt` includes pytest, pytest-cov, and watchdog for development
-- `requirements.txt` includes only runtime dependencies
-
-### 4. Create Example Expert Agents (Optional)
+### 3. Create Example Expert Agents (Optional)
 
 On first run, the application will automatically create 9 example experts. To create them manually:
 
 ```bash
-python3 scripts/setup.py
+uv run python scripts/setup.py
 ```
 
 This creates the following experts:
@@ -77,7 +79,7 @@ This creates the following experts:
 Verify your installation by running the application:
 
 ```bash
-streamlit run app.py
+uv run streamlit run app.py
 ```
 
 The application should open in your browser at `http://localhost:8501`
@@ -93,38 +95,33 @@ The application should open in your browser at `http://localhost:8501`
 # Check your Python version
 python3 --version
 
-# If < 3.8, install a newer version
+# If < 3.11, install a newer version
 # macOS: brew install python3
-# Ubuntu: sudo apt-get install python3.11
+# Ubuntu: sudo apt-get install python3.12
 ```
 
-### Permission Errors
+### uv Not Found
 
-**Problem**: `Permission denied when installing packages`
-
-**Solution**: Ensure your virtual environment is activated and you have write permissions:
-```bash
-# Make sure virtual environment is activated
-source .venv/bin/activate
-
-# Install with user flag (if needed)
-pip install --user -r requirements.txt
-```
-
-### Dependency Conflicts
-
-**Problem**: Package version conflicts
+**Problem**: `uv: command not found`
 
 **Solution**:
 ```bash
-# Upgrade pip first
-pip install --upgrade pip
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Clear pip cache
-pip cache purge
+# Restart your shell or add to PATH
+export PATH="$HOME/.local/bin:$PATH"
+```
 
-# Reinstall dependencies
-pip install -r requirements.txt --force-reinstall
+### Dependency Issues
+
+**Problem**: Package version conflicts or missing dependencies
+
+**Solution**:
+```bash
+# Clear uv cache and reinstall
+uv cache clean
+uv sync --reinstall
 ```
 
 ### Import Errors
@@ -133,14 +130,11 @@ pip install -r requirements.txt --force-reinstall
 
 **Solution**:
 ```bash
-# Ensure virtual environment is activated
-source .venv/bin/activate
+# Make sure you're using uv run
+uv run streamlit run app.py
 
-# Verify Streamlit is installed
-pip list | grep streamlit
-
-# Reinstall if missing
-pip install streamlit
+# Or sync dependencies explicitly
+uv sync
 ```
 
 ## Next Steps
@@ -162,35 +156,41 @@ If you're planning to contribute or modify the codebase, see the **[Development 
 For faster file reloading during development:
 
 ```bash
-pip install -r requirements-dev.txt
-streamlit run app.py --server.fileWatcherType=watchdog
+uv run streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
-This provides instant reload when Python files change.
+This provides instant reload when Python files change. The `watchdog` package is included in the development dependencies.
 
-### System-wide Installation (Not Recommended)
+### Traditional pip Installation (Alternative)
 
-You can install globally without a virtual environment, but this is not recommended:
+If you prefer using pip directly with a virtual environment:
 
 ```bash
-pip install -r requirements.txt
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements-dev.txt  # Development
+# OR
+pip install -r requirements.txt       # Production only
+
+# Run the app
+streamlit run app.py
 ```
 
-**Warning**: This can conflict with other Python projects and is considered bad practice.
+**Note**: uv is recommended for better performance and simpler workflow.
 
 ## Uninstallation
 
 To completely remove ExpertGPTs:
 
 ```bash
-# Deactivate virtual environment
-deactivate
-
 # Remove the project directory
 rm -rf expertgpts
 
-# (Optional) Remove the virtual environment
-rm -rf .venv
+# uv's virtual environment is stored in .venv in the project directory
+# so it's removed automatically when you delete the project
 ```
 
 Configuration files in `.streamlit/` and `chat_history/` will also need to be manually deleted if desired.

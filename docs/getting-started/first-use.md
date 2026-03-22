@@ -7,12 +7,14 @@ This guide walks you through your first time using ExpertGPTs, covering all the 
 Start the application with:
 
 ```bash
-streamlit run app.py
+uv run streamlit run app.py
 ```
 
 The application will open in your browser at `http://localhost:8501`
 
 **First Run?** The app will automatically create 9 example expert agents on first launch.
+
+> **Note**: This guide assumes you have [uv](https://docs.astral.sh/uv/) installed. If not, see the [Installation Guide](installation.md).
 
 ## Initial Setup
 

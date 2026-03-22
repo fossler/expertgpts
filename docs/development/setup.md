@@ -4,10 +4,25 @@ This guide covers setting up a development environment for ExpertGPTs.
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- pip (Python package installer)
+- Python 3.11 or higher
+- uv (Python package manager)
 - Git (for version control)
 - Code editor or IDE (VSCode, PyCharm, etc.)
+
+## Installing uv
+
+[uv](https://docs.astral.sh/uv/) is a fast Python package installer and resolver:
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# With pip (any platform)
+pip install uv
+```
 
 ## Initial Setup
 
@@ -18,29 +33,25 @@ git clone <repository-url>
 cd expertgpts
 ```
 
-### 2. Create Virtual Environment
+### 2. Sync Dependencies
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv sync
 ```
 
-### 3. Install Development Dependencies
-
-```bash
-pip install -r requirements-dev.txt
-```
+This creates a virtual environment and installs all dependencies.
 
 **Development dependencies include**:
 - All production dependencies
 - pytest (testing framework)
 - pytest-cov (coverage reporting)
 - watchdog (faster file watching)
+- black (code formatter)
 
-### 4. Initial Application Setup
+### 3. Initial Application Setup
 
 ```bash
-python3 scripts/setup.py
+uv run python scripts/setup.py
 ```
 
 This creates 9 example experts.
@@ -49,20 +60,25 @@ This creates 9 example experts.
 
 ### Running the Application
 
-**Standard**:
+**Standard** (recommended):
 ```bash
-streamlit run app.py
+uv run streamlit run app.py
 ```
 
 **With Enhanced File Watching** (recommended for development):
 ```bash
-streamlit run app.py --server.fileWatcherType=watchdog
+uv run streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
 **Benefits of watchdog**:
 - Instant reload when Python files change
 - Faster development iteration
-- Requires `watchdog` package (included in requirements-dev.txt)
+- Requires `watchdog` package (included in development dependencies)
+
+**Benefits of uv**:
+- No need to manually activate virtual environment
+- Automatic dependency management
+- 10-100x faster than pip
 
 ### Project Structure
 
@@ -90,10 +106,10 @@ expertgpts/
 ./scripts/run_tests.sh
 
 # Or directly with pytest
-pytest
+uv run pytest
 
 # With coverage
-pytest --cov=utils --cov-report=html
+uv run pytest --cov=lib --cov-report=html
 ```
 
 ## IDE Setup
@@ -117,6 +133,8 @@ pytest --cov=utils --cov-report=html
 }
 ```
 
+> **Note**: uv creates the virtual environment at `.venv` when you run `uv sync` or `uv run`.
+
 ### PyCharm
 
 **Configuration**:
@@ -132,17 +150,17 @@ pytest --cov=utils --cov-report=html
 
 ```bash
 # Format code
-black .
+uv run black .
 
 # Check formatting without making changes
-black --check .
+uv run black --check .
 ```
 
 ### Type Checking (Optional)
 
 ```bash
-pip install mypy
-mypy lib/
+uv add --dev mypy
+uv run mypy lib/
 ```
 
 ## Development Scripts
@@ -152,7 +170,7 @@ mypy lib/
 Create example experts.
 
 ```bash
-python3 scripts/setup.py
+uv run python scripts/setup.py
 ```
 
 ### `scripts/reset_application.py`
@@ -160,7 +178,7 @@ python3 scripts/setup.py
 Reset to factory defaults (regenerate expert pages from template).
 
 ```bash
-echo "yes" | python3 scripts/reset_application.py
+echo "yes" | uv run python scripts/reset_application.py
 ```
 
 **Warning**: Deletes all custom experts and regenerates from template.
@@ -170,7 +188,7 @@ echo "yes" | python3 scripts/reset_application.py
 Sync all locale files with English (source of truth).
 
 ```bash
-python3 scripts/update_translations.py
+uv run python scripts/update_translations.py
 ```
 
 ### `scripts/run_tests.sh`
@@ -186,7 +204,7 @@ Run the test suite.
 ### Streamlit Debugger
 
 ```bash
-streamlit run app.py --logger.level=debug
+uv run streamlit run app.py --logger.level=debug
 ```
 
 ### Python Debugger
@@ -222,7 +240,7 @@ When modifying expert pages:
 ./scripts/run_tests.sh
 
 # Check formatting
-black --check .
+uv run black --check .
 
 # If both pass, commit
 git add .
@@ -243,23 +261,33 @@ git commit -m "Description"
 1. Create file in `lib/`
 2. Add functionality
 3. Write tests in `tests/`
-4. Run tests to verify
+4. Run `uv run pytest` to verify
 5. Update CLAUDE.md if needed
 
 ### Modifying Expert Template
 
 1. Edit `templates/template.py`
 2. Test with one expert
-3. Run `reset_application.py`
+3. Run `uv run python scripts/reset_application.py`
 4. Verify all experts work
 5. Commit changes
 
 ### Adding New Translations
 
 1. Add key to `locales/ui/en.json`
-2. Run `update_translations.py`
+2. Run `uv run python scripts/update_translations.py`
 3. Translate in all locale files
 4. Test in app
+
+### Adding New Dependencies
+
+```bash
+# Add a runtime dependency
+uv add package-name
+
+# Add a development dependency
+uv add --dev package-name
+```
 
 ## Next Steps
 

@@ -4,29 +4,31 @@ Get ExpertGPTs up and running in 5 minutes!
 
 ## Prerequisites
 
-- Python 3.8+ installed
-- pip (Python package installer)
+- Python 3.11+ installed
+- uv (Python package manager) - [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
 - A DeepSeek API key ([Get one here](https://platform.deepseek.com/))
 
 ## Installation
 
-**1. Install dependencies:**
+**1. Install uv (if not already installed):**
 
 ```bash
-# For development (includes watchdog for faster reloading)
-pip install -r requirements-dev.txt
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# For production only
-pip install -r requirements.txt
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 **2. Run the application:**
 
 ```bash
-streamlit run app.py
+uv run streamlit run app.py
 ```
 
 The app will open at `http://localhost:8501`
+
+> **Note**: uv automatically manages dependencies - no need to manually install packages!
 
 ## First Run Setup
 
@@ -104,8 +106,14 @@ Choose the right temperature for your use case:
 
 **App won't start?**
 ```bash
-# Ensure dependencies are installed
-pip install -r requirements.txt
+# Make sure you're using uv run
+uv run streamlit run app.py
+```
+
+**uv not found?**
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 **API errors?**
@@ -113,8 +121,10 @@ pip install -r requirements.txt
 - Check that you have sufficient API credits
 
 **Import errors?**
-- Make sure you're running from the project root directory
-- Check that virtual environment is activated: `source .venv/bin/activate`
+```bash
+# Sync dependencies
+uv sync
+```
 
 ## Next Steps
 
