@@ -35,22 +35,25 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **Base URL**: `https://api.openai.com/v1`
 
-**Default Model**: `o3-mini`
+**Default Model**: `gpt-5.4`
 
 **Models**:
-- `o3-mini` - Mini reasoning model (65536 max tokens)
-- `gpt-4o` - Flagship model
-- `gpt-4o-mini` - Cost-effective option
+- `gpt-5.4` - Flagship model (1M context window)
+- `gpt-5-mini` - Cost-effective option (200K context)
+- `gpt-5-nano` - High-throughput option (400K context)
 
 **Thinking Parameter**: `reasoning_effort`
-- Values: `"low"`, `"medium"`, `"high"`
+- Values: `"none"`, `"low"`, `"medium"`, `"high"`, `"xhigh"` (GPT-5.4 only)
+- Default: `"none"`
 - Passed as direct parameter in API call
 
 **API Documentation**: [https://platform.openai.com/docs/api-reference](https://platform.openai.com/docs/api-reference)
 
 **Characteristics**:
-- Advanced reasoning capabilities
-- o3-series optimized for complex tasks
+- Advanced reasoning, coding, agentic tasks
+- 1M token context window (GPT-5.4)
+- xhigh reasoning effort for deep reasoning
+- GPT-5.4 optimized for complex tasks
 - Higher cost but premium quality
 
 **Get API Key**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)

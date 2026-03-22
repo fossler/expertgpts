@@ -402,18 +402,31 @@ streamlit run app.py --server.fileWatcherType=watchdog
 
 Requires `watchdog` package (included in `requirements-dev.txt`). Provides instant reload when Python files change.
 
-### Future
-
-| Todo | Priority | Problem | Solution |
-|------|----------|---------|----------|
-| Regenerate expert pages | Low | Template changed with Git branch footer | Run `echo "yes" \| python3 scripts/reset_application.py` |
-
-### Recent Session (2026-03-03)
+### Recent Session (2026-03-09)
 
 **Completed:**
-- Code review fixes: duplicate imports, unreachable code, DRY violations
-- Added Git branch display in sidebar footer (configurable via `display.git_branch`)
-- Added `add_error_to_history()` helper for error persistence
-- Added `render_git_branch_footer()` helper for sidebar display
-- Added `get_display_defaults()` and `save_display_setting()` to app_defaults_manager
-- **Dead code cleanup**: Removed ~290 lines of unused code across 10 files
+- Regenerated expert pages from template (Git branch footer now visible)
+- **Dead code cleanup**: Removed ~525 lines of unused code across 10 files
+- **PR created & merged**: https://github.com/fossler/expertgpts/pull/4
+
+### Current Session (2026-03-09)
+
+**Completed:**
+- **OpenAI GPT-5.4 model support**: Added new flagship model with 1M context, xhigh reasoning
+- Updated model configuration in `lib/shared/constants.py`:
+  - Added `gpt-5.4` (1M context, none/low/medium/high/xhigh reasoning)
+  - Removed deprecated `gpt-5` and `gpt-5.2` models
+  - Changed default OpenAI model to `gpt-5.4`
+- Fixed documentation mismatch (docs referenced `o3-mini`, code used `gpt-5` series)
+- Updated 8 documentation files with correct model references
+- All 49 tests pass with no regressions
+
+**Files Modified:**
+- `lib/shared/constants.py` - OpenAI model configuration
+- `lib/config/app_defaults_manager.py` - Docstring example
+- `.streamlit/app_defaults.toml.example` - Model list comments
+- `README.md`, `docs/api/providers.md`, `docs/getting-started/first-use.md`
+- `docs/user-guide/basics.md`, `docs/user-guide/customization.md`
+- `docs/architecture/multi-provider-llm.md`
+
+**Next Step:** Commit changes with message describing GPT-5.4 support

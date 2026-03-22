@@ -117,7 +117,7 @@ Each provider offers multiple models:
 - `deepseek-reasoner` - Reasoning-optimized model
 
 **OpenAI**:
-- `o3-mini` - Mini reasoning model (default)
+- `gpt-5.4` - Mini reasoning model (default)
 - `gpt-4o` - Flagship model
 - `gpt-4o-mini` - Cost-effective option
 
