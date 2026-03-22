@@ -97,17 +97,14 @@ Get ExpertGPTs up and running in 5 minutes:
 git clone <repository-url>
 cd expertgpts
 
-# Create virtual environment (recommended)
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Install uv (if not already installed)
+# macOS/Linux:
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Windows:
+# powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# Install dependencies
-pip install -r requirements-dev.txt  # Development (includes watchdog)
-# OR
-pip install -r requirements.txt       # Production only
-
-# Run the app
-streamlit run app.py
+# Run the app (uv automatically manages dependencies)
+uv run streamlit run app.py
 ```
 
 **First run?** The app automatically creates 9 example experts and detects your system language.
@@ -211,11 +208,26 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 ### Running the App
 
 ```bash
-# Standard
-streamlit run app.py
+# Recommended (uses uv for automatic dependency management)
+uv run streamlit run app.py
 
 # With enhanced file watching (faster during development)
-streamlit run app.py --server.fileWatcherType=watchdog
+uv run streamlit run app.py --server.fileWatcherType=watchdog
+```
+
+### Installing uv
+
+[uv](https://docs.astral.sh/uv/) is a fast Python package installer and resolver. Install it with:
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# With pip (any platform)
+pip install uv
 ```
 
 ### Running Tests
@@ -225,10 +237,10 @@ streamlit run app.py --server.fileWatcherType=watchdog
 ./scripts/run_tests.sh
 
 # Direct pytest
-pytest -v
+uv run pytest -v
 
 # With coverage
-pytest --cov=utils --cov-report=html
+uv run pytest --cov=lib --cov-report=html
 ```
 
 ### Adding Features

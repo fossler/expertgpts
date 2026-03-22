@@ -78,25 +78,20 @@ Read these documents when working on specific areas:
 
 ### Setup & Installation
 ```bash
-# Create and activate virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements-dev.txt  # Development (includes watchdog, pytest)
-pip install -r requirements.txt       # Production only
+# Install uv (fast Python package manager)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # First-time setup (creates 7 example experts)
-python3 scripts/setup.py
+uv run python scripts/setup.py
 ```
 
 ### Running the Application
 ```bash
-# Start the Streamlit app
-streamlit run app.py
+# Start the Streamlit app (recommended)
+uv run streamlit run app.py
 
 # With enhanced file watching (faster reload during development)
-streamlit run app.py --server.fileWatcherType=watchdog
+uv run streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
 ### Testing
@@ -105,29 +100,28 @@ streamlit run app.py --server.fileWatcherType=watchdog
 ./scripts/run_tests.sh
 
 # Direct pytest commands
-source .venv/bin/activate
-python -m pytest -v                           # All tests
-python -m pytest -v -m "unit"                # Unit tests only
-python -m pytest -v -m "integration"         # Integration tests only
-python -m pytest -v -m "not slow"            # Exclude slow tests
+uv run pytest -v                           # All tests
+uv run pytest -v -m "unit"                # Unit tests only
+uv run pytest -v -m "integration"         # Integration tests only
+uv run pytest -v -m "not slow"            # Exclude slow tests
 ```
 
 ### Code Quality
 ```bash
 # Format code with Black
-black .
+uv run black .
 
 # Check formatting without making changes
-black --check .
+uv run black --check .
 ```
 
 ### Administrative Scripts
 ```bash
 # Reset application - regenerates all expert pages from template
-echo "yes" | python3 scripts/reset_application.py
+echo "yes" | uv run python scripts/reset_application.py
 
 # Update translations - syncs English source with all locale files
-python3 scripts/update_translations.py
+uv run python scripts/update_translations.py
 ```
 
 ## Architecture Patterns
@@ -397,10 +391,10 @@ expert_id = generator.generate_page(
 
 For faster development workflow:
 ```bash
-streamlit run app.py --server.fileWatcherType=watchdog
+uv run streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
-Requires `watchdog` package (included in `requirements-dev.txt`). Provides instant reload when Python files change.
+Requires `watchdog` package (included in development dependencies). Provides instant reload when Python files change.
 
 ### Recent Session (2026-03-09)
 
@@ -409,7 +403,23 @@ Requires `watchdog` package (included in `requirements-dev.txt`). Provides insta
 - **Dead code cleanup**: Removed ~525 lines of unused code across 10 files
 - **PR created & merged**: https://github.com/fossler/expertgpts/pull/4
 
-### Current Session (2026-03-09)
+### Current Session (2026-03-22)
+
+**Completed:**
+- **Documentation updated to use uv as recommended package manager**:
+  - Added uv installation instructions (macOS/Linux/Windows)
+  - Updated all run commands to use `uv run`
+  - Updated test commands to use `uv run pytest`
+  - Updated administrative scripts to use `uv run python`
+- **Files updated**:
+  - `README.md` - Quick Start and Development sections
+  - `CLAUDE.md` - Development Commands section
+  - `docs/getting-started/first-use.md` - Running the Application
+  - `docs/getting-started/installation.md` - Complete rewrite for uv
+  - `docs/getting-started/quickstart.md` - Installation section
+  - `docs/development/setup.md` - Development Workflow and Testing
+
+**Previous Session (2026-03-09)**
 
 **Completed:**
 - **OpenAI GPT-5.4 model support**: Added new flagship model with 1M context, xhigh reasoning
@@ -420,13 +430,6 @@ Requires `watchdog` package (included in `requirements-dev.txt`). Provides insta
 - Fixed documentation mismatch (docs referenced `o3-mini`, code used `gpt-5` series)
 - Updated 8 documentation files with correct model references
 - All 49 tests pass with no regressions
+- Committed and pushed: commit `217ebdc`
 
-**Files Modified:**
-- `lib/shared/constants.py` - OpenAI model configuration
-- `lib/config/app_defaults_manager.py` - Docstring example
-- `.streamlit/app_defaults.toml.example` - Model list comments
-- `README.md`, `docs/api/providers.md`, `docs/getting-started/first-use.md`
-- `docs/user-guide/basics.md`, `docs/user-guide/customization.md`
-- `docs/architecture/multi-provider-llm.md`
-
-**Next Step:** Commit changes with message describing GPT-5.4 support
+**Next Step:** Commit documentation changes
