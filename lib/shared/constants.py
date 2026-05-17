@@ -111,7 +111,7 @@ PROVIDER_LINKS = {
     },
     "kimi": {
         "chat": "https://www.kimi.com/",
-        "platform": "https://platform.moonshot.ai/console"
+        "platform": "https://platform.kimi.ai/console"
     }
 }
 

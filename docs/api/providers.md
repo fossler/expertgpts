@@ -99,7 +99,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 - Passed via extra_body
 - Default: enabled for kimi-k2.5
 
-**API Documentation**: [https://platform.moonshot.ai/docs](https://platform.moonshot.ai/docs)
+**API Documentation**: [https://platform.kimi.ai/docs](https://platform.kimi.ai/docs)
 
 **Characteristics**:
 - 256K context window (262,144 tokens)
@@ -107,7 +107,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 - Strong reasoning capabilities
 - Chinese optimization
 
-**Get API Key**: [https://platform.moonshot.ai/console](https://platform.moonshot.ai/console)
+**Get API Key**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 ---
 
@@ -182,7 +182,7 @@ Check provider dashboards for current rates and limits:
 - **DeepSeek**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
 - **OpenAI**: [https://platform.openai.com/usage](https://platform.openai.com/usage)
 - **Z.AI**: [https://z.ai/](https://z.ai/)
-- **KIMI**: [https://platform.moonshot.ai/console](https://platform.moonshot.ai/console)
+- **KIMI**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 ---
 
