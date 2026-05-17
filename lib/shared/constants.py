@@ -83,11 +83,11 @@ LLM_PROVIDERS = {
         "name": "KIMI",
         "api_key_env": "MOONSHOT_API_KEY",
         "base_url": "https://api.moonshot.ai/v1",
-        "default_model": "kimi-k2.5",
+        "default_model": "kimi-k2.6",
         "icon_path": "icons/kimi-logo.png",
         "models": {
-            "kimi-k2.5": {
-                "display_name": "KIMI K2.5",
+            "kimi-k2.6": {
+                "display_name": "KIMI K2.6",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
             }
@@ -111,7 +111,7 @@ PROVIDER_LINKS = {
     },
     "kimi": {
         "chat": "https://www.kimi.com/",
-        "platform": "https://platform.moonshot.ai/console"
+        "platform": "https://platform.kimi.ai/console"
     }
 }
 

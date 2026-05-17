@@ -89,17 +89,17 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **Base URL**: `https://api.moonshot.ai/v1`
 
-**Default Model**: `kimi-k2.5`
+**Default Model**: `kimi-k2.6`
 
 **Models**:
-- `kimi-k2.5` - Flagship model (256K context window)
+- `kimi-k2.6` - Flagship model (256K context window)
 
 **Thinking Parameter**: `thinking.type`
 - Values: `"enabled"`, `"disabled"`
 - Passed via extra_body
-- Default: enabled for kimi-k2.5
+- Default: enabled for kimi-k2.6
 
-**API Documentation**: [https://platform.moonshot.ai/docs](https://platform.moonshot.ai/docs)
+**API Documentation**: [https://platform.kimi.ai/docs](https://platform.kimi.ai/docs)
 
 **Characteristics**:
 - 256K context window (262,144 tokens)
@@ -107,7 +107,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 - Strong reasoning capabilities
 - Chinese optimization
 
-**Get API Key**: [https://platform.moonshot.ai/console](https://platform.moonshot.ai/console)
+**Get API Key**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 ---
 
@@ -161,7 +161,7 @@ ExpertGPTs caches client instances per provider/api_key combination.
 **KIMI**: `thinking.type` via extra_body
 - Set in `extra_body` dictionary
 - Values: enabled, disabled
-- Default: enabled for kimi-k2.5
+- Default: enabled for kimi-k2.6
 
 ### Model Selection
 
@@ -171,7 +171,7 @@ Each provider offers multiple models with different capabilities:
 **High Quality**: OpenAI o3-series, GPT-4o
 **Chinese Optimization**: Z.AI GLM models, KIMI
 **Large Context**: KIMI (256K tokens)
-**Reasoning**: DeepSeek Reasoner, OpenAI o3-mini, KIMI K2.5
+**Reasoning**: DeepSeek Reasoner, OpenAI o3-mini, KIMI K2.6
 
 ---
 
@@ -182,7 +182,7 @@ Check provider dashboards for current rates and limits:
 - **DeepSeek**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
 - **OpenAI**: [https://platform.openai.com/usage](https://platform.openai.com/usage)
 - **Z.AI**: [https://z.ai/](https://z.ai/)
-- **KIMI**: [https://platform.moonshot.ai/console](https://platform.moonshot.ai/console)
+- **KIMI**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 ---
 
