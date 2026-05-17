@@ -17,7 +17,7 @@ provider = "deepseek"
 # DeepSeek: deepseek-chat, deepseek-reasoner
 # OpenAI: GPT-5.4, GPT-5 Mini, GPT-5 Nano
 # Z.AI: glm-4.7, glm-4.7-flash (free), glm-5
-# KIMI: kimi-k2.5
+# KIMI: kimi-k2.6
 model = "deepseek-chat"
 
 # Default thinking/reasoning level
