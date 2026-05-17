@@ -168,10 +168,10 @@ ExpertGPTs caches client instances per provider/api_key combination.
 Each provider offers multiple models with different capabilities:
 
 **Cost-Effective**: DeepSeek, OpenAI mini models
-**High Quality**: OpenAI o3-series, GPT-4o
+**High Quality**: OpenAI GPT-5 series
 **Chinese Optimization**: Z.AI GLM models, KIMI
 **Large Context**: KIMI (256K tokens)
-**Reasoning**: DeepSeek Reasoner, OpenAI o3-mini, KIMI K2.6
+**Reasoning**: DeepSeek Reasoner, OpenAI GPT-5.4, KIMI K2.6
 
 ---
 

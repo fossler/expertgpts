@@ -15,7 +15,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | `https://api.deepseek.com` | `deepseek-chat` | Cost-effective, high quality |
-| **OpenAI** | `https://api.openai.com/v1` | `gpt-5.4` | Advanced reasoning, o3-series |
+| **OpenAI** | `https://api.openai.com/v1` | `gpt-5.4` | Advanced reasoning, GPT-5 series |
 | **Z.AI** | `https://api.z.ai/v1` | `glm-4.7` | GLM models, Chinese optimization |
 
 ## Architecture
@@ -89,11 +89,11 @@ LLM_PROVIDERS = {
     "openai": {
         "name": "OpenAI",
         "base_url": "https://api.openai.com/v1",
-        "default_model": "o3-mini",
+        "default_model": "gpt-5.4",
         "models": {
-            "o3-mini": {
-                "display_name": "o3-mini",
-                "max_tokens": 65536,
+            "gpt-5.4": {
+                "display_name": "GPT-5.4",
+                "max_tokens": 1000000,
                 "thinking_param": "reasoning_effort"
             },
             # ... more models
@@ -118,14 +118,14 @@ PROVIDER_NAME_TO_ID = {
 # Model availability
 MODELS_BY_PROVIDER = {
     "deepseek": ["deepseek-chat", "deepseek-reasoner"],
-    "openai": ["o3-mini", "gpt-4o", "gpt-4o-mini"],
+    "openai": ["gpt-5.4", "gpt-5-mini", "gpt-5-nano"],
     "zai": ["glm-4.7", "glm-4.7-thinking"]
 }
 
 # Thinking parameters
 THINKING_PARAMS_BY_MODEL = {
     "deepseek-reasoner": "enabled",
-    "o3-mini": "reasoning_effort",
+    "gpt-5.4": "reasoning_effort",
     # ...
 }
 ```
@@ -156,7 +156,7 @@ def _prepare_thinking_param(provider, model, thinking_level):
 **Example**:
 ```python
 client.chat.completions.create(
-    model="o3-mini",
+    model="gpt-5.4",
     reasoning_effort="medium",  # Direct parameter
     messages=messages
 )
