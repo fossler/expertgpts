@@ -87,7 +87,7 @@ provider = "deepseek"
 - `"deepseek-reasoner"` - Reasoning-optimized model
 
 **OpenAI Models**:
-- `"gpt-5.4"` - Flagship model, 1M context (default)
+- `"gpt-5.5"` - Flagship model, 1.05M context (default)
 - `"gpt-5-mini"` - Cost-effective option, 200K context
 - `"gpt-5-nano"` - High-throughput option, 400K context
 
@@ -99,7 +99,7 @@ provider = "deepseek"
 ```toml
 [llm]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 ```
 
 **Impact**:
@@ -292,7 +292,7 @@ For advanced users or automated setup.
    ```toml
    [llm]
    provider = "openai"
-   model = "gpt-5.4"
+   model = "gpt-5.5"
    temperature = 0.5
    thinking_level = "medium"
 
@@ -343,7 +343,7 @@ code = "en"
 ```toml
 [llm]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 temperature = 0.5
 thinking_level = "medium"
 
@@ -353,7 +353,7 @@ code = "en"
 
 **Rationale**:
 - OpenAI: Advanced reasoning capabilities
-- gpt-5.4: Flagship model optimized for reasoning tasks
+- gpt-5.5: Flagship model optimized for reasoning tasks
 - Temperature 0.5: Focused but flexible
 - Medium thinking: Balanced reasoning
 
@@ -548,14 +548,14 @@ thinking_level = "none"
 ```toml
 # INVALID
 provider = "deepseek"
-model = "gpt-5.4"  # Wrong! gpt-5.4 is OpenAI
+model = "gpt-5.5"  # Wrong! gpt-5.5 is OpenAI
 ```
 
 **Solution**: Match provider with correct model:
 ```toml
 # VALID
 provider = "openai"
-model = "gpt-5.4"  # Correct!
+model = "gpt-5.5"  # Correct!
 ```
 
 ### File Permission Errors
@@ -587,7 +587,7 @@ provider = "deepseek"
 
 # Default model for the provider
 # DeepSeek: "deepseek-chat", "deepseek-reasoner"
-# OpenAI: "gpt-5.4", "gpt-5-mini", "gpt-5-nano"
+# OpenAI: "gpt-5.5", "gpt-5-mini", "gpt-5-nano"
 # Z.AI: "glm-4.7", "glm-4.7-thinking"
 model = "deepseek-chat"
 
