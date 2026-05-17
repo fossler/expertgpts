@@ -147,7 +147,7 @@ Switch providers per expert using the dropdown in the sidebar.
 Each provider offers multiple models:
 
 - **DeepSeek**: `deepseek-chat`, `deepseek-reasoner`
-- **OpenAI**: `gpt-5.4`, `gpt-5-mini`, `gpt-5-nano`
+- **OpenAI**: `gpt-5.5`, `gpt-5-mini`, `gpt-5-nano`
 - **Z.AI**: `glm-4.7`, `glm-4.7-thinking`
 
 ### Temperature Adjustment

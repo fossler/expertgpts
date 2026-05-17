@@ -92,7 +92,7 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | api.deepseek.com | deepseek-chat | Cost-effective, high quality |
-| **OpenAI** | api.openai.com/v1 | o3-mini | Advanced reasoning |
+| **OpenAI** | api.openai.com/v1 | gpt-5.5 | Advanced reasoning |
 | **Z.AI** | api.z.ai/v1 | glm-4.7 | GLM models |
 
 ### Selecting a Provider
@@ -117,9 +117,9 @@ Each provider offers multiple models:
 - `deepseek-reasoner` - Reasoning-optimized model
 
 **OpenAI**:
-- `gpt-5.4` - Mini reasoning model (default)
-- `gpt-4o` - Flagship model
-- `gpt-4o-mini` - Cost-effective option
+- `gpt-5.5` - Flagship model, 1.05M context (default)
+- `gpt-5-mini` - Cost-effective option, 200K context
+- `gpt-5-nano` - High-throughput option, 400K context
 
 **Z.AI**:
 - `glm-4.7` - Standard model (default)
