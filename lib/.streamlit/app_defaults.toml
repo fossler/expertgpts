@@ -1,7 +1,7 @@
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
-thinking_level = "none"
+model = "deepseek-v4-flash"
+thinking_level = "high"
 
 [language]
 code = "en"

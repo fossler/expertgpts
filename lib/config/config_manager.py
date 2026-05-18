@@ -336,7 +336,7 @@ def get_llm_metadata(config: dict) -> tuple[str, str, str]:
     metadata = config.get("metadata", {})
     return (
         metadata.get("provider", "deepseek"),
-        metadata.get("model", "deepseek-chat"),
+        metadata.get("model", "deepseek-v4-flash"),
         metadata.get("thinking_level", "none")
     )
 
