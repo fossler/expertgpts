@@ -91,7 +91,7 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
-| **DeepSeek** | api.deepseek.com | deepseek-chat | Cost-effective, high quality |
+| **DeepSeek** | api.deepseek.com | deepseek-v4-flash | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | api.openai.com/v1 | gpt-5.5 | Advanced reasoning |
 | **Z.AI** | api.z.ai/v1 | glm-4.7 | GLM models |
 
@@ -113,8 +113,8 @@ Each expert can use a different provider:
 Each provider offers multiple models:
 
 **DeepSeek**:
-- `deepseek-chat` - Standard model (default)
-- `deepseek-reasoner` - Reasoning-optimized model
+- `deepseek-v4-flash` - Cost-effective, 1M context, dual thinking modes (default)
+- `deepseek-v4-pro` - Premium flagship, 1M context, dual thinking modes
 
 **OpenAI**:
 - `gpt-5.5` - Flagship model, 1.05M context (default)

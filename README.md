@@ -192,7 +192,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 | Provider | Default Model | Characteristics |
 |----------|---------------|-----------------|
-| **DeepSeek** | `deepseek-chat` | Cost-effective, high quality |
+| **DeepSeek** | `deepseek-v4-flash` | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | `gpt-5.5` | Advanced reasoning, coding, agentic tasks |
 | **Z.AI** | `glm-4.7` | GLM models, Chinese optimization, includes free tier |
 | **KIMI** | `kimi-k2.6` | 256K context, multimodal, thinking mode |

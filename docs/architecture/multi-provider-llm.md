@@ -14,7 +14,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
-| **DeepSeek** | `https://api.deepseek.com` | `deepseek-chat` | Cost-effective, high quality |
+| **DeepSeek** | `https://api.deepseek.com` | `deepseek-v4-flash` | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | `https://api.openai.com/v1` | `gpt-5.5` | Advanced reasoning, GPT-5 series |
 | **Z.AI** | `https://api.z.ai/v1` | `glm-4.7` | GLM models, Chinese optimization |
 
@@ -72,17 +72,19 @@ LLM_PROVIDERS = {
     "deepseek": {
         "name": "DeepSeek",
         "base_url": "https://api.deepseek.com",
-        "default_model": "deepseek-chat",
+        "default_model": "deepseek-v4-flash",
         "models": {
-            "deepseek-chat": {
-                "display_name": "DeepSeek Chat",
-                "max_tokens": 4096,
-                "thinking_param": None
+            "deepseek-v4-flash": {
+                "display_name": "DeepSeek V4 Flash",
+                "max_tokens": 1000000,
+                "reasoning_efforts": ["none", "high", "max"],
+                "reasoning_effort_default": "high",
             },
-            "deepseek-reasoner": {
-                "display_name": "DeepSeek Reasoner",
-                "max_tokens": 8192,
-                "thinking_param": "enabled"
+            "deepseek-v4-pro": {
+                "display_name": "DeepSeek V4 Pro",
+                "max_tokens": 1000000,
+                "reasoning_efforts": ["none", "high", "max"],
+                "reasoning_effort_default": "high",
             }
         }
     },
@@ -117,14 +119,15 @@ PROVIDER_NAME_TO_ID = {
 
 # Model availability
 MODELS_BY_PROVIDER = {
-    "deepseek": ["deepseek-chat", "deepseek-reasoner"],
+    "deepseek": ["deepseek-v4-flash", "deepseek-v4-pro"],
     "openai": ["gpt-5.5", "gpt-5-mini", "gpt-5-nano"],
     "zai": ["glm-4.7", "glm-4.7-thinking"]
 }
 
 # Thinking parameters
 THINKING_PARAMS_BY_MODEL = {
-    "deepseek-reasoner": "enabled",
+    "deepseek-v4-flash": "reasoning_effort",
+    "deepseek-v4-pro": "reasoning_effort",
     "gpt-5.5": "reasoning_effort",
     # ...
 }
@@ -162,30 +165,40 @@ client.chat.completions.create(
 )
 ```
 
-#### DeepSeek: `thinking.type`
+#### DeepSeek V4: `reasoning_effort` + `thinking.type`
 
-**Parameter**: In `extra_body` dictionary
+**Two knobs**:
+- `reasoning_effort` (top-level): `"high"` or `"max"` — controls how much the model reasons. Thinking is enabled on the DeepSeek API by default, so setting `reasoning_effort` is sufficient to keep it on.
+- `thinking.type` (in `extra_body`): used only to **disable** thinking (`{"type": "disabled"}`) since the API defaults to enabled.
 
-**Values**: `"enabled"`, `"disabled"` (model-dependent)
+**Effort levels exposed in UI**: `none`, `high`, `max`
 
-**Model Behavior**:
-- `deepseek-chat`: No thinking parameter
-- `deepseek-reasoner`: `thinking.type` = "enabled"
+**Model Behavior**: Both `deepseek-v4-flash` and `deepseek-v4-pro` support both modes — thinking is no longer determined by model choice (as it was for the deprecated `deepseek-chat`/`deepseek-reasoner` pair).
 
 **Implementation**:
 ```python
 def _prepare_thinking_param(provider, model, thinking_level):
-    if provider == "deepseek" and model == "deepseek-reasoner":
-        extra_body = {"thinking": {"type": "enabled"}}
-        return extra_body, {}
+    if provider == "deepseek":
+        if thinking_level in ("high", "max"):
+            return {}, {"reasoning_effort": thinking_level}
+        # "none" must explicitly disable, since DeepSeek defaults to enabled
+        return {"thinking": {"type": "disabled"}}, {}
 ```
 
-**Example**:
+**Examples**:
 ```python
+# Thinking off
 client.chat.completions.create(
-    model="deepseek-reasoner",
+    model="deepseek-v4-flash",
     messages=messages,
-    extra_body={"thinking": {"type": "enabled"}}
+    extra_body={"thinking": {"type": "disabled"}}
+)
+
+# Thinking on, high effort (default)
+client.chat.completions.create(
+    model="deepseek-v4-flash",
+    messages=messages,
+    reasoning_effort="high",
 )
 ```
 
@@ -220,6 +233,14 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
     extra_body = {}
     direct_params = {}
 
+    # DeepSeek first: API defaults to thinking-enabled, so "none" must explicitly disable.
+    if provider == "deepseek":
+        if thinking_level in ("high", "max"):
+            direct_params["reasoning_effort"] = thinking_level
+        else:
+            extra_body["thinking"] = {"type": "disabled"}
+        return extra_body, direct_params
+
     if thinking_level == "none":
         return extra_body, direct_params
 
@@ -227,12 +248,8 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
     if provider == "openai":
         direct_params["reasoning_effort"] = thinking_level
 
-    # DeepSeek: thinking.type in extra_body
-    elif provider == "deepseek" and model == "deepseek-reasoner":
-        extra_body["thinking"] = {"type": "enabled"}
-
-    # Z.AI: thinking.type in extra_body
-    elif provider == "zai" and "thinking" in model:
+    # Z.AI / KIMI: thinking.type in extra_body
+    elif provider in ("zai", "kimi"):
         extra_body["thinking"] = {"type": "enabled"}
 
     return extra_body, direct_params
@@ -461,7 +478,7 @@ THINKING_PARAMS_BY_MODEL = {
 
 **Daily Development**:
 - Provider: DeepSeek
-- Model: `deepseek-chat`
+- Model: `deepseek-v4-flash`
 - Reasoning: Disabled
 
 **Complex Problem Solving**:
