@@ -17,7 +17,6 @@ except ImportError:
 
 from lib.shared.constants import (
     get_provider_config,
-    get_model_config,
     get_provider_base_url,
     get_reasoning_efforts,
     SYSTEM_PROMPT_TEMPLATE,
@@ -76,6 +75,14 @@ class LLMClient:
             tuple: (extra_body_dict, direct_params_dict) - Two dictionaries for different
                    ways of passing parameters to the API
         """
+        # DeepSeek V4 needs special handling: the API defaults to thinking-enabled,
+        # so "none" must explicitly disable it rather than just omitting the param.
+        if self.provider == "deepseek":
+            if thinking_level in ("high", "max"):
+                return {}, {"reasoning_effort": thinking_level}
+            # "none" or any other falsy value: disable thinking explicitly.
+            return {"thinking": {"type": "disabled"}}, {}
+
         # No thinking specified or explicitly set to none
         if not thinking_level or thinking_level == "none":
             return {}, {}
@@ -103,12 +110,6 @@ class LLMClient:
             # Z.AI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}}
             # Any thinking_level other than "none" means enabled
             return {"thinking": {"type": "enabled"}}, {}
-
-        # DeepSeek: use thinking type parameter from model config (goes in extra_body)
-        if self.provider == "deepseek":
-            model_config = get_model_config(self.provider, model)
-            thinking_param = model_config.get("thinking_param", {})
-            return thinking_param, {}
 
         # Other providers: return empty for now
         return {}, {}

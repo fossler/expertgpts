@@ -40,9 +40,9 @@ These defaults apply when:
 
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 temperature = 0.7
-thinking_level = "none"
+thinking_level = "high"
 
 [language]
 code = "en"
@@ -83,8 +83,8 @@ provider = "deepseek"
 **Valid Values**: Depends on provider
 
 **DeepSeek Models**:
-- `"deepseek-chat"` - Standard model (default)
-- `"deepseek-reasoner"` - Reasoning-optimized model
+- `"deepseek-v4-flash"` - Cost-effective, 1M context, dual thinking modes (default)
+- `"deepseek-v4-pro"` - Premium flagship, 1M context, dual thinking modes
 
 **OpenAI Models**:
 - `"gpt-5.5"` - Flagship model, 1.05M context (default)
@@ -320,7 +320,7 @@ For advanced users or automated setup.
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 temperature = 0.7
 thinking_level = "none"
 
@@ -330,9 +330,9 @@ code = "en"
 
 **Rationale**:
 - DeepSeek: Most cost-effective provider
-- deepseek-chat: Standard model, good quality
+- deepseek-v4-flash: Smaller V4 variant, good quality, 1M context
 - Temperature 0.7: Balanced for most use cases
-- No reasoning: Faster responses
+- No reasoning: Faster responses (set to "high" or "max" to enable thinking mode)
 
 ---
 
@@ -389,7 +389,7 @@ code = "zh-CN"
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 temperature = 0.3
 thinking_level = "none"
 
@@ -586,10 +586,10 @@ chmod 600 .streamlit/app_defaults.toml
 provider = "deepseek"
 
 # Default model for the provider
-# DeepSeek: "deepseek-chat", "deepseek-reasoner"
+# DeepSeek: "deepseek-v4-flash", "deepseek-v4-pro"
 # OpenAI: "gpt-5.5", "gpt-5-mini", "gpt-5-nano"
 # Z.AI: "glm-4.7", "glm-4.7-thinking"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 
 # Default temperature for new experts (0.0 - 2.0)
 temperature = 0.7

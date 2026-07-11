@@ -202,7 +202,7 @@ Choose the default model for your provider:
 4. Click outside dropdown to save
 
 **Available Models**:
-- **DeepSeek**: `deepseek-chat`, `deepseek-reasoner`
+- **DeepSeek**: `deepseek-v4-flash`, `deepseek-v4-pro`
 - **OpenAI**: `gpt-5.5`, `gpt-5-mini`, `gpt-5-nano`
 - **Z.AI**: `glm-4.7`, `glm-4.7-thinking`
 
@@ -335,8 +335,8 @@ font = "sans serif"
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
-thinking_level = "none"
+model = "deepseek-v4-flash"
+thinking_level = "high"
 
 [language]
 code = "en"

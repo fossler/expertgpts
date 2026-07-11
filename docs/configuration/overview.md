@@ -57,7 +57,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.123456"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 **Naming Convention**: `{expert_id}.yaml`
@@ -83,7 +83,7 @@ metadata:
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 temperature = 0.7
 thinking_level = "none"
 
@@ -488,7 +488,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ## Troubleshooting

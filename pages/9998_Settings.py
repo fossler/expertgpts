@@ -570,7 +570,7 @@ def render_edit_expert_dialog():
     # LLM Configuration (Provider, Model, Temperature, Thinking)
     metadata = expert_config.get("metadata", {})
     current_provider = metadata.get("provider", "deepseek")
-    current_model = metadata.get("model", "deepseek-chat")
+    current_model = metadata.get("model", "deepseek-v4-flash")
     current_thinking = metadata.get("thinking_level", "none")
     current_temperature = expert_config.get('temperature', 1.0)
 
@@ -772,7 +772,7 @@ def render_expert_management_section():
         # Get provider and model info
         metadata = expert.get('metadata', {})
         provider = metadata.get('provider', 'deepseek')
-        model = metadata.get('model', 'deepseek-chat')
+        model = metadata.get('model', 'deepseek-v4-flash')
         thinking_level = metadata.get('thinking_level', 'none')
 
         provider_name = get_provider_display_name(provider)

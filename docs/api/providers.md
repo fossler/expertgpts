@@ -10,21 +10,24 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **Base URL**: `https://api.deepseek.com`
 
-**Default Model**: `deepseek-chat`
+**Default Model**: `deepseek-v4-flash`
 
 **Models**:
-- `deepseek-chat` - Standard model (4096 max tokens)
-- `deepseek-reasoner` - Reasoning-optimized (8192 max tokens)
+- `deepseek-v4-flash` - Cost-effective V4 model (1M context, 284B/13B active params)
+- `deepseek-v4-pro` - Premium flagship (1M context, 1.6T/49B active params)
 
-**Thinking Parameter**: Model-dependent
-- `deepseek-chat`: No thinking parameter
-- `deepseek-reasoner`: `thinking.type = "enabled"` (via extra_body)
+**Thinking Parameter**: Two knobs, both models support both modes
+- `reasoning_effort` (top-level): `"high"` (default on API) or `"max"`
+- `thinking.type = "disabled"` (via `extra_body`) — used only to turn thinking off; the API defaults to enabled
+
+**UI effort values**: `none`, `high`, `max`
 
 **API Documentation**: [https://api-docs.deepseek.com/](https://api-docs.deepseek.com/)
 
 **Characteristics**:
 - Most cost-effective
-- High quality responses
+- 1M context window
+- Dual thinking modes per model
 - Good for daily use
 
 **Get API Key**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
@@ -127,7 +130,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[...]
 )
 ```
@@ -146,9 +149,10 @@ ExpertGPTs caches client instances per provider/api_key combination.
 
 ### Reasoning/Thinking
 
-**DeepSeek**: Enabled via model selection
-- Use `deepseek-reasoner` for reasoning
-- No separate parameter needed
+**DeepSeek**: `reasoning_effort` (top-level) + `thinking.type` (extra_body)
+- Both V4 models support dual thinking modes
+- `reasoning_effort` values: `high`, `max`
+- API defaults to thinking-enabled; pass `extra_body={"thinking": {"type": "disabled"}}` to turn off
 
 **OpenAI**: `reasoning_effort` parameter
 - Values: low, medium, high
@@ -171,7 +175,7 @@ Each provider offers multiple models with different capabilities:
 **High Quality**: OpenAI GPT-5 series
 **Chinese Optimization**: Z.AI GLM models, KIMI
 **Large Context**: KIMI (256K tokens)
-**Reasoning**: DeepSeek Reasoner, OpenAI GPT-5.5, KIMI K2.6
+**Reasoning**: DeepSeek V4 (thinking mode), OpenAI GPT-5.5, KIMI K2.6
 
 ---
 

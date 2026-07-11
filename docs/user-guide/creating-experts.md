@@ -356,7 +356,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 **Note**: After editing YAML, you may need to restart the app or increment cache version.

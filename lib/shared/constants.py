@@ -10,18 +10,22 @@ LLM_PROVIDERS = {
         "name": "DeepSeek",
         "api_key_env": "DEEPSEEK_API_KEY",
         "base_url": "https://api.deepseek.com",
-        "default_model": "deepseek-chat",
+        "default_model": "deepseek-v4-flash",
         "icon_path": "icons/deepseek_icon_blue.png",
         "models": {
-            "deepseek-chat": {
-                "display_name": "DeepSeek Chat",
-                "max_tokens": 128000,
-                "thinking_param": {"thinking": {"type": "disabled"}},
+            "deepseek-v4-flash": {
+                "display_name": "DeepSeek V4 Flash",
+                "max_tokens": 1000000,
+                "reasoning_efforts": ["none", "high", "max"],
+                "reasoning_effort_default": "high",
+                "thinking_param": {"reasoning": {"effort": "high"}},
             },
-            "deepseek-reasoner": {
-                "display_name": "DeepSeek Reasoner",
-                "max_tokens": 128000,
-                "thinking_param": {"thinking": {"type": "enabled"}},
+            "deepseek-v4-pro": {
+                "display_name": "DeepSeek V4 Pro",
+                "max_tokens": 1000000,
+                "reasoning_efforts": ["none", "high", "max"],
+                "reasoning_effort_default": "high",
+                "thinking_param": {"reasoning": {"effort": "high"}},
             }
         }
     },
@@ -148,11 +152,11 @@ MAX_TOKENS = {
 
 # Global Defaults (stored in session state)
 DEFAULT_LLM_PROVIDER = "deepseek"
-DEFAULT_LLM_MODEL = "deepseek-chat"
-DEFAULT_THINKING_ENABLED = False
+DEFAULT_LLM_MODEL = "deepseek-v4-flash"
+DEFAULT_THINKING_ENABLED = True
 
 # Model Context Limits
-DEEPSEEK_MAX_CONTEXT_TOKENS = 128000
+DEEPSEEK_MAX_CONTEXT_TOKENS = 1000000
 
 # Example Experts Configuration
 EXAMPLE_EXPERTS_COUNT = 9  # Number of default/example experts created during setup
@@ -313,7 +317,7 @@ def get_model_config(provider: str, model: str) -> dict:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-chat", "gpt-5", "glm-4.7")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-4.7")
 
     Returns:
         dict: Model configuration with display_name, max_tokens, thinking_param
@@ -335,7 +339,7 @@ def get_max_tokens(provider: str, model: str) -> int:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-chat", "gpt-5", "glm-4.7")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-4.7")
 
     Returns:
         int: Maximum context length for the model
@@ -373,10 +377,10 @@ def get_model_display_name(provider: str, model: str) -> str:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-chat", "gpt-5", "glm-4.7")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-4.7")
 
     Returns:
-        str: Display name (e.g., "DeepSeek Chat", "GPT-5", "GLM-4.7")
+        str: Display name (e.g., "DeepSeek V4 Flash", "GPT-5", "GLM-4.7")
 
     Raises:
         ValueError: If provider or model is not found

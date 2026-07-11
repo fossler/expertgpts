@@ -14,17 +14,17 @@
 provider = "deepseek"
 
 # Default model for the selected provider
-# DeepSeek: deepseek-chat, deepseek-reasoner
+# DeepSeek: deepseek-v4-flash, deepseek-v4-pro
 # OpenAI: GPT-5.5, GPT-5 Mini, GPT-5 Nano
 # Z.AI: glm-4.7, glm-4.7-flash (free), glm-5
 # KIMI: kimi-k2.6
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 
 # Default thinking/reasoning level
 # OpenAI: none, low, medium, high, xhigh
-# Z.AI: enabled, disabled
-# DeepSeek: controlled via model selection (deepseek-chat vs deepseek-reasoner)
-thinking_level = "none"
+# Z.AI / KIMI: enabled, disabled
+# DeepSeek: none, high, max
+thinking_level = "high"
 
 [language]
 # Default interface language

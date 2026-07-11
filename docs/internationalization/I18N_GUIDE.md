@@ -159,7 +159,7 @@ else:
 
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 thinking_level = "none"
 
 [language]

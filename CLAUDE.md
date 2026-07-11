@@ -145,7 +145,7 @@ A unified client interface supports multiple LLM providers through OpenAI-compat
 - **Client implementation**: `lib/llm/llm_client.py` - `LLMClient` class
 - **Provider-specific thinking parameters**:
   - **OpenAI**: `reasoning_effort` (low/medium/high) - passed as direct parameter
-  - **DeepSeek**: `thinking.type` (enabled/disabled) - determined by model selection (`deepseek-chat` vs `deepseek-reasoner`)
+  - **DeepSeek**: `reasoning_effort` (high/max) as direct param + `thinking.type=disabled` in extra_body to turn off. Both `deepseek-v4-flash` and `deepseek-v4-pro` support dual thinking modes; API defaults to enabled.
   - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter
 - **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
 - **Connection pooling**: `lib/llm/client_pool.py` caches client instances for performance
@@ -327,7 +327,7 @@ expert_id = generator.generate_page(
     temperature=0.7,
     system_prompt="Custom prompt...",
     provider="deepseek",
-    model="deepseek-chat"
+    model="deepseek-v4-flash"
 )
 ```
 

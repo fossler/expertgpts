@@ -265,7 +265,7 @@ def render_provider_selection(
         current_provider = st.session_state.get("default_provider", "deepseek")
 
     if current_model is None:
-        current_model = st.session_state.get("default_model", "deepseek-chat")
+        current_model = st.session_state.get("default_model", "deepseek-v4-flash")
 
     # Set default thinking level if not provided
     if current_thinking is None:
@@ -329,24 +329,26 @@ def render_provider_selection(
     # Display model info
     model_config = LLM_PROVIDERS[provider]["models"][model]
 
-    # Determine UI type based on provider
-    uses_reasoning_efforts = provider == "openai"
-    requires_thinking = model == "deepseek-reasoner"
+    # Determine UI type based on provider:
+    # - Reasoning-effort selector (OpenAI, DeepSeek V4): per-model effort list from config
+    # - Enabled/Disabled toggle (Z.AI, KIMI): simple binary
+    uses_reasoning_efforts = provider in {"openai", "deepseek"} and "reasoning_efforts" in model_config
 
-    # Check if provider/model supports thinking mode
-    # Providers that support thinking: openai, zai (DeepSeek handled separately)
-    optional_thinking_providers = {"openai", "zai"}
+    optional_thinking_providers = {"zai", "kimi"}
     supports_optional_thinking = provider in optional_thinking_providers and "thinking_param" in model_config
 
     st.caption(i18n.t('info.context_length', tokens=f"{model_config['max_tokens']:,}"))
 
     if show_thinking:
         if uses_reasoning_efforts:
-            # OpenAI: Show selectbox with effort levels (use half width like temperature)
             col1, col2 = st.columns(2)
             with col1:
-                effort_options = ["none", "low", "medium", "high", "xhigh"]
-                effort_index = effort_options.index(current_thinking) if current_thinking in effort_options else 0
+                effort_options = model_config["reasoning_efforts"]
+                default_effort = model_config.get("reasoning_effort_default", effort_options[0])
+                if current_thinking in effort_options:
+                    effort_index = effort_options.index(current_thinking)
+                else:
+                    effort_index = effort_options.index(default_effort)
                 thinking_level = st.selectbox(
                     thinking_label,
                     options=effort_options,
@@ -356,11 +358,9 @@ def render_provider_selection(
                 )
 
         elif supports_optional_thinking:
-            # Z.AI: Show selectbox with Enabled/Disabled options (use half width like temperature)
             col1, col2 = st.columns(2)
             with col1:
                 thinking_options = ["Disabled", "Enabled"]
-                # Map current_thinking to index ("none" -> 0, "medium" -> 1)
                 option_index = 1 if current_thinking and current_thinking != "none" else 0
                 selected_option = st.selectbox(
                     thinking_label,
@@ -369,16 +369,11 @@ def render_provider_selection(
                     help=thinking_help,
                     key=thinking_key
                 )
-                # Convert back to string ("Disabled" -> "none", "Enabled" -> "medium")
                 thinking_level = "medium" if selected_option == "Enabled" else "none"
 
         else:
-            # DeepSeek or other providers: No thinking UI
-            # DeepSeek-chat: no thinking support
-            # DeepSeek-reasoner: thinking always enabled (handled in API layer)
             thinking_level = "none"
     else:
-        # Thinking UI hidden
         thinking_level = current_thinking if current_thinking else "none"
 
     return provider, model, thinking_level

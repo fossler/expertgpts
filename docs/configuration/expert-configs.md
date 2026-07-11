@@ -43,7 +43,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.123456"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ## Configuration Fields
@@ -261,7 +261,7 @@ created_at: "2025-01-17T12:00:00.123456"
 ```yaml
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 **Purpose**: Stores additional expert information
@@ -308,7 +308,7 @@ system_prompt: |
 created_at: "2025-01-17T10:00:00.000000"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ---
@@ -330,7 +330,7 @@ system_prompt: |
 created_at: "2026-01-24T23:07:42.584965"
 metadata:
   version: "2.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ---
@@ -373,7 +373,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ---
@@ -672,7 +672,7 @@ system_prompt: |
 created_at: "YYYY-MM-DDTHH:MM:SS.ffffff"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ### Advisory Expert Template
@@ -701,7 +701,7 @@ system_prompt: |
 created_at: "YYYY-MM-DDTHH:MM:SS.ffffff"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ### Creative Expert Template
@@ -730,7 +730,7 @@ system_prompt: |
 created_at: "YYYY-MM-DDTHH:MM:SS.ffffff"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 ## Next Steps

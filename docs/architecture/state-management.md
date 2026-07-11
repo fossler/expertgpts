@@ -58,7 +58,7 @@ st.session_state.api_keys = {
 
 # Default LLM Settings (loaded from app_defaults.toml)
 st.session_state.default_provider = "deepseek"
-st.session_state.default_model = "deepseek-chat"
+st.session_state.default_model = "deepseek-v4-flash"
 st.session_state.default_temperature = 0.7
 st.session_state.default_thinking_level = "none"
 
@@ -108,7 +108,7 @@ st.session_state.messages_1001_python_expert = [
 st.session_state.provider_1001_python_expert = "deepseek"
 
 # Model Selection
-st.session_state.model_1001_python_expert = "deepseek-chat"
+st.session_state.model_1001_python_expert = "deepseek-v4-flash"
 
 # Temperature
 st.session_state.temperature_1001_python_expert = 0.7
@@ -160,7 +160,7 @@ if f"provider_{EXPERT_ID}" not in st.session_state:
 
 # Initialize model
 if f"model_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"model_{EXPERT_ID}"] = config.get("metadata", {}).get("model", "deepseek-chat")
+    st.session_state[f"model_{EXPERT_ID}"] = config.get("metadata", {}).get("model", "deepseek-v4-flash")
 
 # Initialize temperature
 if f"temperature_{EXPERT_ID}" not in st.session_state:
@@ -251,7 +251,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
   version: "1.0"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
 ```
 
 **Manager**: `lib/config/config_manager.py`
@@ -272,7 +272,7 @@ metadata:
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-chat"
+model = "deepseek-v4-flash"
 temperature = 0.7
 thinking_level = "none"
 
