@@ -7,7 +7,7 @@ across multiple pages.
 import streamlit as st
 from pathlib import Path
 from lib.config.config_manager import get_config_manager
-from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider, get_reasoning_efforts
+from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider, get_reasoning_efforts, get_model_config
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
 from lib.shared.helpers import sanitize_name, validate_expert_name
@@ -42,21 +42,15 @@ def render_thinking_mode_ui(
     """
     st_func = st.sidebar if use_sidebar else st
 
-    if provider == "openai":
-        # Get model-specific reasoning efforts
-        if model:
-            effort_options = get_reasoning_efforts(provider, model)
-        else:
-            # Fallback to common efforts if model not specified
-            effort_options = ["none", "low", "medium", "high"]
-
+    def _render_effort_selectbox(effort_options):
+        """Render a reasoning-effort selectbox and return the chosen effort."""
         # If current thinking not in options, use first option (default)
-        if current_thinking not in effort_options:
-            effort_index = 0
-        else:
-            effort_index = effort_options.index(current_thinking)
-
-        thinking_level = st_func.selectbox(
+        effort_index = (
+            effort_options.index(current_thinking)
+            if current_thinking in effort_options
+            else 0
+        )
+        return st_func.selectbox(
             label or i18n.t("sidebar.thinking_mode"),
             options=effort_options,
             index=effort_index,
@@ -64,8 +58,22 @@ def render_thinking_mode_ui(
             help=help_text,
             key=widget_key
         )
-        return thinking_level
+
+    if provider == "openai":
+        # Get model-specific reasoning efforts
+        effort_options = (
+            get_reasoning_efforts(provider, model)
+            if model
+            else ["none", "low", "medium", "high"]
+        )
+        return _render_effort_selectbox(effort_options)
     elif provider == "zai":
+        # GLM-5.2 exposes an adjustable reasoning_effort (thinking always on);
+        # older GLM models only support the enabled/disabled toggle.
+        model_config = get_model_config(provider, model) if model else {}
+        if model_config and "reasoning_efforts" in model_config:
+            return _render_effort_selectbox(model_config["reasoning_efforts"])
+
         thinking_options = [i18n.t("sidebar.disabled"), i18n.t("sidebar.enabled")]
         option_index = 1 if current_thinking and current_thinking != "none" else 0
         selected_option = st_func.selectbox(

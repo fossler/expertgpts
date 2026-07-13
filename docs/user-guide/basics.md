@@ -93,7 +93,7 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | api.deepseek.com | deepseek-v4-flash | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | api.openai.com/v1 | gpt-5.5 | Advanced reasoning |
-| **Z.AI** | api.z.ai/v1 | glm-4.7 | GLM models |
+| **Z.AI** | api.z.ai/api/paas/v4 | glm-5.2 | GLM models |
 
 ### Selecting a Provider
 
@@ -122,8 +122,9 @@ Each provider offers multiple models:
 - `gpt-5-nano` - High-throughput option, 400K context
 
 **Z.AI**:
-- `glm-4.7` - Standard model (default)
-- `glm-4.7-thinking` - Reasoning-enabled model
+- `glm-5.2` - Flagship model (default), 1M context, adjustable reasoning effort (high/max)
+- `glm-5` - 200K context
+- `glm-4.7-flash` - Free model, 200K context
 
 ## Temperature and Thinking Level
 

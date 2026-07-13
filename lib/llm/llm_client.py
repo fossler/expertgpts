@@ -19,6 +19,7 @@ from lib.shared.constants import (
     get_provider_config,
     get_provider_base_url,
     get_reasoning_efforts,
+    get_model_config,
     SYSTEM_PROMPT_TEMPLATE,
 )
 from lib.shared.helpers import sanitize_error_message
@@ -83,6 +84,23 @@ class LLMClient:
             # "none" or any other falsy value: disable thinking explicitly.
             return {"thinking": {"type": "disabled"}}, {}
 
+        # Z.AI: GLM-5.2 supports adjustable reasoning_effort (thinking always on);
+        # older GLM models only support the enabled/disabled toggle.
+        if self.provider == "zai":
+            model_config = get_model_config(self.provider, model) or {}
+            if "reasoning_efforts" in model_config:
+                efforts = model_config["reasoning_efforts"]
+                effort = (
+                    thinking_level
+                    if thinking_level in efforts
+                    else model_config.get("reasoning_effort_default", efforts[0])
+                )
+                return {"thinking": {"type": "enabled"}}, {"reasoning_effort": effort}
+            # glm-5 / glm-4.7-flash: enabled/disabled toggle
+            if not thinking_level or thinking_level == "none":
+                return {"thinking": {"type": "disabled"}}, {}
+            return {"thinking": {"type": "enabled"}}, {}
+
         # No thinking specified or explicitly set to none
         if not thinking_level or thinking_level == "none":
             return {}, {}
@@ -102,12 +120,6 @@ class LLMClient:
         # KIMI: use thinking type parameter (enabled/disabled) - same as Z.AI
         if self.provider == "kimi":
             # KIMI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}
-            # Any thinking_level other than "none" means enabled
-            return {"thinking": {"type": "enabled"}}, {}
-
-        # Z.AI: use thinking type parameter (enabled/disabled)
-        if self.provider == "zai":
-            # Z.AI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}}
             # Any thinking_level other than "none" means enabled
             return {"thinking": {"type": "enabled"}}, {}
 

@@ -16,7 +16,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | `https://api.deepseek.com` | `deepseek-v4-flash` | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | `https://api.openai.com/v1` | `gpt-5.5` | Advanced reasoning, GPT-5 series |
-| **Z.AI** | `https://api.z.ai/v1` | `glm-4.7` | GLM models, Chinese optimization |
+| **Z.AI** | `https://api.z.ai/api/paas/v4` | `glm-5.2` | GLM models, Chinese optimization |
 
 ## Architecture
 
@@ -121,7 +121,7 @@ PROVIDER_NAME_TO_ID = {
 MODELS_BY_PROVIDER = {
     "deepseek": ["deepseek-v4-flash", "deepseek-v4-pro"],
     "openai": ["gpt-5.5", "gpt-5-mini", "gpt-5-nano"],
-    "zai": ["glm-4.7", "glm-4.7-thinking"]
+    "zai": ["glm-5.2", "glm-5", "glm-4.7-flash"]
 }
 
 # Thinking parameters
@@ -202,20 +202,32 @@ client.chat.completions.create(
 )
 ```
 
-#### Z.AI: `thinking.type` via extra_body
+#### Z.AI: `thinking.type` via extra_body (+ `reasoning_effort` for GLM-5.2)
 
-**Parameter**: In `extra_body` dictionary
+**Parameter**: `thinking.type` in `extra_body` dictionary; `reasoning_effort` as a direct parameter for GLM-5.2
 
-**Values**: `"enabled"`, `"disabled"`
+**Values**: `thinking.type` = `"enabled"` / `"disabled"`; `reasoning_effort` = `"high"` / `"max"` (GLM-5.2 only)
 
-**Similar to DeepSeek** but different model availability
+**Model behavior**:
+- `glm-5.2` — thinking is **always enabled**; the user only adjusts `reasoning_effort` (`high`/`max`). The Z.AI API collapses `low`/`medium` → `high` and `xhigh` → `max`, so only the two distinct levels are exposed.
+- `glm-5`, `glm-4.7-flash` — enabled/disabled toggle only (no `reasoning_effort`).
+
+Detection is by whether the model config defines `reasoning_efforts` (GLM-5.2 does; the others don't).
 
 **Implementation**:
 ```python
 def _prepare_thinking_param(provider, model, thinking_level):
-    if provider == "zai" and "thinking" in model:
-        extra_body = {"thinking": {"type": "enabled"}}
-        return extra_body, {}
+    if provider == "zai":
+        model_config = get_model_config(provider, model) or {}
+        if "reasoning_efforts" in model_config:  # glm-5.2
+            efforts = model_config["reasoning_efforts"]
+            effort = thinking_level if thinking_level in efforts \
+                else model_config.get("reasoning_effort_default", efforts[0])
+            return {"thinking": {"type": "enabled"}}, {"reasoning_effort": effort}
+        # glm-5 / glm-4.7-flash: enabled/disabled toggle
+        if not thinking_level or thinking_level == "none":
+            return {"thinking": {"type": "disabled"}}, {}
+        return {"thinking": {"type": "enabled"}}, {}
 ```
 
 ### Unified Implementation
@@ -488,8 +500,8 @@ THINKING_PARAMS_BY_MODEL = {
 
 **Chinese Language**:
 - Provider: Z.AI
-- Model: `glm-4.7`
-- Reasoning: Disabled
+- Model: `glm-5.2`
+- Reasoning: High/Max
 
 **Balanced Quality/Cost**:
 - Provider: DeepSeek (most tasks)
