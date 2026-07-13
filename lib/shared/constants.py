@@ -63,15 +63,17 @@ LLM_PROVIDERS = {
         "name": "Z.AI",
         "api_key_env": "ZAI_API_KEY",
         "base_url": "https://api.z.ai/api/paas/v4",
-        "default_model": "glm-4.7",
+        "default_model": "glm-5.2",
         "icon_path": "icons/zai_logo.svg",
         "models": {
-            "glm-4.7": {
-                "display_name": "GLM-4.7",
-                "max_tokens": 200000,
-                "thinking_param": {"thinking": {"type": "disabled"}},
+            "glm-5.2": {
+                "display_name": "GLM-5.2",
+                "max_tokens": 1000000,
+                "reasoning_efforts": ["high", "max"],
+                "reasoning_effort_default": "high",
+                "thinking_param": {"thinking": {"type": "enabled"}},
             },
-                "glm-5": {
+            "glm-5": {
                 "display_name": "GLM-5",
                 "max_tokens": 200000,
                 "thinking_param": {"thinking": {"type": "disabled"}},
@@ -317,7 +319,7 @@ def get_model_config(provider: str, model: str) -> dict:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-4.7")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-5.2")
 
     Returns:
         dict: Model configuration with display_name, max_tokens, thinking_param
@@ -339,7 +341,7 @@ def get_max_tokens(provider: str, model: str) -> int:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-4.7")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-5.2")
 
     Returns:
         int: Maximum context length for the model
@@ -377,10 +379,10 @@ def get_model_display_name(provider: str, model: str) -> str:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-4.7")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-5.2")
 
     Returns:
-        str: Display name (e.g., "DeepSeek V4 Flash", "GPT-5", "GLM-4.7")
+        str: Display name (e.g., "DeepSeek V4 Flash", "GPT-5", "GLM-5.2")
 
     Raises:
         ValueError: If provider or model is not found
@@ -485,7 +487,7 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
 
     Args:
         provider: Provider key (e.g., "openai")
-        model: Model ID (e.g., "gpt-5.5", "glm-4.7")
+        model: Model ID (e.g., "gpt-5.5", "glm-5.2")
 
     Returns:
         list: List of supported reasoning effort levels for the model

@@ -204,7 +204,7 @@ Choose the default model for your provider:
 **Available Models**:
 - **DeepSeek**: `deepseek-v4-flash`, `deepseek-v4-pro`
 - **OpenAI**: `gpt-5.5`, `gpt-5-mini`, `gpt-5-nano`
-- **Z.AI**: `glm-4.7`, `glm-4.7-thinking`
+- **Z.AI**: `glm-5.2`, `glm-5`, `glm-4.7-flash`
 
 **Impact**:
 - New experts use this model by default

@@ -92,8 +92,9 @@ provider = "deepseek"
 - `"gpt-5-nano"` - High-throughput option, 400K context
 
 **Z.AI Models**:
-- `"glm-4.7"` - Standard model (default)
-- `"glm-4.7-thinking"` - Reasoning-enabled model
+- `"glm-5.2"` - Flagship model, 1M context, adjustable reasoning effort high/max (default)
+- `"glm-5"` - 200K context
+- `"glm-4.7-flash"` - Free model, 200K context
 
 **Example**:
 ```toml
@@ -366,9 +367,9 @@ code = "en"
 ```toml
 [llm]
 provider = "zai"
-model = "glm-4.7"
+model = "glm-5.2"
 temperature = 0.7
-thinking_level = "none"
+thinking_level = "high"
 
 [language]
 code = "zh-CN"
@@ -588,7 +589,7 @@ provider = "deepseek"
 # Default model for the provider
 # DeepSeek: "deepseek-v4-flash", "deepseek-v4-pro"
 # OpenAI: "gpt-5.5", "gpt-5-mini", "gpt-5-nano"
-# Z.AI: "glm-4.7", "glm-4.7-thinking"
+# Z.AI: "glm-5.2", "glm-5", "glm-4.7-flash"
 model = "deepseek-v4-flash"
 
 # Default temperature for new experts (0.0 - 2.0)

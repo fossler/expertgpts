@@ -65,17 +65,19 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 ### Z.AI
 
-**Base URL**: `https://api.z.ai/v1`
+**Base URL**: `https://api.z.ai/api/paas/v4`
 
-**Default Model**: `glm-4.7`
+**Default Model**: `glm-5.2`
 
 **Models**:
-- `glm-4.7` - Standard model
-- `glm-4.7-thinking` - Reasoning-enabled model
+- `glm-5.2` - Flagship model (default), 1M context, adjustable reasoning effort (`high`/`max`)
+- `glm-5` - 200K context, enabled/disabled thinking toggle
+- `glm-4.7-flash` - Free model, 200K context, enabled/disabled thinking toggle
 
 **Thinking Parameter**: `thinking.type`
 - Values: `"enabled"`, `"disabled"`
 - Passed via extra_body
+- `glm-5.2` additionally supports `reasoning_effort` (`high`/`max`) as a direct parameter, applied while thinking is enabled
 
 **API Documentation**: [https://z.ai/](https://z.ai/)
 
