@@ -4,18 +4,18 @@
 streamlit>=1.52.0
 
 # DeepSeek API (uses OpenAI-compatible interface)
-openai>=1.12.0
+openai>=2.45.0
 
 # YAML Configuration
-pyyaml>=6.0.1
+pyyaml>=6.0.3
 
 # TOML Configuration (for app_defaults.toml)
 # Python 3.11+ has tomllib built-in, tomli/tomli_w are fallbacks for older versions
-tomli>=2.0.1
+tomli>=2.4.1
 tomli_w>=1.2.0
 
 # Environment Variables
-python-dotenv>=1.0.0
+python-dotenv>=1.2.2
 
 # Token counting for context length
-tiktoken>=0.5.0
+tiktoken>=0.13.0

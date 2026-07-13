@@ -5,11 +5,11 @@
 -r requirements.txt
 
 # File watching for faster Streamlit auto-reload
-watchdog>=4.0.0
+watchdog>=6.0.0
 
 # Code formatting and linting
-black>=24.0.0
+black>=26.5.1
 
 # Testing framework (optional, for future use)
-pytest>=8.0.0
-pytest-cov>=4.1.0
+pytest>=9.1.1
+pytest-cov>=7.1.0
