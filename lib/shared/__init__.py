@@ -23,7 +23,12 @@ from lib.shared.constants import (
     get_provider_links,
     get_provider_avatar,
 )
-from lib.shared.helpers import sanitize_name, translate_expert_name, validate_expert_name, validate_api_key
+from lib.shared.helpers import (
+    sanitize_name,
+    translate_expert_name,
+    validate_expert_name,
+    validate_api_key,
+)
 from lib.shared.file_ops import (
     get_project_root,
     get_streamlit_path,

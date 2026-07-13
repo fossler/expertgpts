@@ -32,10 +32,35 @@ st.set_page_config(
 
 # API categories and their endpoints
 API_CATEGORIES = {
-    "Users": ["/users", "/users/{id}", "/users/me", "/users/search", "/users/bulk", "/users/export"],
-    "Orders": ["/orders", "/orders/{id}", "/orders/create", "/orders/cancel", "/orders/refund", "/orders/status"],
-    "Products": ["/products", "/products/{id}", "/products/search", "/products/categories", "/products/inventory"],
-    "Analytics": ["/analytics/events", "/analytics/metrics", "/analytics/reports", "/analytics/dashboards"],
+    "Users": [
+        "/users",
+        "/users/{id}",
+        "/users/me",
+        "/users/search",
+        "/users/bulk",
+        "/users/export",
+    ],
+    "Orders": [
+        "/orders",
+        "/orders/{id}",
+        "/orders/create",
+        "/orders/cancel",
+        "/orders/refund",
+        "/orders/status",
+    ],
+    "Products": [
+        "/products",
+        "/products/{id}",
+        "/products/search",
+        "/products/categories",
+        "/products/inventory",
+    ],
+    "Analytics": [
+        "/analytics/events",
+        "/analytics/metrics",
+        "/analytics/reports",
+        "/analytics/dashboards",
+    ],
 }
 
 # Starter kits - predefined endpoint selections
@@ -56,36 +81,38 @@ def generate_api_data(
     end_date: date,
 ) -> pd.DataFrame:
     """Generate synthetic API usage data.
-    
+
     Replace this function with your actual data source.
     """
     np.random.seed(42)
-    
+
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
     records = []
-    
+
     for endpoint in endpoints:
         # Each endpoint has different base traffic and growth
         base = np.random.randint(1000, 50000)
         growth = np.random.uniform(0.0005, 0.003)
-        
+
         for i, dt in enumerate(dates):
             # Base trend with growth
             trend = base * (1 + growth) ** i
-            
+
             # Weekly seasonality (lower on weekends)
             if dt.dayofweek >= 5:
                 trend *= 0.4
-            
+
             # Random noise
             value = trend * np.random.uniform(0.85, 1.15)
-            
-            records.append({
-                "date": dt,
-                "endpoint": endpoint,
-                "request_count": int(value),
-            })
-    
+
+            records.append(
+                {
+                    "date": dt,
+                    "endpoint": endpoint,
+                    "request_count": int(value),
+                }
+            )
+
     df = pd.DataFrame(records)
     return df
 
@@ -95,11 +122,11 @@ def load_api_data() -> pd.DataFrame:
     """Load all API usage data."""
     end_date = date.today() - timedelta(days=1)
     start_date = end_date - timedelta(days=365)
-    
+
     all_endpoints = []
     for endpoints in API_CATEGORIES.values():
         all_endpoints.extend(endpoints)
-    
+
     return generate_api_data(all_endpoints, start_date, end_date)
 
 
@@ -107,11 +134,10 @@ def apply_rolling_average(df: pd.DataFrame, window: int) -> pd.DataFrame:
     """Apply rolling average to request data."""
     if window == 1:
         return df
-    
+
     result = df.copy()
-    result["request_count"] = (
-        result.groupby("endpoint")["request_count"]
-        .transform(lambda x: x.rolling(window, min_periods=1).mean())
+    result["request_count"] = result.groupby("endpoint")["request_count"].transform(
+        lambda x: x.rolling(window, min_periods=1).mean()
     )
     return result
 
@@ -127,17 +153,17 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
 def calculate_delta(df: pd.DataFrame, endpoint: str) -> tuple[float, float | None]:
     """Calculate 28-day delta for an endpoint."""
     endpoint_data = df[df["endpoint"] == endpoint].sort_values("date")
-    
+
     if len(endpoint_data) < 2:
         return endpoint_data["request_count"].iloc[-1], None
-    
+
     latest = endpoint_data["request_count"].iloc[-1]
-    
+
     if len(endpoint_data) > 28:
         previous = endpoint_data["request_count"].iloc[-29]
     else:
         previous = endpoint_data["request_count"].iloc[0]
-    
+
     delta = latest - previous
     return latest, delta
 
@@ -195,26 +221,26 @@ with filter_col:
             disabled=True,  # Only one option in this template
             help="In production, connect to different metrics tables",
         )
-        
+
         rolling_label = st.segmented_control(
             "Time aggregation",
             list(ROLLING_OPTIONS.keys()),
             default="7-day average",
             label_visibility="collapsed",
         )
-        
+
         if rolling_label is None:
             st.caption("Please select a time aggregation.")
             st.stop()
-        
+
         rolling_window = ROLLING_OPTIONS[rolling_label]
-        
+
         normalize = st.toggle(
             "Normalize",
             value=False,
             help="Normalize to show percentage share of total requests",
         )
-    
+
     # Starter kits
     with st.expander("Starter kits", expanded=True, icon=":material/auto_awesome:"):
         starter_kit = st.pills(
@@ -223,16 +249,18 @@ with filter_col:
             default="None",
             label_visibility="collapsed",
         )
-    
+
     # Endpoint selection
     available_endpoints = API_CATEGORIES[selected_category]
-    
+
     # Determine default selection based on starter kit
     if starter_kit and starter_kit != "None":
-        default_endpoints = [e for e in STARTER_KITS[starter_kit] if e in available_endpoints]
+        default_endpoints = [
+            e for e in STARTER_KITS[starter_kit] if e in available_endpoints
+        ]
     else:
         default_endpoints = available_endpoints[:4]  # First 4 endpoints
-    
+
     with st.expander("Endpoints", expanded=True, icon=":material/checklist:"):
         selected_endpoints = st.multiselect(
             "Select endpoints",
@@ -244,7 +272,9 @@ with filter_col:
 # Filter and process data
 if not selected_endpoints:
     with chart_col:
-        st.info("Select at least one endpoint to view usage data.", icon=":material/info:")
+        st.info(
+            "Select at least one endpoint to view usage data.", icon=":material/info:"
+        )
     st.stop()
 
 filtered_data = raw_data[raw_data["endpoint"].isin(selected_endpoints)].copy()
@@ -257,36 +287,40 @@ with chart_col:
     # Latest metrics
     with st.expander("Latest numbers", expanded=True, icon=":material/numbers:"):
         metrics_row = st.container(horizontal=True)
-        
+
         for endpoint in selected_endpoints:
             latest, delta = calculate_delta(filtered_data, endpoint)
-            
+
             if normalize:
                 value_str = f"{latest:.2%}"
                 delta_str = f"{delta:+.2%}" if delta is not None else None
             else:
                 value_str = f"{latest:,.0f}"
                 delta_str = f"{delta:+,.0f}" if delta is not None else None
-            
+
             metrics_row.metric(
                 label=endpoint,
                 value=value_str,
                 delta=delta_str,
                 border=True,
             )
-    
+
     # Time series chart
     with st.expander("Time series", expanded=True, icon=":material/show_chart:"):
         y_format = ".1%" if normalize else ",.0f"
         y_title = "Share of requests" if normalize else "Request count"
-        
+
         chart = (
             alt.Chart(filtered_data)
             .mark_line()
             .encode(
                 x=alt.X("date:T", title="Date"),
-                y=alt.Y("request_count:Q", title=y_title, axis=alt.Axis(format=y_format)),
-                color=alt.Color("endpoint:N", title="Endpoint", legend=alt.Legend(orient="bottom")),
+                y=alt.Y(
+                    "request_count:Q", title=y_title, axis=alt.Axis(format=y_format)
+                ),
+                color=alt.Color(
+                    "endpoint:N", title="Endpoint", legend=alt.Legend(orient="bottom")
+                ),
                 tooltip=[
                     alt.Tooltip("date:T", title="Date", format="%Y-%m-%d"),
                     alt.Tooltip("endpoint:N", title="Endpoint"),
@@ -296,12 +330,14 @@ with chart_col:
             .properties(height=450)
             .interactive()
         )
-        
+
         st.altair_chart(chart)
 
 # Raw data section
 with st.expander("Raw data", expanded=False, icon=":material/table:"):
     display_df = filtered_data.copy()
     if normalize:
-        display_df["request_count"] = display_df["request_count"].apply(lambda x: f"{x:.2%}")
+        display_df["request_count"] = display_df["request_count"].apply(
+            lambda x: f"{x:.2%}"
+        )
     st.dataframe(display_df, hide_index=True)

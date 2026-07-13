@@ -94,21 +94,21 @@ ORDER BY ds
 @st.cache_data(ttl=3600, show_spinner="Loading metrics from Snowflake...")
 def load_metric_from_snowflake(metric_name: str) -> pd.DataFrame:
     """Load metric data from Snowflake using parameterized queries.
-    
+
     In production, replace the synthetic query with your actual table query:
-    
+
         PRODUCTION_QUERY = '''
         SELECT ds, daily_value, value_7d_ma
         FROM your_schema.your_metrics_table
         WHERE metric_name = ?
         ORDER BY ds
         '''
-        
+
         df = conn.query(PRODUCTION_QUERY, params=[metric_name])
     """
     conn = get_snowflake_connection()
     config = METRIC_CONFIGS[metric_name]
-    
+
     # Use parameterized query with positional parameters (list)
     df = conn.query(
         SYNTHETIC_DATA_QUERY,
@@ -175,11 +175,11 @@ def render_line_chart(
         var_name="series",
         value_name="value",
     )
-    
+
     # Map to labels
     label_map = dict(zip(y_cols, labels))
     melted["series"] = melted["series"].map(label_map)
-    
+
     chart = (
         alt.Chart(melted)
         .mark_line()
@@ -200,7 +200,7 @@ def render_line_chart(
         )
         .properties(height=height)
     )
-    
+
     return chart
 
 
@@ -220,7 +220,7 @@ def render_area_chart(
     )
     label_map = dict(zip(y_cols, labels))
     melted["series"] = melted["series"].map(label_map)
-    
+
     chart = (
         alt.Chart(melted)
         .mark_area(opacity=0.6, line=True)
@@ -250,10 +250,10 @@ def render_bar_chart(
     df = df.copy()
     df[x_col] = pd.to_datetime(df[x_col])
     df["week"] = df[x_col].dt.to_period("W").dt.start_time
-    
+
     # Aggregate by week
     agg_df = df.groupby("week")[y_cols].mean().reset_index()
-    
+
     melted = agg_df.melt(
         id_vars=["week"],
         value_vars=y_cols,
@@ -262,7 +262,7 @@ def render_bar_chart(
     )
     label_map = dict(zip(y_cols, labels))
     melted["series"] = melted["series"].map(label_map)
-    
+
     chart = (
         alt.Chart(melted)
         .mark_bar(opacity=0.8)
@@ -298,7 +298,7 @@ def render_point_chart(
     )
     label_map = dict(zip(y_cols, labels))
     melted["series"] = melted["series"].map(label_map)
-    
+
     points = (
         alt.Chart(melted)
         .mark_point(opacity=0.5, size=20)
@@ -313,7 +313,7 @@ def render_point_chart(
             ],
         )
     )
-    
+
     # Add trend line for 7-day MA only
     trend = (
         alt.Chart(melted[melted["series"] == "7-day MA"])
@@ -324,7 +324,7 @@ def render_point_chart(
             color=alt.Color("series:N"),
         )
     )
-    
+
     return (points + trend).properties(height=height)
 
 
@@ -340,7 +340,7 @@ def metric_card(
     chart_type: str = "line",
 ):
     """Display a metric card with chart/table toggle and popover filters.
-    
+
     Args:
         title: Card title
         df: DataFrame with ds, daily_value, value_7d_ma columns
@@ -354,7 +354,7 @@ def metric_card(
         "point": render_point_chart,
     }
     render_chart = chart_renderers.get(chart_type, render_line_chart)
-    
+
     with st.container(border=True):
         # Header row with title, view toggle, and filters
         with st.container(
@@ -363,7 +363,7 @@ def metric_card(
             vertical_alignment="center",
         ):
             st.markdown(f"**{title}**")
-            
+
             view_mode = st.segmented_control(
                 "View",
                 options=[":material/show_chart:", ":material/table:"],
@@ -371,7 +371,7 @@ def metric_card(
                 key=f"{key_prefix}_view",
                 label_visibility="collapsed",
             )
-            
+
             with st.popover("Filters", type="tertiary"):
                 line_options = st.pills(
                     "Lines",
@@ -386,11 +386,11 @@ def metric_card(
                     default="All",
                     key=f"{key_prefix}_time",
                 )
-        
+
         # Apply filters
         line_options = line_options or ["7-day MA"]
         filtered_df = filter_by_time_range(df, "ds", time_range)
-        
+
         # Determine which columns to show
         y_cols = []
         labels = []
@@ -400,7 +400,7 @@ def metric_card(
         if "7-day MA" in line_options:
             y_cols.append("value_7d_ma")
             labels.append("7-day MA")
-        
+
         # Render view
         if "table" in (view_mode or ""):
             st.dataframe(
@@ -460,4 +460,6 @@ with row2[0]:
     metric_card("Revenue", metrics_data["revenue"], "revenue", chart_type="bar")
 
 with row2[1]:
-    metric_card("Conversions", metrics_data["conversions"], "conversions", chart_type="point")
+    metric_card(
+        "Conversions", metrics_data["conversions"], "conversions", chart_type="point"
+    )

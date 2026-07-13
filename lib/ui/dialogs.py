@@ -7,7 +7,15 @@ across multiple pages.
 import streamlit as st
 from pathlib import Path
 from lib.config.config_manager import get_config_manager
-from lib.shared.constants import get_expert_behavior_docs, LLM_PROVIDERS, get_provider_display_name, get_model_display_name, get_default_model_for_provider, get_reasoning_efforts, get_model_config
+from lib.shared.constants import (
+    get_expert_behavior_docs,
+    LLM_PROVIDERS,
+    get_provider_display_name,
+    get_model_display_name,
+    get_default_model_for_provider,
+    get_reasoning_efforts,
+    get_model_config,
+)
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
 from lib.shared.helpers import sanitize_name, validate_expert_name
@@ -21,7 +29,7 @@ def render_thinking_mode_ui(
     model: str = None,
     label: str = None,
     help_text: str = None,
-    use_sidebar: bool = False
+    use_sidebar: bool = False,
 ) -> str:
     """Render thinking mode UI based on provider and model.
 
@@ -56,7 +64,7 @@ def render_thinking_mode_ui(
             index=effort_index,
             format_func=lambda x: x.capitalize(),
             help=help_text,
-            key=widget_key
+            key=widget_key,
         )
 
     if provider == "openai":
@@ -81,7 +89,7 @@ def render_thinking_mode_ui(
             options=thinking_options,
             index=option_index,
             help=help_text,
-            key=widget_key
+            key=widget_key,
         )
         return "medium" if selected_option == i18n.t("sidebar.enabled") else "none"
     else:
@@ -97,7 +105,7 @@ def render_model_selection(
     help_text: str = None,
     use_sidebar: bool = False,
     update_session_state: bool = False,
-    session_state_key: str = None
+    session_state_key: str = None,
 ) -> str:
     """Render model selection dropdown for a provider.
 
@@ -126,7 +134,9 @@ def render_model_selection(
         if update_session_state and session_state_key:
             st.session_state[session_state_key] = current_model
 
-    model_index = model_options.index(current_model) if current_model in model_options else 0
+    model_index = (
+        model_options.index(current_model) if current_model in model_options else 0
+    )
 
     selected_model = st_func.selectbox(
         label or i18n.t("sidebar.model"),
@@ -134,7 +144,7 @@ def render_model_selection(
         index=model_index,
         format_func=lambda x: get_model_display_name(provider, x),
         help=help_text,
-        key=widget_key
+        key=widget_key,
     )
 
     if update_session_state and session_state_key:
@@ -148,7 +158,7 @@ def render_temperature_input(
     provider: str = None,
     use_sidebar: bool = False,
     widget_key: str = None,
-    show_help: bool = True
+    show_help: bool = True,
 ) -> float:
     """Render temperature input field.
 
@@ -167,38 +177,46 @@ def render_temperature_input(
     # OpenAI models only support temperature=1.0
     if provider == "openai":
         temperature = st_func.number_input(
-            i18n.t('forms.temperature'),
+            i18n.t("forms.temperature"),
             min_value=0.0,
             max_value=2.0,
             value=1.0,
             step=0.01,
-            help=i18n.t('dialogs.temperature.fixed_for_openai') if show_help else None,
+            help=i18n.t("dialogs.temperature.fixed_for_openai") if show_help else None,
             disabled=True,
             format="%.2f",
-            key=widget_key
+            key=widget_key,
         )
         if show_help:
             st.caption(f"⚠️ {i18n.t('dialogs.temperature.openai_warning')}")
     else:
         temperature = st_func.number_input(
-            i18n.t('forms.temperature'),
+            i18n.t("forms.temperature"),
             min_value=0.0,
             max_value=2.0,
             value=value,
             step=0.1,
-            help=i18n.t('dialogs.temperature.help_creativity') if show_help else None,
+            help=i18n.t("dialogs.temperature.help_creativity") if show_help else None,
             format="%.1f",
-            key=widget_key
+            key=widget_key,
         )
 
         # Add expander with detailed temperature guidance (only for non-OpenAI)
         if show_help:
-            with (st.sidebar if use_sidebar else st).expander(f"📖 {i18n.t('dialogs.temperature.recommended_values')}", expanded=False):
-                st.markdown(f"**{i18n.t('dialogs.temperature.use_case_guidelines')}**\n")
+            with (st.sidebar if use_sidebar else st).expander(
+                f"📖 {i18n.t('dialogs.temperature.recommended_values')}", expanded=False
+            ):
+                st.markdown(
+                    f"**{i18n.t('dialogs.temperature.use_case_guidelines')}**\n"
+                )
                 st.markdown(f"• **0.0** - {i18n.t('dialogs.temperature.coding')}")
-                st.markdown(f"• **1.0** - {i18n.t('dialogs.temperature.data_analysis')}")
+                st.markdown(
+                    f"• **1.0** - {i18n.t('dialogs.temperature.data_analysis')}"
+                )
                 st.markdown(f"• **1.3** - {i18n.t('dialogs.temperature.conversation')}")
-                st.markdown(f"• **1.5** - {i18n.t('dialogs.temperature.creative_writing')}")
+                st.markdown(
+                    f"• **1.5** - {i18n.t('dialogs.temperature.creative_writing')}"
+                )
                 st.caption(f"\n*{i18n.t('dialogs.temperature.based_on_docs')}*")
 
     return temperature
@@ -210,7 +228,7 @@ def render_llm_configuration(
     current_temperature: float = 1.0,
     current_thinking: str = None,
     show_thinking: bool = True,
-    is_defaults: bool = False
+    is_defaults: bool = False,
 ) -> tuple:
     """Render complete LLM configuration UI (Provider, Model, Temperature, Thinking).
 
@@ -235,13 +253,10 @@ def render_llm_configuration(
         current_model=current_model,
         current_thinking=current_thinking,
         show_thinking=show_thinking,
-        is_defaults=is_defaults
+        is_defaults=is_defaults,
     )
 
-    temperature = render_temperature_input(
-        value=current_temperature,
-        provider=provider
-    )
+    temperature = render_temperature_input(value=current_temperature, provider=provider)
 
     return provider, model, temperature, thinking_level
 
@@ -251,7 +266,7 @@ def render_provider_selection(
     current_model: str = None,
     current_thinking: str = None,
     show_thinking: bool = True,
-    is_defaults: bool = False
+    is_defaults: bool = False,
 ) -> tuple:
     """Render LLM provider and model selection UI.
 
@@ -281,22 +296,24 @@ def render_provider_selection(
 
     # Set labels based on context
     if is_defaults:
-        provider_label = i18n.t('dialogs.llm_config.default_provider')
-        model_label = i18n.t('dialogs.llm_config.default_model')
-        thinking_label = i18n.t('dialogs.llm_config.thinking_mode_level')
-        provider_help = i18n.t('dialogs.llm_config.default_provider_help')
-        model_help = i18n.t('dialogs.llm_config.default_model_help', provider="{provider}")
-        thinking_help = i18n.t('dialogs.llm_config.thinking_mode_help')
+        provider_label = i18n.t("dialogs.llm_config.default_provider")
+        model_label = i18n.t("dialogs.llm_config.default_model")
+        thinking_label = i18n.t("dialogs.llm_config.thinking_mode_level")
+        provider_help = i18n.t("dialogs.llm_config.default_provider_help")
+        model_help = i18n.t(
+            "dialogs.llm_config.default_model_help", provider="{provider}"
+        )
+        thinking_help = i18n.t("dialogs.llm_config.thinking_mode_help")
         provider_key = "default_provider_selector"
         model_key = "default_model_selector"
         thinking_key = "default_thinking_slider"
     else:
-        provider_label = i18n.t('forms.llm_provider')
-        model_label = i18n.t('forms.model')
-        thinking_label = i18n.t('default_llm.select_thinking_mode')
-        provider_help = i18n.t('dialogs.llm_config.provider_help')
-        model_help = i18n.t('dialogs.llm_config.model_help', provider="{provider}")
-        thinking_help = i18n.t('dialogs.llm_config.thinking_mode_help_expert')
+        provider_label = i18n.t("forms.llm_provider")
+        model_label = i18n.t("forms.model")
+        thinking_label = i18n.t("default_llm.select_thinking_mode")
+        provider_help = i18n.t("dialogs.llm_config.provider_help")
+        model_help = i18n.t("dialogs.llm_config.model_help", provider="{provider}")
+        thinking_help = i18n.t("dialogs.llm_config.thinking_mode_help_expert")
         provider_key = "expert_provider_selector"
         model_key = "expert_model_selector"
         thinking_key = "expert_thinking_slider"
@@ -305,7 +322,11 @@ def render_provider_selection(
 
     # Provider selection
     provider_options = list(LLM_PROVIDERS.keys())
-    provider_index = provider_options.index(current_provider) if current_provider in provider_options else 0
+    provider_index = (
+        provider_options.index(current_provider)
+        if current_provider in provider_options
+        else 0
+    )
 
     provider = st.selectbox(
         provider_label,
@@ -313,7 +334,7 @@ def render_provider_selection(
         index=provider_index,
         format_func=lambda x: get_provider_display_name(x),
         help=provider_help,
-        key=provider_key
+        key=provider_key,
     )
 
     # Model selection (filtered by provider)
@@ -323,7 +344,9 @@ def render_provider_selection(
     if current_model not in model_options:
         current_model = get_default_model_for_provider(provider)
 
-    model_index = model_options.index(current_model) if current_model in model_options else 0
+    model_index = (
+        model_options.index(current_model) if current_model in model_options else 0
+    )
 
     model = st.selectbox(
         model_label,
@@ -331,7 +354,7 @@ def render_provider_selection(
         index=model_index,
         format_func=lambda x: get_model_display_name(provider, x),
         help=model_help.format(provider=get_provider_display_name(provider)),
-        key=model_key
+        key=model_key,
     )
 
     # Display model info
@@ -340,19 +363,25 @@ def render_provider_selection(
     # Determine UI type based on provider:
     # - Reasoning-effort selector (OpenAI, DeepSeek V4): per-model effort list from config
     # - Enabled/Disabled toggle (Z.AI, KIMI): simple binary
-    uses_reasoning_efforts = provider in {"openai", "deepseek"} and "reasoning_efforts" in model_config
+    uses_reasoning_efforts = (
+        provider in {"openai", "deepseek"} and "reasoning_efforts" in model_config
+    )
 
     optional_thinking_providers = {"zai", "kimi"}
-    supports_optional_thinking = provider in optional_thinking_providers and "thinking_param" in model_config
+    supports_optional_thinking = (
+        provider in optional_thinking_providers and "thinking_param" in model_config
+    )
 
-    st.caption(i18n.t('info.context_length', tokens=f"{model_config['max_tokens']:,}"))
+    st.caption(i18n.t("info.context_length", tokens=f"{model_config['max_tokens']:,}"))
 
     if show_thinking:
         if uses_reasoning_efforts:
             col1, col2 = st.columns(2)
             with col1:
                 effort_options = model_config["reasoning_efforts"]
-                default_effort = model_config.get("reasoning_effort_default", effort_options[0])
+                default_effort = model_config.get(
+                    "reasoning_effort_default", effort_options[0]
+                )
                 if current_thinking in effort_options:
                     effort_index = effort_options.index(current_thinking)
                 else:
@@ -362,20 +391,22 @@ def render_provider_selection(
                     options=effort_options,
                     index=effort_index,
                     help=thinking_help,
-                    key=thinking_key
+                    key=thinking_key,
                 )
 
         elif supports_optional_thinking:
             col1, col2 = st.columns(2)
             with col1:
                 thinking_options = ["Disabled", "Enabled"]
-                option_index = 1 if current_thinking and current_thinking != "none" else 0
+                option_index = (
+                    1 if current_thinking and current_thinking != "none" else 0
+                )
                 selected_option = st.selectbox(
                     thinking_label,
                     options=thinking_options,
                     index=option_index,
                     help=thinking_help,
-                    key=thinking_key
+                    key=thinking_key,
                 )
                 thinking_level = "medium" if selected_option == "Enabled" else "none"
 
@@ -386,9 +417,9 @@ def render_provider_selection(
 
     return provider, model, thinking_level
 
+
 def render_api_key_status(
-    show_provider_name: bool = False,
-    use_sidebar: bool = False
+    show_provider_name: bool = False, use_sidebar: bool = False
 ) -> None:
     """Render API key status display.
 
@@ -414,8 +445,12 @@ def render_api_key_status(
         # Detailed status (for Settings page)
         available_providers = [p for p, key in api_keys.items() if key]
         if available_providers:
-            providers_str = ", ".join([get_provider_display_name(p) for p in available_providers])
-            st_func.success(f"✅ {i18n.t('status.api_keys_configured_for', providers=providers_str)}")
+            providers_str = ", ".join(
+                [get_provider_display_name(p) for p in available_providers]
+            )
+            st_func.success(
+                f"✅ {i18n.t('status.api_keys_configured_for', providers=providers_str)}"
+            )
         else:
             st_func.caption(f"⚠️ {i18n.t('status.api_key_not_set')}")
 
@@ -428,7 +463,7 @@ def create_new_expert(
     api_key: str = None,
     provider: str = None,
     model: str = None,
-    thinking_level: str = "none"
+    thinking_level: str = "none",
 ):
     """Create a new expert agent.
 
@@ -475,9 +510,8 @@ def create_new_expert(
 
     # Check if AI generation will be used
     needs_ai_generation = (
-        (custom_system_prompt is None or custom_system_prompt.strip() == "")
-        and api_key
-    )
+        custom_system_prompt is None or custom_system_prompt.strip() == ""
+    ) and api_key
 
     if needs_ai_generation:
         # Show spinner during AI generation
@@ -518,6 +552,7 @@ def create_new_expert(
 
     # Invalidate cache for this expert
     from lib.shared.session_state import invalidate_expert_cache
+
     invalidate_expert_cache(expert_id)
 
     return expert_id, page_path
@@ -564,24 +599,26 @@ def render_add_chat_dialog():
     st.divider()
 
     with st.form("add_chat_form"):
-        st.subheader(i18n.t('dialogs.add_chat.expert_configuration'))
+        st.subheader(i18n.t("dialogs.add_chat.expert_configuration"))
 
         # Chat Name
         chat_name = st.text_input(
             f"{i18n.t('forms.expert_name')} *",
-            placeholder=i18n.t('forms.expert_name_placeholder'),
-            help=i18n.t('dialogs.add_chat.help_expert_name'),
+            placeholder=i18n.t("forms.expert_name_placeholder"),
+            help=i18n.t("dialogs.add_chat.help_expert_name"),
             max_chars=100,
         ).strip()
 
         # Add caption with allowed characters
-        st.caption(f"💡 **{i18n.t('forms.allowed_characters')}:** {i18n.t('forms.allowed_characters_desc')}")
+        st.caption(
+            f"💡 **{i18n.t('forms.allowed_characters')}:** {i18n.t('forms.allowed_characters_desc')}"
+        )
 
         # Agent Description
         description = st.text_area(
             f"{i18n.t('forms.agent_description')} *",
-            placeholder=i18n.t('forms.agent_description_placeholder'),
-            help=i18n.t('dialogs.add_chat.help_expert_description'),
+            placeholder=i18n.t("forms.agent_description_placeholder"),
+            help=i18n.t("dialogs.add_chat.help_expert_description"),
             height="content",
             max_chars=1000,
         ).strip()
@@ -590,14 +627,12 @@ def render_add_chat_dialog():
 
         # Expert Behavior (Advanced) - The most important field!
         st.markdown(f"### 🧠 {i18n.t('dialogs.add_chat.expert_behavior_title')}")
-        st.caption(
-            f"💡 {i18n.t('info.ai_powered_tip')}"
-        )
+        st.caption(f"💡 {i18n.t('info.ai_powered_tip')}")
 
         custom_system_prompt = st.text_area(
-            i18n.t('forms.custom_system_prompt'),
-            placeholder=i18n.t('forms.custom_system_prompt_placeholder'),
-            help=i18n.t('dialogs.add_chat.help_custom_behavior'),
+            i18n.t("forms.custom_system_prompt"),
+            placeholder=i18n.t("forms.custom_system_prompt_placeholder"),
+            help=i18n.t("dialogs.add_chat.help_custom_behavior"),
             height=250,
             max_chars=3000,
         ).strip()
@@ -609,14 +644,16 @@ def render_add_chat_dialog():
         with st.expander(f"📖 {i18n.t('dialogs.add_chat.why_important_title')}"):
             st.markdown(get_expert_behavior_docs())
 
-        st.caption(i18n.t('info.required_fields_hint'))
+        st.caption(i18n.t("info.required_fields_hint"))
 
         # Form buttons (left-aligned)
         st.write("")  # Spacing
         col1, col2, col3 = st.columns([1, 1, 6])
 
         with col1:
-            submit_button = st.form_submit_button(i18n.t("buttons.create_expert"), type="primary")
+            submit_button = st.form_submit_button(
+                i18n.t("buttons.create_expert"), type="primary"
+            )
 
         with col2:
             cancel_button = st.form_submit_button(i18n.t("buttons.cancel"))
@@ -652,7 +689,7 @@ def render_add_chat_dialog():
                     api_key,
                     provider,
                     model,
-                    thinking_level
+                    thinking_level,
                 )
 
                 # Store the page path for navigation after rerun

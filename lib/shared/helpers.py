@@ -35,7 +35,7 @@ def sanitize_name(name: str) -> str:
         raise ValueError("Expert name cannot be empty")
 
     # Unicode normalization (NFC form) to prevent homograph attacks
-    normalized = unicodedata.normalize('NFC', name)
+    normalized = unicodedata.normalize("NFC", name)
 
     # Convert to lowercase
     lowercased = normalized.lower()
@@ -44,7 +44,7 @@ def sanitize_name(name: str) -> str:
     sanitized = lowercased.replace(" ", "_").replace("-", "_")
 
     # Remove any characters that aren't alphanumeric or underscore
-    sanitized = re.sub(r'[^a-z0-9_]', '', sanitized)
+    sanitized = re.sub(r"[^a-z0-9_]", "", sanitized)
 
     # Enforce maximum length (64 characters) to prevent DoS/buffer issues
     MAX_LENGTH = 64
@@ -52,7 +52,7 @@ def sanitize_name(name: str) -> str:
         sanitized = sanitized[:MAX_LENGTH]
 
     # Remove leading/trailing underscores
-    sanitized = sanitized.strip('_')
+    sanitized = sanitized.strip("_")
 
     # Ensure result is not empty
     if not sanitized:
@@ -112,10 +112,7 @@ def translate_expert_names_batch(expert_names: tuple, language: str) -> dict:
     """
     from lib.i18n.i18n import i18n
 
-    return {
-        name: _translate_single_name(name, i18n)
-        for name in expert_names
-    }
+    return {name: _translate_single_name(name, i18n) for name in expert_names}
 
 
 def _translate_single_name(expert_name: str, i18n) -> str:
@@ -154,14 +151,14 @@ def validate_expert_name(name: str) -> tuple[bool, str]:
     from lib.i18n.i18n import i18n
 
     if not name:
-        return False, i18n.t('errors.expert_name_empty')
+        return False, i18n.t("errors.expert_name_empty")
 
     # Regex pattern for allowed characters
-    pattern = r'^[A-Za-z0-9_.\- ]+$'
+    pattern = r"^[A-Za-z0-9_.\- ]+$"
 
     if not re.match(pattern, name):
-        allowed = i18n.t('forms.allowed_characters_desc')
-        return False, i18n.t('errors.expert_name_invalid_chars', allowed=allowed)
+        allowed = i18n.t("forms.allowed_characters_desc")
+        return False, i18n.t("errors.expert_name_invalid_chars", allowed=allowed)
 
     return True, ""
 
@@ -191,27 +188,29 @@ def validate_api_key(api_key: str, provider: str = None) -> tuple[bool, str]:
     PROVIDER_KEY_PATTERNS = {
         "deepseek": {
             "pattern": r"^sk-[a-f0-9]{31,}$",
-            "example": "sk-1234567890abcdef1234567890abcdef"
+            "example": "sk-1234567890abcdef1234567890abcdef",
         },
         "openai": {
             "pattern": r"^sk-[a-zA-Z0-9_-]{52,}$",
-            "example": "sk-proj-abc123_XyZ789..."
+            "example": "sk-proj-abc123_XyZ789...",
         },
         "zai": {
             "pattern": r"^[a-f0-9]{32}\.[a-zA-Z0-9]{16}$",
-            "example": "ab3e366bed0b468586b2bd9e7eab347a.XyZ1234567890AbC"
+            "example": "ab3e366bed0b468586b2bd9e7eab347a.XyZ1234567890AbC",
         },
         "kimi": {
             "pattern": r"^sk-[a-zA-Z0-9]{46,}$",
-            "example": "sk-AbCdEf123456XyZ7890GhIjKlMnOpQrStUv"
-        }
+            "example": "sk-AbCdEf123456XyZ7890GhIjKlMnOpQrStUv",
+        },
     }
 
     # Provider-specific validation
     if provider and provider in PROVIDER_KEY_PATTERNS:
         config = PROVIDER_KEY_PATTERNS[provider]
         if not re.match(config["pattern"], api_key):
-            return False, i18n.t("errors.api_key_invalid_format", example=config["example"])
+            return False, i18n.t(
+                "errors.api_key_invalid_format", example=config["example"]
+            )
         return True, ""
 
     # Generic validation (minimum length check)
@@ -245,15 +244,15 @@ def sanitize_error_message(message: str) -> str:
     # API key patterns to redact (order matters - more specific first)
     API_KEY_PATTERNS = [
         # Z.AI format: 32 hex chars + dot + 16 alphanumeric
-        (r'[a-f0-9]{32}\.[a-zA-Z0-9]{16}', '[REDACTED]'),
+        (r"[a-f0-9]{32}\.[a-zA-Z0-9]{16}", "[REDACTED]"),
         # DeepSeek format: sk- + 32+ hex chars
-        (r'sk-[a-f0-9]{32,}', '[REDACTED]'),
+        (r"sk-[a-f0-9]{32,}", "[REDACTED]"),
         # OpenAI format: sk- + 20+ alphanumeric/underscore/hyphen
-        (r'sk-[a-zA-Z0-9_-]{20,}', '[REDACTED]'),
+        (r"sk-[a-zA-Z0-9_-]{20,}", "[REDACTED]"),
         # KIMI format: sk- + 20+ alphanumeric
-        (r'sk-[a-zA-Z0-9]{20,}', '[REDACTED]'),
+        (r"sk-[a-zA-Z0-9]{20,}", "[REDACTED]"),
         # Generic sk- prefix patterns (catches most API keys)
-        (r'sk-[a-zA-Z0-9_-]{10,}', '[REDACTED]'),
+        (r"sk-[a-zA-Z0-9_-]{10,}", "[REDACTED]"),
     ]
 
     for pattern, replacement in API_KEY_PATTERNS:
@@ -288,10 +287,10 @@ def sanitize_markdown_content(content: str) -> str:
     # Dangerous URL schemes to block (case-insensitive)
     # Pattern matches: scheme: or scheme:// anything until space or end
     DANGEROUS_SCHEMES = [
-        r'javascript\s*:',
-        r'vbscript\s*:',
-        r'data\s*:',
-        r'file\s*:',
+        r"javascript\s*:",
+        r"vbscript\s*:",
+        r"data\s*:",
+        r"file\s*:",
     ]
 
     # Replace dangerous schemes in markdown links and images
@@ -299,20 +298,16 @@ def sanitize_markdown_content(content: str) -> str:
     for scheme in DANGEROUS_SCHEMES:
         # Match in markdown link context: ](scheme:...)
         sanitized = re.sub(
-            rf'\]\s*\(\s*({scheme})',
-            '](about:blank#blocked)',
+            rf"\]\s*\(\s*({scheme})",
+            "](about:blank#blocked)",
             sanitized,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
     return sanitized
 
 
-def add_error_to_history(
-    expert_id: str,
-    messages_key: str,
-    error_msg: str
-) -> None:
+def add_error_to_history(expert_id: str, messages_key: str, error_msg: str) -> None:
     """Add error message to chat history and persist to file.
 
     This helper centralizes the error persistence pattern used across
@@ -325,10 +320,9 @@ def add_error_to_history(
     """
     from lib.storage import save_chat_history
 
-    st.session_state[messages_key].append({
-        "role": "assistant",
-        "content": f"❌ {error_msg}"
-    })
+    st.session_state[messages_key].append(
+        {"role": "assistant", "content": f"❌ {error_msg}"}
+    )
     save_chat_history(expert_id, st.session_state[messages_key])
 
 
@@ -339,12 +333,13 @@ def get_git_branch() -> str | None:
         str | None: Branch name if in a Git repo, None otherwise
     """
     import subprocess
+
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True,
             text=True,
-            timeout=5
+            timeout=5,
         )
         if result.returncode == 0:
             return result.stdout.strip()

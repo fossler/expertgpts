@@ -72,7 +72,7 @@ def get_llm_defaults() -> Dict[str, Any]:
     return {
         "provider": llm_section.get("provider", DEFAULT_LLM_PROVIDER),
         "model": llm_section.get("model", DEFAULT_LLM_MODEL),
-        "thinking_level": llm_section.get("thinking_level", "none")
+        "thinking_level": llm_section.get("thinking_level", "none"),
     }
 
 
@@ -175,9 +175,7 @@ def get_display_defaults() -> Dict[str, Any]:
     # Extract display defaults, falling back to hardcoded values
     display_section = data.get("display", {})
 
-    return {
-        "git_branch": display_section.get("git_branch", True)
-    }
+    return {"git_branch": display_section.get("git_branch", True)}
 
 
 def save_display_setting(key: str, value: Any) -> bool:
@@ -206,4 +204,3 @@ def save_display_setting(key: str, value: Any) -> bool:
     # Write using shared function (handles permissions and errors)
     header = "# Application Default Settings\n# This file persists your default LLM and other app-wide settings\n"
     return write_toml(defaults_path, data, header=header)
-

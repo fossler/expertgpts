@@ -138,7 +138,9 @@ class ConfigManager:
                 expert_name = updates.get("expert_name", config.get("expert_name"))
                 description = updates.get("description", config.get("description"))
                 temperature = updates.get("temperature", config.get("temperature", 1.0))
-                provider = updates.get("provider", config["metadata"].get("provider", "deepseek"))
+                provider = updates.get(
+                    "provider", config["metadata"].get("provider", "deepseek")
+                )
                 model = updates.get("model", config["metadata"].get("model"))
 
                 updates["system_prompt"] = self._generate_system_prompt(
@@ -223,15 +225,17 @@ class ConfigManager:
             if not config:
                 continue
 
-            experts.append({
-                "expert_id": config["expert_id"],
-                "expert_name": config["expert_name"],
-                "description": config["description"],
-                "temperature": config.get("temperature", 1.0),
-                "metadata": config.get("metadata", {}),
-                "created_at": config.get("created_at", "Unknown"),
-                # Note: system_prompt intentionally excluded
-            })
+            experts.append(
+                {
+                    "expert_id": config["expert_id"],
+                    "expert_name": config["expert_name"],
+                    "description": config["description"],
+                    "temperature": config.get("temperature", 1.0),
+                    "metadata": config.get("metadata", {}),
+                    "created_at": config.get("created_at", "Unknown"),
+                    # Note: system_prompt intentionally excluded
+                }
+            )
 
         # Sort by creation date
         experts.sort(key=lambda x: x["created_at"], reverse=False)
@@ -303,7 +307,9 @@ class ConfigManager:
         try:
             # Try AI generation with specified provider and model
             client = get_cached_client(provider=provider, api_key=api_key)
-            return client.generate_system_prompt(expert_name, description, temperature, model)
+            return client.generate_system_prompt(
+                expert_name, description, temperature, model
+            )
         except Exception:
             # Silent fallback to template
             return self._get_template_system_prompt(expert_name, description)
@@ -319,8 +325,7 @@ class ConfigManager:
             Template system prompt
         """
         return SYSTEM_PROMPT_TEMPLATE.format(
-            expert_name=expert_name,
-            description=description
+            expert_name=expert_name, description=description
         )
 
 
@@ -337,7 +342,7 @@ def get_llm_metadata(config: dict) -> tuple[str, str, str]:
     return (
         metadata.get("provider", "deepseek"),
         metadata.get("model", "deepseek-v4-flash"),
-        metadata.get("thinking_level", "none")
+        metadata.get("thinking_level", "none"),
     )
 
 

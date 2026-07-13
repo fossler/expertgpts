@@ -49,7 +49,7 @@ class TokenManager:
     def calculate_usage_statistics(
         system_prompt: str,
         messages: list,
-        max_tokens: int = DEEPSEEK_MAX_CONTEXT_TOKENS
+        max_tokens: int = DEEPSEEK_MAX_CONTEXT_TOKENS,
     ) -> dict:
         """Calculate comprehensive token usage statistics.
 
@@ -76,13 +76,12 @@ class TokenManager:
             return {
                 "error": f"Token counting unavailable: {type(e).__name__}",
                 "total_tokens": 0,
-                "usage_percent": 0
+                "usage_percent": 0,
             }
 
         # Count tokens in system prompt
         system_tokens = (
-            TokenManager.count_tokens(system_prompt, encoding)
-            if system_prompt else 0
+            TokenManager.count_tokens(system_prompt, encoding) if system_prompt else 0
         )
 
         # Count tokens in chat messages
@@ -111,6 +110,5 @@ class TokenManager:
             "system_tokens": system_tokens,
             "messages_tokens": messages_tokens,
             "color": color,
-            "max_tokens": max_tokens
+            "max_tokens": max_tokens,
         }
-

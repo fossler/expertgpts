@@ -43,9 +43,7 @@ def set_secure_permissions(file_path: Path) -> None:
 
 
 def ensure_file_exists(
-    file_path: Path,
-    default_content: str = "",
-    set_permissions: bool = True
+    file_path: Path, default_content: str = "", set_permissions: bool = True
 ) -> Path:
     """Ensure a file exists, creating it with default content if needed.
 
@@ -207,7 +205,7 @@ def validate_cwd(cwd_path: Path) -> Path:
 
     # Check for suspicious paths (hidden directories)
     # This prevents attackers from using paths like /.git/config
-    if any(part.startswith('.') for part in resolved.parts if part not in {'.', '..'}):
+    if any(part.startswith(".") for part in resolved.parts if part not in {".", ".."}):
         raise ValueError(
             f"Hidden directory in path: {cwd_path} "
             "(potential path traversal attempt)"

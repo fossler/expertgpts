@@ -9,7 +9,6 @@ from lib.shared.helpers import sanitize_name
 from lib.shared.types import PageInfo
 from lib.shared.file_ops import ensure_directory_exists, safe_path_join
 
-
 # System pages that should not be treated as expert pages
 SYSTEM_PAGES = {"1000_Home.py", "9998_Settings.py", "9999_Help.py"}
 
@@ -29,11 +28,7 @@ def is_system_page(filename: str) -> bool:
 class PageGenerator:
     """Generates new Streamlit pages for expert agents."""
 
-    def __init__(
-        self,
-        pages_dir: str = "pages",
-        template_path: Optional[str] = None
-    ):
+    def __init__(self, pages_dir: str = "pages", template_path: Optional[str] = None):
         """Initialize the page generator.
 
         Args:
@@ -82,10 +77,7 @@ class PageGenerator:
         return max(existing_numbers, default=1000) + 1
 
     def generate_page(
-        self,
-        expert_id: str,
-        expert_name: str,
-        overwrite: bool = False
+        self, expert_id: str, expert_name: str, overwrite: bool = False
     ) -> Tuple[str, int]:
         """Generate a new page from the template.
 
@@ -120,9 +112,7 @@ class PageGenerator:
             template_content = f.read()
 
         # Replace placeholders in template
-        page_content = template_content.replace(
-            "{{EXPERT_ID}}", expert_id
-        ).replace(
+        page_content = template_content.replace("{{EXPERT_ID}}", expert_id).replace(
             "{{EXPERT_NAME}}", expert_name
         )
 
@@ -207,7 +197,7 @@ class PageGenerator:
             # Access the cached function and clear its cache
             # The function is stored as an attribute after decoration
             cached_func = self.__class__._build_page_index
-            if hasattr(cached_func, 'clear'):
+            if hasattr(cached_func, "clear"):
                 cached_func.clear()
         except Exception:
             # If clearing fails, we'll rebuild on next access anyway
@@ -246,7 +236,7 @@ class PageGenerator:
                 index[str(page_number)] = {
                     "filename": page_file.name,
                     "expert_name": expert_name,
-                    "page_number": page_number
+                    "page_number": page_number,
                 }
 
         return index
@@ -269,7 +259,7 @@ class PageGenerator:
             {
                 "filename": info["filename"],
                 "expert_id": f"{page_num}_{info['expert_name'].lower().replace(' ', '_')}",
-                "expert_name": info["expert_name"]
+                "expert_name": info["expert_name"],
             }
             for page_num, info in sorted(page_index.items(), key=lambda x: int(x[0]))
         ]

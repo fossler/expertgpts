@@ -37,7 +37,7 @@ def confirm_reset():
     print("-" * 60)
 
     response = input(f"\nType 'yes' to confirm, or anything else to cancel: ")
-    return response.lower() == 'yes'
+    return response.lower() == "yes"
 
 
 def delete_configs():
@@ -72,8 +72,10 @@ def delete_pages():
 
     # Get all Python files, excluding Home (1000), Settings (9998), Help (9999), and hidden files (starting with _)
     page_files = [
-        f for f in pages_dir.glob("*.py")
-        if not f.name.startswith("_") and f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
+        f
+        for f in pages_dir.glob("*.py")
+        if not f.name.startswith("_")
+        and f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
     ]
 
     if not page_files:
@@ -148,7 +150,7 @@ def run_setup():
             check=True,
             capture_output=False,
             text=True,
-            cwd=safe_cwd  # Use validated working directory
+            cwd=safe_cwd,  # Use validated working directory
         )
         return result.returncode == 0
     except subprocess.CalledProcessError as e:

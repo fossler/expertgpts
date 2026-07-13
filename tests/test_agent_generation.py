@@ -122,8 +122,7 @@ class TestAgentGeneration:
 
         # Create page generator first to get page number
         page_generator = PageGenerator(
-            pages_dir=str(temp_pages_dir),
-            template_path=str(temp_template_path)
+            pages_dir=str(temp_pages_dir), template_path=str(temp_template_path)
         )
         page_number = page_generator.get_next_page_number()
 
@@ -165,8 +164,7 @@ class TestAgentGeneration:
 
         # Initialize managers
         page_generator = PageGenerator(
-            pages_dir=str(temp_pages_dir),
-            template_path=str(temp_template_path)
+            pages_dir=str(temp_pages_dir), template_path=str(temp_template_path)
         )
         page_number = page_generator.get_next_page_number()
 
@@ -250,8 +248,7 @@ class TestAgentGeneration:
         temp_pages_dir, temp_configs_dir, temp_template_path = temp_dirs
         config_manager = ConfigManager(config_dir=str(temp_configs_dir))
         page_generator = PageGenerator(
-            pages_dir=str(temp_pages_dir),
-            template_path=str(temp_template_path)
+            pages_dir=str(temp_pages_dir), template_path=str(temp_template_path)
         )
 
         # Create multiple pages

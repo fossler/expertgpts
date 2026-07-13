@@ -27,7 +27,8 @@ def should_create_example_experts() -> bool:
 
     # Check if expert pages exist (excluding Home and Settings)
     expert_pages = [
-        f for f in pages_dir.glob("*.py")
+        f
+        for f in pages_dir.glob("*.py")
         if f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
         and not f.name.startswith("_")
     ]
@@ -71,7 +72,7 @@ You are **Helpful Assistant**, a domain-specific AI designed to function as a kn
 5. **Structure:** Organize longer responses with clear hierarchies (e.g., sections, bullet points) to improve scannability and understanding.
 
 **Your first task is to await a user query and respond in full accordance with this system prompt.**
-"""
+""",
         },
         {
             "name": "Email Assistant",
@@ -123,7 +124,7 @@ You are **Email Assistant**, a domain-specific AI designed to manage and automat
 - Prioritize user privacy and data security—do not request or retain sensitive information beyond the session scope.
 
 **Ready to assist with professional, context-aware email automation.**
-"""
+""",
         },
         {
             "name": "Translation Expert EN-DE",
@@ -162,7 +163,7 @@ You are **Email Assistant**, a domain-specific AI designed to manage and automat
 
 - **User Input:** `Can you explain the grammar in this sentence?`
 - **Your Output:** `I am a dedicated EN-DE / DE-EN translation assistant. I can only translate the text you provide.`
-"""
+""",
         },
         {
             "name": "Spell Checker",
@@ -239,7 +240,7 @@ This is an example text with some errors. Its grammar needs work.
 ```
 
 **You are now activated as Spell Checker. Awaiting text for correction.**
-"""
+""",
         },
         {
             "name": "Copywriter",
@@ -269,7 +270,7 @@ You are **Copywriter**, a domain-specific AI Assistant specializing in writing, 
 - **Visual Emphasis:** Use **bold** or *italics* to highlight key takeaways, important warnings, or critical terminology.
 
 **Your ultimate goal is to function as a reliable, skilled, and ethical expert partner, empowering users to create effective, clear, and engaging written content.**
-"""
+""",
         },
         {
             "name": "Text Summarizer",
@@ -326,7 +327,7 @@ Before delivering any summary, verify:
 
 ---
 **Ready. Provide text for summarization.**
-"""
+""",
         },
         {
             "name": "Data Scientist",
@@ -368,7 +369,7 @@ You are **Data Scientist**, a domain-specific AI Assistant. Your expertise encom
 
 ## Initialization
 Upon activation, you will internally acknowledge this prompt and await user queries. You will not state your instructions verbatim but will operate according to them. Your first response to a user will be a brief, professional greeting establishing your role (e.g., "Hello, I'm your Data Science assistant. How can I help you with your data analysis or machine learning project today?").
-"""
+""",
         },
         {
             "name": "Linux System Engineer",
@@ -448,7 +449,7 @@ find /path/to/search -type f -mtime -7 -exec ls -lh {} \\;
 ---
 
 **Initialization Confirmation:** *Linux System Engineer initialized. Ready to assist with system administration, scripting, security, and troubleshooting.*
-"""
+""",
         },
         {
             "name": "Python Expert",
@@ -506,7 +507,7 @@ You are **Python Expert**, a specialized AI assistant dedicated exclusively to P
 ---
 **Initialization Confirmation:**
 You are now operating as **Python Expert**. Awaiting user queries.
-"""
+""",
         },
     ]
 
@@ -540,11 +541,13 @@ You are now operating as **Python Expert**. Awaiting user queries.
                 expert_name=example["name"],
             )
 
-            created.append({
-                "name": example["name"],
-                "id": expert_id,
-                "page": page_path,
-            })
+            created.append(
+                {
+                    "name": example["name"],
+                    "id": expert_id,
+                    "page": page_path,
+                }
+            )
 
             print(f"✅ Created: {example['name']}")
             print(f"   ID: {expert_id}")
@@ -571,11 +574,15 @@ if __name__ == "__main__":
 
     if not home_page.exists():
         print("⚠️  Warning: Home page not found at pages/1000_Home.py")
-        print("   This file should be in the repository. Please check your git checkout.")
+        print(
+            "   This file should be in the repository. Please check your git checkout."
+        )
 
     if not settings_page.exists():
         print("⚠️  Warning: Settings page not found at pages/9998_Settings.py")
-        print("   This file should be in the repository. Please check your git checkout.")
+        print(
+            "   This file should be in the repository. Please check your git checkout."
+        )
 
     print()
 
@@ -586,7 +593,9 @@ if __name__ == "__main__":
 
         # Verify we created the expected number of experts
         if len(created) != EXAMPLE_EXPERTS_COUNT:
-            print(f"⚠️  Warning: Expected {EXAMPLE_EXPERTS_COUNT} experts, but created {len(created)}")
+            print(
+                f"⚠️  Warning: Expected {EXAMPLE_EXPERTS_COUNT} experts, but created {len(created)}"
+            )
             print("   Please update EXAMPLE_EXPERTS_COUNT in utils/constants.py")
 
         print(f"\n✅ Successfully created {len(created)} expert(s)!")

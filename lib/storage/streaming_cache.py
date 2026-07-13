@@ -54,7 +54,7 @@ class StreamingCache:
         temperature: float,
         model: str,
         system_prompt: str,
-        thinking_level: Optional[str]
+        thinking_level: Optional[str],
     ) -> threading.Thread:
         """Start a background thread that streams LLM response to file.
 
@@ -75,9 +75,8 @@ class StreamingCache:
         # Create and start daemon thread
         thread = threading.Thread(
             target=self._stream_to_file,
-            args=(client, messages, temperature, model,
-                  system_prompt, thinking_level),
-            daemon=True
+            args=(client, messages, temperature, model, system_prompt, thinking_level),
+            daemon=True,
         )
         thread.start()
 
@@ -93,7 +92,7 @@ class StreamingCache:
         temperature: float,
         model: str,
         system_prompt: str,
-        thinking_level: Optional[str]
+        thinking_level: Optional[str],
     ) -> None:
         """Execute API call in background thread and write chunks to file.
 
@@ -109,13 +108,13 @@ class StreamingCache:
                 self.cache_file.touch()
                 set_secure_permissions(self.cache_file)
 
-            with open(self.cache_file, 'a', encoding='utf-8') as f:
+            with open(self.cache_file, "a", encoding="utf-8") as f:
                 for chunk in client.chat_stream(
                     messages=messages,
                     temperature=temperature,
                     model=model,
                     system_prompt=system_prompt,
-                    thinking_level=thinking_level
+                    thinking_level=thinking_level,
                 ):
                     f.write(chunk)
                     f.flush()  # Ensure immediate write to disk
@@ -131,7 +130,7 @@ class StreamingCache:
                 set_secure_permissions(self.cache_file)
 
             # Write error to file for debugging
-            with open(self.cache_file, 'a', encoding='utf-8') as f:
+            with open(self.cache_file, "a", encoding="utf-8") as f:
                 f.write(f"\n[STREAMING ERROR: {str(e)}]")
 
             # Mark error in metadata
@@ -145,7 +144,7 @@ class StreamingCache:
         """
         try:
             if self.cache_file.exists():
-                return self.cache_file.read_text(encoding='utf-8')
+                return self.cache_file.read_text(encoding="utf-8")
         except Exception:
             pass
         return ""

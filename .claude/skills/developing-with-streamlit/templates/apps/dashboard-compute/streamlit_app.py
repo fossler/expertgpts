@@ -52,35 +52,40 @@ def generate_time_series(
 ) -> pd.DataFrame:
     """Generate synthetic time series data by category."""
     np.random.seed(hash(category_name) % 2**32)
-    
+
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
     records = []
-    
+
     for category in categories:
-        base = base_values.get(category, 1000) if base_values else np.random.randint(500, 5000)
+        base = (
+            base_values.get(category, 1000)
+            if base_values
+            else np.random.randint(500, 5000)
+        )
         growth = np.random.uniform(0.001, 0.005)
-        
+
         for i, dt in enumerate(dates):
             trend = base * (1 + growth) ** i
             if dt.dayofweek >= 5:
                 trend *= 0.4
-            
+
             daily = max(0, trend * np.random.uniform(0.8, 1.2))
-            
-            records.append({
-                "ds": dt,
-                category_name: category,
-                "daily_credits": daily,
-            })
-    
+
+            records.append(
+                {
+                    "ds": dt,
+                    category_name: category,
+                    "daily_credits": daily,
+                }
+            )
+
     df = pd.DataFrame(records)
-    
+
     # Add 7-day moving average
-    df["credits_7d_ma"] = (
-        df.groupby(category_name)["daily_credits"]
-        .transform(lambda x: x.rolling(7, min_periods=1).mean())
+    df["credits_7d_ma"] = df.groupby(category_name)["daily_credits"].transform(
+        lambda x: x.rolling(7, min_periods=1).mean()
     )
-    
+
     return df
 
 
@@ -90,7 +95,10 @@ def load_account_type_data() -> pd.DataFrame:
     end_date = date.today() - timedelta(days=1)
     start_date = end_date - timedelta(days=730)  # 2 years
     return generate_time_series(
-        ACCOUNT_TYPES, "account_type", start_date, end_date,
+        ACCOUNT_TYPES,
+        "account_type",
+        start_date,
+        end_date,
         base_values={"Paying": 8000, "Trial": 2000, "Internal": 1000},
     )
 
@@ -101,8 +109,16 @@ def load_instance_type_data() -> pd.DataFrame:
     end_date = date.today() - timedelta(days=1)
     start_date = end_date - timedelta(days=730)
     return generate_time_series(
-        INSTANCE_TYPES, "instance_type", start_date, end_date,
-        base_values={"Standard": 5000, "High Memory": 3000, "High CPU": 2000, "GPU": 1500},
+        INSTANCE_TYPES,
+        "instance_type",
+        start_date,
+        end_date,
+        base_values={
+            "Standard": 5000,
+            "High Memory": 3000,
+            "High CPU": 2000,
+            "GPU": 1500,
+        },
     )
 
 
@@ -112,8 +128,16 @@ def load_region_data() -> pd.DataFrame:
     end_date = date.today() - timedelta(days=1)
     start_date = end_date - timedelta(days=730)
     return generate_time_series(
-        REGIONS, "region", start_date, end_date,
-        base_values={"us-west-2": 4000, "us-east-1": 3500, "eu-west-1": 2500, "ap-northeast-1": 1500},
+        REGIONS,
+        "region",
+        start_date,
+        end_date,
+        base_values={
+            "us-west-2": 4000,
+            "us-east-1": 3500,
+            "eu-west-1": 2500,
+            "ap-northeast-1": 1500,
+        },
     )
 
 
@@ -158,7 +182,7 @@ def create_line_chart(
 ) -> alt.Chart:
     """Create a line chart."""
     y_format = ".1%" if show_percent else ",.0f"
-    
+
     return (
         alt.Chart(df)
         .mark_line()
@@ -168,7 +192,9 @@ def create_line_chart(
             color=alt.Color(f"{color_col}:N", legend=alt.Legend(orient="bottom")),
             tooltip=[
                 alt.Tooltip(f"{x_col}:T", title="Date", format="%Y-%m-%d"),
-                alt.Tooltip(f"{color_col}:N", title=color_col.replace("_", " ").title()),
+                alt.Tooltip(
+                    f"{color_col}:N", title=color_col.replace("_", " ").title()
+                ),
                 alt.Tooltip(f"{y_col}:Q", title="Credits", format=y_format),
             ],
         )
@@ -187,7 +213,7 @@ def create_bar_chart(
 ) -> alt.Chart:
     """Create a stacked bar chart."""
     y_format = ".1%" if show_percent else ",.0f"
-    
+
     return (
         alt.Chart(df)
         .mark_bar()
@@ -235,11 +261,15 @@ def render_page_header(title: str):
 def account_type_metric():
     """Account type metric card with independent state."""
     data = load_account_type_data()
-    
+
     with st.container(border=True):
-        with st.container(horizontal=True, horizontal_alignment="distribute", vertical_alignment="center"):
+        with st.container(
+            horizontal=True,
+            horizontal_alignment="distribute",
+            vertical_alignment="center",
+        ):
             st.markdown("**Credits by account type**")
-            
+
             view_mode = st.segmented_control(
                 "View",
                 options=[":material/show_chart:", ":material/table:"],
@@ -247,7 +277,7 @@ def account_type_metric():
                 key="acct_view",
                 label_visibility="collapsed",
             )
-            
+
             with st.popover("Filters", type="tertiary"):
                 selected_types = st.pills(
                     "Account types",
@@ -270,7 +300,9 @@ def account_type_metric():
                     key="acct_chart",
                 )
                 show_percent = st.toggle(
-                    "Show %", value=False, key="acct_pct",
+                    "Show %",
+                    value=False,
+                    key="acct_pct",
                     disabled="Line" in (chart_type or ""),
                 )
                 time_range = st.segmented_control(
@@ -279,26 +311,35 @@ def account_type_metric():
                     default="All",
                     key="acct_time",
                 )
-        
+
         # Filter data
         selected_types = selected_types or ["Paying"]
         line_options = line_options or ["7-day MA"]
         filtered = data[data["account_type"].isin(selected_types)]
         filtered = filter_by_time_range(filtered, "ds", time_range)
-        
+
         # Determine y column
         y_col = "credits_7d_ma" if "7-day MA" in line_options else "daily_credits"
-        
+
         if "table" in (view_mode or ""):
             st.dataframe(filtered, height=CHART_HEIGHT, hide_index=True)
         else:
             if "Bar" in (chart_type or ""):
                 st.altair_chart(
-                    create_bar_chart(filtered, "ds", y_col, "account_type", CHART_HEIGHT, show_percent),
+                    create_bar_chart(
+                        filtered,
+                        "ds",
+                        y_col,
+                        "account_type",
+                        CHART_HEIGHT,
+                        show_percent,
+                    ),
                 )
             else:
                 st.altair_chart(
-                    create_line_chart(filtered, "ds", y_col, "account_type", CHART_HEIGHT),
+                    create_line_chart(
+                        filtered, "ds", y_col, "account_type", CHART_HEIGHT
+                    ),
                 )
 
 
@@ -306,11 +347,15 @@ def account_type_metric():
 def instance_type_metric():
     """Instance type metric card with independent state."""
     data = load_instance_type_data()
-    
+
     with st.container(border=True):
-        with st.container(horizontal=True, horizontal_alignment="distribute", vertical_alignment="center"):
+        with st.container(
+            horizontal=True,
+            horizontal_alignment="distribute",
+            vertical_alignment="center",
+        ):
             st.markdown("**Credits by instance type**")
-            
+
             view_mode = st.segmented_control(
                 "View",
                 options=[":material/show_chart:", ":material/table:"],
@@ -318,7 +363,7 @@ def instance_type_metric():
                 key="inst_view",
                 label_visibility="collapsed",
             )
-            
+
             with st.popover("Filters", type="tertiary"):
                 selected_types = st.pills(
                     "Instance types",
@@ -341,7 +386,9 @@ def instance_type_metric():
                     key="inst_chart",
                 )
                 show_percent = st.toggle(
-                    "Show %", value=False, key="inst_pct",
+                    "Show %",
+                    value=False,
+                    key="inst_pct",
                     disabled="Line" in (chart_type or ""),
                 )
                 time_range = st.segmented_control(
@@ -350,25 +397,34 @@ def instance_type_metric():
                     default="All",
                     key="inst_time",
                 )
-        
+
         # Filter data
         selected_types = selected_types or INSTANCE_TYPES
         line_options = line_options or ["7-day MA"]
         filtered = data[data["instance_type"].isin(selected_types)]
         filtered = filter_by_time_range(filtered, "ds", time_range)
-        
+
         y_col = "credits_7d_ma" if "7-day MA" in line_options else "daily_credits"
-        
+
         if "table" in (view_mode or ""):
             st.dataframe(filtered, height=CHART_HEIGHT, hide_index=True)
         else:
             if "Bar" in (chart_type or ""):
                 st.altair_chart(
-                    create_bar_chart(filtered, "ds", y_col, "instance_type", CHART_HEIGHT, show_percent),
+                    create_bar_chart(
+                        filtered,
+                        "ds",
+                        y_col,
+                        "instance_type",
+                        CHART_HEIGHT,
+                        show_percent,
+                    ),
                 )
             else:
                 st.altair_chart(
-                    create_line_chart(filtered, "ds", y_col, "instance_type", CHART_HEIGHT),
+                    create_line_chart(
+                        filtered, "ds", y_col, "instance_type", CHART_HEIGHT
+                    ),
                 )
 
 
@@ -376,11 +432,15 @@ def instance_type_metric():
 def region_metric():
     """Region metric card with independent state."""
     data = load_region_data()
-    
+
     with st.container(border=True):
-        with st.container(horizontal=True, horizontal_alignment="distribute", vertical_alignment="center"):
+        with st.container(
+            horizontal=True,
+            horizontal_alignment="distribute",
+            vertical_alignment="center",
+        ):
             st.markdown("**Credits by region**")
-            
+
             view_mode = st.segmented_control(
                 "View",
                 options=[":material/show_chart:", ":material/table:"],
@@ -388,7 +448,7 @@ def region_metric():
                 key="region_view",
                 label_visibility="collapsed",
             )
-            
+
             with st.popover("Filters", type="tertiary"):
                 selected_regions = st.pills(
                     "Regions",
@@ -411,7 +471,9 @@ def region_metric():
                     key="region_chart",
                 )
                 show_percent = st.toggle(
-                    "Show %", value=False, key="region_pct",
+                    "Show %",
+                    value=False,
+                    key="region_pct",
                     disabled="Line" in (chart_type or ""),
                 )
                 time_range = st.segmented_control(
@@ -420,21 +482,23 @@ def region_metric():
                     default="All",
                     key="region_time",
                 )
-        
+
         # Filter data
         selected_regions = selected_regions or REGIONS
         line_options = line_options or ["7-day MA"]
         filtered = data[data["region"].isin(selected_regions)]
         filtered = filter_by_time_range(filtered, "ds", time_range)
-        
+
         y_col = "credits_7d_ma" if "7-day MA" in line_options else "daily_credits"
-        
+
         if "table" in (view_mode or ""):
             st.dataframe(filtered, height=CHART_HEIGHT, hide_index=True)
         else:
             if "Bar" in (chart_type or ""):
                 st.altair_chart(
-                    create_bar_chart(filtered, "ds", y_col, "region", CHART_HEIGHT, show_percent),
+                    create_bar_chart(
+                        filtered, "ds", y_col, "region", CHART_HEIGHT, show_percent
+                    ),
                 )
             else:
                 st.altair_chart(

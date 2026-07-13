@@ -11,7 +11,10 @@ import subprocess
 import streamlit as st
 from pathlib import Path
 from lib.shared.page_generator import PageGenerator
-from lib.shared.session_state import initialize_shared_session_state, handle_pending_navigation
+from lib.shared.session_state import (
+    initialize_shared_session_state,
+    handle_pending_navigation,
+)
 from lib.shared.constants import EXAMPLE_EXPERTS_COUNT
 from lib.i18n import i18n
 from lib.shared.helpers import translate_expert_name
@@ -28,7 +31,8 @@ def check_first_run():
     # Check if expert pages exist (excluding Home, Settings, and Help)
     if pages_dir.exists():
         expert_pages = [
-            f for f in pages_dir.glob("*.py")
+            f
+            for f in pages_dir.glob("*.py")
             if f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
             and not f.name.startswith("_")
         ]
@@ -57,7 +61,7 @@ def run_first_time_setup():
             cwd=safe_cwd,
             check=True,
             capture_output=True,
-            text=True
+            text=True,
         )
 
         st.success("✅ Setup complete! Refreshing...")
@@ -80,6 +84,7 @@ def initialize_session_state():
 
     # Initialize add chat dialog state (using shared helper)
     from lib.shared.session_state import ensure_dialog_state
+
     ensure_dialog_state("add_chat")
 
 
@@ -91,7 +96,7 @@ def main():
         page_title="ExpertGPTs",
         page_icon="🤖",
         layout="wide",
-        initial_sidebar_state="auto"
+        initial_sidebar_state="auto",
     )
 
     # Check for first run (before navigation)
@@ -104,23 +109,21 @@ def main():
 
     # Define the home page with icon
     home = st.Page(
-        "pages/1000_Home.py",
-        title=i18n.t("nav.home"),
-        icon=":material/home:"
+        "pages/1000_Home.py", title=i18n.t("nav.home"), icon=":material/home:"
     )
 
     # Define Settings page
     settings = st.Page(
         "pages/9998_Settings.py",
         title=i18n.t("nav.settings"),
-        icon=":material/settings:"
+        icon=":material/settings:",
     )
 
     # Define Help page
     help_page = st.Page(
         "pages/9999_Help.py",
         title=i18n.t("nav.help", default="Help"),
-        icon=":material/help:"
+        icon=":material/help:",
     )
 
     # Dynamically load all expert pages
@@ -144,11 +147,7 @@ def main():
         translated_name = translate_expert_name(expert_name)
 
         expert_pages.append(
-            st.Page(
-                str(page_path),
-                title=translated_name,
-                icon=":material/psychology:"
-            )
+            st.Page(str(page_path), title=translated_name, icon=":material/psychology:")
         )
 
     # Create page list: Home + Experts + Settings + Help

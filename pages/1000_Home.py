@@ -28,7 +28,11 @@ def render_expert_list():
         with cols[idx % 3]:
             with st.container():
                 st.markdown(f"### {expert['expert_name']}")
-                display_desc = expert['description'][:100] + "..." if len(expert['description']) > 100 else expert['description']
+                display_desc = (
+                    expert["description"][:100] + "..."
+                    if len(expert["description"]) > 100
+                    else expert["description"]
+                )
                 st.caption(display_desc)
                 st.caption(f"🆔 {expert['expert_id']}")
 
