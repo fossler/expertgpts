@@ -99,7 +99,7 @@ def render_doc_toc():
             if st.button(
                 label,
                 key=f"toc_{file_path.replace('/', '_')}",
-                use_container_width=True,
+                width="stretch",
             ):
                 st.session_state.selected_doc = file_path
                 st.rerun()
@@ -127,7 +127,7 @@ def render_doc_toc():
                 if st.button(
                     display_name,
                     key=f"doc_{rel_path.as_posix().replace('/', '_')}",
-                    use_container_width=True,
+                    width="stretch",
                 ):
                     st.session_state.selected_doc = str(rel_path)
                     st.rerun()

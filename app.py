@@ -96,7 +96,7 @@ def main():
         page_title="ExpertGPTs",
         page_icon="🤖",
         layout="wide",
-        initial_sidebar_state="auto",
+        initial_sidebar_state=320,
     )
 
     # Check for first run (before navigation)

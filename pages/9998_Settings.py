@@ -586,7 +586,7 @@ def render_general_settings_section():
             if st.button(
                 f"{info['flag']} {info['native_name']}",
                 key=f"lang_{code}",
-                use_container_width=True,
+                width="stretch",
                 type="secondary" if code != current_lang else "primary",
             ):
                 i18n.set_language(code)
@@ -600,7 +600,7 @@ def render_general_settings_section():
             if st.button(
                 f"{info['flag']} {info['native_name']}",
                 key=f"lang_{code}",
-                use_container_width=True,
+                width="stretch",
                 type="secondary" if code != current_lang else "primary",
             ):
                 i18n.set_language(code)
@@ -614,7 +614,7 @@ def render_general_settings_section():
             if st.button(
                 f"{info['flag']} {info['native_name']}",
                 key=f"lang_{code}",
-                use_container_width=True,
+                width="stretch",
                 type="secondary" if code != current_lang else "primary",
             ):
                 i18n.set_language(code)
