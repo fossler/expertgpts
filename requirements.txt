@@ -1,7 +1,7 @@
 # ExpertGPTs Requirements
 
 # Core Framework
-streamlit>=1.52.0
+streamlit~=1.59.0
 
 # DeepSeek API (uses OpenAI-compatible interface)
 openai>=2.45.0
