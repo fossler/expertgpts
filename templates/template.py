@@ -564,23 +564,21 @@ def display_context_usage(config: dict, messages_key: str):
         st.sidebar.caption(f"ℹ️ {stats['error']}")
         return
 
-    # Display context usage in sidebar
-    st.sidebar.markdown(f"### 📊 {i18n.t('sidebar.context_usage')}")
-
-    # Display main stats
-    max_tokens_formatted = f"{stats['max_tokens']:,}"
-    st.sidebar.markdown(
-        f"{stats['color']} **{stats['usage_percent']:.1f}%** "
-        f"{i18n.t('sidebar.of_tokens', max=max_tokens_formatted)}"
-    )
+    # Display context usage in sidebar as a metric card. The severity emoji
+    # (stats["color"]) stays in the label because st.metric cannot color the
+    # value itself; the token count rides along as a neutral delta sub-line.
     total_tokens_formatted = f"{stats['total_tokens']:,}"
     max_tokens_formatted = f"{stats['max_tokens']:,}"
-    st.sidebar.caption(
-        i18n.t(
+    st.sidebar.metric(
+        label=f"{stats['color']} {i18n.t('sidebar.context_usage')}",
+        value=f"{stats['usage_percent']:.1f}%",
+        delta=i18n.t(
             "sidebar.total_tokens",
             total=total_tokens_formatted,
             max=max_tokens_formatted,
-        )
+        ),
+        delta_color="off",
+        border=True,
     )
 
     # Show breakdown
