@@ -97,10 +97,7 @@ def load_chat_history(expert_id: str) -> List[Dict]:
     validated_messages = []
     for msg in messages:
         if isinstance(msg, dict) and "role" in msg and "content" in msg:
-            validated_messages.append({
-                "role": msg["role"],
-                "content": msg["content"]
-            })
+            validated_messages.append({"role": msg["role"], "content": msg["content"]})
 
     return validated_messages
 
@@ -131,7 +128,7 @@ def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
                 timestamped_msg = {
                     "role": msg["role"],
                     "content": msg["content"],
-                    "timestamp": msg.get("timestamp", datetime.now().isoformat())
+                    "timestamp": msg.get("timestamp", datetime.now().isoformat()),
                 }
                 timestamped_messages.append(timestamped_msg)
 
@@ -140,7 +137,7 @@ def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
             "expert_id": expert_id,
             "created_at": datetime.now().isoformat(),
             "last_updated": datetime.now().isoformat(),
-            "messages": timestamped_messages
+            "messages": timestamped_messages,
         }
 
         # If file exists, preserve created_at timestamp (using shared read_json)
@@ -151,9 +148,7 @@ def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
 
         # Truncate if needed (checks size internally)
         file_data["messages"] = truncate_messages_by_size(
-            file_data["messages"],
-            expert_id,
-            DEFAULT_MAX_FILE_SIZE_MB
+            file_data["messages"], expert_id, DEFAULT_MAX_FILE_SIZE_MB
         )
 
         # Write using shared function (handles permissions and encoding)
@@ -165,9 +160,7 @@ def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
 
 
 def truncate_messages_by_size(
-    messages: List[Dict],
-    expert_id: str,
-    max_size_mb: int
+    messages: List[Dict], expert_id: str, max_size_mb: int
 ) -> List[Dict]:
     """Truncate messages list to fit within size limit.
 
@@ -194,9 +187,9 @@ def truncate_messages_by_size(
         "expert_id": expert_id,
         "created_at": datetime.now().isoformat(),
         "last_updated": datetime.now().isoformat(),
-        "messages": []
+        "messages": [],
     }
-    base_size = len(json.dumps(base_data, indent=2, ensure_ascii=False).encode('utf-8'))
+    base_size = len(json.dumps(base_data, indent=2, ensure_ascii=False).encode("utf-8"))
     base_size_mb = base_size / (1024 * 1024)
 
     # If even base structure exceeds limit, return minimum messages
@@ -208,8 +201,7 @@ def truncate_messages_by_size(
 
     # Pre-calculate average message size once (O(n))
     total_msg_size = sum(
-        len(json.dumps(msg, ensure_ascii=False).encode('utf-8'))
-        for msg in messages
+        len(json.dumps(msg, ensure_ascii=False).encode("utf-8")) for msg in messages
     )
     avg_msg_size = total_msg_size / len(messages)
 

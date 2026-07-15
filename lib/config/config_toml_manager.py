@@ -7,7 +7,13 @@ This module provides functions to read and write theme settings to the
 import streamlit as st
 from pathlib import Path
 from typing import Optional
-from lib.shared.file_ops import ensure_directory_exists, get_project_root, set_secure_permissions, get_streamlit_path, ensure_streamlit_file
+from lib.shared.file_ops import (
+    ensure_directory_exists,
+    get_project_root,
+    set_secure_permissions,
+    get_streamlit_path,
+    ensure_streamlit_file,
+)
 
 
 def get_config_path() -> Path:
@@ -67,7 +73,7 @@ def get_theme_settings() -> dict:
     in_theme_section = False
     base_path = None
 
-    for line in content.split('\n'):
+    for line in content.split("\n"):
         line = line.strip()
 
         # Check if we're in the [theme] section
@@ -128,7 +134,7 @@ def load_theme_file(theme_file_path: Path) -> dict:
     }
 
     in_theme_section = False
-    for line in content.split('\n'):
+    for line in content.split("\n"):
         line = line.strip()
 
         # Check if we're in the [theme] section
@@ -156,7 +162,7 @@ def update_custom_theme(
     primaryColor: str,
     backgroundColor: str,
     secondaryBackgroundColor: str,
-    textColor: str
+    textColor: str,
 ) -> None:
     """Update the custom.toml theme file with new colors.
 
@@ -207,14 +213,19 @@ def save_theme_settings(base: str) -> None:
     content = config_path.read_text()
 
     # Parse existing settings (preserve non-theme settings)
-    lines = content.split('\n')
+    lines = content.split("\n")
     new_lines = []
     in_theme_section = False
     theme_found = False
     base_added = False
 
     # Theme color keys to remove when using base parameter
-    theme_color_keys = {"primaryColor", "backgroundColor", "secondaryBackgroundColor", "textColor"}
+    theme_color_keys = {
+        "primaryColor",
+        "backgroundColor",
+        "secondaryBackgroundColor",
+        "textColor",
+    }
 
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -263,7 +274,7 @@ def save_theme_settings(base: str) -> None:
             new_lines.insert(theme_section_index + 1, f'base = "{base}"')
 
     # Write back to file
-    new_content = '\n'.join(new_lines)
+    new_content = "\n".join(new_lines)
     config_path.write_text(new_content)
 
     # Ensure secure permissions after writing
@@ -289,7 +300,7 @@ def get_current_theme_name() -> Optional[str]:
     # Parse config.toml to find base parameter
     in_theme_section = False
 
-    for line in content.split('\n'):
+    for line in content.split("\n"):
         line = line.strip()
 
         # Check if we're in the [theme] section
@@ -363,11 +374,11 @@ def load_available_themes() -> dict:
             "background": "#FFFFFF",
             "secondary": "#F3F4F6",
             "text": "#1F2937",
-            "icon": "🎨"
+            "icon": "🎨",
         }
 
         current_section = None
-        for line in content.split('\n'):
+        for line in content.split("\n"):
             line = line.strip()
 
             # Track current section

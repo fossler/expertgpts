@@ -31,11 +31,26 @@ st.set_page_config(
 # =============================================================================
 
 COMPANY_NAMES = [
-    "Acme Corp", "TechFlow Inc", "DataDriven Co", "CloudFirst Ltd", 
-    "InnovateTech", "ScaleUp Systems", "PrimeData Inc", "FutureStack",
-    "ByteWise Corp", "StreamLine Co", "Quantum Labs", "NexGen Solutions",
-    "AlphaMetrics", "BetaAnalytics", "GammaInsights", "DeltaData",
-    "OmegaTech", "SigmaSoft", "ThetaCloud", "ZetaDigital",
+    "Acme Corp",
+    "TechFlow Inc",
+    "DataDriven Co",
+    "CloudFirst Ltd",
+    "InnovateTech",
+    "ScaleUp Systems",
+    "PrimeData Inc",
+    "FutureStack",
+    "ByteWise Corp",
+    "StreamLine Co",
+    "Quantum Labs",
+    "NexGen Solutions",
+    "AlphaMetrics",
+    "BetaAnalytics",
+    "GammaInsights",
+    "DeltaData",
+    "OmegaTech",
+    "SigmaSoft",
+    "ThetaCloud",
+    "ZetaDigital",
 ]
 
 ACCOUNT_TYPES = ["Enterprise", "Growth", "Startup", "Trial", "Internal"]
@@ -46,47 +61,49 @@ SEGMENTS = ["Technology", "Finance", "Healthcare", "Retail", "Manufacturing"]
 @st.cache_data(ttl=3600)
 def generate_company_data(days: int = 90) -> pd.DataFrame:
     """Generate synthetic company usage data.
-    
+
     Replace this function with your actual data source.
     """
     np.random.seed(42)
-    
+
     end_date = date.today() - timedelta(days=1)
     start_date = end_date - timedelta(days=days)
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
-    
+
     records = []
-    
+
     for company in COMPANY_NAMES:
         # Assign static attributes
         account_type = np.random.choice(ACCOUNT_TYPES, p=[0.3, 0.25, 0.2, 0.15, 0.1])
         region = np.random.choice(REGIONS)
         segment = np.random.choice(SEGMENTS)
-        
+
         # Generate usage pattern
         base_usage = np.random.randint(100, 10000)
         growth = np.random.uniform(-0.005, 0.01)  # Some companies shrink
-        
+
         for i, dt in enumerate(dates):
             # Base trend
             trend = base_usage * (1 + growth) ** i
-            
+
             # Weekly seasonality
             if dt.dayofweek >= 5:
                 trend *= 0.3
-            
+
             # Random noise
             daily_credits = max(0, trend * np.random.uniform(0.7, 1.3))
-            
-            records.append({
-                "company_name": company,
-                "date": dt,
-                "daily_credits": daily_credits,
-                "account_type": account_type,
-                "region": region,
-                "segment": segment,
-            })
-    
+
+            records.append(
+                {
+                    "company_name": company,
+                    "date": dt,
+                    "daily_credits": daily_credits,
+                    "account_type": account_type,
+                    "region": region,
+                    "segment": segment,
+                }
+            )
+
     return pd.DataFrame(records)
 
 
@@ -104,31 +121,35 @@ def aggregate_companies(
 ) -> pd.DataFrame:
     """Filter and aggregate company data."""
     result = df.copy()
-    
+
     # Filter by time window
     if days:
         cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
         result = result[result["date"] >= cutoff]
-    
+
     # Filter by account type
     if account_types:
         result = result[result["account_type"].isin(account_types)]
-    
+
     if result.empty:
         return pd.DataFrame()
-    
+
     # Aggregate to company level
-    agg = result.groupby("company_name").agg(
-        total_credits=("daily_credits", "sum"),
-        active_days=("date", "nunique"),
-        account_type=("account_type", "first"),
-        region=("region", "first"),
-        segment=("segment", "first"),
-    ).reset_index()
-    
+    agg = (
+        result.groupby("company_name")
+        .agg(
+            total_credits=("daily_credits", "sum"),
+            active_days=("date", "nunique"),
+            account_type=("account_type", "first"),
+            region=("region", "first"),
+            segment=("segment", "first"),
+        )
+        .reset_index()
+    )
+
     # Calculate daily average
     agg["daily_avg"] = agg["total_credits"] / agg["active_days"]
-    
+
     # Build sparkline data (list of daily values)
     sparklines = (
         result.groupby("company_name")
@@ -137,7 +158,7 @@ def aggregate_companies(
     )
     sparklines.columns = ["company_name", "usage_trend"]
     agg = agg.merge(sparklines, on="company_name")
-    
+
     # Calculate growth score (second half vs first half)
     def calc_growth(trend):
         if not trend or len(trend) < 2:
@@ -146,9 +167,9 @@ def aggregate_companies(
         first_half = sum(trend[:mid]) if mid > 0 else 0
         second_half = sum(trend[mid:])
         return second_half - first_half
-    
+
     agg["growth_score"] = agg["usage_trend"].apply(calc_growth)
-    
+
     # Sort
     if sort_by == "growth_asc":
         agg = agg.sort_values("growth_score", ascending=True)
@@ -156,31 +177,33 @@ def aggregate_companies(
         agg = agg.sort_values("growth_score", ascending=False)
     else:
         agg = agg.sort_values("total_credits", ascending=False)
-    
+
     return agg
 
 
 def render_company_dialog(company_name: str, company_row: pd.Series, df: pd.DataFrame):
     """Render company details inside a dialog."""
     company_data = df[df["company_name"] == company_name].sort_values("date")
-    
+
     if company_data.empty:
         st.warning("No data available for this company.")
         return
-    
+
     # Company info badges - extract from list format back to single value
-    account_type = company_row["account_type"][0] if company_row["account_type"] else "Unknown"
+    account_type = (
+        company_row["account_type"][0] if company_row["account_type"] else "Unknown"
+    )
     region = company_row["region"][0] if company_row["region"] else "Unknown"
     segment = company_row["segment"][0] if company_row["segment"] else "Unknown"
     total_credits = company_row["total_credits"]
-    
+
     st.markdown(
         f":blue-badge[{account_type}] "
         f":violet-badge[{region}] "
         f":orange-badge[{segment}] "
         f":green-badge[{total_credits:,.0f} credits]"
     )
-    
+
     # Summary metrics
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -190,15 +213,15 @@ def render_company_dialog(company_name: str, company_row: pd.Series, df: pd.Data
     with col3:
         growth = company_row["growth_score"]
         st.metric("Growth Score", f"{growth:+,.0f}")
-    
+
     # Charts
     col1, col2 = st.columns(2)
-    
+
     with col1:
         with st.container(border=True):
             st.markdown("**Daily usage**")
             st.line_chart(company_data, x="date", y="daily_credits", height=250)
-    
+
     with col2:
         with st.container(border=True):
             st.markdown("**Cumulative usage**")
@@ -220,7 +243,7 @@ st.caption("Track company adoption - usage, growth trends, and account details."
 # Filters
 with st.container(border=True):
     st.markdown("**Filters**")
-    
+
     # Company selection mode
     sort_mode = st.segmented_control(
         "Sort by",
@@ -232,7 +255,7 @@ with st.container(border=True):
         ],
         default="All companies",
     )
-    
+
     # Time window
     timeframe_options = {
         "All time": None,
@@ -245,7 +268,7 @@ with st.container(border=True):
         default="Last 28 days",
     )
     days_filter = timeframe_options.get(timeframe)
-    
+
     # Account types
     account_types = st.pills(
         "Account types",
@@ -288,7 +311,7 @@ for col in ["account_type", "region", "segment"]:
 with st.container(border=True):
     timeframe_text = timeframe.lower() if timeframe != "All time" else "all time"
     st.markdown(f"**Companies — {timeframe_text}**")
-    
+
     # Selection dataframe with cell-click support
     selection = st.dataframe(
         leaderboard,
@@ -336,8 +359,14 @@ with st.container(border=True):
             ),
         },
         column_order=[
-            "company_name", "account_type", "total_credits", "growth_score",
-            "usage_trend", "daily_avg", "region", "segment",
+            "company_name",
+            "account_type",
+            "total_credits",
+            "growth_score",
+            "usage_trend",
+            "daily_avg",
+            "region",
+            "segment",
         ],
         hide_index=True,
         on_select="rerun",

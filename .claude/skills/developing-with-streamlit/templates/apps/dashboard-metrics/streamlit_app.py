@@ -46,36 +46,38 @@ def generate_metric_data(
     noise_factor: float = 0.1,
 ) -> pd.DataFrame:
     """Generate synthetic time series data for a metric.
-    
+
     Replace this function with your actual data source, e.g.:
     - Snowflake query
     - API call
     - Database query
     """
     np.random.seed(hash(metric_name) % 2**32)
-    
+
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
     n_days = len(dates)
-    
+
     # Base trend with growth
     trend = base_value * (1 + growth_rate) ** np.arange(n_days)
-    
+
     # Add weekly seasonality (lower on weekends)
     day_of_week = dates.dayofweek
     seasonality = np.where(day_of_week >= 5, 0.7, 1.0)
     trend = trend * seasonality
-    
+
     # Add noise
     noise = np.random.normal(1, noise_factor, n_days)
     values = trend * noise
-    
+
     # Calculate rolling averages
-    df = pd.DataFrame({
-        "ds": dates,
-        "daily_value": values,
-    })
+    df = pd.DataFrame(
+        {
+            "ds": dates,
+            "daily_value": values,
+        }
+    )
     df["value_7d_ma"] = df["daily_value"].rolling(7, min_periods=1).mean()
-    
+
     return df
 
 
@@ -84,12 +86,20 @@ def load_all_metrics() -> dict[str, pd.DataFrame]:
     """Load all metrics data. Replace with your data loading logic."""
     end_date = date.today() - timedelta(days=1)
     start_date = end_date - timedelta(days=730)  # 2 years of data
-    
+
     return {
-        "users": generate_metric_data("users", start_date, end_date, base_value=5000, growth_rate=0.002),
-        "sessions": generate_metric_data("sessions", start_date, end_date, base_value=15000, growth_rate=0.003),
-        "revenue": generate_metric_data("revenue", start_date, end_date, base_value=50000, growth_rate=0.001),
-        "conversions": generate_metric_data("conversions", start_date, end_date, base_value=500, growth_rate=0.0015),
+        "users": generate_metric_data(
+            "users", start_date, end_date, base_value=5000, growth_rate=0.002
+        ),
+        "sessions": generate_metric_data(
+            "sessions", start_date, end_date, base_value=15000, growth_rate=0.003
+        ),
+        "revenue": generate_metric_data(
+            "revenue", start_date, end_date, base_value=50000, growth_rate=0.001
+        ),
+        "conversions": generate_metric_data(
+            "conversions", start_date, end_date, base_value=500, growth_rate=0.0015
+        ),
     }
 
 
@@ -139,11 +149,11 @@ def render_line_chart(
         var_name="series",
         value_name="value",
     )
-    
+
     # Map to labels
     label_map = dict(zip(y_cols, labels))
     melted["series"] = melted["series"].map(label_map)
-    
+
     chart = (
         alt.Chart(melted)
         .mark_line()
@@ -164,7 +174,7 @@ def render_line_chart(
         )
         .properties(height=height)
     )
-    
+
     return chart
 
 
@@ -327,7 +337,7 @@ def metric_card(
             vertical_alignment="center",
         ):
             st.markdown(f"**{title}**")
-            
+
             view_mode = st.segmented_control(
                 "View",
                 options=[":material/show_chart:", ":material/table:"],
@@ -335,7 +345,7 @@ def metric_card(
                 key=f"{key_prefix}_view",
                 label_visibility="collapsed",
             )
-            
+
             with st.popover("Filters", type="tertiary"):
                 line_options = st.pills(
                     "Lines",
@@ -350,11 +360,11 @@ def metric_card(
                     default="All",
                     key=f"{key_prefix}_time",
                 )
-        
+
         # Apply filters
         line_options = line_options or ["7-day MA"]
         filtered_df = filter_by_time_range(df, "ds", time_range)
-        
+
         # Determine which columns to show
         y_cols = []
         labels = []
@@ -364,7 +374,7 @@ def metric_card(
         if "7-day MA" in line_options:
             y_cols.append("value_7d_ma")
             labels.append("7-day MA")
-        
+
         # Render view
         if "table" in (view_mode or ""):
             st.dataframe(
@@ -423,4 +433,6 @@ with row2[0]:
     metric_card("Revenue", metrics_data["revenue"], "revenue", chart_type="bar")
 
 with row2[1]:
-    metric_card("Conversions", metrics_data["conversions"], "conversions", chart_type="point")
+    metric_card(
+        "Conversions", metrics_data["conversions"], "conversions", chart_type="point"
+    )

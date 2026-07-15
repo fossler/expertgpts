@@ -17,7 +17,7 @@ def read_markdown_file(file_path: Path) -> str:
         File content as string
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
     except Exception as e:
         return f"# Error\n\nCould not read file: {e}"
@@ -40,7 +40,7 @@ def get_docs_structure() -> dict:
         "Reference": [],
         "API": [],
         "Internationalization": [],
-        "Other": []
+        "Other": [],
     }
 
     # Map directory names to structure keys
@@ -52,7 +52,7 @@ def get_docs_structure() -> dict:
         "development": "Development",
         "reference": "Reference",
         "api": "API",
-        "internationalization": "Internationalization"
+        "internationalization": "Internationalization",
     }
 
     # Get all markdown files
@@ -81,7 +81,7 @@ def render_doc_toc():
 
     # Quick links to main docs
     st.markdown(f"**{i18n.t('help.quick_links', default='Quick Links')}**")
-    
+
     st.markdown("---")
 
     quick_links = {
@@ -96,7 +96,11 @@ def render_doc_toc():
     for file_path, label in quick_links.items():
         full_path = docs_dir / file_path
         if full_path.exists():
-            if st.button(label, key=f"toc_{file_path.replace('/', '_')}", use_container_width=True):
+            if st.button(
+                label,
+                key=f"toc_{file_path.replace('/', '_')}",
+                width="stretch",
+            ):
                 st.session_state.selected_doc = file_path
                 st.rerun()
 
@@ -115,12 +119,16 @@ def render_doc_toc():
         with st.expander(f"**{category}**", expanded=False):
             for rel_path, file_path in sorted(files):
                 # Get filename without extension for display
-                display_name = rel_path.stem.replace('_', ' ').title()
+                display_name = rel_path.stem.replace("_", " ").title()
                 # Add parent directory if needed
-                if rel_path.parent != Path('.'):
+                if rel_path.parent != Path("."):
                     display_name = f"{rel_path.parent.name} / {display_name}"
 
-                if st.button(display_name, key=f"doc_{rel_path.as_posix().replace('/', '_')}", use_container_width=True):
+                if st.button(
+                    display_name,
+                    key=f"doc_{rel_path.as_posix().replace('/', '_')}",
+                    width="stretch",
+                ):
                     st.session_state.selected_doc = str(rel_path)
                     st.rerun()
 
@@ -162,14 +170,17 @@ def render_markdown_content(content: str, rel_path: str):
     """
     # Convert relative markdown links to work in Streamlit
     # This handles links like [](../getting-started/installation.md)
-    lines = content.split('\n')
+    lines = content.split("\n")
     processed_lines = []
 
     for line in lines:
         # Skip lines that are just navigation
         line_lower = line.lower().strip()
-        if (line_lower.startswith('back to:') or
-            'documentation home' in line_lower and '|' in line_lower):
+        if (
+            line_lower.startswith("back to:")
+            or "documentation home" in line_lower
+            and "|" in line_lower
+        ):
             continue
 
         # Handle relative markdown links
@@ -182,18 +193,18 @@ def render_markdown_content(content: str, rel_path: str):
             link_target = match.group(2)
 
             # Keep external links and anchors
-            if link_target.startswith('http') or link_target.startswith('#'):
+            if link_target.startswith("http") or link_target.startswith("#"):
                 return match.group(0)
 
             # For internal links, just return the text
             return text
 
         # Replace markdown links
-        line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', replace_relative_link, line)
+        line = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace_relative_link, line)
         processed_lines.append(line)
 
     # Join and display
-    processed_content = '\n'.join(processed_lines)
+    processed_content = "\n".join(processed_lines)
 
     # Display the markdown
     st.markdown(processed_content)
@@ -207,11 +218,7 @@ def main():
     from lib.i18n import i18n
 
     # Page config
-    st.set_page_config(
-        page_title="Help",
-        page_icon=":material/help:",
-        layout="wide"
-    )
+    st.set_page_config(page_title="Help", page_icon=":material/help:", layout="wide")
 
     # Initialize selected doc if not set
     if "selected_doc" not in st.session_state:
@@ -246,17 +253,24 @@ def main():
             # Render with link handling
             render_markdown_content(content, selected_doc)
         else:
-            st.error(f"❌ {i18n.t('help.doc_not_found', default='Documentation not found')}")
+            st.error(
+                f"❌ {i18n.t('help.doc_not_found', default='Documentation not found')}"
+            )
             st.markdown(f"**File**: `{selected_doc}`")
 
             # Provide option to go back to home
-            if st.button(f"📖 {i18n.t('help.go_home', default='Go to Documentation Home')}", key="go_home"):
+            if st.button(
+                f"📖 {i18n.t('help.go_home', default='Go to Documentation Home')}",
+                key="go_home",
+            ):
                 st.session_state.selected_doc = "README.md"
                 st.rerun()
 
     # Footer
     st.divider()
-    st.caption(f"💡 {i18n.t('help.tip', default='Tip: Use the sidebar on the left to browse documentation')}")
+    st.caption(
+        f"💡 {i18n.t('help.tip', default='Tip: Use the sidebar on the left to browse documentation')}"
+    )
 
     # Git branch footer in sidebar (at very bottom)
     render_git_branch_footer()

@@ -26,8 +26,8 @@ LLM_PROVIDERS = {
                 "reasoning_efforts": ["none", "high", "max"],
                 "reasoning_effort_default": "high",
                 "thinking_param": {"reasoning": {"effort": "high"}},
-            }
-        }
+            },
+        },
     },
     "openai": {
         "name": "OpenAI",
@@ -56,8 +56,8 @@ LLM_PROVIDERS = {
                 "reasoning_efforts": ["none", "low", "medium", "high"],
                 "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
-            }
-        }
+            },
+        },
     },
     "zai": {
         "name": "Z.AI",
@@ -82,8 +82,8 @@ LLM_PROVIDERS = {
                 "display_name": "GLM-4.7-Flash (free)",
                 "max_tokens": 200000,
                 "thinking_param": {"thinking": {"type": "disabled"}},
-            }
-        }
+            },
+        },
     },
     "kimi": {
         "name": "KIMI",
@@ -97,28 +97,28 @@ LLM_PROVIDERS = {
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
             }
-        }
-    }
+        },
+    },
 }
 
 # Provider Platform Links (for API usage monitoring and chat interfaces)
 PROVIDER_LINKS = {
     "deepseek": {
         "chat": "https://chat.deepseek.com/",
-        "platform": "https://platform.deepseek.com/usage"
+        "platform": "https://platform.deepseek.com/usage",
     },
     "openai": {
         "chat": "https://chatgpt.com/",
-        "platform": "https://platform.openai.com/usage"
+        "platform": "https://platform.openai.com/usage",
     },
     "zai": {
         "chat": "https://chat.z.ai/",
-        "platform": "https://z.ai/manage-apikey/subscription"
+        "platform": "https://z.ai/manage-apikey/subscription",
     },
     "kimi": {
         "chat": "https://www.kimi.com/",
-        "platform": "https://platform.kimi.ai/console"
-    }
+        "platform": "https://platform.kimi.ai/console",
+    },
 }
 
 # Performance Optimization: Pre-computed lookup tables for O(1) access
@@ -134,16 +134,22 @@ MODEL_LOOKUP = {
 }
 
 # Provider display names: PROVIDER_NAMES[provider] -> display_name
-PROVIDER_NAMES = {provider: config["name"] for provider, config in LLM_PROVIDERS.items()}
+PROVIDER_NAMES = {
+    provider: config["name"] for provider, config in LLM_PROVIDERS.items()
+}
 
 # Default models: DEFAULT_MODELS[provider] -> default_model_id
-DEFAULT_MODELS = {provider: config["default_model"] for provider, config in LLM_PROVIDERS.items()}
+DEFAULT_MODELS = {
+    provider: config["default_model"] for provider, config in LLM_PROVIDERS.items()
+}
 
 # Base URLs: BASE_URLS[provider] -> base_url
 BASE_URLS = {provider: config["base_url"] for provider, config in LLM_PROVIDERS.items()}
 
 # API key environment variables: API_KEY_ENVS[provider] -> env_var_name
-API_KEY_ENVS = {provider: config["api_key_env"] for provider, config in LLM_PROVIDERS.items()}
+API_KEY_ENVS = {
+    provider: config["api_key_env"] for provider, config in LLM_PROVIDERS.items()
+}
 
 # Max tokens: MAX_TOKENS[(provider, model)] -> max_tokens
 MAX_TOKENS = {
@@ -169,12 +175,7 @@ CONTEXT_USAGE_WARNING_THRESHOLD = 75
 CONTEXT_USAGE_ALERT_THRESHOLD = 90
 
 # Context Usage Colors (emojis for UI display)
-CONTEXT_USAGE_COLORS = {
-    "safe": "🟢",
-    "warning": "🟡",
-    "alert": "🟠",
-    "critical": "🔴"
-}
+CONTEXT_USAGE_COLORS = {"safe": "🟢", "warning": "🟡", "alert": "🟠", "critical": "🔴"}
 
 # Cache TTLs (seconds)
 CONFIG_CACHE_TTL = 300
@@ -248,6 +249,7 @@ def get_expert_behavior_docs():
         str: Markdown-formatted documentation about expert behavior field
     """
     from lib.i18n.i18n import i18n
+
     return i18n.t("dialogs.add_chat.expert_behavior_docs")
 
 
@@ -258,6 +260,7 @@ def get_expert_behavior_docs_edit():
         str: Markdown-formatted documentation about editing expert behavior
     """
     from lib.i18n.i18n import i18n
+
     return i18n.t("dialogs.edit_expert.expert_behavior_docs_edit")
 
 
@@ -297,6 +300,7 @@ You are {expert_name}, a domain-specific AI Assistant.
 
 # LLM Provider Helper Functions
 
+
 def get_provider_config(provider: str) -> dict:
     """Get configuration for a specific LLM provider.
 
@@ -310,7 +314,9 @@ def get_provider_config(provider: str) -> dict:
         ValueError: If provider is not found
     """
     if provider not in LLM_PROVIDERS:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(LLM_PROVIDERS.keys())}")
+        raise ValueError(
+            f"Unknown provider: {provider}. Available: {list(LLM_PROVIDERS.keys())}"
+        )
     return LLM_PROVIDERS[provider]
 
 
@@ -329,10 +335,14 @@ def get_model_config(provider: str, model: str) -> dict:
     """
     # Optimized: Use pre-computed lookup table
     if provider not in MODEL_LOOKUP:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(MODEL_LOOKUP.keys())}")
+        raise ValueError(
+            f"Unknown provider: {provider}. Available: {list(MODEL_LOOKUP.keys())}"
+        )
     if model not in MODEL_LOOKUP[provider]:
         available = list(MODEL_LOOKUP[provider].keys())
-        raise ValueError(f"Unknown model: {model} for provider {provider}. Available: {available}")
+        raise ValueError(
+            f"Unknown model: {model} for provider {provider}. Available: {available}"
+        )
     return MODEL_LOOKUP[provider][model]
 
 
@@ -370,7 +380,9 @@ def get_provider_display_name(provider: str) -> str:
     """
     # Optimized: Direct dict lookup
     if provider not in PROVIDER_NAMES:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(PROVIDER_NAMES.keys())}")
+        raise ValueError(
+            f"Unknown provider: {provider}. Available: {list(PROVIDER_NAMES.keys())}"
+        )
     return PROVIDER_NAMES[provider]
 
 
@@ -406,7 +418,9 @@ def get_provider_base_url(provider: str) -> str:
     """
     # Optimized: Direct dict lookup
     if provider not in BASE_URLS:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(BASE_URLS.keys())}")
+        raise ValueError(
+            f"Unknown provider: {provider}. Available: {list(BASE_URLS.keys())}"
+        )
     return BASE_URLS[provider]
 
 
@@ -424,7 +438,9 @@ def get_provider_api_key_env(provider: str) -> str:
     """
     # Optimized: Direct dict lookup
     if provider not in API_KEY_ENVS:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(API_KEY_ENVS.keys())}")
+        raise ValueError(
+            f"Unknown provider: {provider}. Available: {list(API_KEY_ENVS.keys())}"
+        )
     return API_KEY_ENVS[provider]
 
 
@@ -442,7 +458,9 @@ def get_default_model_for_provider(provider: str) -> str:
     """
     # Optimized: Direct dict lookup
     if provider not in DEFAULT_MODELS:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(DEFAULT_MODELS.keys())}")
+        raise ValueError(
+            f"Unknown provider: {provider}. Available: {list(DEFAULT_MODELS.keys())}"
+        )
     return DEFAULT_MODELS[provider]
 
 
@@ -466,7 +484,7 @@ PROVIDER_AVATARS = {
     "deepseek": "icons/deepseek_icon_blue.png",
     "openai": "icons/OpenAI-black-monoblossom.png",
     "zai": "icons/zai_logo.svg",
-    "kimi": "icons/kimi-logo.png"
+    "kimi": "icons/kimi-logo.png",
 }
 
 

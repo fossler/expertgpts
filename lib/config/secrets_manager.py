@@ -6,7 +6,11 @@ way to manage secrets in production.
 """
 
 from pathlib import Path
-from lib.shared.file_ops import set_secure_permissions, get_streamlit_path, ensure_streamlit_file
+from lib.shared.file_ops import (
+    set_secure_permissions,
+    get_streamlit_path,
+    ensure_streamlit_file,
+)
 
 
 def get_secrets_path() -> Path:
@@ -28,6 +32,7 @@ def ensure_secrets_file_exists() -> Path:
         Path: Path to secrets.toml file
     """
     return ensure_streamlit_file("secrets.toml", default_content="")
+
 
 def save_provider_api_key(provider: str, api_key: str) -> None:
     """Save API key for a specific provider to secrets.toml file.
@@ -51,10 +56,10 @@ def save_provider_api_key(provider: str, api_key: str) -> None:
     # Parse existing content to preserve other secrets
     existing_lines = {}
     if existing_content.strip():
-        for line in existing_content.split('\n'):
+        for line in existing_content.split("\n"):
             line = line.strip()
-            if '=' in line and not line.startswith('#'):
-                key, value = line.split('=', 1)
+            if "=" in line and not line.startswith("#"):
+                key, value = line.split("=", 1)
                 existing_lines[key.strip()] = value.strip()
 
     # Get the environment variable name for this provider's API key
@@ -64,8 +69,8 @@ def save_provider_api_key(provider: str, api_key: str) -> None:
     existing_lines[env_key] = f'"{api_key}"'
 
     # Write back to file
-    new_content = '\n'.join([f'{k} = {v}' for k, v in existing_lines.items()])
-    secrets_path.write_text(new_content + '\n')
+    new_content = "\n".join([f"{k} = {v}" for k, v in existing_lines.items()])
+    secrets_path.write_text(new_content + "\n")
 
     # Ensure secure permissions after writing
     set_secure_permissions(secrets_path)
@@ -93,11 +98,11 @@ def get_provider_api_key(provider: str) -> str | None:
     env_key = get_provider_api_key_env(provider)
     content = secrets_path.read_text()
 
-    for line in content.split('\n'):
+    for line in content.split("\n"):
         line = line.strip()
         if line.startswith(env_key):
-            if '=' in line:
-                value = line.split('=', 1)[1].strip()
+            if "=" in line:
+                value = line.split("=", 1)[1].strip()
                 # Remove quotes if present
                 value = value.strip('"').strip("'")
                 return value
@@ -131,12 +136,12 @@ def get_all_provider_api_keys() -> dict[str, str]:
         env_key = get_provider_api_key_env(provider)
 
         # Parse key from content
-        for line in content.split('\n'):
+        for line in content.split("\n"):
             line = line.strip()
             if line.startswith(env_key):
                 # Extract value after '='
-                if '=' in line:
-                    value = line.split('=', 1)[1].strip()
+                if "=" in line:
+                    value = line.split("=", 1)[1].strip()
                     # Remove quotes
                     value = value.strip('"').strip("'")
                     api_keys[provider] = value

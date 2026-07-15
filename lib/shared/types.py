@@ -14,6 +14,7 @@ class ThinkingLevel(str, Enum):
     OpenAI supports specific effort levels, while other providers
     use simpler enabled/disabled models.
     """
+
     NONE = "none"
     LOW = "low"
     MEDIUM = "medium"
@@ -23,6 +24,7 @@ class ThinkingLevel(str, Enum):
 
 class Provider(str, Enum):
     """Supported LLM providers."""
+
     DEEPSEEK = "deepseek"
     OPENAI = "openai"
     ZAI = "zai"
@@ -30,6 +32,7 @@ class Provider(str, Enum):
 
 class Message(TypedDict):
     """A chat message."""
+
     role: str
     content: str
 
@@ -39,6 +42,7 @@ class ExpertConfig(TypedDict, total=False):
 
     All fields are optional to allow partial updates.
     """
+
     expert_id: str
     expert_name: str
     description: str
@@ -53,6 +57,7 @@ class ExpertConfig(TypedDict, total=False):
 
 class ExpertInfo(TypedDict):
     """Basic information about an expert."""
+
     expert_id: str
     expert_name: str
     description: str
@@ -61,6 +66,7 @@ class ExpertInfo(TypedDict):
 
 class PageInfo(TypedDict):
     """Information about a page file."""
+
     filename: str
     expert_name: str
     page_number: int
@@ -68,6 +74,7 @@ class PageInfo(TypedDict):
 
 class ProviderConfig(TypedDict):
     """Configuration for an LLM provider."""
+
     name: str
     api_key_env: str
     base_url: str
@@ -78,6 +85,7 @@ class ProviderConfig(TypedDict):
 
 class ModelConfig(TypedDict):
     """Configuration for a specific model."""
+
     display_name: str
     max_tokens: int
     thinking_param: Dict[str, Dict[str, str]]
@@ -85,6 +93,7 @@ class ModelConfig(TypedDict):
 
 class TokenUsage(TypedDict):
     """Token usage information."""
+
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
@@ -92,6 +101,7 @@ class TokenUsage(TypedDict):
 
 class ChatState(TypedDict):
     """State of a chat conversation."""
+
     messages: List[Message]
     provider: str
     model: str
@@ -101,12 +111,14 @@ class ChatState(TypedDict):
 
 class CacheStats(TypedDict):
     """Cache performance statistics."""
+
     total_clients: int
     providers: Dict[str, int]
 
 
 class ValidationResult(TypedDict):
     """Result of a validation operation."""
+
     valid: bool
     errors: List[str]
     warnings: List[str]

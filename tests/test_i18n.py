@@ -25,23 +25,28 @@ class TestI18nLanguagePrefix:
         """Get I18nManager instance."""
         return I18nManager()
 
-    @pytest.mark.parametrize("language_code,language_name,expected_phrase", [
-        ('en', 'English', 'You must respond in English.'),
-        ('de', 'German', 'You must respond in German (Deutsch).'),
-        ('es', 'Spanish', 'You must respond in Spanish (Español).'),
-        ('fr', 'French', 'You must respond in French (Français).'),
-        ('it', 'Italian', 'You must respond in Italian (Italiano).'),
-        ('pt', 'Portuguese', 'You must respond in Portuguese (Português).'),
-        ('ru', 'Russian', 'You must respond in Russian (Русский).'),
-        ('tr', 'Turkish', 'You must respond in Turkish (Türkçe).'),
-        ('id', 'Indonesian', 'You must respond in Indonesian (Bahasa Indonesia).'),
-        ('ms', 'Malay', 'You must respond in Malay (Bahasa Melayu).'),
-        ('zh-CN', 'Simplified Chinese', 'Simplified Chinese (简体中文)'),
-        ('zh-TW', 'Traditional Chinese', 'Traditional Chinese (繁體中文)'),
-        ('wyw', 'Classical Chinese', 'Classical Chinese (文言文)'),
-        ('yue', 'Cantonese', 'Cantonese (粵語)'),
-    ])
-    def test_language_prefix_generation(self, i18n, language_code, language_name, expected_phrase):
+    @pytest.mark.parametrize(
+        "language_code,language_name,expected_phrase",
+        [
+            ("en", "English", "You must respond in English."),
+            ("de", "German", "You must respond in German (Deutsch)."),
+            ("es", "Spanish", "You must respond in Spanish (Español)."),
+            ("fr", "French", "You must respond in French (Français)."),
+            ("it", "Italian", "You must respond in Italian (Italiano)."),
+            ("pt", "Portuguese", "You must respond in Portuguese (Português)."),
+            ("ru", "Russian", "You must respond in Russian (Русский)."),
+            ("tr", "Turkish", "You must respond in Turkish (Türkçe)."),
+            ("id", "Indonesian", "You must respond in Indonesian (Bahasa Indonesia)."),
+            ("ms", "Malay", "You must respond in Malay (Bahasa Melayu)."),
+            ("zh-CN", "Simplified Chinese", "Simplified Chinese (简体中文)"),
+            ("zh-TW", "Traditional Chinese", "Traditional Chinese (繁體中文)"),
+            ("wyw", "Classical Chinese", "Classical Chinese (文言文)"),
+            ("yue", "Cantonese", "Cantonese (粵語)"),
+        ],
+    )
+    def test_language_prefix_generation(
+        self, i18n, language_code, language_name, expected_phrase
+    ):
         """Test that language prefix is generated correctly for each language.
 
         Args:
@@ -67,7 +72,7 @@ class TestI18nLanguagePrefix:
             i18n: I18nManager fixture
         """
         # Should not raise exception for invalid codes
-        prefix = i18n.get_language_prefix('invalid-code')
+        prefix = i18n.get_language_prefix("invalid-code")
         assert len(prefix) > 0, "Should return a fallback prefix for invalid codes"
 
 
@@ -94,15 +99,17 @@ class TestI18nSystemPrompt:
             i18n: I18nManager fixture
             raw_system_prompt: Sample system prompt fixture
         """
-        language_code = 'en'
+        language_code = "en"
         language_prefix = i18n.get_language_prefix(language_code)
         system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
 
         # Verify structure: [prefix], [empty line], [raw prompt]
-        lines = system_prompt_with_lang.split('\n')
+        lines = system_prompt_with_lang.split("\n")
         assert lines[0] == language_prefix, "Language prefix should be first line"
-        assert lines[1] == '', "Second line should be empty separator"
-        assert raw_system_prompt in system_prompt_with_lang, "Raw prompt should be included"
+        assert lines[1] == "", "Second line should be empty separator"
+        assert (
+            raw_system_prompt in system_prompt_with_lang
+        ), "Raw prompt should be included"
 
     def test_system_prompt_construction_german(self, i18n, raw_system_prompt):
         """Test system prompt construction with German language prefix.
@@ -111,17 +118,19 @@ class TestI18nSystemPrompt:
             i18n: I18nManager fixture
             raw_system_prompt: Sample system prompt fixture
         """
-        language_code = 'de'
+        language_code = "de"
         language_prefix = i18n.get_language_prefix(language_code)
         system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
 
         # Verify structure
-        lines = system_prompt_with_lang.split('\n')
+        lines = system_prompt_with_lang.split("\n")
         assert lines[0] == language_prefix, "Language prefix should be first line"
-        assert lines[1] == '', "Second line should be empty separator"
-        assert raw_system_prompt in system_prompt_with_lang, "Raw prompt should be included"
+        assert lines[1] == "", "Second line should be empty separator"
+        assert (
+            raw_system_prompt in system_prompt_with_lang
+        ), "Raw prompt should be included"
         # Verify it's German
-        assert 'Deutsch' in language_prefix, "German prefix should contain 'Deutsch'"
+        assert "Deutsch" in language_prefix, "German prefix should contain 'Deutsch'"
 
     def test_system_prompt_length(self, i18n, raw_system_prompt):
         """Test that adding language prefix increases prompt length appropriately.
@@ -130,13 +139,13 @@ class TestI18nSystemPrompt:
             i18n: I18nManager fixture
             raw_system_prompt: Sample system prompt fixture
         """
-        language_prefix = i18n.get_language_prefix('de')
+        language_prefix = i18n.get_language_prefix("de")
         system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
 
         # Combined prompt should be longer than raw prompt
-        assert len(system_prompt_with_lang) > len(raw_system_prompt), (
-            "Combined prompt should be longer than raw prompt"
-        )
+        assert len(system_prompt_with_lang) > len(
+            raw_system_prompt
+        ), "Combined prompt should be longer than raw prompt"
 
         # But not excessively long (prefix + 2 newlines + raw)
         expected_length = len(language_prefix) + 2 + len(raw_system_prompt)
@@ -159,7 +168,9 @@ class TestI18nLocaleFiles:
         """
         locale_files = list(locale_dir.glob("*.json"))
         assert len(locale_files) > 0, "Should have locale files"
-        assert (locale_dir / "en.json").exists(), "Should have English locale (source of truth)"
+        assert (
+            locale_dir / "en.json"
+        ).exists(), "Should have English locale (source of truth)"
 
     def test_locale_files_no_expert_content(self, locale_dir):
         """Test that locale files don't contain expert content.
@@ -180,15 +191,15 @@ class TestI18nLocaleFiles:
             assert data is not None, f"Could not read {locale_file.name}"
 
             # Should not have top-level expert content sections
-            assert 'expert_names' not in data, (
+            assert "expert_names" not in data, (
                 f"{locale_file.name} should not have top-level 'expert_names' section - "
                 "expert names are translated dynamically via helpers.translate_expert_name()"
             )
 
             # If 'experts' section exists, it should only contain UI-related keys
-            if 'experts' in data:
-                experts_section = data['experts']
-                allowed_ui_keys = {'management', 'names'}
+            if "experts" in data:
+                experts_section = data["experts"]
+                allowed_ui_keys = {"management", "names"}
 
                 # Check for disallowed expert content keys
                 disallowed_keys = set(experts_section.keys()) - allowed_ui_keys
@@ -241,15 +252,15 @@ class TestI18nYamlConfigs:
         # Load and verify
         config = config_manager.load_config(expert_id)
 
-        assert 'expert_name' in config, "YAML config should have expert_name"
-        assert 'description' in config, "YAML config should have description"
-        assert 'system_prompt' in config, "YAML config should have system_prompt"
+        assert "expert_name" in config, "YAML config should have expert_name"
+        assert "description" in config, "YAML config should have description"
+        assert "system_prompt" in config, "YAML config should have system_prompt"
 
         # Verify content
-        assert config['expert_name'] == "Test Expert"
-        assert len(config['description']) > 0
-        assert len(config['system_prompt']) > 0
-        assert "Test Expert" in config['system_prompt']
+        assert config["expert_name"] == "Test Expert"
+        assert len(config["description"]) > 0
+        assert len(config["system_prompt"]) > 0
+        assert "Test Expert" in config["system_prompt"]
 
 
 class TestI18nIntegration:
@@ -295,34 +306,34 @@ class TestI18nIntegration:
             temperature=0.7,
         )
         config = config_manager.load_config(expert_id)
-        raw_prompt = config.get('system_prompt', '')
+        raw_prompt = config.get("system_prompt", "")
 
-        assert config['expert_name'] == "Python Expert"
+        assert config["expert_name"] == "Python Expert"
         assert len(raw_prompt) > 0
 
         # Step 2: Simulate user's language preference (from app_defaults.toml)
-        language_code = 'de'
+        language_code = "de"
 
         # Step 3: Generate language prefix
         language_prefix = i18n.get_language_prefix(language_code)
 
-        assert 'Deutsch' in language_prefix, "German prefix should contain 'Deutsch'"
+        assert "Deutsch" in language_prefix, "German prefix should contain 'Deutsch'"
         assert len(language_prefix) > 0, "Language prefix should not be empty"
 
         # Step 4: Construct system prompt for API call
         final_prompt = f"{language_prefix}\n\n{raw_prompt}"
 
         # Step 5: Verify structure
-        lines = final_prompt.split('\n')
-        assert lines[0].startswith("You must respond in"), (
-            "First line should be language instruction"
-        )
-        assert lines[1] == '', "Second line should be empty separator"
+        lines = final_prompt.split("\n")
+        assert lines[0].startswith(
+            "You must respond in"
+        ), "First line should be language instruction"
+        assert lines[1] == "", "Second line should be empty separator"
         assert raw_prompt in final_prompt, "Raw prompt should be included"
 
         # Verify it's ready for API
         assert len(final_prompt) > 100, "Final prompt should have substantial content"
-        assert 'Python Expert' in final_prompt, "Expert name should be in prompt"
+        assert "Python Expert" in final_prompt, "Expert name should be in prompt"
 
     def test_full_workflow_chinese_user(self, temp_config_dir):
         """Test full i18n workflow for Chinese user.
@@ -343,19 +354,21 @@ class TestI18nIntegration:
             temperature=0.8,
         )
         config = config_manager.load_config(expert_id)
-        raw_prompt = config.get('system_prompt', '')
+        raw_prompt = config.get("system_prompt", "")
 
         # Chinese language preference
-        language_code = 'zh-CN'
+        language_code = "zh-CN"
         language_prefix = i18n.get_language_prefix(language_code)
 
         # Verify Chinese prefix
-        assert '简体中文' in language_prefix, "Should contain Simplified Chinese characters"
+        assert (
+            "简体中文" in language_prefix
+        ), "Should contain Simplified Chinese characters"
 
         # Construct and verify
         final_prompt = f"{language_prefix}\n\n{raw_prompt}"
-        assert 'Data Scientist' in final_prompt
-        assert 'You must respond in' in final_prompt
+        assert "Data Scientist" in final_prompt
+        assert "You must respond in" in final_prompt
 
     def test_language_switching_doesnt_affect_configs(self, temp_config_dir):
         """Test that changing language doesn't modify YAML configs.
@@ -379,18 +392,18 @@ class TestI18nIntegration:
 
         # Load config once
         config_english = config_manager.load_config(expert_id)
-        original_prompt = config_english['system_prompt']
+        original_prompt = config_english["system_prompt"]
 
         # Simulate language switch
-        _ = i18n.get_language_prefix('de')
-        _ = i18n.get_language_prefix('zh-CN')
-        _ = i18n.get_language_prefix('es')
+        _ = i18n.get_language_prefix("de")
+        _ = i18n.get_language_prefix("zh-CN")
+        _ = i18n.get_language_prefix("es")
 
         # Load config again - should be unchanged
         config_after = config_manager.load_config(expert_id)
 
-        assert config_after['system_prompt'] == original_prompt, (
-            "YAML config should not be affected by language switching"
-        )
-        assert config_after['expert_name'] == "Test Expert"
-        assert config_after['description'] == "Test description."
+        assert (
+            config_after["system_prompt"] == original_prompt
+        ), "YAML config should not be affected by language switching"
+        assert config_after["expert_name"] == "Test Expert"
+        assert config_after["description"] == "Test description."

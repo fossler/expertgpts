@@ -12,12 +12,14 @@ from lib.config.config_manager import get_llm_metadata
 from lib.llm import LLMClient, TokenManager
 from lib.shared.session_state import initialize_shared_session_state
 from lib.i18n import i18n
-from lib.shared.helpers import translate_expert_name, sanitize_error_message, sanitize_markdown_content, add_error_to_history, render_git_branch_footer
-from lib.storage import (
-    load_chat_history,
-    save_chat_history,
-    delete_chat_history
+from lib.shared.helpers import (
+    translate_expert_name,
+    sanitize_error_message,
+    sanitize_markdown_content,
+    add_error_to_history,
+    render_git_branch_footer,
 )
+from lib.storage import load_chat_history, save_chat_history, delete_chat_history
 from lib.shared import (
     LLM_PROVIDERS,
     get_provider_display_name,
@@ -29,14 +31,17 @@ from lib.shared import (
     CONTEXT_USAGE_WARNING_THRESHOLD,
     CONTEXT_USAGE_SAFE_THRESHOLD,
     CONTEXT_USAGE_COLORS,
-    CONFIG_CACHE_TTL
+    CONFIG_CACHE_TTL,
 )
-from lib.ui.dialogs import render_temperature_input, render_thinking_mode_ui, render_model_selection
+from lib.ui.dialogs import (
+    render_temperature_input,
+    render_thinking_mode_ui,
+    render_model_selection,
+)
 from lib.shared.session_state import invalidate_expert_cache
 from lib.shared.format_ops import read_json
 from lib.shared.helpers import validate_api_key
 from lib.storage import StreamingCache
-
 
 # Expert Configuration
 EXPERT_ID = "{{EXPERT_ID}}"
@@ -138,7 +143,7 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
 
         # Handle completed streams
         if is_complete:
-            response = cache_file.read_text(encoding='utf-8')
+            response = cache_file.read_text(encoding="utf-8")
 
             # Check for error marker
             if "[STREAMING ERROR:" in response:
@@ -148,7 +153,7 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
                     try:
                         metadata = read_json(metadata_file)
                         if metadata is not None:
-                            error = metadata.get('error')
+                            error = metadata.get("error")
                             if error:
                                 st.error(f"Error: {sanitize_error_message(error)}")
                     except Exception:
@@ -161,16 +166,14 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
 
             # Check if already in chat history (avoid duplicates)
             already_displayed = any(
-                msg.get("content") == response
-                for msg in st.session_state[messages_key]
+                msg.get("content") == response for msg in st.session_state[messages_key]
             )
 
             if not already_displayed and response.strip():
                 # Add to chat history
-                st.session_state[messages_key].append({
-                    "role": "assistant",
-                    "content": response
-                })
+                st.session_state[messages_key].append(
+                    {"role": "assistant", "content": response}
+                )
 
                 # Save to persistent chat history
                 save_chat_history(expert_id, st.session_state[messages_key])
@@ -204,7 +207,9 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
     return False
 
 
-def poll_stream_and_display(cache: "StreamingCache", expert_id: str, messages_key: str, message_placeholder) -> str:
+def poll_stream_and_display(
+    cache: "StreamingCache", expert_id: str, messages_key: str, message_placeholder
+) -> str:
     """Poll cache file and display streaming response.
 
     This is a shared function used by both new streams and resumed streams.
@@ -269,15 +274,16 @@ def poll_incomplete_stream(expert_id: str, messages_key: str) -> None:
     message_placeholder = st.empty()
 
     # Poll and display the stream
-    response = poll_stream_and_display(cache, expert_id, messages_key, message_placeholder)
+    response = poll_stream_and_display(
+        cache, expert_id, messages_key, message_placeholder
+    )
 
     # Only add to chat history if response is not empty
     if response.strip():
         # Add assistant response to chat history
-        st.session_state[messages_key].append({
-            "role": "assistant",
-            "content": response
-        })
+        st.session_state[messages_key].append(
+            {"role": "assistant", "content": response}
+        )
 
         # Persist to file
         save_chat_history(expert_id, st.session_state[messages_key])
@@ -297,7 +303,7 @@ def render_chat_interface(config: dict, messages_key: str):
         messages_key: Session state key for this expert's messages
     """
     # Translate expert name for default experts
-    expert_name = config.get('expert_name', EXPERT_NAME)
+    expert_name = config.get("expert_name", EXPERT_NAME)
     translated_name = translate_expert_name(expert_name)
 
     st.title(f"🤖 {translated_name}")
@@ -355,6 +361,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
             try:
                 # Get LLM client from pool (cached for performance)
                 from lib.llm.client_pool import get_cached_client
+
                 client = get_cached_client(provider=provider, api_key=api_key)
 
                 # Convert messages to format expected by API
@@ -372,7 +379,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 # Get system prompt with language prefix
                 # This ensures AI responds in the user's preferred language
                 raw_system_prompt = config.get("system_prompt", "")
-                system_prompt_with_lang = i18n.get_system_prompt_with_language(raw_system_prompt)
+                system_prompt_with_lang = i18n.get_system_prompt_with_language(
+                    raw_system_prompt
+                )
 
                 # Initialize streaming cache
                 cache = StreamingCache(EXPERT_ID)
@@ -384,19 +393,20 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     temperature=api_temperature,
                     model=model,
                     system_prompt=system_prompt_with_lang,
-                    thinking_level=thinking_level
+                    thinking_level=thinking_level,
                 )
 
                 # Poll cache file for updates (battery-optimized: file I/O)
-                response = poll_stream_and_display(cache, EXPERT_ID, messages_key, message_placeholder)
+                response = poll_stream_and_display(
+                    cache, EXPERT_ID, messages_key, message_placeholder
+                )
 
                 # Only add to chat history if response is not empty
                 if response.strip():  # Prevent empty responses
                     # Add assistant response to chat history
-                    st.session_state[messages_key].append({
-                        "role": "assistant",
-                        "content": response
-                    })
+                    st.session_state[messages_key].append(
+                        {"role": "assistant", "content": response}
+                    )
 
                     # Persist to file
                     save_chat_history(EXPERT_ID, st.session_state[messages_key])
@@ -413,11 +423,17 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 message_placeholder.error(f"❌ {error_msg}")
                 add_error_to_history(EXPERT_ID, messages_key, error_msg)
             except ValueError as e:
-                error_msg = i18n.t("errors.api_response_error", error=sanitize_error_message(str(e)))
+                error_msg = i18n.t(
+                    "errors.api_response_error", error=sanitize_error_message(str(e))
+                )
                 message_placeholder.error(f"❌ {error_msg}")
                 add_error_to_history(EXPERT_ID, messages_key, error_msg)
             except Exception as e:
-                error_msg = i18n.t("errors.unexpected_error", type=type(e).__name__, message=sanitize_error_message(str(e)))
+                error_msg = i18n.t(
+                    "errors.unexpected_error",
+                    type=type(e).__name__,
+                    message=sanitize_error_message(str(e)),
+                )
                 message_placeholder.error(f"❌ {error_msg}")
                 add_error_to_history(EXPERT_ID, messages_key, error_msg)
 
@@ -461,7 +477,7 @@ def display_model_settings(config: dict, messages_key: str):
         provider=provider,
         current_model=model,
         widget_key=f"{EXPERT_ID}_model_selector_v{cache_version}",
-        use_sidebar=True
+        use_sidebar=True,
     )
 
     # Thinking Mode Level (using shared helper, with model-specific efforts)
@@ -470,7 +486,7 @@ def display_model_settings(config: dict, messages_key: str):
         current_thinking=thinking_level,
         widget_key=f"{EXPERT_ID}_thinking_selector_v{cache_version}",
         model=new_model,
-        use_sidebar=True
+        use_sidebar=True,
     )
 
     # Temperature (using shared helper)
@@ -480,17 +496,23 @@ def display_model_settings(config: dict, messages_key: str):
         provider=provider,
         use_sidebar=True,
         widget_key=f"{EXPERT_ID}_temperature_input_v{cache_version}",
-        show_help=False
+        show_help=False,
     )
 
     # Display provider links below temperature
     st.sidebar.markdown(get_provider_links(provider))
 
     # Save button if any setting changed
-    if (new_model != model or
-        new_thinking_level != thinking_level or
-        new_temperature != float(current_temperature)):
-        if st.sidebar.button(f"💾 {i18n.t('sidebar.save_settings')}", key=f"{EXPERT_ID}_save_settings_v{cache_version}", type="primary"):
+    if (
+        new_model != model
+        or new_thinking_level != thinking_level
+        or new_temperature != float(current_temperature)
+    ):
+        if st.sidebar.button(
+            f"💾 {i18n.t('sidebar.save_settings')}",
+            key=f"{EXPERT_ID}_save_settings_v{cache_version}",
+            type="primary",
+        ):
             try:
                 config_manager = get_config_manager()
                 config_manager.update_config(
@@ -498,15 +520,17 @@ def display_model_settings(config: dict, messages_key: str):
                     updates={
                         "model": new_model,
                         "thinking_level": new_thinking_level,
-                        "temperature": new_temperature
-                    }
+                        "temperature": new_temperature,
+                    },
                 )
                 # Invalidate cache to force reload (using shared helper)
                 invalidate_expert_cache(EXPERT_ID)
                 st.success("✅ Settings saved successfully!")
                 st.rerun()
             except Exception as e:
-                st.sidebar.error(f"❌ Error saving settings: {sanitize_error_message(str(e))}")
+                st.sidebar.error(
+                    f"❌ Error saving settings: {sanitize_error_message(str(e))}"
+                )
 
 
 def display_context_usage(config: dict, messages_key: str):
@@ -530,9 +554,7 @@ def display_context_usage(config: dict, messages_key: str):
 
     try:
         stats = TokenManager.calculate_usage_statistics(
-            system_prompt=system_prompt,
-            messages=messages,
-            max_tokens=max_tokens
+            system_prompt=system_prompt, messages=messages, max_tokens=max_tokens
         )
     except (ImportError, OSError, ValueError, TypeError) as e:
         st.sidebar.caption(f"ℹ️ Token counting unavailable: {type(e).__name__}")
@@ -542,25 +564,31 @@ def display_context_usage(config: dict, messages_key: str):
         st.sidebar.caption(f"ℹ️ {stats['error']}")
         return
 
-    # Display context usage in sidebar
-    st.sidebar.markdown(f"### 📊 {i18n.t('sidebar.context_usage')}")
-
-    # Display main stats
-    max_tokens_formatted = f"{stats['max_tokens']:,}"
-    st.sidebar.markdown(
-        f"{stats['color']} **{stats['usage_percent']:.1f}%** "
-        f"{i18n.t('sidebar.of_tokens', max=max_tokens_formatted)}"
-    )
+    # Display context usage in sidebar as a metric card. The severity emoji
+    # (stats["color"]) stays in the label because st.metric cannot color the
+    # value itself; the token count rides along as a neutral delta sub-line.
     total_tokens_formatted = f"{stats['total_tokens']:,}"
     max_tokens_formatted = f"{stats['max_tokens']:,}"
-    st.sidebar.caption(
-        i18n.t('sidebar.total_tokens', total=total_tokens_formatted, max=max_tokens_formatted)
+    st.sidebar.metric(
+        label=f"{stats['color']} {i18n.t('sidebar.context_usage')}",
+        value=f"{stats['usage_percent']:.1f}%",
+        delta=i18n.t(
+            "sidebar.total_tokens",
+            total=total_tokens_formatted,
+            max=max_tokens_formatted,
+        ),
+        delta_color="off",
+        border=True,
     )
 
     # Show breakdown
     with st.sidebar.expander(i18n.t("sidebar.see_breakdown")):
-        st.caption(f"📝 {i18n.t('sidebar.system_prompt')}: {stats['system_tokens']:,} tokens")
-        st.caption(f"💬 {i18n.t('sidebar.chat_messages')}: {stats['messages_tokens']:,} tokens")
+        st.caption(
+            f"📝 {i18n.t('sidebar.system_prompt')}: {stats['system_tokens']:,} tokens"
+        )
+        st.caption(
+            f"💬 {i18n.t('sidebar.chat_messages')}: {stats['messages_tokens']:,} tokens"
+        )
 
 
 def main():
@@ -584,7 +612,7 @@ def main():
     if not api_key:
         provider_name = get_provider_display_name(provider)
         st.warning(f"⚠️ {i18n.t('sidebar.no_api_key_warning', provider=provider_name)}")
-        st.info(i18n.t('sidebar.go_to_settings_api_key', provider=provider_name))
+        st.info(i18n.t("sidebar.go_to_settings_api_key", provider=provider_name))
         st.stop()
 
     # Display model settings (at the top of sidebar)

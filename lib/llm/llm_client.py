@@ -7,13 +7,10 @@ LLM providers (DeepSeek, OpenAI, Z.AI) through the OpenAI-compatible API.
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 
-
 try:
     from openai import OpenAI
 except ImportError:
-    raise ImportError(
-        "OpenAI package is required. Install with: pip install openai"
-    )
+    raise ImportError("OpenAI package is required. Install with: pip install openai")
 
 from lib.shared.constants import (
     get_provider_config,
@@ -29,6 +26,7 @@ from lib.i18n.i18n import i18n
 @dataclass
 class Message:
     """Represents a chat message."""
+
     role: str
     content: str
 
@@ -60,10 +58,7 @@ class LLMClient:
         self.base_url = get_provider_base_url(provider)
 
         # Initialize OpenAI-compatible client with provider-specific base URL
-        self.client = OpenAI(
-            api_key=api_key,
-            base_url=self.base_url
-        )
+        self.client = OpenAI(api_key=api_key, base_url=self.base_url)
 
     def _prepare_thinking_param(self, model: str, thinking_level: str = None) -> dict:
         """Prepare provider-specific thinking/reasoning parameter.
@@ -157,15 +152,14 @@ class LLMClient:
         prepared_messages = []
 
         if system_prompt:
-            prepared_messages.append({
-                "role": "system",
-                "content": system_prompt
-            })
+            prepared_messages.append({"role": "system", "content": system_prompt})
 
         prepared_messages.extend(messages)
 
         # Get thinking parameter (returns tuple: extra_body_dict, direct_params_dict)
-        extra_body_params, direct_params = self._prepare_thinking_param(model, thinking_level)
+        extra_body_params, direct_params = self._prepare_thinking_param(
+            model, thinking_level
+        )
 
         # Build API call parameters
         api_params = {
@@ -187,7 +181,9 @@ class LLMClient:
             return response.choices[0].message.content
 
         except Exception as e:
-            raise Exception(f"Error calling {self.config['name']} API: {sanitize_error_message(str(e))}")
+            raise Exception(
+                f"Error calling {self.config['name']} API: {sanitize_error_message(str(e))}"
+            )
 
     def chat_stream(
         self,
@@ -220,15 +216,14 @@ class LLMClient:
         prepared_messages = []
 
         if system_prompt:
-            prepared_messages.append({
-                "role": "system",
-                "content": system_prompt
-            })
+            prepared_messages.append({"role": "system", "content": system_prompt})
 
         prepared_messages.extend(messages)
 
         # Get thinking parameter (returns tuple: extra_body_dict, direct_params_dict)
-        extra_body_params, direct_params = self._prepare_thinking_param(model, thinking_level)
+        extra_body_params, direct_params = self._prepare_thinking_param(
+            model, thinking_level
+        )
 
         # Build API call parameters
         api_params = {
@@ -253,7 +248,9 @@ class LLMClient:
                     yield chunk.choices[0].delta.content
 
         except Exception as e:
-            raise Exception(f"Error calling {self.config['name']} API: {sanitize_error_message(str(e))}")
+            raise Exception(
+                f"Error calling {self.config['name']} API: {sanitize_error_message(str(e))}"
+            )
 
     def generate_system_prompt(
         self,
@@ -290,17 +287,13 @@ class LLMClient:
 
         # Fallback template - clean system prompt for direct use
         fallback_template = SYSTEM_PROMPT_TEMPLATE.format(
-            expert_name=expert_name,
-            description=description
+            expert_name=expert_name, description=description
         )
 
         try:
             # Ask LLM to generate an enhanced system prompt
             response = self.chat(
-                messages=[{
-                    "role": "user",
-                    "content": generation_prompt
-                }],
+                messages=[{"role": "user", "content": generation_prompt}],
                 temperature=temperature,
                 model=model,
             )

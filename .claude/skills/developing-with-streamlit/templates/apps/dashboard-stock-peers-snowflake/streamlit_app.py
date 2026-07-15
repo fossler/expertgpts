@@ -56,25 +56,129 @@ def get_snowflake_connection():
 # =============================================================================
 
 STOCKS = [
-    "AAPL", "ABBV", "ACN", "ADBE", "ADP", "AMD", "AMGN", "AMT", "AMZN", "APD",
-    "AVGO", "AXP", "BA", "BK", "BKNG", "BMY", "BSX", "C", "CAT", "CI",
-    "CL", "CMCSA", "COST", "CRM", "CSCO", "CVX", "DE", "DHR", "DIS", "DUK",
-    "ELV", "EOG", "EQR", "FDX", "GD", "GE", "GILD", "GOOG", "GOOGL", "HD",
-    "HON", "HUM", "IBM", "ICE", "INTC", "ISRG", "JNJ", "JPM", "KO", "LIN",
-    "LLY", "LMT", "LOW", "MA", "MCD", "MDLZ", "META", "MMC", "MO", "MRK",
-    "MSFT", "NEE", "NFLX", "NKE", "NOW", "NVDA", "ORCL", "PEP", "PFE", "PG",
-    "PLD", "PM", "PSA", "REGN", "RTX", "SBUX", "SCHW", "SLB", "SO", "SPGI",
-    "T", "TJX", "TMO", "TSLA", "TXN", "UNH", "UNP", "UPS", "V", "VZ",
-    "WFC", "WM", "WMT", "XOM",
+    "AAPL",
+    "ABBV",
+    "ACN",
+    "ADBE",
+    "ADP",
+    "AMD",
+    "AMGN",
+    "AMT",
+    "AMZN",
+    "APD",
+    "AVGO",
+    "AXP",
+    "BA",
+    "BK",
+    "BKNG",
+    "BMY",
+    "BSX",
+    "C",
+    "CAT",
+    "CI",
+    "CL",
+    "CMCSA",
+    "COST",
+    "CRM",
+    "CSCO",
+    "CVX",
+    "DE",
+    "DHR",
+    "DIS",
+    "DUK",
+    "ELV",
+    "EOG",
+    "EQR",
+    "FDX",
+    "GD",
+    "GE",
+    "GILD",
+    "GOOG",
+    "GOOGL",
+    "HD",
+    "HON",
+    "HUM",
+    "IBM",
+    "ICE",
+    "INTC",
+    "ISRG",
+    "JNJ",
+    "JPM",
+    "KO",
+    "LIN",
+    "LLY",
+    "LMT",
+    "LOW",
+    "MA",
+    "MCD",
+    "MDLZ",
+    "META",
+    "MMC",
+    "MO",
+    "MRK",
+    "MSFT",
+    "NEE",
+    "NFLX",
+    "NKE",
+    "NOW",
+    "NVDA",
+    "ORCL",
+    "PEP",
+    "PFE",
+    "PG",
+    "PLD",
+    "PM",
+    "PSA",
+    "REGN",
+    "RTX",
+    "SBUX",
+    "SCHW",
+    "SLB",
+    "SO",
+    "SPGI",
+    "T",
+    "TJX",
+    "TMO",
+    "TSLA",
+    "TXN",
+    "UNH",
+    "UNP",
+    "UPS",
+    "V",
+    "VZ",
+    "WFC",
+    "WM",
+    "WMT",
+    "XOM",
 ]
 
 # Base prices for synthetic data (approximate real values for realism)
 STOCK_BASE_PRICES = {
-    "AAPL": 175, "MSFT": 380, "GOOGL": 140, "AMZN": 180, "NVDA": 500,
-    "META": 350, "TSLA": 250, "JPM": 170, "V": 280, "UNH": 520,
-    "HD": 350, "PG": 160, "MA": 450, "COST": 580, "ABBV": 170,
-    "MRK": 120, "AVGO": 900, "PEP": 180, "KO": 60, "TMO": 550,
-    "ADBE": 550, "CRM": 280, "CSCO": 50, "ACN": 340, "NKE": 100,
+    "AAPL": 175,
+    "MSFT": 380,
+    "GOOGL": 140,
+    "AMZN": 180,
+    "NVDA": 500,
+    "META": 350,
+    "TSLA": 250,
+    "JPM": 170,
+    "V": 280,
+    "UNH": 520,
+    "HD": 350,
+    "PG": 160,
+    "MA": 450,
+    "COST": 580,
+    "ABBV": 170,
+    "MRK": 120,
+    "AVGO": 900,
+    "PEP": 180,
+    "KO": 60,
+    "TMO": 550,
+    "ADBE": 550,
+    "CRM": 280,
+    "CSCO": 50,
+    "ACN": 340,
+    "NKE": 100,
 }
 
 DEFAULT_STOCKS = ["AAPL", "MSFT", "GOOGL", "NVDA", "AMZN", "TSLA", "META"]
@@ -127,7 +231,7 @@ def stocks_to_str(stocks):
 
 def generate_stock_data_query(tickers: list[str], days: int) -> str:
     """Generate SQL query that creates synthetic stock price data.
-    
+
     NOTE: This uses f-strings for VALUES clause construction which is acceptable
     for synthetic data generation with controlled inputs. For production apps
     with real tables, always use parameterized queries as shown above.
@@ -139,9 +243,9 @@ def generate_stock_data_query(tickers: list[str], days: int) -> str:
         growth_rate = 0.0003 + (hash(ticker) % 10) * 0.00005
         volatility = 0.02 + (hash(ticker) % 5) * 0.005
         ticker_values.append(f"('{ticker}', {base_price}, {growth_rate}, {volatility})")
-    
+
     tickers_cte = ", ".join(ticker_values)
-    
+
     return f"""
     WITH tickers AS (
         SELECT column1 AS ticker, column2 AS base_price, column3 AS growth_rate, column4 AS volatility
@@ -177,7 +281,7 @@ def load_stock_data(tickers: list[str], days: int) -> pd.DataFrame:
     query = generate_stock_data_query(tickers, days)
     df = conn.query(query)
     df.columns = df.columns.str.lower()
-    
+
     # Pivot to get tickers as columns
     pivoted = df.pivot(index="date", columns="ticker", values="close_price")
     pivoted.index = pd.to_datetime(pivoted.index)

@@ -103,7 +103,7 @@ LANGUAGE_METADATA = {
         "flag": "🇺🇸",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "en_US"
+        "locale": "en_US",
     },
     "de": {
         "name": "German",
@@ -111,7 +111,7 @@ LANGUAGE_METADATA = {
         "flag": "🇩🇪",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "de_DE"
+        "locale": "de_DE",
     },
     "fr": {
         "name": "French",
@@ -119,7 +119,7 @@ LANGUAGE_METADATA = {
         "flag": "🇫🇷",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "fr_FR"
+        "locale": "fr_FR",
     },
     "es": {
         "name": "Spanish",
@@ -127,7 +127,7 @@ LANGUAGE_METADATA = {
         "flag": "🇪🇸",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "es_ES"
+        "locale": "es_ES",
     },
     "ru": {
         "name": "Russian",
@@ -135,7 +135,7 @@ LANGUAGE_METADATA = {
         "flag": "🇷🇺",
         "script": "Cyrillic",
         "direction": "ltr",
-        "locale": "ru_RU"
+        "locale": "ru_RU",
     },
     "it": {
         "name": "Italian",
@@ -143,7 +143,7 @@ LANGUAGE_METADATA = {
         "flag": "🇮🇹",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "it_IT"
+        "locale": "it_IT",
     },
     "tr": {
         "name": "Turkish",
@@ -151,7 +151,7 @@ LANGUAGE_METADATA = {
         "flag": "🇹🇷",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "tr_TR"
+        "locale": "tr_TR",
     },
     "pt": {
         "name": "Portuguese",
@@ -159,7 +159,7 @@ LANGUAGE_METADATA = {
         "flag": "🇵🇹",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "pt_PT"
+        "locale": "pt_PT",
     },
     "id": {
         "name": "Indonesian",
@@ -167,7 +167,7 @@ LANGUAGE_METADATA = {
         "flag": "🇮🇩",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "id_ID"
+        "locale": "id_ID",
     },
     "ms": {
         "name": "Malay",
@@ -175,7 +175,7 @@ LANGUAGE_METADATA = {
         "flag": "🇲🇾",
         "script": "Latin",
         "direction": "ltr",
-        "locale": "ms_MY"
+        "locale": "ms_MY",
     },
     "zh-CN": {
         "name": "Simplified Chinese",
@@ -183,7 +183,7 @@ LANGUAGE_METADATA = {
         "flag": "🇨🇳",
         "script": "Han",
         "direction": "ltr",
-        "locale": "zh_CN"
+        "locale": "zh_CN",
     },
     "zh-TW": {
         "name": "Traditional Chinese",
@@ -191,7 +191,7 @@ LANGUAGE_METADATA = {
         "flag": "🇹🇼",
         "script": "Han",
         "direction": "ltr",
-        "locale": "zh_TW"
+        "locale": "zh_TW",
     },
     "wyw": {
         "name": "Classical Chinese",
@@ -199,7 +199,7 @@ LANGUAGE_METADATA = {
         "flag": "🏛️",
         "script": "Han",
         "direction": "ltr",
-        "locale": "wyw"
+        "locale": "wyw",
     },
     "yue": {
         "name": "Cantonese",
@@ -207,7 +207,7 @@ LANGUAGE_METADATA = {
         "flag": "🇭🇰",
         "script": "Han",
         "direction": "ltr",
-        "locale": "yue"
+        "locale": "yue",
     },
 }
 
@@ -232,7 +232,7 @@ class I18nManager:
         Returns:
             Current language code from session state, or 'en' as default
         """
-        if not hasattr(self, '_cached_lang'):
+        if not hasattr(self, "_cached_lang"):
             self._cached_lang = st.session_state.get("language", "en")
         return self._cached_lang
 
@@ -242,8 +242,8 @@ class I18nManager:
         This should be called whenever the language is changed to ensure
         the cached value is updated.
         """
-        if hasattr(self, '_cached_lang'):
-            delattr(self, '_cached_lang')
+        if hasattr(self, "_cached_lang"):
+            delattr(self, "_cached_lang")
 
     def detect_system_language(self) -> str:
         """Detect system language and return appropriate language code.
@@ -268,17 +268,17 @@ class I18nManager:
 
             # Handle special cases first
             # German variants: de-AT (Austrian), de-CH (Swiss), de-DE, de-?? → all use 'de'
-            if system_locale.startswith('de'):
+            if system_locale.startswith("de"):
                 return "de"
 
             # Chinese variants
-            if system_locale in ['zh_CN', 'zh-CN', 'zh_SG']:
+            if system_locale in ["zh_CN", "zh-CN", "zh_SG"]:
                 return "zh-CN"
-            elif system_locale in ['zh_TW', 'zh-TW', 'zh_HK']:
+            elif system_locale in ["zh_TW", "zh-TW", "zh_HK"]:
                 return "zh-TW"
 
             # Extract language code (before '_' or '-')
-            lang_code = system_locale.split('_')[0].split('-')[0]
+            lang_code = system_locale.split("_")[0].split("-")[0]
 
             # Check if we support this language
             if lang_code in LANGUAGE_METADATA:
@@ -323,14 +323,17 @@ class I18nManager:
 
     def get_language_info(self, code: str) -> Dict:
         """Get comprehensive language metadata."""
-        return LANGUAGE_METADATA.get(code, {
-            "name": code.upper(),
-            "native_name": code.upper(),
-            "flag": "🌐",
-            "script": "Unknown",
-            "direction": "ltr",
-            "locale": code
-        })
+        return LANGUAGE_METADATA.get(
+            code,
+            {
+                "name": code.upper(),
+                "native_name": code.upper(),
+                "flag": "🌐",
+                "script": "Unknown",
+                "direction": "ltr",
+                "locale": code,
+            },
+        )
 
     def get_language_prefix(self, lang: str = None) -> str:
         """Generate language prefix for AI responses.

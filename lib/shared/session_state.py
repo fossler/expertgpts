@@ -26,14 +26,23 @@ def initialize_shared_session_state():
     """
     # Ensure config.toml exists (copies from example if needed)
     from lib.config.config_toml_manager import ensure_config_file_exists
+
     ensure_config_file_exists()
 
     # Import LLM_PROVIDERS to get all provider keys
-    from lib.shared.constants import LLM_PROVIDERS, DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL, DEFAULT_THINKING_ENABLED
+    from lib.shared.constants import (
+        LLM_PROVIDERS,
+        DEFAULT_LLM_PROVIDER,
+        DEFAULT_LLM_MODEL,
+        DEFAULT_THINKING_ENABLED,
+    )
 
     # Initialize language with saved preference or auto-detection
     if "language" not in st.session_state:
-        from lib.config.app_defaults_manager import get_language_preference, save_language_preference
+        from lib.config.app_defaults_manager import (
+            get_language_preference,
+            save_language_preference,
+        )
 
         # Try to load saved preference first
         saved_lang = get_language_preference()
@@ -44,6 +53,7 @@ def initialize_shared_session_state():
         else:
             # No saved preference - auto-detect and save
             from lib.i18n.i18n import i18n
+
             detected_lang = i18n.detect_system_language()
             st.session_state.language = detected_lang
 

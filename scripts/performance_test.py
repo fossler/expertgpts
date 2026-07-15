@@ -19,7 +19,7 @@ ZAI_API_KEY = "ab3e366bed0b468586b2bd9e7eab347a.IgKW2zzWtVB1Xs9B"
 MODEL = "glm-5"
 TEST_MESSAGES = [
     {"role": "system", "content": "You are a helpful AI assistant."},
-    {"role": "user", "content": "Hello, please introduce yourself."}
+    {"role": "user", "content": "Hello, please introduce yourself."},
 ]
 NUM_RUNS = 3
 
@@ -45,7 +45,7 @@ def test_framework_non_streaming():
                 messages=TEST_MESSAGES,
                 temperature=1.0,
                 model=MODEL,
-                system_prompt=None  # System prompt already in messages
+                system_prompt=None,  # System prompt already in messages
             )
             total_time = time.time() - start
             response_len = len(response)
@@ -80,10 +80,7 @@ def test_framework_streaming():
 
         try:
             for chunk in client.chat_stream(
-                messages=TEST_MESSAGES,
-                temperature=1.0,
-                model=MODEL,
-                system_prompt=None
+                messages=TEST_MESSAGES, temperature=1.0, model=MODEL, system_prompt=None
             ):
                 if first_chunk_time is None:
                     first_chunk_time = time.time() - start
@@ -91,13 +88,17 @@ def test_framework_streaming():
                 total_content += chunk
 
             total_time = time.time() - start
-            results.append({
-                "first_chunk": first_chunk_time,
-                "total": total_time,
-                "chunks": chunk_count,
-                "content_len": len(total_content)
-            })
-            print(f"Run {i+1}: First chunk={first_chunk_time:.3f}s, Total={total_time:.3f}s, Chunks={chunk_count}")
+            results.append(
+                {
+                    "first_chunk": first_chunk_time,
+                    "total": total_time,
+                    "chunks": chunk_count,
+                    "content_len": len(total_content),
+                }
+            )
+            print(
+                f"Run {i+1}: First chunk={first_chunk_time:.3f}s, Total={total_time:.3f}s, Chunks={chunk_count}"
+            )
         except Exception as e:
             print(f"Run {i+1}: ERROR - {e}")
 
@@ -119,13 +120,9 @@ def test_httpx_direct():
     url = "https://api.z.ai/api/paas/v4/chat/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {ZAI_API_KEY}"
+        "Authorization": f"Bearer {ZAI_API_KEY}",
     }
-    payload = {
-        "model": MODEL,
-        "messages": TEST_MESSAGES,
-        "stream": False
-    }
+    payload = {"model": MODEL, "messages": TEST_MESSAGES, "stream": False}
 
     results = []
 
@@ -133,12 +130,16 @@ def test_httpx_direct():
         start = time.time()
         try:
             with httpx.Client() as http_client:
-                response = http_client.post(url, headers=headers, json=payload, timeout=60.0)
+                response = http_client.post(
+                    url, headers=headers, json=payload, timeout=60.0
+                )
                 total_time = time.time() - start
                 data = response.json()
                 content_len = len(data["choices"][0]["message"]["content"])
                 results.append(total_time)
-                print(f"Run {i+1}: Total={total_time:.3f}s, Response={content_len} chars")
+                print(
+                    f"Run {i+1}: Total={total_time:.3f}s, Response={content_len} chars"
+                )
         except Exception as e:
             print(f"Run {i+1}: ERROR - {e}")
 
@@ -193,9 +194,13 @@ def main():
         print(f"Framework non-stream: {ns_avg:.3f}s (warm, client creation excluded)")
 
     if stream_results:
-        s_first_chunk = sum(r["first_chunk"] for r in stream_results) / len(stream_results)
+        s_first_chunk = sum(r["first_chunk"] for r in stream_results) / len(
+            stream_results
+        )
         s_total = sum(r["total"] for r in stream_results) / len(stream_results)
-        print(f"Framework streaming:  First chunk={s_first_chunk:.3f}s, Total={s_total:.3f}s")
+        print(
+            f"Framework streaming:  First chunk={s_first_chunk:.3f}s, Total={s_total:.3f}s"
+        )
 
     # Overhead calculation
     if curl_results and non_stream_results:

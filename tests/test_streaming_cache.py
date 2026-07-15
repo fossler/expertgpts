@@ -45,7 +45,10 @@ def temp_cache_dir(monkeypatch):
         tmpdir_path = Path(tmpdir)
         # Patch STREAMING_CACHE_DIR before importing the module
         import lib.storage.streaming_cache
-        monkeypatch.setattr(lib.storage.streaming_cache, 'STREAMING_CACHE_DIR', tmpdir_path)
+
+        monkeypatch.setattr(
+            lib.storage.streaming_cache, "STREAMING_CACHE_DIR", tmpdir_path
+        )
         yield tmpdir_path
 
 
@@ -76,7 +79,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         assert thread.is_alive()
@@ -98,7 +101,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         # Wait for partial response
@@ -128,7 +131,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         # Should not be complete immediately
@@ -155,7 +158,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         time.sleep(0.2)  # Wait for completion
@@ -210,7 +213,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         # Wait for thread to complete
@@ -282,7 +285,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are expert 1",
-            thinking_level=None
+            thinking_level=None,
         )
 
         thread2 = cache2.start_streaming_to_file(
@@ -291,7 +294,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are expert 2",
-            thinking_level=None
+            thinking_level=None,
         )
 
         # Both threads should be alive
@@ -338,7 +341,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         # Verify thread started
@@ -393,7 +396,7 @@ class TestStreamingCache:
             temperature=0.7,
             model="test-model",
             system_prompt="You are a test assistant",
-            thinking_level=None
+            thinking_level=None,
         )
 
         # Phase 2: Navigate away briefly (partial stream)
