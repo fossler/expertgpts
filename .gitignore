@@ -61,9 +61,10 @@ chat_history/
 llm_comm/
 streaming_cache/
 
-# Expert pages only (not Home/Settings/Help which are permanent)
+# Expert pages only (not Home/Settings/Help/Debug which are permanent)
 pages/*.py
 !pages/1000_Home.py
 !pages/9998_Settings.py
 !pages/9999_Help.py
+!pages/_debug.py
 

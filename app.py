@@ -8,6 +8,7 @@ This is the main entry point using the newer st.navigation() approach.
 
 import sys
 import subprocess
+import urllib.parse
 import streamlit as st
 from pathlib import Path
 from lib.shared.page_generator import PageGenerator
@@ -152,6 +153,20 @@ def main():
 
     # Create page list: Home + Experts + Settings + Help
     pages = [home] + expert_pages + [settings, help_page]
+
+    # Debug page: routable only via the /debug URL, never linked in nav.
+    # st.navigation only shows (and routes to) pages in the list, so we add the
+    # debug page exclusively when the browser is already on /debug.
+    current_path = urllib.parse.urlparse(st.context.url).path.rstrip("/")
+    if current_path.endswith("/debug"):
+        pages.append(
+            st.Page(
+                "pages/_debug.py",
+                title="Debug",
+                icon=":material/bug_report:",
+                url_path="debug",
+            )
+        )
 
     # Set up navigation
     pg = st.navigation(pages)

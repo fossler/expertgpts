@@ -81,6 +81,7 @@ Reference documentation:
 
 - **[Scripts](reference/scripts.md)** - Script documentation
 - **[Troubleshooting](reference/troubleshooting.md)** - Common issues
+- **[Debug Page](reference/debug-page.md)** - Hidden `/debug` diagnostics page
 
 ### API
 
@@ -114,6 +115,7 @@ Start with → Development Setup → Project Structure → Adding Features
 - **Understand the architecture**: [Architecture Overview](architecture/overview.md)
 - **Contribute code**: [Development Setup](development/setup.md)
 - **Fix an issue**: [Troubleshooting](reference/troubleshooting.md)
+- **Diagnose the running app**: [Debug Page](reference/debug-page.md)
 
 ## Key Concepts
 

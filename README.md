@@ -183,6 +183,7 @@ ExpertGPTs supports **13 languages** with automatic detection:
 - **[API Providers](docs/api/providers.md)** - LLM provider integration
 - **[Template System](docs/architecture/template-system.md)** - Page generation
 - **[Scripts Reference](docs/reference/scripts.md)** - Administrative scripts
+- **[Debug Page](docs/reference/debug-page.md)** - Hidden `/debug` diagnostics page
 
 **Full documentation**: [docs/](docs/)
 
@@ -250,6 +251,28 @@ uv run pytest --cov=lib --cov-report=html
 **Modify Home/Settings/Help**: Edit `pages/1000_Home.py`, `pages/9998_Settings.py`, or `pages/9999_Help.py` directly
 
 **Development Guide**: [Adding Features Documentation](docs/development/adding-features.md)
+
+### Debug Page
+
+A hidden diagnostics page for developers and operators. It is **not** linked in
+the navigation — reach it by appending `/debug` to the app URL:
+
+```
+http://localhost:8501/debug
+```
+
+It has six tabs: **Dependencies** (declared vs. actually-installed versions from
+`requirements*.txt`, with mismatches flagged), **Runtime** (Python/Streamlit
+versions, platform, Git branch), **App status** (expert/config counts,
+chat-history sizes, streaming-cache files), **Config** (API-key status and
+default provider/model/language), **Session state** (a live `st.session_state`
+dump), and **Actions** (cache-clear buttons that never touch chat history or
+configs).
+
+API keys and other secret-like values are always masked. The page is *unlisted*,
+not access-controlled, so don't expose the app publicly without authentication.
+
+**Details**: [Debug Page Reference](docs/reference/debug-page.md)
 
 ## License
 
