@@ -87,9 +87,11 @@ provider = "deepseek"
 - `"deepseek-v4-pro"` - Premium flagship, 1M context, dual thinking modes
 
 **OpenAI Models**:
-- `"gpt-5.5"` - Flagship model, 1.05M context (default)
-- `"gpt-5-mini"` - Cost-effective option, 200K context
-- `"gpt-5-nano"` - High-throughput option, 400K context
+- `"gpt-5.6-sol"` - Frontier flagship, 1.05M context
+- `"gpt-5.6-terra"` - Balanced performance/price, 1.05M context (default)
+- `"gpt-5.6-luna"` - Efficient, high-volume, 1.05M context
+- `"gpt-5.4-mini"` - Cost-effective option, 400K context
+- `"gpt-5.4-nano"` - High-throughput option, 400K context
 
 **Z.AI Models**:
 - `"glm-5.2"` - Flagship model, 1M context, adjustable reasoning effort high/max (default)
@@ -100,7 +102,7 @@ provider = "deepseek"
 ```toml
 [llm]
 provider = "openai"
-model = "gpt-5.5"
+model = "gpt-5.6-terra"
 ```
 
 **Impact**:
@@ -293,7 +295,7 @@ For advanced users or automated setup.
    ```toml
    [llm]
    provider = "openai"
-   model = "gpt-5.5"
+   model = "gpt-5.6-terra"
    temperature = 0.5
    thinking_level = "medium"
 
@@ -344,7 +346,7 @@ code = "en"
 ```toml
 [llm]
 provider = "openai"
-model = "gpt-5.5"
+model = "gpt-5.6-terra"
 temperature = 0.5
 thinking_level = "medium"
 
@@ -354,7 +356,7 @@ code = "en"
 
 **Rationale**:
 - OpenAI: Advanced reasoning capabilities
-- gpt-5.5: Flagship model optimized for reasoning tasks
+- gpt-5.6-terra: Balanced flagship optimized for reasoning tasks
 - Temperature 0.5: Focused but flexible
 - Medium thinking: Balanced reasoning
 
@@ -549,14 +551,14 @@ thinking_level = "none"
 ```toml
 # INVALID
 provider = "deepseek"
-model = "gpt-5.5"  # Wrong! gpt-5.5 is OpenAI
+model = "gpt-5.6-terra"  # Wrong! gpt-5.6-terra is OpenAI
 ```
 
 **Solution**: Match provider with correct model:
 ```toml
 # VALID
 provider = "openai"
-model = "gpt-5.5"  # Correct!
+model = "gpt-5.6-terra"  # Correct!
 ```
 
 ### File Permission Errors
@@ -588,7 +590,7 @@ provider = "deepseek"
 
 # Default model for the provider
 # DeepSeek: "deepseek-v4-flash", "deepseek-v4-pro"
-# OpenAI: "gpt-5.5", "gpt-5-mini", "gpt-5-nano"
+# OpenAI: "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5.4-nano"
 # Z.AI: "glm-5.2", "glm-5", "glm-4.7-flash"
 model = "deepseek-v4-flash"
 

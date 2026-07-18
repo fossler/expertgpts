@@ -81,7 +81,7 @@ def save_llm_defaults(provider: str, model: str, thinking_level: str) -> bool:
 
     Args:
         provider: Default LLM provider (e.g., "deepseek", "openai", "zai")
-        model: Default model for the provider (e.g., "deepseek-v4-flash", "gpt-5.5")
+        model: Default model for the provider (e.g., "deepseek-v4-flash", "gpt-5.6-terra")
         thinking_level: Default thinking level for OpenAI (e.g., "none", "low", "medium")
 
     Returns:

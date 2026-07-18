@@ -144,7 +144,7 @@ A unified client interface supports multiple LLM providers through OpenAI-compat
 
 - **Client implementation**: `lib/llm/llm_client.py` - `LLMClient` class
 - **Provider-specific thinking parameters**:
-  - **OpenAI**: `reasoning_effort` (low/medium/high) - passed as direct parameter
+  - **OpenAI**: `reasoning_effort` (none/low/medium/high/xhigh) - passed as direct parameter
   - **DeepSeek**: `reasoning_effort` (high/max) as direct param + `thinking.type=disabled` in extra_body to turn off. Both `deepseek-v4-flash` and `deepseek-v4-pro` support dual thinking modes; API defaults to enabled.
   - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter
 - **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
@@ -395,6 +395,16 @@ uv run streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
 Requires `watchdog` package (included in development dependencies). Provides instant reload when Python files change.
+
+### Current Session (2026-07-15)
+
+**Completed:**
+- **OpenAI model refresh**: upgraded the small models and added the GPT-5.6 family
+  - Upgraded `gpt-5-mini` → `gpt-5.4-mini` and `gpt-5-nano` → `gpt-5.4-nano` (both 400K context, up to `xhigh` reasoning)
+  - Added `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` (1.05M context, reasoning up to `xhigh`)
+  - Dropped `gpt-5.5`; new default OpenAI model is `gpt-5.6-terra`
+  - Added `MAX` to `ThinkingLevel` / `ThinkingLevelType` in `lib/shared/types.py`
+  - Updated `lib/shared/constants.py` and all model docs (README, this file, `docs/`)
 
 ### Recent Session (2026-03-09)
 

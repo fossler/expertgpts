@@ -15,7 +15,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | `https://api.deepseek.com` | `deepseek-v4-flash` | Cost-effective, 1M context, dual thinking modes |
-| **OpenAI** | `https://api.openai.com/v1` | `gpt-5.5` | Advanced reasoning, GPT-5 series |
+| **OpenAI** | `https://api.openai.com/v1` | `gpt-5.6-terra` | Advanced reasoning, GPT-5.6 / GPT-5.4 series |
 | **Z.AI** | `https://api.z.ai/api/paas/v4` | `glm-5.2` | GLM models, Chinese optimization |
 
 ## Architecture
@@ -91,12 +91,14 @@ LLM_PROVIDERS = {
     "openai": {
         "name": "OpenAI",
         "base_url": "https://api.openai.com/v1",
-        "default_model": "gpt-5.5",
+        "default_model": "gpt-5.6-terra",
         "models": {
-            "gpt-5.5": {
-                "display_name": "GPT-5.5",
-                "max_tokens": 1000000,
-                "thinking_param": "reasoning_effort"
+            "gpt-5.6-terra": {
+                "display_name": "GPT-5.6 Terra",
+                "max_tokens": 1050000,
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "none",
+                "thinking_param": {"reasoning": {"effort": "none"}}
             },
             # ... more models
         }
@@ -120,7 +122,7 @@ PROVIDER_NAME_TO_ID = {
 # Model availability
 MODELS_BY_PROVIDER = {
     "deepseek": ["deepseek-v4-flash", "deepseek-v4-pro"],
-    "openai": ["gpt-5.5", "gpt-5-mini", "gpt-5-nano"],
+    "openai": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5.4-nano"],
     "zai": ["glm-5.2", "glm-5", "glm-4.7-flash"]
 }
 
@@ -128,7 +130,7 @@ MODELS_BY_PROVIDER = {
 THINKING_PARAMS_BY_MODEL = {
     "deepseek-v4-flash": "reasoning_effort",
     "deepseek-v4-pro": "reasoning_effort",
-    "gpt-5.5": "reasoning_effort",
+    "gpt-5.6-terra": "reasoning_effort",
     # ...
 }
 ```
@@ -147,7 +149,7 @@ THINKING_PARAMS_BY_MODEL = {
 
 **Parameter**: Direct parameter in API call
 
-**Values**: `"low"`, `"medium"`, `"high"`
+**Values**: `"none"`, `"low"`, `"medium"`, `"high"`, `"xhigh"` (all current OpenAI models top out at `"xhigh"`)
 
 **Implementation**:
 ```python
@@ -159,7 +161,7 @@ def _prepare_thinking_param(provider, model, thinking_level):
 **Example**:
 ```python
 client.chat.completions.create(
-    model="gpt-5.5",
+    model="gpt-5.6-terra",
     reasoning_effort="medium",  # Direct parameter
     messages=messages
 )
@@ -495,8 +497,8 @@ THINKING_PARAMS_BY_MODEL = {
 
 **Complex Problem Solving**:
 - Provider: OpenAI
-- Model: `gpt-5.5`
-- Reasoning: Medium/High
+- Model: `gpt-5.6-sol`
+- Reasoning: Medium/High/Xhigh
 
 **Chinese Language**:
 - Provider: Z.AI
