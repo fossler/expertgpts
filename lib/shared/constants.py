@@ -33,27 +33,41 @@ LLM_PROVIDERS = {
         "name": "OpenAI",
         "api_key_env": "OPENAI_API_KEY",
         "base_url": "https://api.openai.com/v1",
-        "default_model": "gpt-5.5",
+        "default_model": "gpt-5.6-terra",
         "icon_path": "icons/openai_logo.png",
         "models": {
-            "gpt-5.5": {
-                "display_name": "GPT-5.5",
+            "gpt-5.6-sol": {
+                "display_name": "GPT-5.6 Sol",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
                 "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
-            "gpt-5-mini": {
-                "display_name": "GPT-5 Mini",
-                "max_tokens": 200000,
-                "reasoning_efforts": ["none", "low", "medium", "high"],
+            "gpt-5.6-terra": {
+                "display_name": "GPT-5.6 Terra",
+                "max_tokens": 1050000,  # 1.05M context window
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
                 "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
-            "gpt-5-nano": {
-                "display_name": "GPT-5 Nano",
+            "gpt-5.6-luna": {
+                "display_name": "GPT-5.6 Luna",
+                "max_tokens": 1050000,  # 1.05M context window
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "none",
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            },
+            "gpt-5.4-mini": {
+                "display_name": "GPT-5.4 Mini",
                 "max_tokens": 400000,
-                "reasoning_efforts": ["none", "low", "medium", "high"],
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "none",
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            },
+            "gpt-5.4-nano": {
+                "display_name": "GPT-5.4 Nano",
+                "max_tokens": 400000,
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
                 "reasoning_effort_default": "none",
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
@@ -325,7 +339,7 @@ def get_model_config(provider: str, model: str) -> dict:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-5.2")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5.6-terra", "glm-5.2")
 
     Returns:
         dict: Model configuration with display_name, max_tokens, thinking_param
@@ -351,7 +365,7 @@ def get_max_tokens(provider: str, model: str) -> int:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-5.2")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5.6-terra", "glm-5.2")
 
     Returns:
         int: Maximum context length for the model
@@ -391,7 +405,7 @@ def get_model_display_name(provider: str, model: str) -> str:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5", "glm-5.2")
+        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5.6-terra", "glm-5.2")
 
     Returns:
         str: Display name (e.g., "DeepSeek V4 Flash", "GPT-5", "GLM-5.2")
@@ -505,7 +519,7 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
 
     Args:
         provider: Provider key (e.g., "openai")
-        model: Model ID (e.g., "gpt-5.5", "glm-5.2")
+        model: Model ID (e.g., "gpt-5.6-terra", "glm-5.2")
 
     Returns:
         list: List of supported reasoning effort levels for the model

@@ -20,6 +20,7 @@ class ThinkingLevel(str, Enum):
     MEDIUM = "medium"
     HIGH = "high"
     XHIGH = "xhigh"
+    MAX = "max"
 
 
 class Provider(str, Enum):
@@ -136,4 +137,4 @@ ProviderKey = Literal["deepseek", "openai", "zai"]
 ModelID = str
 ApiKey = str
 SystemPrompt = str
-ThinkingLevelType = Literal["none", "low", "medium", "high", "xhigh"]
+ThinkingLevelType = Literal["none", "low", "medium", "high", "xhigh", "max"]

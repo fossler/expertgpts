@@ -38,15 +38,17 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **Base URL**: `https://api.openai.com/v1`
 
-**Default Model**: `gpt-5.5`
+**Default Model**: `gpt-5.6-terra`
 
 **Models**:
-- `gpt-5.5` - Flagship model (1.05M context window)
-- `gpt-5-mini` - Cost-effective option (200K context)
-- `gpt-5-nano` - High-throughput option (400K context)
+- `gpt-5.6-sol` - Frontier flagship (1.05M context window)
+- `gpt-5.6-terra` - Balanced performance/price, default (1.05M context)
+- `gpt-5.6-luna` - Efficient, high-volume option (1.05M context)
+- `gpt-5.4-mini` - Cost-effective option (400K context)
+- `gpt-5.4-nano` - High-throughput option (400K context)
 
 **Thinking Parameter**: `reasoning_effort`
-- Values: `"none"`, `"low"`, `"medium"`, `"high"`, `"xhigh"` (GPT-5.5 only)
+- Values: `"none"`, `"low"`, `"medium"`, `"high"`, `"xhigh"` (all current OpenAI models top out at `xhigh`)
 - Default: `"none"`
 - Passed as direct parameter in API call
 
@@ -54,9 +56,9 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **Characteristics**:
 - Advanced reasoning, coding, agentic tasks
-- 1.05M token context window (GPT-5.5)
-- xhigh reasoning effort for deep reasoning
-- GPT-5.5 optimized for complex tasks
+- 1.05M token context window (GPT-5.6 family)
+- `xhigh` reasoning effort for deep reasoning
+- GPT-5.6 family optimized for complex tasks
 - Higher cost but premium quality
 
 **Get API Key**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
@@ -174,10 +176,10 @@ ExpertGPTs caches client instances per provider/api_key combination.
 Each provider offers multiple models with different capabilities:
 
 **Cost-Effective**: DeepSeek, OpenAI mini models
-**High Quality**: OpenAI GPT-5 series
+**High Quality**: OpenAI GPT-5.6 series
 **Chinese Optimization**: Z.AI GLM models, KIMI
 **Large Context**: KIMI (256K tokens)
-**Reasoning**: DeepSeek V4 (thinking mode), OpenAI GPT-5.5, KIMI K2.6
+**Reasoning**: DeepSeek V4 (thinking mode), OpenAI GPT-5.6, KIMI K2.6
 
 ---
 

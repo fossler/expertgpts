@@ -92,7 +92,7 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
 | **DeepSeek** | api.deepseek.com | deepseek-v4-flash | Cost-effective, 1M context, dual thinking modes |
-| **OpenAI** | api.openai.com/v1 | gpt-5.5 | Advanced reasoning |
+| **OpenAI** | api.openai.com/v1 | gpt-5.6-terra | Advanced reasoning |
 | **Z.AI** | api.z.ai/api/paas/v4 | glm-5.2 | GLM models |
 
 ### Selecting a Provider
@@ -117,9 +117,11 @@ Each provider offers multiple models:
 - `deepseek-v4-pro` - Premium flagship, 1M context, dual thinking modes
 
 **OpenAI**:
-- `gpt-5.5` - Flagship model, 1.05M context (default)
-- `gpt-5-mini` - Cost-effective option, 200K context
-- `gpt-5-nano` - High-throughput option, 400K context
+- `gpt-5.6-sol` - Frontier flagship, 1.05M context
+- `gpt-5.6-terra` - Balanced performance/price, 1.05M context (default)
+- `gpt-5.6-luna` - Efficient, high-volume, 1.05M context
+- `gpt-5.4-mini` - Cost-effective option, 400K context
+- `gpt-5.4-nano` - High-throughput option, 400K context
 
 **Z.AI**:
 - `glm-5.2` - Flagship model (default), 1M context, adjustable reasoning effort (high/max)
@@ -149,9 +151,11 @@ Enables/disables reasoning capabilities (provider-specific):
 - **Low** - Light reasoning
 - **Medium** - Balanced reasoning
 - **High** - Deep reasoning
+- **Xhigh** - Extended reasoning (all current OpenAI models)
+- **Max** - Maximum reasoning (DeepSeek and Z.AI GLM only)
 
 **Availability**:
-- **OpenAI**: Supports all levels (reasoning_effort parameter)
+- **OpenAI**: `none`/`low`/`medium`/`high`/`xhigh` (reasoning_effort parameter)
 - **DeepSeek**: Enabled/disabled based on model selection
 - **Z.AI**: Enabled/disabled via extra_body parameter
 
