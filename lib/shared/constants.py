@@ -103,14 +103,25 @@ LLM_PROVIDERS = {
         "name": "KIMI",
         "api_key_env": "MOONSHOT_API_KEY",
         "base_url": "https://api.moonshot.ai/v1",
-        "default_model": "kimi-k2.6",
+        "default_model": "kimi-k3",
         "icon_path": "icons/kimi-logo.png",
         "models": {
+            "kimi-k3": {
+                "display_name": "KIMI K3",
+                "max_tokens": 1048576,  # 1M context window
+                # K3 reasons via a top-level reasoning_effort field.
+                # "max" is the only supported level today (more coming).
+                "reasoning_efforts": ["max"],
+                "reasoning_effort_default": "max",
+                "thinking_param": {"reasoning": {"effort": "max"}},
+                # K3 only accepts temperature=1.0 (fixed by the API).
+                "fixed_temperature": 1.0,
+            },
             "kimi-k2.6": {
                 "display_name": "KIMI K2.6",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
-            }
+            },
         },
     },
 }
@@ -529,3 +540,23 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
     """
     model_config = get_model_config(provider, model)
     return model_config.get("reasoning_efforts", ["none", "low", "medium", "high"])
+
+
+def get_fixed_temperature(provider: str, model: str):
+    """Get the enforced temperature for a model, if it only accepts a fixed value.
+
+    Some models (e.g. kimi-k3) reject any temperature other than a single fixed
+    value. This returns that value so callers can override user-selected
+    temperatures, or None when the model accepts an adjustable temperature.
+
+    Args:
+        provider: Provider key (e.g., "kimi")
+        model: Model ID (e.g., "kimi-k3")
+
+    Returns:
+        float | None: The fixed temperature, or None if temperature is adjustable
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    return get_model_config(provider, model).get("fixed_temperature")

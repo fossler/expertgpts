@@ -15,6 +15,7 @@ from lib.shared.constants import (
     get_default_model_for_provider,
     get_reasoning_efforts,
     get_model_config,
+    get_fixed_temperature,
 )
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
@@ -75,9 +76,9 @@ def render_thinking_mode_ui(
             else ["none", "low", "medium", "high"]
         )
         return _render_effort_selectbox(effort_options)
-    elif provider == "zai":
-        # GLM-5.2 exposes an adjustable reasoning_effort (thinking always on);
-        # older GLM models only support the enabled/disabled toggle.
+    elif provider in ("zai", "kimi"):
+        # Models that expose an adjustable reasoning_effort (GLM-5.2, kimi-k3)
+        # show an effort selector; the rest use the enabled/disabled toggle.
         model_config = get_model_config(provider, model) if model else {}
         if model_config and "reasoning_efforts" in model_config:
             return _render_effort_selectbox(model_config["reasoning_efforts"])
@@ -159,6 +160,7 @@ def render_temperature_input(
     use_sidebar: bool = False,
     widget_key: str = None,
     show_help: bool = True,
+    model: str = None,
 ) -> float:
     """Render temperature input field.
 
@@ -168,26 +170,37 @@ def render_temperature_input(
         use_sidebar: If True, render in sidebar
         widget_key: Unique widget key
         show_help: If True, show help expander
+        model: Model ID (used to detect models with a fixed temperature)
 
     Returns:
         float: Temperature value from user input
     """
     st_func = st.sidebar if use_sidebar else st
 
-    # OpenAI models only support temperature=1.0
-    if provider == "openai":
+    # Determine whether temperature is fixed for this provider/model:
+    # - All OpenAI models only support temperature=1.0
+    # - Some models (e.g. kimi-k3) enforce a fixed value declared in config
+    fixed_temperature = 1.0 if provider == "openai" else None
+    if fixed_temperature is None and provider and model:
+        fixed_temperature = get_fixed_temperature(provider, model)
+
+    if fixed_temperature is not None:
         temperature = st_func.number_input(
             i18n.t("forms.temperature"),
             min_value=0.0,
             max_value=2.0,
-            value=1.0,
+            value=fixed_temperature,
             step=0.01,
-            help=i18n.t("dialogs.temperature.fixed_for_openai") if show_help else None,
+            help=(
+                i18n.t("dialogs.temperature.fixed_for_openai")
+                if provider == "openai" and show_help
+                else None
+            ),
             disabled=True,
             format="%.2f",
             key=widget_key,
         )
-        if show_help:
+        if provider == "openai" and show_help:
             st.caption(f"⚠️ {i18n.t('dialogs.temperature.openai_warning')}")
     else:
         temperature = st_func.number_input(
@@ -256,7 +269,9 @@ def render_llm_configuration(
         is_defaults=is_defaults,
     )
 
-    temperature = render_temperature_input(value=current_temperature, provider=provider)
+    temperature = render_temperature_input(
+        value=current_temperature, provider=provider, model=model
+    )
 
     return provider, model, temperature, thinking_level
 
@@ -361,10 +376,11 @@ def render_provider_selection(
     model_config = LLM_PROVIDERS[provider]["models"][model]
 
     # Determine UI type based on provider:
-    # - Reasoning-effort selector (OpenAI, DeepSeek V4): per-model effort list from config
-    # - Enabled/Disabled toggle (Z.AI, KIMI): simple binary
+    # - Reasoning-effort selector (OpenAI, DeepSeek V4, kimi-k3): per-model effort list
+    # - Enabled/Disabled toggle (Z.AI, KIMI K2.x): simple binary
     uses_reasoning_efforts = (
-        provider in {"openai", "deepseek"} and "reasoning_efforts" in model_config
+        provider in {"openai", "deepseek", "kimi"}
+        and "reasoning_efforts" in model_config
     )
 
     optional_thinking_providers = {"zai", "kimi"}

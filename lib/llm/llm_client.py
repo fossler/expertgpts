@@ -17,6 +17,7 @@ from lib.shared.constants import (
     get_provider_base_url,
     get_reasoning_efforts,
     get_model_config,
+    get_fixed_temperature,
     SYSTEM_PROMPT_TEMPLATE,
 )
 from lib.shared.helpers import sanitize_error_message
@@ -96,6 +97,25 @@ class LLMClient:
                 return {"thinking": {"type": "disabled"}}, {}
             return {"thinking": {"type": "enabled"}}, {}
 
+        # KIMI: K3 always reasons via a top-level reasoning_effort field
+        # ("max" is the only supported level today); K2.x uses the
+        # enabled/disabled thinking toggle in extra_body. Handled before the
+        # "none" early-return below so K3 always sends its effort level.
+        if self.provider == "kimi":
+            model_config = get_model_config(self.provider, model) or {}
+            if "reasoning_efforts" in model_config:
+                efforts = model_config["reasoning_efforts"]
+                effort = (
+                    thinking_level
+                    if thinking_level in efforts
+                    else model_config.get("reasoning_effort_default", efforts[0])
+                )
+                return {}, {"reasoning_effort": effort}
+            # K2.x: enabled/disabled toggle
+            if not thinking_level or thinking_level == "none":
+                return {}, {}
+            return {"thinking": {"type": "enabled"}}, {}
+
         # No thinking specified or explicitly set to none
         if not thinking_level or thinking_level == "none":
             return {}, {}
@@ -112,14 +132,27 @@ class LLMClient:
                 # Effort not supported by this model, use default (no reasoning_effort param)
                 return {}, {}
 
-        # KIMI: use thinking type parameter (enabled/disabled) - same as Z.AI
-        if self.provider == "kimi":
-            # KIMI uses: {"thinking": {"type": "enabled"}} or {"type": "disabled"}
-            # Any thinking_level other than "none" means enabled
-            return {"thinking": {"type": "enabled"}}, {}
-
         # Other providers: return empty for now
         return {}, {}
+
+    def _effective_temperature(self, model: str, temperature: float) -> float:
+        """Resolve the temperature actually sent to the API for a model.
+
+        Most models honor the user-selected temperature, but some (e.g.
+        kimi-k3) only accept a single fixed value and reject anything else.
+        This centralizes that override so every code path (streaming,
+        non-streaming, system-prompt generation) stays consistent.
+
+        Args:
+            model: Model ID
+            temperature: User-selected temperature
+
+        Returns:
+            The temperature to send: the model's fixed value if it enforces
+            one, otherwise the caller-supplied temperature unchanged.
+        """
+        fixed_temp = get_fixed_temperature(self.provider, model)
+        return fixed_temp if fixed_temp is not None else temperature
 
     def chat(
         self,
@@ -147,6 +180,9 @@ class LLMClient:
         # Use provider default model if not specified
         if model is None:
             model = self.config["default_model"]
+
+        # Some models (e.g. kimi-k3) reject any temperature but a fixed value.
+        temperature = self._effective_temperature(model, temperature)
 
         # Prepare messages with system prompt
         prepared_messages = []
@@ -211,6 +247,9 @@ class LLMClient:
         # Use provider default model if not specified
         if model is None:
             model = self.config["default_model"]
+
+        # Some models (e.g. kimi-k3) reject any temperature but a fixed value.
+        temperature = self._effective_temperature(model, temperature)
 
         # Prepare messages with system prompt
         prepared_messages = []

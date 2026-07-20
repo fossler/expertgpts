@@ -196,7 +196,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 | **DeepSeek** | `deepseek-v4-flash` | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | `gpt-5.6-terra` | Advanced reasoning, coding, agentic tasks |
 | **Z.AI** | `glm-5.2` | GLM models, Chinese optimization, includes free tier |
-| **KIMI** | `kimi-k2.6` | 256K context, multimodal, thinking mode |
+| **KIMI** | `kimi-k3` | 1M context, always-on reasoning (`max`), multimodal |
 
 **Per-Expert Selection**: Each expert can use a different provider/model. Switch via the sidebar dropdown.
 

@@ -17,6 +17,7 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 | **DeepSeek** | `https://api.deepseek.com` | `deepseek-v4-flash` | Cost-effective, 1M context, dual thinking modes |
 | **OpenAI** | `https://api.openai.com/v1` | `gpt-5.6-terra` | Advanced reasoning, GPT-5.6 / GPT-5.4 series |
 | **Z.AI** | `https://api.z.ai/api/paas/v4` | `glm-5.2` | GLM models, Chinese optimization |
+| **KIMI** | `https://api.moonshot.ai/v1` | `kimi-k3` | 1M context, always-on reasoning (`max`), multimodal |
 
 ## Architecture
 
@@ -232,6 +233,37 @@ def _prepare_thinking_param(provider, model, thinking_level):
         return {"thinking": {"type": "enabled"}}, {}
 ```
 
+#### KIMI: `reasoning_effort` (K3) vs `thinking.type` (K2.x)
+
+**Challenge**: The K3 and K2.x generations use *different* reasoning parameters.
+
+**Model behavior**:
+- `kimi-k3` — reasons via a **top-level** `reasoning_effort` field. `"max"` is the only supported level today (the model always reasons), and it only accepts a fixed `temperature = 1.0`. Do **not** send the K2.x `thinking` parameter.
+- `kimi-k2.6` — enabled/disabled toggle via `thinking.type` in `extra_body` (defaults to enabled).
+
+Detection is by whether the model config defines `reasoning_efforts` (kimi-k3 does; kimi-k2.6 doesn't) — the same pattern used for Z.AI's GLM-5.2.
+
+**Implementation**:
+```python
+def _prepare_thinking_param(self, model, thinking_level):
+    if self.provider == "kimi":
+        model_config = get_model_config(self.provider, model) or {}
+        if "reasoning_efforts" in model_config:  # kimi-k3
+            efforts = model_config["reasoning_efforts"]
+            effort = thinking_level if thinking_level in efforts \
+                else model_config.get("reasoning_effort_default", efforts[0])
+            return {}, {"reasoning_effort": effort}
+        # kimi-k2.x: enabled/disabled toggle
+        if not thinking_level or thinking_level == "none":
+            return {}, {}
+        return {"thinking": {"type": "enabled"}}, {}
+```
+
+> **Fixed temperature**: models may declare `fixed_temperature` in their config
+> (kimi-k3 sets `1.0`). `LLMClient` overrides the user-selected temperature with
+> that value on every call path, so the UI disables the temperature control for
+> such models.
+
 ### Unified Implementation
 
 **Location**: `lib/llm/llm_client.py`
@@ -262,7 +294,8 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
     if provider == "openai":
         direct_params["reasoning_effort"] = thinking_level
 
-    # Z.AI / KIMI: thinking.type in extra_body
+    # Z.AI (and KIMI K2.x): thinking.type in extra_body.
+    # KIMI K3 instead uses a top-level reasoning_effort (see KIMI section above).
     elif provider in ("zai", "kimi"):
         extra_body["thinking"] = {"type": "enabled"}
 

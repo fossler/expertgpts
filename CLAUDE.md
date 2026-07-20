@@ -147,6 +147,8 @@ A unified client interface supports multiple LLM providers through OpenAI-compat
   - **OpenAI**: `reasoning_effort` (none/low/medium/high/xhigh) - passed as direct parameter
   - **DeepSeek**: `reasoning_effort` (high/max) as direct param + `thinking.type=disabled` in extra_body to turn off. Both `deepseek-v4-flash` and `deepseek-v4-pro` support dual thinking modes; API defaults to enabled.
   - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter
+  - **KIMI**: generation-dependent. `kimi-k3` uses a top-level `reasoning_effort` (only `max` today; always reasons) and enforces a fixed `temperature=1.0`. `kimi-k2.6` uses the `thinking.type` (enabled/disabled) extra_body toggle. Detected by whether the model config defines `reasoning_efforts` (same pattern as Z.AI's GLM-5.2).
+- **Fixed temperature**: models may declare `fixed_temperature` in their config (kimi-k3 = 1.0). `LLMClient._effective_temperature()` overrides the user-selected temperature on every call path; `render_temperature_input()` disables the control for such models.
 - **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
 - **Connection pooling**: `lib/llm/client_pool.py` caches client instances for performance
 
@@ -396,7 +398,18 @@ uv run streamlit run app.py --server.fileWatcherType=watchdog
 
 Requires `watchdog` package (included in development dependencies). Provides instant reload when Python files change.
 
-### Current Session (2026-07-15)
+### Current Session (2026-07-18)
+
+**Completed:**
+- **KIMI K3 support**: added the `kimi-k3` flagship model (Moonshot / `MOONSHOT_API_KEY`)
+  - 1M context (1,048,576 tokens); set as the new default KIMI model (`kimi-k2.6` kept as secondary)
+  - K3 reasons via a **top-level `reasoning_effort`** (`max` only today), NOT the K2.x `thinking` extra_body toggle — handled per-model in `LLMClient._prepare_thinking_param()`
+  - Introduced a generic **`fixed_temperature`** model-config field (kimi-k3 = 1.0), enforced in `LLMClient._effective_temperature()` (covers streaming, non-streaming, and system-prompt generation) and surfaced in the UI via `render_temperature_input(model=...)`
+  - `render_provider_selection` / `render_thinking_mode_ui` now show kimi-k3 as a reasoning-effort selector (`max`); k2.6 keeps the enabled/disabled toggle
+  - Added `KIMI` to the `Provider` enum / `ProviderKey`; regenerated expert pages from the template
+  - Updated docs (README, `docs/api/providers.md`, `docs/architecture/multi-provider-llm.md`, `app_defaults.toml.example`)
+
+### Previous Session (2026-07-15)
 
 **Completed:**
 - **OpenAI model refresh**: upgraded the small models and added the GPT-5.6 family
