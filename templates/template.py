@@ -497,6 +497,7 @@ def display_model_settings(config: dict, messages_key: str):
         use_sidebar=True,
         widget_key=f"{EXPERT_ID}_temperature_input_v{cache_version}",
         show_help=False,
+        model=new_model,
     )
 
     # Display provider links below temperature

@@ -29,6 +29,7 @@ class Provider(str, Enum):
     DEEPSEEK = "deepseek"
     OPENAI = "openai"
     ZAI = "zai"
+    KIMI = "kimi"
 
 
 class Message(TypedDict):
@@ -133,7 +134,7 @@ PromptTokens = int
 CompletionTokens = int
 TotalTokens = int
 MessagesList = List[Message]
-ProviderKey = Literal["deepseek", "openai", "zai"]
+ProviderKey = Literal["deepseek", "openai", "zai", "kimi"]
 ModelID = str
 ApiKey = str
 SystemPrompt = str

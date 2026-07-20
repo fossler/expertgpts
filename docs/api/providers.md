@@ -96,23 +96,25 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **Base URL**: `https://api.moonshot.ai/v1`
 
-**Default Model**: `kimi-k2.6`
+**Default Model**: `kimi-k3`
 
 **Models**:
-- `kimi-k2.6` - Flagship model (256K context window)
+- `kimi-k3` - Flagship model (1M context window), always-on reasoning
+- `kimi-k2.6` - Previous flagship (256K context window)
 
-**Thinking Parameter**: `thinking.type`
-- Values: `"enabled"`, `"disabled"`
-- Passed via extra_body
-- Default: enabled for kimi-k2.6
+**Thinking Parameter**: differs by model generation
+- `kimi-k3` — `reasoning_effort` as a **top-level** parameter; `"max"` is the only supported level today (always reasons). Do **not** send the K2.x `thinking` parameter.
+- `kimi-k2.6` — `thinking.type` (`"enabled"` / `"disabled"`) via `extra_body`; defaults to enabled.
+
+**Temperature**: `kimi-k3` only accepts a fixed `temperature = 1.0` (the app enforces this automatically); `kimi-k2.6` accepts an adjustable temperature.
 
 **API Documentation**: [https://platform.kimi.ai/docs](https://platform.kimi.ai/docs)
 
 **Characteristics**:
-- 256K context window (262,144 tokens)
+- `kimi-k3`: 1M context window (1,048,576 tokens), always-on reasoning at `max`
+- `kimi-k2.6`: 256K context window (262,144 tokens)
 - Native multimodal support (images, videos)
 - Strong reasoning capabilities
-- Chinese optimization
 
 **Get API Key**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
@@ -166,10 +168,9 @@ ExpertGPTs caches client instances per provider/api_key combination.
 - Set in `extra_body` dictionary
 - Values: enabled, disabled
 
-**KIMI**: `thinking.type` via extra_body
-- Set in `extra_body` dictionary
-- Values: enabled, disabled
-- Default: enabled for kimi-k2.6
+**KIMI**:
+- `kimi-k3`: `reasoning_effort` as a top-level parameter (`max` only today; always reasons)
+- `kimi-k2.6`: `thinking.type` (`enabled`/`disabled`) via extra_body, defaults to enabled
 
 ### Model Selection
 
@@ -178,8 +179,8 @@ Each provider offers multiple models with different capabilities:
 **Cost-Effective**: DeepSeek, OpenAI mini models
 **High Quality**: OpenAI GPT-5.6 series
 **Chinese Optimization**: Z.AI GLM models, KIMI
-**Large Context**: KIMI (256K tokens)
-**Reasoning**: DeepSeek V4 (thinking mode), OpenAI GPT-5.6, KIMI K2.6
+**Large Context**: KIMI K3, DeepSeek, OpenAI GPT-5.6 (1M+ tokens)
+**Reasoning**: DeepSeek V4 (thinking mode), OpenAI GPT-5.6, KIMI K3 (always-on `max`)
 
 ---
 
