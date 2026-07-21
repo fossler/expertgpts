@@ -157,8 +157,13 @@ def main():
     # Debug page: routable only via the /debug URL, never linked in nav.
     # st.navigation only shows (and routes to) pages in the list, so we add the
     # debug page exclusively when the browser is already on /debug.
+    # Guard on file existence: the debug page is optional and may be absent
+    # (fresh clone that didn't sync it, a deploy that strips "_" files, etc.).
+    # A missing hidden page must not crash the whole app, unlike the mandatory
+    # Home/Settings/Help pages which are intentionally created unconditionally.
     current_path = urllib.parse.urlparse(st.context.url).path.rstrip("/")
-    if current_path.endswith("/debug"):
+    debug_page_path = Path(__file__).parent / "pages" / "_debug.py"
+    if current_path.endswith("/debug") and debug_page_path.exists():
         pages.append(
             st.Page(
                 "pages/_debug.py",
