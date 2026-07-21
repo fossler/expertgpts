@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 import streamlit as st
 from lib.config.config_manager import get_config_manager
-from lib.shared.page_generator import PageGenerator
+from lib.shared.page_generator import PageGenerator, is_system_page
 from lib.shared.constants import (
     EXPERT_BEHAVIOR_DOCS,
     get_expert_behavior_docs_edit,
@@ -1097,16 +1097,13 @@ def render_danger_zone_section():
                             if safe_config_path.exists():
                                 safe_config_path.unlink()
 
-                    # Delete all expert pages (except Home.py and Settings.py)
+                    # Delete all expert pages, preserving system pages (Home,
+                    # Settings, Help) and any hidden "_"-prefixed page (e.g.
+                    # _debug.py). is_system_page() is the single source of truth.
                     pages_dir = Path(__file__).parent
                     if pages_dir.exists():
                         for page_file in pages_dir.glob("*.py"):
-                            # Keep core application files (Home and Settings)
-                            if page_file.name not in [
-                                "1000_Home.py",
-                                "9998_Settings.py",
-                                "9999_Help.py",
-                            ]:
+                            if not is_system_page(page_file.name):
                                 # Validate the page file path is safe before deletion
                                 safe_page_path = safe_path_join(
                                     pages_dir, page_file.name

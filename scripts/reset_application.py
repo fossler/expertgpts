@@ -22,6 +22,7 @@ sys.path.insert(0, str(project_root))
 
 from lib.shared.constants import EXAMPLE_EXPERTS_COUNT
 from lib.shared.file_ops import validate_cwd
+from lib.shared.page_generator import is_system_page
 
 
 def confirm_reset():
@@ -70,13 +71,9 @@ def delete_pages():
         print("❌ Pages directory not found!")
         return False
 
-    # Get all Python files, excluding Home (1000), Settings (9998), Help (9999), and hidden files (starting with _)
-    page_files = [
-        f
-        for f in pages_dir.glob("*.py")
-        if not f.name.startswith("_")
-        and f.name not in ["1000_Home.py", "9998_Settings.py", "9999_Help.py"]
-    ]
+    # Get all expert pages, excluding system pages: Home (1000), Settings
+    # (9998), Help (9999), and any hidden "_"-prefixed page (e.g. _debug.py).
+    page_files = [f for f in pages_dir.glob("*.py") if not is_system_page(f.name)]
 
     if not page_files:
         print("ℹ️  No expert pages to delete.")
