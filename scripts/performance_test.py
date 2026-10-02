@@ -50,9 +50,11 @@ def test_framework_non_streaming():
             total_time = time.time() - start
             response_len = len(response)
             results.append(total_time)
-            print(f"Run {i+1}: Total={total_time:.3f}s, Response={response_len} chars")
+            print(
+                f"Run {i + 1}: Total={total_time:.3f}s, Response={response_len} chars"
+            )
         except Exception as e:
-            print(f"Run {i+1}: ERROR - {e}")
+            print(f"Run {i + 1}: ERROR - {e}")
 
     if results:
         avg = sum(results) / len(results)
@@ -97,10 +99,10 @@ def test_framework_streaming():
                 }
             )
             print(
-                f"Run {i+1}: First chunk={first_chunk_time:.3f}s, Total={total_time:.3f}s, Chunks={chunk_count}"
+                f"Run {i + 1}: First chunk={first_chunk_time:.3f}s, Total={total_time:.3f}s, Chunks={chunk_count}"
             )
         except Exception as e:
-            print(f"Run {i+1}: ERROR - {e}")
+            print(f"Run {i + 1}: ERROR - {e}")
 
     if results:
         avg_first_chunk = sum(r["first_chunk"] for r in results) / len(results)
@@ -138,10 +140,10 @@ def test_httpx_direct():
                 content_len = len(data["choices"][0]["message"]["content"])
                 results.append(total_time)
                 print(
-                    f"Run {i+1}: Total={total_time:.3f}s, Response={content_len} chars"
+                    f"Run {i + 1}: Total={total_time:.3f}s, Response={content_len} chars"
                 )
         except Exception as e:
-            print(f"Run {i+1}: ERROR - {e}")
+            print(f"Run {i + 1}: ERROR - {e}")
 
     if results:
         avg = sum(results) / len(results)
@@ -164,7 +166,7 @@ def main():
     curl_results = [7.352, 7.947, 6.451]  # From earlier CURL tests
     curl_avg = sum(curl_results) / len(curl_results)
     for i, t in enumerate(curl_results):
-        print(f"Run {i+1}: Total={t:.3f}s")
+        print(f"Run {i + 1}: Total={t:.3f}s")
     print(f"Average: {curl_avg:.3f}s")
 
     # Test direct HTTP

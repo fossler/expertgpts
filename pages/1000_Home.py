@@ -66,36 +66,36 @@ def main():
     st.title(f"🤖 {i18n.t('home.title')}")
 
     st.markdown(f"""
-    ## {i18n.t('home.subtitle')}
+    ## {i18n.t("home.subtitle")}
 
     ExpertGPTs provides access to multiple domain-specific expert AI agents, each specialized
     in different fields. Select an expert from the navigation menu to start chatting!
 
-    ### {i18n.t('home.getting_started')}
+    ### {i18n.t("home.getting_started")}
 
-    1. **{i18n.t('home.getting_started_steps.step1')}**: {i18n.t('home.getting_started_steps.step1_desc')}
-    2. **{i18n.t('home.getting_started_steps.step2')}**: {i18n.t('home.getting_started_steps.step2_desc')}
-    3. **{i18n.t('home.getting_started_steps.step3')}**: {i18n.t('home.getting_started_steps.step3_desc')}
+    1. **{i18n.t("home.getting_started_steps.step1")}**: {i18n.t("home.getting_started_steps.step1_desc")}
+    2. **{i18n.t("home.getting_started_steps.step2")}**: {i18n.t("home.getting_started_steps.step2_desc")}
+    3. **{i18n.t("home.getting_started_steps.step3")}**: {i18n.t("home.getting_started_steps.step3_desc")}
 
-    ### {i18n.t('home.create_custom_experts')}
+    ### {i18n.t("home.create_custom_experts")}
 
-    {i18n.t('home.create_experts_desc')}
-    - {i18n.t('home.expert_features.feature1')}
-    - {i18n.t('home.expert_features.feature2')}
-    - {i18n.t('home.expert_features.feature3')}
+    {i18n.t("home.create_experts_desc")}
+    - {i18n.t("home.expert_features.feature1")}
+    - {i18n.t("home.expert_features.feature2")}
+    - {i18n.t("home.expert_features.feature3")}
 
-    ### {i18n.t('home.features.title')}
+    ### {i18n.t("home.features.title")}
 
-    - 🤖 **{i18n.t('home.features.multiple_experts')}**: {i18n.t('home.features.multiple_experts_desc')}
-    - 🔄 **{i18n.t('home.features.multi_provider')}**: {i18n.t('home.features.multi_provider_desc')}
-    - ✨ **{i18n.t('home.features.ai_prompts')}**: {i18n.t('home.features.ai_prompts_desc')}
-    - 🌍 **{i18n.t('home.features.internationalization')}**: {i18n.t('home.features.internationalization_desc')}
-    - 📝 **{i18n.t('home.features.template_architecture')}**: {i18n.t('home.features.template_architecture_desc')}
-    - 🎨 **{i18n.t('home.features.theme_customization')}**: {i18n.t('home.features.theme_customization_desc')}
-    - 💾 **{i18n.t('home.features.chat_history')}**: {i18n.t('home.features.chat_history_desc')}
-    - ⚙️ **{i18n.t('home.features.temperature')}**: {i18n.t('home.features.temperature_desc')}
-    - 🚀 **{i18n.t('home.features.modern_navigation')}**: {i18n.t('home.features.modern_navigation_desc')}
-    - 📂 **{i18n.t('home.features.file_config')}**: {i18n.t('home.features.file_config_desc')}
+    - 🤖 **{i18n.t("home.features.multiple_experts")}**: {i18n.t("home.features.multiple_experts_desc")}
+    - 🔄 **{i18n.t("home.features.multi_provider")}**: {i18n.t("home.features.multi_provider_desc")}
+    - ✨ **{i18n.t("home.features.ai_prompts")}**: {i18n.t("home.features.ai_prompts_desc")}
+    - 🌍 **{i18n.t("home.features.internationalization")}**: {i18n.t("home.features.internationalization_desc")}
+    - 📝 **{i18n.t("home.features.template_architecture")}**: {i18n.t("home.features.template_architecture_desc")}
+    - 🎨 **{i18n.t("home.features.theme_customization")}**: {i18n.t("home.features.theme_customization_desc")}
+    - 💾 **{i18n.t("home.features.chat_history")}**: {i18n.t("home.features.chat_history_desc")}
+    - ⚙️ **{i18n.t("home.features.temperature")}**: {i18n.t("home.features.temperature_desc")}
+    - 🚀 **{i18n.t("home.features.modern_navigation")}**: {i18n.t("home.features.modern_navigation_desc")}
+    - 📂 **{i18n.t("home.features.file_config")}**: {i18n.t("home.features.file_config_desc")}
     """)
 
     st.divider()
