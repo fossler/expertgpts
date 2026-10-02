@@ -207,8 +207,7 @@ def validate_cwd(cwd_path: Path) -> Path:
     # This prevents attackers from using paths like /.git/config
     if any(part.startswith(".") for part in resolved.parts if part not in {".", ".."}):
         raise ValueError(
-            f"Hidden directory in path: {cwd_path} "
-            "(potential path traversal attempt)"
+            f"Hidden directory in path: {cwd_path} (potential path traversal attempt)"
         )
 
     return resolved

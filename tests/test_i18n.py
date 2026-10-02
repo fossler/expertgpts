@@ -107,9 +107,9 @@ class TestI18nSystemPrompt:
         lines = system_prompt_with_lang.split("\n")
         assert lines[0] == language_prefix, "Language prefix should be first line"
         assert lines[1] == "", "Second line should be empty separator"
-        assert (
-            raw_system_prompt in system_prompt_with_lang
-        ), "Raw prompt should be included"
+        assert raw_system_prompt in system_prompt_with_lang, (
+            "Raw prompt should be included"
+        )
 
     def test_system_prompt_construction_german(self, i18n, raw_system_prompt):
         """Test system prompt construction with German language prefix.
@@ -126,9 +126,9 @@ class TestI18nSystemPrompt:
         lines = system_prompt_with_lang.split("\n")
         assert lines[0] == language_prefix, "Language prefix should be first line"
         assert lines[1] == "", "Second line should be empty separator"
-        assert (
-            raw_system_prompt in system_prompt_with_lang
-        ), "Raw prompt should be included"
+        assert raw_system_prompt in system_prompt_with_lang, (
+            "Raw prompt should be included"
+        )
         # Verify it's German
         assert "Deutsch" in language_prefix, "German prefix should contain 'Deutsch'"
 
@@ -143,9 +143,9 @@ class TestI18nSystemPrompt:
         system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
 
         # Combined prompt should be longer than raw prompt
-        assert len(system_prompt_with_lang) > len(
-            raw_system_prompt
-        ), "Combined prompt should be longer than raw prompt"
+        assert len(system_prompt_with_lang) > len(raw_system_prompt), (
+            "Combined prompt should be longer than raw prompt"
+        )
 
         # But not excessively long (prefix + 2 newlines + raw)
         expected_length = len(language_prefix) + 2 + len(raw_system_prompt)
@@ -168,9 +168,9 @@ class TestI18nLocaleFiles:
         """
         locale_files = list(locale_dir.glob("*.json"))
         assert len(locale_files) > 0, "Should have locale files"
-        assert (
-            locale_dir / "en.json"
-        ).exists(), "Should have English locale (source of truth)"
+        assert (locale_dir / "en.json").exists(), (
+            "Should have English locale (source of truth)"
+        )
 
     def test_locale_files_no_expert_content(self, locale_dir):
         """Test that locale files don't contain expert content.
@@ -325,9 +325,9 @@ class TestI18nIntegration:
 
         # Step 5: Verify structure
         lines = final_prompt.split("\n")
-        assert lines[0].startswith(
-            "You must respond in"
-        ), "First line should be language instruction"
+        assert lines[0].startswith("You must respond in"), (
+            "First line should be language instruction"
+        )
         assert lines[1] == "", "Second line should be empty separator"
         assert raw_prompt in final_prompt, "Raw prompt should be included"
 
@@ -361,9 +361,9 @@ class TestI18nIntegration:
         language_prefix = i18n.get_language_prefix(language_code)
 
         # Verify Chinese prefix
-        assert (
-            "简体中文" in language_prefix
-        ), "Should contain Simplified Chinese characters"
+        assert "简体中文" in language_prefix, (
+            "Should contain Simplified Chinese characters"
+        )
 
         # Construct and verify
         final_prompt = f"{language_prefix}\n\n{raw_prompt}"
@@ -402,8 +402,8 @@ class TestI18nIntegration:
         # Load config again - should be unchanged
         config_after = config_manager.load_config(expert_id)
 
-        assert (
-            config_after["system_prompt"] == original_prompt
-        ), "YAML config should not be affected by language switching"
+        assert config_after["system_prompt"] == original_prompt, (
+            "YAML config should not be affected by language switching"
+        )
         assert config_after["expert_name"] == "Test Expert"
         assert config_after["description"] == "Test description."

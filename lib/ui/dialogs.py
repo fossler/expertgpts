@@ -596,9 +596,9 @@ def render_add_chat_dialog():
 
     if not api_key_available:
         st.warning(f"""
-        ⚠️ **{i18n.t('dialogs.add_chat.api_key_required')}**
+        ⚠️ **{i18n.t("dialogs.add_chat.api_key_required")}**
 
-        {i18n.t('dialogs.add_chat.api_key_required_desc')}
+        {i18n.t("dialogs.add_chat.api_key_required_desc")}
         """)
 
         if st.button(f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"):

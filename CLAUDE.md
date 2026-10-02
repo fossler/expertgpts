@@ -108,11 +108,11 @@ uv run pytest -v -m "not slow"            # Exclude slow tests
 
 ### Code Quality
 ```bash
-# Format code with Black
-uv run black .
+# Format code with Ruff
+uv run ruff format .
 
 # Check formatting without making changes
-uv run black --check .
+uv run ruff format --check .
 ```
 
 ### Administrative Scripts

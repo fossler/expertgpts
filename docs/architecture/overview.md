@@ -377,7 +377,7 @@ Render expert interface
 
 ### Development
 - **Testing**: pytest
-- **Code Quality**: Black (formatter)
+- **Code Quality**: Ruff (formatter)
 - **Version Control**: Git
 
 ## Performance Optimizations

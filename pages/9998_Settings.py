@@ -1161,23 +1161,23 @@ def render_about_section():
     st.markdown(f"""
     ### ExpertGPTs
 
-    {i18n.t('about.description')}
+    {i18n.t("about.description")}
 
-    **{i18n.t('about.version')}**
+    **{i18n.t("about.version")}**
 
-    **{i18n.t('about.features_title')}:**
-    - 🤖 {i18n.t('about.feature_multiple_experts')}
-    - 🔄 {i18n.t('about.feature_multi_provider')}
-    - ✨ {i18n.t('about.feature_ai_prompts')}
-    - 🌍 {i18n.t('about.feature_internationalization')}
-    - 📝 {i18n.t('about.feature_template_architecture')}
-    - 🎨 {i18n.t('about.feature_theme_customization')}
-    - 💾 {i18n.t('about.feature_chat_history')}
-    - ⚙️ {i18n.t('about.feature_temperature')}
-    - 🚀 {i18n.t('about.feature_modern_navigation')}
-    - 📂 {i18n.t('about.feature_file_config')}
+    **{i18n.t("about.features_title")}:**
+    - 🤖 {i18n.t("about.feature_multiple_experts")}
+    - 🔄 {i18n.t("about.feature_multi_provider")}
+    - ✨ {i18n.t("about.feature_ai_prompts")}
+    - 🌍 {i18n.t("about.feature_internationalization")}
+    - 📝 {i18n.t("about.feature_template_architecture")}
+    - 🎨 {i18n.t("about.feature_theme_customization")}
+    - 💾 {i18n.t("about.feature_chat_history")}
+    - ⚙️ {i18n.t("about.feature_temperature")}
+    - 🚀 {i18n.t("about.feature_modern_navigation")}
+    - 📂 {i18n.t("about.feature_file_config")}
 
-    ### {i18n.t('about.development')}
+    ### {i18n.t("about.development")}
     """)
 
     # Display z.ai icon and link
@@ -1210,14 +1210,14 @@ def render_about_section():
         st.empty()
 
     st.markdown(f"""
-    ### {i18n.t('about.resources')}
+    ### {i18n.t("about.resources")}
     """)
     st.markdown(
         "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)"
     )
 
     st.markdown(f"""
-    ### {i18n.t('about.support')}
+    ### {i18n.t("about.support")}
     """)
 
     # Buy Me a Coffee button
