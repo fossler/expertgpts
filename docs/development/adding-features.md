@@ -226,7 +226,7 @@ def test_my_new_feature():
 
 ```bash
 # Format code
-black .
+uv run ruff format .
 
 # Run tests
 ./scripts/run_tests.sh

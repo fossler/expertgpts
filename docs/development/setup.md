@@ -46,7 +46,7 @@ This creates a virtual environment and installs all dependencies.
 - pytest (testing framework)
 - pytest-cov (coverage reporting)
 - watchdog (faster file watching)
-- black (code formatter)
+- ruff (code formatter)
 
 ### 3. Initial Application Setup
 
@@ -146,14 +146,14 @@ uv run pytest --cov=lib --cov-report=html
 
 ## Code Quality
 
-### Formatting with Black
+### Formatting with Ruff
 
 ```bash
 # Format code
-uv run black .
+uv run ruff format .
 
 # Check formatting without making changes
-uv run black --check .
+uv run ruff format --check .
 ```
 
 ### Type Checking (Optional)
@@ -240,7 +240,7 @@ When modifying expert pages:
 ./scripts/run_tests.sh
 
 # Check formatting
-uv run black --check .
+uv run ruff format --check .
 
 # If both pass, commit
 git add .

@@ -8,7 +8,7 @@
 watchdog>=6.0.0
 
 # Code formatting and linting
-black>=26.5.1
+ruff>=0.16.10
 
 # Testing framework (optional, for future use)
 pytest>=9.1.1

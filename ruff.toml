@@ -1,0 +1,3 @@
+# Ruff formatter settings (defaults match Black).
+# Markdown code blocks are excluded to keep doc examples hand-formatted.
+extend-exclude = ["*.md"]
