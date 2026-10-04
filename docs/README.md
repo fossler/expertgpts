@@ -74,6 +74,7 @@ Developer documentation:
 - **[Project Structure](development/project-structure.md)** - File organization
 - **[Adding Features](development/adding-features.md)** - Feature development
 - **[Testing](development/testing.md)** - Testing guide
+- **[Streamlit 1.65 Upgrade Notes](development/streamlit-1.65-upgrade.md)** - Breaking changes and adoptable features (1.60–1.65)
 
 ### Reference
 
