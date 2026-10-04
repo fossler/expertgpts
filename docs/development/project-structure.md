@@ -91,8 +91,8 @@ expertgpts/
 │   ├── reference/
 │   └── api/
 │
-├── requirements.txt                # Production dependencies
-├── requirements-dev.txt            # Development dependencies
+├── pyproject.toml                  # Project metadata and dependencies
+├── uv.lock                         # Locked dependency versions
 └── .gitignore                      # Git ignore patterns
 ```
 

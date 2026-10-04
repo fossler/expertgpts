@@ -101,8 +101,8 @@ expertgpts/
 │   ├── secrets.toml                # API keys (gitignored)
 │   ├── config.toml                 # Theme settings (gitignored)
 │   └── app_defaults.toml           # User preferences (gitignored)
-├── requirements.txt                # Production dependencies
-├── requirements-dev.txt            # Development dependencies
+├── pyproject.toml                  # Project metadata and dependencies
+├── uv.lock                         # Locked dependency versions
 └── scripts/                        # Administrative scripts
     ├── setup.py                    # Initial setup
     ├── reset_application.py        # Reset to factory defaults

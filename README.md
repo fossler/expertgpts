@@ -262,7 +262,7 @@ http://localhost:8501/debug
 ```
 
 It has six tabs: **Dependencies** (declared vs. actually-installed versions from
-`requirements*.txt`, with mismatches flagged), **Runtime** (Python/Streamlit
+`pyproject.toml`, with mismatches flagged), **Runtime** (Python/Streamlit
 versions, platform, Git branch), **App status** (expert/config counts,
 chat-history sizes, streaming-cache files), **Config** (API-key status and
 default provider/model/language), **Session state** (a live `st.session_state`

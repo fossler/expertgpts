@@ -26,11 +26,17 @@ python3 --version
 
 **Solution**:
 ```bash
-# Ensure virtual environment activated
-source .venv/bin/activate
+# Install the locked dependencies into .venv
+uv sync
+```
 
-# Install dependencies
-pip install -r requirements.txt
+If this happens right after a Python upgrade (e.g. an OS upgrade from Python 3.12
+to 3.14), the existing `.venv` was built for the old interpreter. `uv run` and
+`uv sync` normally detect this and rebuild it; if not, recreate it:
+
+```bash
+rm -rf .venv
+uv sync
 ```
 
 ---
@@ -40,12 +46,12 @@ pip install -r requirements.txt
 **Problem**: `Permission denied when installing packages`
 
 **Solution**:
-```bash
-# Ensure virtual environment activated
-source .venv/bin/activate
+uv installs into the project's `.venv`, so no root or `--user` installs are
+needed. If `.venv` was created by another user, recreate it as yourself:
 
-# Reinstall
-pip install -r requirements.txt --user
+```bash
+rm -rf .venv
+uv sync
 ```
 
 ---
@@ -101,7 +107,7 @@ python3 scripts/setup.py
 **Solutions**:
 ```bash
 # Check dependencies
-pip install -r requirements.txt
+uv sync
 
 # Use different port
 streamlit run app.py --server.port 8502

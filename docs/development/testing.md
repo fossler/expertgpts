@@ -23,16 +23,12 @@ ExpertGPTs uses **pytest** as its testing framework. The test suite focuses on:
 
 ### Test Requirements
 
-All testing dependencies are included in `requirements-dev.txt`:
+All testing dependencies are part of the `dev` dependency group in
+`pyproject.toml`. `uv run` installs them automatically; to install them
+explicitly:
 
 ```bash
-pip install -r requirements-dev.txt
-```
-
-Or install individually:
-
-```bash
-pip install pytest pytest-cov
+uv sync
 ```
 
 ## Running Tests
@@ -242,18 +238,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v6
 
     - name: Install dependencies
       run: |
-        pip install -r requirements-dev.txt
+        uv sync --locked
 
     - name: Run tests
       run: |
-        pytest --cov=utils --cov-report=xml
+        uv run pytest --cov=lib --cov-report=xml
 
     - name: Upload coverage
       uses: codecov/codecov-action@v3
@@ -371,12 +365,9 @@ pytest -m "not slow"  # Everything except slow tests
 
 **Solution**:
 ```bash
-# Install in development mode
-pip install -e .
-
-# Or ensure you're in the project root
+# Run pytest from the project root
 cd /path/to/expertgpts
-pytest
+uv run pytest
 ```
 
 ### Tests Fail When Run Together

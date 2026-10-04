@@ -81,6 +81,9 @@ Read these documents when working on specific areas:
 # Install uv (fast Python package manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# Install locked dependencies (pyproject.toml + uv.lock; `uv run` also does this automatically)
+uv sync
+
 # First-time setup (creates 7 example experts)
 uv run python scripts/setup.py
 ```
