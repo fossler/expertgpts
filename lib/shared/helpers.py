@@ -196,7 +196,7 @@ def validate_api_key(api_key: str, provider: str = None) -> tuple[bool, str]:
         },
         "zai": {
             "pattern": r"^[a-f0-9]{32}\.[a-zA-Z0-9]{16}$",
-            "example": "ab3e366bed0b468586b2bd9e7eab347a.XyZ1234567890AbC",
+            "example": "0123456789abcdef0123456789abcdef.XyZ1234567890AbC",
         },
         "kimi": {
             "pattern": r"^sk-[a-zA-Z0-9]{46,}$",

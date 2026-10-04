@@ -5,6 +5,11 @@ This script measures and compares the performance of:
 1. Direct HTTP calls (simulating CURL)
 2. Framework non-streaming calls (LLMClient.chat)
 3. Framework streaming calls (LLMClient.chat_stream)
+
+The API key is read from ZAI_API_KEY in .streamlit/secrets.toml (set it via the
+Settings page). Run manually; this is a benchmark, not part of the test suite:
+
+    uv run python scripts/benchmark_zai.py
 """
 
 import sys
@@ -14,8 +19,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Test configuration
-ZAI_API_KEY = "ab3e366bed0b468586b2bd9e7eab347a.IgKW2zzWtVB1Xs9B"
+# Benchmark configuration
 MODEL = "glm-5"
 TEST_MESSAGES = [
     {"role": "system", "content": "You are a helpful AI assistant."},
@@ -24,15 +28,28 @@ TEST_MESSAGES = [
 NUM_RUNS = 3
 
 
-def test_framework_non_streaming():
-    """Test framework non-streaming API calls."""
+def load_api_key() -> str:
+    """Return the Z.AI API key from secrets.toml, or exit if it is not set."""
+    from lib.config.secrets_manager import get_provider_api_key
+
+    api_key = get_provider_api_key("zai")
+    if not api_key:
+        sys.exit(
+            "ZAI_API_KEY is not set in .streamlit/secrets.toml "
+            "(set it via the Settings page)."
+        )
+    return api_key
+
+
+def bench_framework_non_streaming(api_key: str):
+    """Benchmark framework non-streaming API calls."""
     from lib.llm.llm_client import LLMClient
 
     print("\n=== Framework Non-Streaming ===")
 
     # Measure client creation time
     start = time.time()
-    client = LLMClient(provider="zai", api_key=ZAI_API_KEY)
+    client = LLMClient(provider="zai", api_key=api_key)
     client_creation_time = time.time() - start
     print(f"Client creation: {client_creation_time:.3f}s")
 
@@ -63,14 +80,14 @@ def test_framework_non_streaming():
     return results, client_creation_time
 
 
-def test_framework_streaming():
-    """Test framework streaming API calls."""
+def bench_framework_streaming(api_key: str):
+    """Benchmark framework streaming API calls."""
     from lib.llm.llm_client import LLMClient
 
     print("\n=== Framework Streaming ===")
 
     # Reuse client for fair comparison
-    client = LLMClient(provider="zai", api_key=ZAI_API_KEY)
+    client = LLMClient(provider="zai", api_key=api_key)
 
     results = []
 
@@ -112,8 +129,8 @@ def test_framework_streaming():
     return results
 
 
-def test_httpx_direct():
-    """Test direct HTTP call using httpx2 (what OpenAI SDK uses internally)."""
+def bench_httpx_direct(api_key: str):
+    """Benchmark direct HTTP call using httpx2 (what OpenAI SDK uses internally)."""
     import json
     import httpx2
 
@@ -122,7 +139,7 @@ def test_httpx_direct():
     url = "https://api.z.ai/api/paas/v4/chat/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {ZAI_API_KEY}",
+        "Authorization": f"Bearer {api_key}",
     }
     payload = {"model": MODEL, "messages": TEST_MESSAGES, "stream": False}
 
@@ -153,7 +170,9 @@ def test_httpx_direct():
 
 
 def main():
-    """Run all performance tests."""
+    """Run all benchmarks."""
+    api_key = load_api_key()
+
     print("=" * 60)
     print("Z.AI API Performance Comparison")
     print("=" * 60)
@@ -170,13 +189,13 @@ def main():
     print(f"Average: {curl_avg:.3f}s")
 
     # Test direct HTTP
-    httpx_results = test_httpx_direct()
+    httpx_results = bench_httpx_direct(api_key)
 
     # Test framework non-streaming
-    non_stream_results, client_creation = test_framework_non_streaming()
+    non_stream_results, client_creation = bench_framework_non_streaming(api_key)
 
     # Test framework streaming
-    stream_results = test_framework_streaming()
+    stream_results = bench_framework_streaming(api_key)
 
     # Summary
     print("\n" + "=" * 60)
