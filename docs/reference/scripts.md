@@ -120,6 +120,19 @@ pytest tests/test_agent_generation.py
 pytest --cov=utils --cov-report=html
 ```
 
+### Benchmark Scripts
+
+#### `benchmark_zai.py`
+
+**Purpose**: Compare Z.AI response times of direct HTTP calls vs. `LLMClient.chat` and `LLMClient.chat_stream`
+
+**Requirements**: `ZAI_API_KEY` in `.streamlit/secrets.toml` (set it via the Settings page). The script makes real, billable API calls and is intentionally not named `test_*` / `*_test.py`, so pytest never collects it.
+
+**Usage**:
+```bash
+uv run python scripts/benchmark_zai.py
+```
+
 ---
 
 ## Script Development Guidelines
