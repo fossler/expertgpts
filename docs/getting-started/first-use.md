@@ -251,7 +251,7 @@ If you encounter issues:
 - **"Configuration not found"**: Run `python3 scripts/setup.py` to create example experts
 - **API key errors**: Verify your API key is valid and has sufficient credits
 - **Expert not appearing**: Check that the expert page exists in `pages/` directory
-- **Import errors**: Ensure dependencies are installed: `pip install -r requirements.txt`
+- **Import errors**: Ensure dependencies are installed: `uv sync`
 
 ### Documentation
 

@@ -52,7 +52,7 @@ uv run streamlit run app.py
 
 uv automatically:
 - Creates a virtual environment (if needed)
-- Installs all dependencies
+- Installs all dependencies from `uv.lock`
 - Runs the command in that environment
 
 ### 3. Create Example Expert Agents (Optional)
@@ -161,25 +161,20 @@ uv run streamlit run app.py --server.fileWatcherType=watchdog
 
 This provides instant reload when Python files change. The `watchdog` package is included in the development dependencies.
 
-### Traditional pip Installation (Alternative)
+### Dependency Definition
 
-If you prefer using pip directly with a virtual environment:
+Dependencies are declared in `pyproject.toml` (runtime dependencies plus a `dev`
+dependency group) and pinned to exact versions in `uv.lock`. To install
+everything explicitly, e.g. after pulling changes:
 
 ```bash
-# Create and activate virtual environment
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements-dev.txt  # Development
-# OR
-pip install -r requirements.txt       # Production only
-
-# Run the app
-streamlit run app.py
+uv sync                 # Runtime + dev dependencies
+uv sync --no-dev        # Runtime dependencies only
 ```
 
-**Note**: uv is recommended for better performance and simpler workflow.
+If the Python version changes (for example after an OS upgrade), `uv run`
+detects that the existing `.venv` no longer matches and rebuilds it from
+`uv.lock` automatically.
 
 ## Uninstallation
 

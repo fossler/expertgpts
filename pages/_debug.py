@@ -8,10 +8,12 @@ status and session state. Secrets (API keys) are always masked.
 
 import platform
 import sys
+import tomllib
 from importlib import metadata
 from pathlib import Path
 
 import streamlit as st
+from packaging.requirements import Requirement
 
 from lib.shared.session_state import initialize_shared_session_state
 from lib.shared.helpers import render_git_branch_footer, get_git_branch
@@ -25,10 +27,7 @@ from lib.config.app_defaults_manager import (
 )
 
 PROJECT_ROOT = Path(__file__).parent.parent
-REQUIREMENTS_FILES = [
-    ("requirements.txt", "prod"),
-    ("requirements-dev.txt", "dev"),
-]
+PYPROJECT_FILE = PROJECT_ROOT / "pyproject.toml"
 
 # Session-state keys whose values must never be rendered in the inspector.
 _SECRET_HINTS = ("key", "secret", "token", "password", "credential")
@@ -53,36 +52,28 @@ def _is_secret_key(name: str) -> bool:
 # --- Dependencies ----------------------------------------------------------
 
 
-def _parse_requirements(path: Path):
-    """Yield ``(package, spec)`` tuples from a requirements file.
+def _declared_dependencies(path: Path):
+    """Yield ``(Requirement, source)`` tuples from ``pyproject.toml``.
 
-    Skips blanks, comments and ``-r``/``-c`` include lines. Splits inline
-    comments and separates the package name from its version specifier.
+    ``[project].dependencies`` are reported as ``prod``; every entry of
+    ``[dependency-groups]`` uses its group name (e.g. ``dev``) as source.
+    ``{include-group = ...}`` tables are skipped.
     """
     if not path.exists():
         return
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.split("#", 1)[0].strip()
-        if not line or line.startswith("-"):
-            continue
-        for sep in ("~=", ">=", "<=", "==", "!=", ">", "<", "==="):
-            if sep in line:
-                name, spec = line.split(sep, 1)
-                yield name.strip(), f"{sep}{spec.strip()}"
-                break
-        else:
-            yield line.strip(), ""
-
-
-def _normalize_name(name: str) -> str:
-    """Strip extras (e.g. ``pkg[extra]``) and lower-case for lookup."""
-    return name.split("[", 1)[0].strip()
+    data = tomllib.loads(path.read_text(encoding="utf-8"))
+    groups = {"prod": data.get("project", {}).get("dependencies", [])}
+    groups.update(data.get("dependency-groups", {}))
+    for source, entries in groups.items():
+        for entry in entries:
+            if isinstance(entry, str):
+                yield Requirement(entry), source
 
 
 def _installed_version(name: str):
     """Return the installed version string, or None if not installed."""
     try:
-        return metadata.version(_normalize_name(name))
+        return metadata.version(name)
     except metadata.PackageNotFoundError:
         return None
 
@@ -102,31 +93,31 @@ def _spec_satisfied(spec: str, installed: str):
 
 def render_dependencies():
     st.subheader(":material/inventory_2: Dependencies")
-    st.caption("Declared in requirements*.txt vs. actually installed.")
+    st.caption("Declared in pyproject.toml vs. actually installed.")
 
     rows = []
     mismatches = 0
-    for filename, source in REQUIREMENTS_FILES:
-        for name, spec in _parse_requirements(PROJECT_ROOT / filename):
-            installed = _installed_version(name)
-            satisfied = _spec_satisfied(spec, installed)
-            if installed is None:
-                status = "❌ not installed"
-                mismatches += 1
-            elif satisfied is False:
-                status = "⚠️ mismatch"
-                mismatches += 1
-            else:
-                status = "✅ ok"
-            rows.append(
-                {
-                    "Package": name,
-                    "Required": spec or "(any)",
-                    "Installed": installed or "—",
-                    "Status": status,
-                    "Source": source,
-                }
-            )
+    for requirement, source in _declared_dependencies(PYPROJECT_FILE):
+        name, spec = requirement.name, str(requirement.specifier)
+        installed = _installed_version(name)
+        satisfied = _spec_satisfied(spec, installed)
+        if installed is None:
+            status = "❌ not installed"
+            mismatches += 1
+        elif satisfied is False:
+            status = "⚠️ mismatch"
+            mismatches += 1
+        else:
+            status = "✅ ok"
+        rows.append(
+            {
+                "Package": name,
+                "Required": spec or "(any)",
+                "Installed": installed or "—",
+                "Status": status,
+                "Source": source,
+            }
+        )
 
     if mismatches:
         st.warning(

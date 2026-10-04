@@ -113,11 +113,11 @@ def test_framework_streaming():
 
 
 def test_httpx_direct():
-    """Test direct HTTP call using httpx (what OpenAI SDK uses internally)."""
+    """Test direct HTTP call using httpx2 (what OpenAI SDK uses internally)."""
     import json
-    import httpx
+    import httpx2
 
-    print("\n=== Direct HTTP (httpx) ===")
+    print("\n=== Direct HTTP (httpx2) ===")
 
     url = "https://api.z.ai/api/paas/v4/chat/completions"
     headers = {
@@ -131,7 +131,7 @@ def test_httpx_direct():
     for i in range(NUM_RUNS):
         start = time.time()
         try:
-            with httpx.Client() as http_client:
+            with httpx2.Client() as http_client:
                 response = http_client.post(
                     url, headers=headers, json=payload, timeout=60.0
                 )

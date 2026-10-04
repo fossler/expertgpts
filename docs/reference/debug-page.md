@@ -31,16 +31,16 @@ The page is organized into six tabs:
 
 ### Dependencies
 
-Every package declared in `requirements.txt` and `requirements-dev.txt`, shown
-next to the version that is **actually installed** in the running environment:
+Every package declared in `pyproject.toml` (`[project].dependencies` and
+`[dependency-groups]`), shown next to the version that is **actually installed** in the running environment:
 
 | Column | Meaning |
 |--------|---------|
 | Package | Package name as declared |
-| Required | The version specifier from the requirements file (e.g. `~=1.59.0`) |
+| Required | The version specifier from `pyproject.toml` (e.g. `~=1.65.0`) |
 | Installed | The resolved installed version, or `—` if missing |
 | Status | `✅ ok`, `⚠️ mismatch` (installed version doesn't satisfy the spec), or `❌ not installed` |
-| Source | `prod` (`requirements.txt`) or `dev` (`requirements-dev.txt`) |
+| Source | `prod` (`[project].dependencies`) or the dependency group name (e.g. `dev`) |
 
 A banner at the top summarizes whether everything is installed and satisfies its
 declared spec. This is the quickest way to spot a drifted or missing dependency.
