@@ -343,9 +343,10 @@ def render_provider_selection(
             "default_model", get_default_model_for_provider(current_provider)
         )
 
-    # Set default thinking level if not provided
+    # Use the default thinking level from Settings if not provided (models
+    # that don't support it preselect their own default further below)
     if current_thinking is None:
-        current_thinking = "none"
+        current_thinking = st.session_state.get("default_thinking_level", "none")
 
     # Set labels based on context
     if is_defaults:

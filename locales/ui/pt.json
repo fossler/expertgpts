@@ -16,7 +16,7 @@
     "getting_started": "Para Começar",
     "getting_started_steps": {
       "step1": "Configure sua Chave API",
-      "step1_desc": "Insira sua chave API DeepSeek nas Configurações (ela será salva com segurança)",
+      "step1_desc": "Insira uma chave API da DeepSeek, OpenAI, Z.AI ou KIMI nas Configurações (ela será salva com segurança)",
       "step2": "Escolha um Especialista",
       "step2_desc": "Selecione um agente especialista no menu de navegação",
       "step3": "Comece a Conversar",
@@ -49,7 +49,7 @@
       "file_config_desc": "Cada especialista tem sua própria configuração YAML para fácil gerenciamento",
       "multiple_experts": "Múltiplos Agentes Especialistas",
       "multi_provider": "Suporte a Múltiplos Provedores",
-      "internationalization_desc": "13 idiomas com detecção automática e resposta de idioma da IA",
+      "internationalization_desc": "{count} idiomas com detecção automática e resposta de idioma da IA",
       "theme_customization": "Personalização de Tema"
     },
     "chat_input_placeholder": "Pergunte ao especialista...",

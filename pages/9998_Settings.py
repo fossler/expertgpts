@@ -38,6 +38,7 @@ from lib.shared.session_state import (
     invalidate_expert_cache,
 )
 from lib.shared.file_ops import safe_path_join, validate_cwd
+from lib.storage import StreamingCache, delete_chat_history
 
 
 def initialize_session_state():
@@ -961,9 +962,12 @@ def _render_delete_expert_dialog(expert: dict) -> None:
 
     if confirm:
         try:
-            # Delete the config file and the page
+            # Delete the config, the page, the chat history (incl. images)
+            # and any leftover streaming cache
             get_config_manager().delete_config(expert_id)
             PageGenerator().delete_page(expert_id)
+            delete_chat_history(expert_id)
+            StreamingCache(expert_id).cleanup()
 
             # Clear all session state of this expert (cache version, messages, ...)
             keys_to_delete = [

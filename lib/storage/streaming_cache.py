@@ -131,16 +131,14 @@ class StreamingCache:
             self._write_metadata({"status": "complete", "end_time": time.time()})
 
         except Exception as e:
-            # Create file with secure permissions if it doesn't exist
+            # Create file with secure permissions if it doesn't exist, so the
+            # error is detected on page load even before the first chunk
             if not self.cache_file.exists():
                 self.cache_file.touch()
                 set_secure_permissions(self.cache_file)
 
-            # Write error to file for debugging
-            with open(self.cache_file, "a", encoding="utf-8") as f:
-                f.write(f"\n[STREAMING ERROR: {str(e)}]")
-
-            # Mark error in metadata
+            # The error goes to the metadata only; the cache file keeps the
+            # partial response
             self._write_metadata({"status": "error", "error": str(e)})
 
     def read_cache(self) -> str:

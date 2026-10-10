@@ -230,6 +230,32 @@ class TestStreamingCache:
         # Clean up
         cache.cleanup()
 
+    def test_error_mid_stream_keeps_partial_response_only(self, temp_cache_dir):
+        """A failing stream keeps the partial text; the error is in the metadata."""
+        from lib.storage.streaming_cache import StreamingCache
+
+        class FailingClient(MockLLMClient):
+            def chat_stream(self, *args, **kwargs):
+                yield from super().chat_stream(*args, **kwargs)
+                raise RuntimeError("connection reset")
+
+        cache = StreamingCache("test_expert")
+        cache.start_streaming_to_file(
+            client=FailingClient(["Partial ", "answer"], delay=0.01),
+            messages=[],
+            temperature=0.7,
+            model="test-model",
+            system_prompt="",
+            thinking_level=None,
+        )
+        time.sleep(0.3)
+
+        assert cache.has_error() and not cache.is_complete()
+        assert cache.get_error() == "connection reset"
+        # No raw error marker is mixed into the response text
+        assert cache.read_cache() == "Partial answer"
+        cache.cleanup()
+
     def test_metadata_tracking(self, temp_cache_dir):
         """Test that metadata is correctly written and read."""
         from lib.storage.streaming_cache import StreamingCache

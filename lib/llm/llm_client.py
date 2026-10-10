@@ -10,7 +10,7 @@ from dataclasses import dataclass
 try:
     from openai import OpenAI
 except ImportError:
-    raise ImportError("OpenAI package is required. Install with: pip install openai")
+    raise ImportError("OpenAI package is required. Install it with: uv sync")
 
 from lib.shared.constants import (
     get_provider_config,

@@ -74,7 +74,7 @@ def run_first_time_setup():
 
         {e.stderr}
 
-        Please run manually: `python3 scripts/setup.py`
+        Please run manually: `uv run python scripts/setup.py`
         """)
 
 
@@ -105,7 +105,7 @@ def main():
 
     # Define the home page with icon
     home = st.Page(
-        "pages/1000_Home.py", title=i18n.t("nav.home"), icon=":material/home:"
+        "pages/1000_Home.py", title=i18n.t("nav.home"), icon=":material/smart_toy:"
     )
 
     # Define Settings page
@@ -119,7 +119,7 @@ def main():
     help_page = st.Page(
         "pages/9999_Help.py",
         title=i18n.t("nav.help", default="Help"),
-        icon=":material/help:",
+        icon=":material/menu_book:",
     )
 
     # Dynamically load all expert pages
@@ -143,7 +143,9 @@ def main():
         translated_name = translate_expert_name(expert_name)
 
         expert_pages.append(
-            st.Page(str(page_path), title=translated_name, icon=":material/psychology:")
+            st.Page(
+                str(page_path), title=translated_name, icon=":material/psychology_alt:"
+            )
         )
 
     # Create page list: Home + Experts + Settings + Help

@@ -16,7 +16,7 @@
     "getting_started": "Başlarken",
     "getting_started_steps": {
       "step1": "API Anahtarınızı Ayarlayın",
-      "step1_desc": "Ayarlar bölümünde DeepSeek API anahtarınızı girin (güvenli bir şekilde kaydedilecektir)",
+      "step1_desc": "Ayarlar bölümünde DeepSeek, OpenAI, Z.AI veya KIMI için bir API anahtarı girin (güvenli bir şekilde kaydedilecektir)",
       "step2": "Bir Uzman Seçin",
       "step2_desc": "Navigasyon menüsünden bir uzman ajan seçin",
       "step3": "Sohbete Başlayın",
@@ -49,7 +49,7 @@
       "file_config_desc": "Her uzmanın kolay yönetim için kendi YAML yapılandırması vardır",
       "multiple_experts": "Çoklu Uzman Ajanlar",
       "multi_provider": "Çoklu Sağlayıcı Desteği",
-      "internationalization_desc": "Otomatik algılama ve AI dil yanıtı ile 13 dil",
+      "internationalization_desc": "Otomatik algılama ve AI dil yanıtı ile {count} dil",
       "theme_customization": "Tema Özelleştirme"
     },
     "chat_input_placeholder": "Uzmanına sorun...",

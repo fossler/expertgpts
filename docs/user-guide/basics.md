@@ -12,10 +12,10 @@ ExpertGPTs provides access to multiple domain-specific AI experts, each speciali
 
 The sidebar displays all available experts as navigation items:
 
-- **:material/home:** Home Page - Expert list and management
-- **:material/psychology: {Expert Name}** - Individual expert pages
+- **:material/smart_toy:** Home Page - Expert list and management
+- **:material/psychology_alt: {Expert Name}** - Individual expert pages
 - **:material/settings:** Settings - Configuration
-- **:material/help:** Help - In-app documentation
+- **:material/menu_book:** Help - In-app documentation
 
 ### Home Page
 

@@ -504,8 +504,9 @@ uv run streamlit run app.py  # Restart app
 **Removes**:
 - Configuration file: `configs/{expert_id}.yaml`
 - Expert page: `pages/{expert_id}.py`
-
-The chat history file (`chat_history/{expert_id}.json`) and images in `chat_attachments/{expert_id}/` stay on disk. Use "Clear chat history" in the chat toolbox before deleting, or remove them manually.
+- Chat history: `chat_history/{expert_id}.json`
+- Attached images: `chat_attachments/{expert_id}/`
+- A leftover streaming cache: `streaming_cache/{expert_id}_latest.*`
 
 ### Manual Deletion
 

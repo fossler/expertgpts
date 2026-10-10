@@ -7,6 +7,7 @@ import streamlit as st
 from lib.config.config_manager import get_config_manager
 from lib.ui import open_add_chat_dialog
 from lib.i18n import i18n
+from lib.i18n.i18n import LANGUAGE_METADATA
 from lib.shared.helpers import render_git_branch_footer
 
 
@@ -75,7 +76,7 @@ def main():
     - 🤖 **{i18n.t("home.features.multiple_experts")}**: {i18n.t("home.features.multiple_experts_desc")}
     - 🔄 **{i18n.t("home.features.multi_provider")}**: {i18n.t("home.features.multi_provider_desc")}
     - ✨ **{i18n.t("home.features.ai_prompts")}**: {i18n.t("home.features.ai_prompts_desc")}
-    - 🌍 **{i18n.t("home.features.internationalization")}**: {i18n.t("home.features.internationalization_desc")}
+    - 🌍 **{i18n.t("home.features.internationalization")}**: {i18n.t("home.features.internationalization_desc", count=len(LANGUAGE_METADATA))}
     - 📝 **{i18n.t("home.features.template_architecture")}**: {i18n.t("home.features.template_architecture_desc")}
     - 🎨 **{i18n.t("home.features.theme_customization")}**: {i18n.t("home.features.theme_customization_desc")}
     - 💾 **{i18n.t("home.features.chat_history")}**: {i18n.t("home.features.chat_history_desc")}

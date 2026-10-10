@@ -291,10 +291,8 @@ try:
         f.flush()
         os.fsync(f.fileno())
 except Exception as e:
-    # Write error to file
-    f.write(f"\n[STREAMING ERROR: {str(e)}]")
-
-    # Mark error in metadata
+    # The error goes to the metadata only; the cache file keeps the
+    # partial response
     self._write_metadata({
         "status": "error",
         "error": str(e)
@@ -303,21 +301,27 @@ except Exception as e:
 
 ### Error Detection in Polling
 
-```python
-# Check for errors
-if cache.has_error():
-    error_msg = cache.get_error()
-    st.error(f"Streaming error: {sanitize_error_message(error_msg)}")
-    break
-```
+`poll_stream_and_display()` stops when the stream is complete or has failed
+(`cache.is_complete() or cache.has_error()`). The caller then passes the result to
+`save_stream_result()` (template), which:
+
+- saves a partial response, if any, as a normal assistant message,
+- adds the error like any other request error: translated (`errors.api_response_error`),
+  sanitized, via `add_error_to_history()`,
+- saves the chat history and cleans up the cache files.
+
+The same helper is used for a new stream, a resumed stream (`poll_incomplete_stream()`)
+and on page load (`check_and_display_cached_responses()`), which also handles streams
+that failed while the user was on another page and shows a toast
+(`errors.background_stream_error`).
 
 ### Error Scenarios
 
 1. **Network error during streaming**
    - Background thread catches exception
-   - Writes error to cache file
-   - Marks status="error" in metadata
-   - Polling loop detects error and displays message
+   - Marks status="error" in metadata (the cache file keeps the partial response)
+   - Polling loop stops; `save_stream_result()` saves the partial response and the
+     translated error message to the chat history
 
 2. **API rate limit exceeded**
    - Same handling as network errors
@@ -356,8 +360,8 @@ def _cleanup_old_cache_files(self):
    - Frees disk space
 
 3. **On error** (in `check_and_display_cached_responses()`)
-   - Cleans up corrupt files (read errors) and completed caches containing a `[STREAMING ERROR: ...]` marker
-   - Prevents retry loops (caches with `status="error"` are removed by the next stream's `_cleanup_old_cache_files()`)
+   - Failed streams (`status="error"`) are saved to the chat history with their error
+     and cleaned up by `save_stream_result()`, like completed ones
 
 4. **Application reset** (`scripts/reset_application.py`)
    - Deletes entire `streaming_cache/` directory

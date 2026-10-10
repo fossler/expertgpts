@@ -87,10 +87,10 @@ ExpertGPTs requires an API key for at least one provider (DeepSeek, OpenAI, Z.AI
 
 ExpertGPTs uses Streamlit's modern navigation with Material Design icons:
 
-- **:material/home:** Home - Expert list and Add Chat button
-- **:material/psychology:** Expert Pages - Your custom expert agents
+- **:material/smart_toy:** Home - Expert list and Add Chat button
+- **:material/psychology_alt:** Expert Pages - Your custom expert agents
 - **:material/settings:** Settings - Configure API keys, themes, language, defaults, and experts
-- **:material/help:** Help - In-app documentation
+- **:material/menu_book:** Help - In-app documentation
 
 ### Default Experts
 

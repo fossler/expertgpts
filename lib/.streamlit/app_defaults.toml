@@ -1,7 +1,0 @@
-[llm]
-provider = "deepseek"
-model = "deepseek-flash"
-thinking_level = "high"
-
-[language]
-code = "en"

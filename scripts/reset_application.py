@@ -225,7 +225,7 @@ def main():
     print("\n" + "=" * 60)
     print("✅ Application reset successfully!")
     print("=" * 60)
-    print("\n🎉 You can now run the app with: streamlit run app.py\n")
+    print("\n🎉 You can now run the app with: uv run streamlit run app.py\n")
 
     return 0
 
