@@ -353,7 +353,7 @@ def get_git_branch() -> str | None:
     return None
 
 
-def render_git_branch_footer(divider: bool = True) -> None:
+def render_git_branch_footer(divider: bool = False) -> None:
     """Render Git branch display at the bottom of sidebar.
 
     Shows the current Git branch if the app is running from a Git repository
@@ -361,8 +361,9 @@ def render_git_branch_footer(divider: bool = True) -> None:
     Should be called at the end of sidebar content rendering.
 
     Args:
-        divider: Draw a divider above the branch. Pass False when the sidebar
-            has no own content, since the navigation already ends with one.
+        divider: Draw a divider above the branch. Only needed when the page
+            puts own content in the sidebar; otherwise the navigation already
+            ends with a divider.
     """
     from lib.config.app_defaults_manager import get_display_defaults
 

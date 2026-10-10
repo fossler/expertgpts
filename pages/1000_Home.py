@@ -48,7 +48,7 @@ def main():
             st.rerun()
 
         # Git branch footer (at very bottom)
-        render_git_branch_footer()
+        render_git_branch_footer(divider=True)
 
     # Render add chat dialog if active
     if st.session_state.show_add_chat_dialog:

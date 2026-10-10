@@ -496,7 +496,7 @@ def main():
         st.stop()
 
     # Git branch footer in sidebar (at very bottom)
-    render_git_branch_footer(divider=False)
+    render_git_branch_footer()
 
     # Check for completed background streams (from cache files) FIRST
     # This ensures cached responses are loaded before rendering the interface
