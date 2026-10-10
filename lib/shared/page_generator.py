@@ -104,23 +104,60 @@ class PageGenerator:
                 "Use overwrite=True to replace it."
             )
 
-        # Read template
+        # Write new page
+        with open(page_path, "w", encoding="utf-8") as f:
+            f.write(self._render_template(expert_id, expert_name))
+
+        return str(page_path), page_number
+
+    def _render_template(self, expert_id: str, expert_name: str) -> str:
+        """Return the template with its placeholders filled in.
+
+        Args:
+            expert_id: Unique ID of the expert
+            expert_name: Display name for the expert
+
+        Returns:
+            str: Page source code
+
+        Raises:
+            FileNotFoundError: If the template file does not exist
+        """
         if not self.template_path.exists():
             raise FileNotFoundError(f"Template not found: {self.template_path}")
 
         with open(self.template_path, "r", encoding="utf-8") as f:
             template_content = f.read()
 
-        # Replace placeholders in template
-        page_content = template_content.replace("{{EXPERT_ID}}", expert_id).replace(
+        return template_content.replace("{{EXPERT_ID}}", expert_id).replace(
             "{{EXPERT_NAME}}", expert_name
         )
 
-        # Write new page
-        with open(page_path, "w", encoding="utf-8") as f:
-            f.write(page_content)
+    def regenerate_pages(self) -> List[str]:
+        """Rewrite all existing expert pages from the current template.
 
-        return str(page_path), page_number
+        Each page keeps its filename, EXPERT_ID and EXPERT_NAME, so configs
+        and chat history stay attached. Use this after changing the template;
+        unlike scripts/reset_application.py it deletes no data.
+
+        Returns:
+            List[str]: Filenames of the regenerated pages
+        """
+        regenerated = []
+        for page_file in sorted(self.pages_dir.glob("*.py")):
+            if is_system_page(page_file.name) or page_file.name == "template.py":
+                continue
+            source = page_file.read_text(encoding="utf-8")
+            expert_id = re.search(r'^EXPERT_ID = "(.*)"$', source, re.MULTILINE)
+            expert_name = re.search(r'^EXPERT_NAME = "(.*)"$', source, re.MULTILINE)
+            if not (expert_id and expert_name):
+                continue  # not generated from the template
+            page_file.write_text(
+                self._render_template(expert_id.group(1), expert_name.group(1)),
+                encoding="utf-8",
+            )
+            regenerated.append(page_file.name)
+        return regenerated
 
     def _get_next_filename(self, base_filename: str) -> str:
         """Get the next available filename with proper ordering prefix.

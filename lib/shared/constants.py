@@ -240,6 +240,15 @@ DEFAULT_LLM_PROVIDER = "deepseek"
 DEFAULT_LLM_MODEL = LLM_PROVIDERS[DEFAULT_LLM_PROVIDER]["default_model"]
 DEFAULT_THINKING_ENABLED = True
 
+# Chat Attachments ("Attach file" in the chat toolbox)
+# Text files only: their content is embedded into the user message.
+ATTACHMENT_MAX_SIZE_KB = 200
+ATTACHMENT_FILE_TYPES = [
+    "txt", "md", "csv", "tsv", "json", "yaml", "yml", "toml", "xml", "ini",
+    "cfg", "conf", "log", "html", "css", "js", "ts", "py", "java", "c", "cpp",
+    "h", "cs", "go", "rs", "rb", "php", "sh", "sql",
+]  # fmt: skip
+
 # Model Context Limits
 DEEPSEEK_MAX_CONTEXT_TOKENS = 1000000
 

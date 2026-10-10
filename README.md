@@ -17,6 +17,7 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 - **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
 - **💾 Persistent Chat History** - Conversations saved automatically per expert
+- **📎 File Attachments** - Attach text files (code, Markdown, CSV, JSON, logs, ...) to a message via the toolbox below the chat input
 - **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0) for each expert
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
 - **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
@@ -246,7 +247,7 @@ uv run pytest --cov=lib --cov-report=html
 
 ### Adding Features
 
-**Modify Expert Pages**: Edit `templates/template.py`, then run `echo "yes" | python3 scripts/reset_application.py`
+**Modify Expert Pages**: Edit `templates/template.py`, then run `uv run python scripts/regenerate_pages.py` (rewrites all expert pages from the template; configs and chat history are kept)
 
 **Modify Home/Settings/Help**: Edit `pages/1000_Home.py`, `pages/9998_Settings.py`, or `pages/9999_Help.py` directly
 

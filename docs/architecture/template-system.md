@@ -174,15 +174,21 @@ if f"messages_1005_sql_expert" not in st.session_state:
 
 **Via Script**:
 ```bash
-echo "yes" | python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 ```
 
-**What Happens**:
-1. Deletes all expert pages (`pages/1001_*.py` to `pages/9998_*.py`)
-2. Runs `setup.py` to recreate from template
-3. All expert pages regenerated with latest template
+**What Happens** (`PageGenerator.regenerate_pages()` in `lib/shared/page_generator.py`):
+1. Finds all existing expert pages in `pages/` (system pages such as `1000_Home.py`, `9998_Settings.py`, `9999_Help.py` and `_`-prefixed pages are skipped)
+2. Reads each page's `EXPERT_ID` and `EXPERT_NAME`
+3. Rewrites the page from `templates/template.py` with the same filename, ID and name
 
-**Warning**: This deletes all expert pages and recreates them. Custom edits to individual expert pages will be lost.
+Expert configs (`configs/`) and chat history (`chat_history/`) are not touched and stay attached to their pages.
+
+**Warning**: Custom edits to individual expert pages will be lost, because each page is overwritten with the template.
+
+**Generated pages are local**: Expert pages (`pages/1001_*.py` and higher) are gitignored, so only `templates/template.py` is committed. After pulling a template change on another machine, run `regenerate_pages.py` there as well.
+
+**Not for template changes**: `scripts/reset_application.py` deletes all configs, pages, chat history and the streaming cache and recreates the example experts. Use it only when you want a full reset.
 
 **Best Practice**: Keep all expert-specific logic in the template or in YAML configs. Never edit generated expert pages directly.
 
@@ -209,17 +215,17 @@ echo "yes" | python3 scripts/reset_application.py
 **Characteristics**:
 - Committed to git
 - Edited directly
-- Not affected by `reset_application.py`
+- Not affected by `regenerate_pages.py` or `reset_application.py`
 
 ### Generated Expert Pages
 
 **Expert Pages** (`pages/1001_*.py` to `pages/9998_*.py`):
 - Generated from template
 - Auto-generated, not manually edited
-- Regenerated via `reset_application.py`
+- Regenerated via `regenerate_pages.py`
 
 **Characteristics**:
-- Can be gitignored or committed
+- Gitignored (local to each installation)
 - Should NOT be manually edited
 - Always regenerate from template
 
@@ -230,7 +236,7 @@ echo "yes" | python3 scripts/reset_application.py
 **Workflow**:
 1. Edit `templates/template.py`
 2. Test with one expert first
-3. Run `reset_application.py` to regenerate all
+3. Run `uv run python scripts/regenerate_pages.py` to regenerate all
 4. Test multiple experts to verify
 5. Commit changes
 
@@ -247,7 +253,7 @@ if st.button("Export Chat"):
 
 Then regenerate:
 ```bash
-echo "yes" | python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 ```
 
 All expert pages now have the export button.
@@ -313,17 +319,27 @@ if f"thinking_{EXPERT_ID}" not in st.session_state:
 ### Chat Interface
 
 ```python
-# Display chat history
+# Display chat history (user messages show attachments as expanders)
 for message in st.session_state[f"messages_{EXPERT_ID}"]:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+        if message["role"] == "user":
+            render_user_message(message["content"])
+        else:
+            st.markdown(message["content"])
 
-# Chat input
-if prompt := st.chat_input(f"Chat with {EXPERT_NAME}"):
+# Chat input with the toolbox pinned below it
+with st.bottom:
+    prompt = st.chat_input(i18n.t("home.chat_input_placeholder"))
+    attachments = render_chat_toolbox(uploader_key)
+
+if prompt:
+    # Embed attached files into the message content
+    content = build_message_content(prompt, attachments)
+
     # Add user message to history
     st.session_state[f"messages_{EXPERT_ID}"].append({
         "role": "user",
-        "content": prompt
+        "content": content
     })
 
     # Generate response
@@ -338,6 +354,13 @@ if prompt := st.chat_input(f"Chat with {EXPERT_NAME}"):
     # Save chat history
     chat_history_manager.save_chat_history(EXPERT_ID, st.session_state[f"messages_{EXPERT_ID}"])
 ```
+
+**Chat toolbox and attachments** (see `handle_user_input()` in the template):
+- `st.chat_input` and the toolbox row (`render_chat_toolbox()` in `lib/ui/chat_toolbox.py`) are rendered inside `with st.bottom:`, so the toolbox stays pinned below the input. Its only entry so far is "Attach file", a popover with a multi-file `st.file_uploader`.
+- Only text files are accepted (UTF-8, at most `ATTACHMENT_MAX_SIZE_KB` = 200 KB each, extensions from `ATTACHMENT_FILE_TYPES` in `lib/shared/constants.py`). Too-large or non-UTF-8 files are reported in the toolbox and skipped.
+- On send, `build_message_content()` (`lib/shared/attachments.py`) appends each file to the prompt as an `<attachment name="...">...</attachment>` block. Because the attachments are part of the message content, the LLM request, token counting, chat history persistence and size limits need no changes.
+- `render_user_message()` uses `split_message_content()` to show the prompt plus one collapsible "📎 <filename>" expander per attachment, also after a reload.
+- The uploader key includes a counter that is incremented after each sent message, which clears the attachments.
 
 ### Sidebar Controls
 
@@ -397,7 +420,7 @@ All experts have:
 vim templates/template.py
 
 # 2. Regenerate all expert pages
-echo "yes" | python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 
 # 3. Done! All experts now have "Clear Chat" button
 ```
@@ -495,7 +518,7 @@ elif EXPERT_ID == "1002_data_scientist":
 **Solution**:
 ```bash
 # Regenerate expert pages
-echo "yes" | python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 ```
 
 ### Regeneration Failed
@@ -521,7 +544,7 @@ echo "yes" | python3 scripts/reset_application.py
 **Solution**:
 ```bash
 # Regenerate all pages
-echo "yes" | python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 ```
 
 ## Related Documentation

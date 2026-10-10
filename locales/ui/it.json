@@ -377,5 +377,12 @@
     "doc_not_found": "Documentazione non trovata",
     "go_home": "Vai alla Home",
     "tip": "Suggerimento: Usa la barra laterale sinistra per navigare nella documentazione"
+  },
+  "chat_toolbox": {
+    "attach_file": "Allega file",
+    "attach_help": "File di testo fino a {size} KB. Vengono aggiunti al tuo prossimo messaggio.",
+    "attached": "📎 Allegato: {files}",
+    "error_too_large": "{name} supera i {size} KB e non è stato allegato.",
+    "error_not_text": "{name} non è un file di testo UTF-8 e non è stato allegato."
   }
 }

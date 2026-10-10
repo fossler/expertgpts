@@ -63,6 +63,29 @@ python3 scripts/setup.py
 
 ---
 
+#### `regenerate_pages.py`
+
+**Purpose**: Regenerate all expert pages from the current template
+
+**What it does**:
+- Rewrites every existing expert page in `pages/` from `templates/template.py`
+- Keeps each page's filename, `EXPERT_ID` and `EXPERT_NAME`
+- Skips system pages (`1000_Home.py`, `9998_Settings.py`, `9999_Help.py`) and `_`-prefixed pages
+- Does not touch configs, chat history or the streaming cache
+
+**When to use**:
+- After modifying `templates/template.py`
+- After pulling a template change on another machine (generated expert pages are gitignored, so each installation regenerates its own)
+
+**Usage**:
+```bash
+uv run python scripts/regenerate_pages.py
+```
+
+**Note**: Manual edits to individual expert pages are overwritten.
+
+---
+
 #### `reset_application.py`
 
 **Purpose**: Reset application to factory default state
@@ -70,11 +93,11 @@ python3 scripts/setup.py
 **What it does**:
 - Deletes all expert configurations
 - Deletes all expert pages
+- Deletes all chat history and the streaming cache
 - Runs `setup.py` to recreate example experts
-- **Warning**: Irreversible, deletes all custom experts
+- **Warning**: Irreversible, deletes all custom experts and conversations
 
 **When to use**:
-- After modifying `templates/template.py` to regenerate pages
 - When configs/pages become corrupted
 - Starting fresh for development/testing
 
@@ -84,6 +107,8 @@ echo "yes" | python3 scripts/reset_application.py
 ```
 
 **⚠️ Warning**: Always use `echo "yes" |` prefix to auto-confirm in non-interactive environments.
+
+**Note**: To apply template changes, use `regenerate_pages.py` instead; it keeps all data.
 
 ---
 

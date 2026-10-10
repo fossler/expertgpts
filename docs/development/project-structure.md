@@ -41,8 +41,10 @@ expertgpts/
 │   │   ├── chat_history_manager.py # Chat history persistence
 │   │   └── streaming_cache.py     # Background response caching
 │   ├── ui/                        # UI components
+│   │   ├── chat_toolbox.py        # Toolbox below the chat input ("Attach file")
 │   │   └── dialogs.py             # Shared dialog rendering
 │   └── shared/                    # Shared utilities
+│       ├── attachments.py         # Text file attachments in chat messages
 │       ├── constants.py           # Provider/model configurations
 │       ├── file_ops.py            # File system operations
 │       ├── format_ops.py          # File format operations (TOML, YAML, JSON)
@@ -76,7 +78,8 @@ expertgpts/
 │
 ├── scripts/                        # Administrative scripts
 │   ├── setup.py                   # Create example experts
-│   ├── reset_application.py       # Regenerate expert pages
+│   ├── regenerate_pages.py        # Regenerate expert pages from template (keeps data)
+│   ├── reset_application.py       # Reset to factory defaults (deletes all data)
 │   ├── update_translations.py     # Sync locale files
 │   └── run_tests.sh               # Run test suite
 │
@@ -91,7 +94,7 @@ expertgpts/
 │   ├── reference/
 │   └── api/
 │
-├── pyproject.toml                  # Project metadata and dependencies
+├── pyproject.toml                  # Project metadata, dependencies and pytest config
 ├── uv.lock                         # Locked dependency versions
 └── .gitignore                      # Git ignore patterns
 ```
@@ -165,6 +168,7 @@ from lib.storage import load_chat_history, save_chat_history, StreamingCache
 **When to use**: Adding new dialog types, creating reusable UI components, modifying shared rendering logic.
 
 **Modules**:
+- `chat_toolbox.py` - Toolbox row below the chat input ("Attach file") and rendering of user messages with attachments
 - `dialogs.py` - Dialog rendering (add expert, delete expert, LLM configuration)
 
 **Imports**:
@@ -182,6 +186,7 @@ from lib.ui import render_add_chat_dialog, render_llm_configuration
 - Defining types and interfaces
 
 **Modules**:
+- `attachments.py` - Text file attachments: read/validate uploads, embed them into the user message, split them out for display
 - `constants.py` - Provider/model configurations, thresholds, lookup tables
 - `file_ops.py` - File system operations (permissions, paths, directories)
 - `format_ops.py` - File format operations (TOML, YAML, JSON)

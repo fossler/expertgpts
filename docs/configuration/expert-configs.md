@@ -417,7 +417,7 @@ temperature: 0.7
 2. Follow naming convention: `{number}_{sanitized_name}.yaml`
 3. Add required fields
 4. Save file
-5. Regenerate expert pages or restart app
+5. Create the matching expert page: copy any existing expert page to `pages/{expert_id}.py`, set `EXPERT_ID` and `EXPERT_NAME` in it, then run `scripts/regenerate_pages.py` to rewrite it from the template
 
 **Example**:
 ```bash
@@ -425,8 +425,12 @@ cd configs/
 vim 1015_custom_expert.yaml
 # Add YAML content
 cd ..
-python3 scripts/reset_application.py
+cp pages/1001_helpful_assistant.py pages/1015_custom_expert.py
+# Set EXPERT_ID = "1015_custom_expert" and EXPERT_NAME = "Custom Expert"
+uv run python scripts/regenerate_pages.py
 ```
+
+Do not use `reset_application.py` here: it deletes all configs, including the new one.
 
 **Caution**:
 - Must be valid YAML syntax

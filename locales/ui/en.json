@@ -377,5 +377,12 @@
     "doc_not_found": "Documentation not found",
     "go_home": "Go to Documentation Home",
     "tip": "Tip: Use the sidebar on the left to browse documentation"
+  },
+  "chat_toolbox": {
+    "attach_file": "Attach file",
+    "attach_help": "Text files up to {size} KB. They are added to your next message.",
+    "attached": "📎 Attached: {files}",
+    "error_too_large": "{name} is larger than {size} KB and was not attached.",
+    "error_not_text": "{name} is not a UTF-8 text file and was not attached."
   }
 }
