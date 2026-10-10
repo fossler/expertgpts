@@ -37,5 +37,11 @@
 	# trust Caddy's root certificate once):
 	# tls internal
 
+	# Login (recommended): ExpertGPTs has no login of its own, and everyone who
+	# reaches it can use the stored API keys. Hash: caddy hash-password
+	# basic_auth {
+	# 	<user> <hash>
+	# }
+
 	reverse_proxy {$EXPERTGPTS_UPSTREAM:127.0.0.1:8501}
 }

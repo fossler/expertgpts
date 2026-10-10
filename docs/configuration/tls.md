@@ -148,13 +148,33 @@ journalctl -u caddy -f      # until "certificate obtained successfully"
 `caddy validate --config /etc/caddy/Caddyfile` checks the file before a restart; it
 needs the same environment variables in the shell.
 
-### 5. Bind Streamlit to localhost
+### 5. Add a login
 
-So that ExpertGPTs is only reachable through Caddy, start Streamlit with
-`--server.address 127.0.0.1`, for example in its systemd unit:
+ExpertGPTs has no login of its own: everyone who reaches it can chat, change experts and
+use the stored API keys. Unless the network is fully trusted, let Caddy ask for a
+password. Create a hash and enable the `basic_auth` block in the Caddyfile:
+
+```bash
+caddy hash-password          # asks for the password, prints the hash
+```
 
 ```
-ExecStart=… uv run streamlit run app.py --server.address 127.0.0.1
+basic_auth {
+	alice $2a$14$…
+}
+```
+
+Then reload Caddy: `sudo systemctl reload caddy`.
+
+### 6. Bind Streamlit to localhost
+
+So that ExpertGPTs is only reachable through Caddy, let Streamlit listen on localhost:
+either `--server.address 127.0.0.1` on the command line or the environment variable
+`STREAMLIT_SERVER_ADDRESS=127.0.0.1`, for example in its systemd unit:
+
+```
+Environment=STREAMLIT_SERVER_ADDRESS=127.0.0.1
+ExecStart=… streamlit run app.py
 ```
 
 ```bash
@@ -166,7 +186,7 @@ curl -s localhost:8501/_stcore/health      # → ok
 If Caddy runs on another machine, keep Streamlit on its network address instead and
 set `EXPERTGPTS_UPSTREAM` to it.
 
-### 6. Name resolution and firewall
+### 7. Name resolution and firewall
 
 - **Local network only:** the clients must resolve the domain to the server's local
   address, through a local DNS entry (router, Pi-hole, internal DNS) or `/etc/hosts`.
@@ -175,7 +195,7 @@ set `EXPERTGPTS_UPSTREAM` to it.
 - **Firewall:** allow ports 80 and 443 to the server (for example
   `sudo ufw allow 80,443/tcp`). Port 80 redirects to HTTPS and serves the HTTP challenge.
 
-### 7. Verify
+### 8. Verify
 
 From a client:
 
@@ -183,8 +203,8 @@ From a client:
 curl -s https://<domain>/_stcore/health     # → ok, no certificate warning
 ```
 
-Then open `https://<domain>` in the browser and send a chat message: the answer streams
-through the websocket.
+Then open `https://<domain>` in the browser (log in, if enabled) and send a chat message:
+the answer streams through the websocket.
 
 ## Renewal
 
@@ -200,7 +220,7 @@ the CNAME) have to stay in place.
 | `unrecognized global option: reverse_proxy` | `EXPERTGPTS_DOMAIN` isn't set, so the site block has no address. Set it for the service (step 4), and in the shell for `caddy validate`. |
 | HTTP challenge fails | The domain must point to the server publicly and ports 80/443 must be reachable from the internet. Otherwise use a DNS challenge. |
 | DNS challenge fails or times out | Check the provider token, or for acme-dns the CNAME (`dig +short CNAME _acme-challenge.<domain>`) and `/etc/caddy/acmedns.json` (owner `root:caddy`, mode `640`). |
-| Browser reaches another server or shows a certificate for another name | The client resolves the domain to a different address. Check the local DNS entry (step 6). |
+| Browser reaches another server or shows a certificate for another name | The client resolves the domain to a different address. Check the local DNS entry (step 7). |
 | `502 Bad Gateway` | Streamlit isn't running or listens on another address: `curl <upstream>/_stcore/health`. |
 
 ---
