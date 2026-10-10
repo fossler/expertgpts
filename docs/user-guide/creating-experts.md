@@ -16,15 +16,15 @@ ExpertGPTs allows you to create unlimited custom experts, each specialized in a 
 ### Step-by-Step Process
 
 1. **Navigate to Home Page**
-   - The "Add Chat" button is only available on the Home page
+   - Alternatively use **"➕ Add new Chat"** in **Settings** → **Expert Management**
 
-2. **Click "➕ Add Chat"** in the sidebar
+2. **Click "➕ Add Chat"** in the sidebar Toolbox
 
 3. **Fill in the Form**:
+   - **LLM Provider & Model**: Provider, model, thinking mode and temperature (default 1.0; range depends on the provider)
    - **Expert Name**: A descriptive name for the expert
    - **Agent Description**: What the expert specializes in
-   - **Temperature**: Response creativity (0.0-2.0)
-   - **Custom System Prompt** (optional): Override default prompt
+   - **Customize Expert Behavior** (optional): Custom system prompt instead of the auto-generated one
 
 4. **Click "Create Expert"**
    - Expert page automatically generated
@@ -40,15 +40,14 @@ ExpertGPTs allows you to create unlimited custom experts, each specialized in a 
 
 **Guidelines**:
 - Use descriptive, clear names
-- Can be in any language
+- Allowed characters: letters A-Z/a-z, numbers, spaces, underscores (_), hyphens (-) and dots (.); other characters (including umlauts, accents and CJK characters) are rejected
 - 3-50 characters recommended
-- Avoid special characters that might cause file system issues
 
 **Examples**:
 - ✅ "SQL Expert"
 - ✅ "Legal Advisor"
 - ✅ "Datenexperte" (German)
-- ✅ "数据分析师" (Chinese)
+- ❌ "数据分析师" (non-ASCII characters; use the description for other languages)
 - ❌ "Expert/Manager\Analyst" (special characters)
 
 #### Agent Description
@@ -86,6 +85,8 @@ An expert that helps with stuff.
 
 **Purpose**: Controls response creativity and randomness
 
+**Provider limits**: Z.AI accepts at most 1.0; DeepSeek ignores the temperature while thinking is enabled (the field is disabled); OpenAI models are fixed at 1.0 and KIMI models use a fixed temperature.
+
 **Quick Reference**:
 - **0.0 - 0.3**: Highly focused, deterministic (coding, math)
 - **0.4 - 0.7**: Balanced, informative (general advice, explanations)
@@ -105,7 +106,7 @@ An expert that helps with stuff.
 
 **See also**: [Temperature Guide](temperature-guide.md) for detailed explanations
 
-#### Custom System Prompt (Optional)
+#### Customize Expert Behavior (Optional)
 
 **Purpose**: Override the auto-generated system prompt with specific instructions
 
@@ -181,7 +182,7 @@ Be encouraging while providing constructive feedback.
 
 ## Multilingual Experts
 
-You can create experts in any language! The expert will automatically respond in the user's selected language.
+You can describe experts in any language! The expert will automatically respond in the user's selected language. Note that the expert name itself is limited to ASCII letters, numbers, spaces, `_`, `-` and `.`.
 
 ### Creating a Multilingual Expert
 
@@ -195,14 +196,14 @@ When users with German selected chat with this expert, responses will be in Germ
 
 **Example: Chinese Expert**
 
-1. **Expert Name**: "SQL专家"
+1. **Expert Name**: "SQL Expert CN"
 2. **Description**: "SQL数据库设计、查询优化和数据库管理专家。专长于PostgreSQL、MySQL和SQLite。"
 3. **Temperature**: 0.5
 
 ### Language Behavior
 
 **Expert Creation Language**:
-- Name and description can be in any language
+- The description (and custom system prompt) can be in any language; the name must use the allowed ASCII characters
 - This sets the "identity" of the expert
 
 **User Interaction Language**:
@@ -215,14 +216,14 @@ The app injects a language prefix at runtime:
 ```
 You must respond in German (Deutsch).
 
-You are SQL专家, a domain-specific expert AI assistant...
+You are SQL Expert CN, a domain-specific expert AI assistant...
 ```
 
 ## Expert Creation Best Practices
 
-### 1. Start with Default Temperature
+### 1. Start with a Balanced Temperature
 
-**Recommended**: Begin with 0.7 (balanced), then adjust based on results.
+**Recommended**: Begin with 0.7 (balanced; the form's default is 1.0), then adjust based on results.
 
 **Rationale**:
 - Easier to adjust later than to redesign the expert
@@ -249,7 +250,7 @@ authentication, database integration, and deployment best practices.
 2. Test with typical questions
 3. Adjust temperature if responses are too focused or too creative
 4. Refine description or add custom prompt if needed
-5. Edit expert configuration via Settings page if needed
+5. Edit expert configuration via Settings → Expert Management if needed (model, thinking mode and temperature can also be changed directly below the chat input)
 
 ### 4. Use Temperature Appropriately
 
@@ -319,10 +320,10 @@ Custom Prompt: Custom prompt provided for specific style guidelines
 
 ### Example 4: Multilingual Expert
 
-**Traductor Español**
+**Traductor Espanol**
 
 ```
-Name: Traductor Español
+Name: Traductor Espanol
 Description: Experto en traducción inglés-español, gramática español, y matices
 culturales en la traducción.
 Temperature: 0.5
@@ -333,11 +334,13 @@ Custom Prompt: None (let description guide)
 
 ### Via UI
 
-1. Go to **Home** page
+1. Go to **Settings** → **Expert Management**
 2. Find the expert in the list
 3. Click **Edit** button
-4. Modify name, description, temperature, or system prompt
+4. Modify name, description, provider/model, thinking mode, temperature, or expert behavior (the Expert ID cannot be changed)
 5. Click **Save Changes**
+
+Model, thinking mode and temperature can also be changed directly in the toolbox below the chat input on the expert's page; changes there are saved immediately.
 
 ### Via Configuration Files
 
@@ -355,8 +358,10 @@ system_prompt: |
   You are Python Expert...
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "high"
 ```
 
 **Note**: After editing YAML, you may need to restart the app or increment cache version.
@@ -365,15 +370,15 @@ metadata:
 
 ### Via UI
 
-1. Go to **Home** page
+1. Go to **Settings** → **Expert Management**
 2. Find the expert in the list
 3. Click **Delete** button
-4. Confirm deletion
+4. Confirm with **Yes, Delete**
 
 **What gets deleted**:
 - Expert configuration: `configs/{expert_id}.yaml`
 - Expert page: `pages/{expert_id}.py`
-- Chat history: `chat_history/{expert_id}.json` (optional, typically included)
+- The chat history file `chat_history/{expert_id}.json` (and images in `chat_attachments/{expert_id}/`) is **not** deleted; remove it manually or use **Clear Chat History** before deleting
 
 **Warning**: Deletion is irreversible. Backup important conversations before deletion.
 
@@ -389,7 +394,7 @@ metadata:
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  2. Create Expert                                            │
-│     - Go to Home page                                       │
+│     - Go to Home page (or Settings → Expert Management)     │
 │     - Click "➕ Add Chat"                                    │
 │     - Fill form with details                                 │
 └─────────────────────────────────────────────────────────────┘

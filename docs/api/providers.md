@@ -70,6 +70,7 @@ For the input modalities (text, image, audio, video) of each model, see [Model C
 - `xhigh` reasoning effort for deep reasoning
 - GPT-6 family optimized for complex tasks
 - Higher cost but premium quality
+- The OpenAI key is also used for voice input: `gpt-transcribe` transcribes voice messages for OpenAI experts
 
 **Get API Key**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
@@ -94,14 +95,15 @@ For the input modalities (text, image, audio, video) of each model, see [Model C
 
 **Temperature**: adjustable within `0.0`–`1.0` (API default `1.0`), with or without thinking. The provider config sets `max_temperature: 1.0`: the UI caps the control at `1.0`, and the client clamps higher stored values (e.g. an expert created with `1.5` under another provider) to `1.0`. See the [Chat Completion API reference](https://docs.z.ai/api-reference/llm/chat-completion).
 
-**API Documentation**: [https://z.ai/](https://z.ai/)
+**API Documentation**: [https://docs.z.ai/](https://docs.z.ai/)
 
 **Characteristics**:
 - GLM models optimized for Chinese
 - Competitive pricing
 - Good for multilingual applications
+- The Z.AI key is also used for voice input: `glm-asr-2512` transcribes voice messages for all non-OpenAI experts (max. 30 s per recording)
 
-**Get API Key**: [https://z.ai/](https://z.ai/)
+**Get API Key**: [https://z.ai/manage-apikey/subscription](https://z.ai/manage-apikey/subscription)
 
 ---
 
@@ -119,7 +121,7 @@ For the input modalities (text, image, audio, video) of each model, see [Model C
 
 **Thinking Parameter**: differs by model generation
 - `kimi-k3` — `reasoning_effort` as a **top-level** parameter: `"low"`, `"high"` or `"max"` (default `"max"`; always reasons). Do **not** send the K2.x `thinking` parameter.
-- `kimi-k2.7-code`, `kimi-k2.7-code-highspeed` — always think: thinking cannot be disabled and `reasoning_effort` is ignored by the API. The UI shows a fixed, disabled "Enabled" thinking selector.
+- `kimi-k2.7-code`, `kimi-k2.7-code-highspeed` — always think: thinking cannot be disabled and `reasoning_effort` is ignored by the API. The add/edit dialogs show a fixed, disabled "Enabled" thinking selector; the chat toolbox shows no thinking control for them.
 - `kimi-k2.6` — `thinking.type` (`"enabled"` / `"disabled"`) via `extra_body`. The API thinks by default, so "Disabled" sends `thinking.type = "disabled"` explicitly.
 
 **Temperature**: fixed by the API (the app enforces this automatically) — `kimi-k3` and `kimi-k2.7-code*` use `1.0`; `kimi-k2.6` uses `1.0` with thinking and `0.6` without.
@@ -159,7 +161,7 @@ response = client.chat.completions.create(
 
 ### Connection Pooling
 
-ExpertGPTs caches client instances per provider/api_key combination.
+ExpertGPTs caches client instances per provider/api_key combination (`get_cached_client()` with `@st.cache_resource`).
 
 **Implementation**: `lib/llm/client_pool.py`
 
@@ -221,9 +223,9 @@ Each provider offers multiple models with different capabilities:
 
 Check provider dashboards for current rates and limits:
 
-- **DeepSeek**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
+- **DeepSeek**: [https://platform.deepseek.com/usage](https://platform.deepseek.com/usage)
 - **OpenAI**: [https://platform.openai.com/usage](https://platform.openai.com/usage)
-- **Z.AI**: [https://z.ai/](https://z.ai/)
+- **Z.AI**: [https://z.ai/manage-apikey/subscription](https://z.ai/manage-apikey/subscription)
 - **KIMI**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 ---

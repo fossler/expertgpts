@@ -1,20 +1,21 @@
 # App Defaults Guide
 
-This guide explains the application defaults configuration in ExpertGPTs, which controls default LLM settings and language preferences.
+This guide explains the application defaults configuration in ExpertGPTs, which controls default LLM settings, language preference and display settings.
 
 ## Overview
 
 The application defaults are stored in `.streamlit/app_defaults.toml` and control:
-- **Default LLM provider** (DeepSeek, OpenAI, Z.AI)
+- **Default LLM provider** (DeepSeek, OpenAI, Z.AI, KIMI)
 - **Default model** for the selected provider
-- **Default temperature** for new experts
 - **Default thinking level** for reasoning
 - **Language preference** for the UI
+- **Display settings** (Git branch in the sidebar footer)
 
 These defaults apply when:
-- Creating new experts
+- Creating new experts (provider and model are preselected in the "Add Chat" dialog)
 - Starting the application for the first time
-- No expert-specific override exists
+
+Existing experts keep their own provider, model, thinking level and temperature in `configs/{expert_id}.yaml` (changed via the chat toolbox on the expert page).
 
 ## Configuration File
 
@@ -31,22 +32,19 @@ These defaults apply when:
 **Location**: `.streamlit/app_defaults.toml.example`
 
 ```toml
-# ExpertGPTs Application Defaults
-#
-# This file stores your default LLM settings and language preference
-#
-# Settings are managed via the Settings page in the app
-# You can also edit this file manually
-
 [llm]
 provider = "deepseek"
 model = "deepseek-flash"
-temperature = 0.7
 thinking_level = "high"
 
 [language]
 code = "en"
+
+[display]
+git_branch = true
 ```
+
+(Comments omitted; see [File Reference](#file-reference) for the full file.)
 
 ## Configuration Sections
 
@@ -57,7 +55,7 @@ Controls default LLM provider and model settings.
 #### `provider`
 
 **Type**: String
-**Valid Values**: `"deepseek"`, `"openai"`, `"zai"`
+**Valid Values**: `"deepseek"`, `"openai"`, `"zai"`, `"kimi"`
 **Default**: `"deepseek"`
 
 **Purpose**: Default LLM provider for new experts
@@ -102,6 +100,12 @@ provider = "deepseek"
 - `"glm-5"` - 200K context
 - `"glm-4.7-flash"` - Free model, 200K context
 
+**KIMI Models**:
+- `"kimi-k3"` - Flagship, 1M context, always reasons, effort low/high/max (default)
+- `"kimi-k2.7-code"` - Coding model, 256K context, always thinks
+- `"kimi-k2.7-code-highspeed"` - Faster K2.7 Code variant, 256K context, always thinks
+- `"kimi-k2.6"` - 256K context, enabled/disabled thinking
+
 **Example**:
 ```toml
 [llm]
@@ -116,32 +120,14 @@ model = "gpt-6.1-sol"
 
 ---
 
-#### `temperature`
+#### Temperature (not an app default)
 
-**Type**: Float
-**Range**: 0.0 to 2.0
-**Default**: 0.7
+There is **no** `temperature` key in `app_defaults.toml` (the app ignores it). Temperature is stored per expert in `configs/{expert_id}.yaml`; the "Add Chat" dialog starts at `1.0`, and it can be changed later in the chat toolbox.
 
-**Purpose**: Default temperature for new experts
-
-**Note**: Some models only accept a fixed temperature, and the app overrides this value for them: all OpenAI models use `1.0`; KIMI `kimi-k3` and `kimi-k2.7-code*` use `1.0`; `kimi-k2.6` uses `1.0` with thinking and `0.6` without.
-
-**Quick Reference**:
-- **0.0 - 0.3**: Focused, deterministic (coding, math)
-- **0.4 - 0.7**: Balanced, informative (general advice)
-- **0.8 - 1.2**: Creative, exploratory (brainstorming)
-- **1.3 - 2.0**: Highly creative (creative writing)
-
-**Example**:
-```toml
-[llm]
-temperature = 0.5
-```
-
-**Impact**:
-- New experts created with this temperature
-- Can be adjusted per-expert
-- Doesn't affect existing experts
+**Limits** (from `LLM_PROVIDERS` in `lib/shared/constants.py`):
+- Range `0.0`–`2.0` by default; Z.AI caps it at `1.0` (`max_temperature`)
+- Fixed values override the stored temperature (`fixed_temperature`): all OpenAI models use `1.0`; KIMI `kimi-k3` and `kimi-k2.7-code*` use `1.0`; `kimi-k2.6` uses `1.0` with thinking and `0.6` without
+- DeepSeek ignores temperature while thinking is enabled (`temperature_ignored_with_thinking`), so the control is disabled then
 
 **See also**: [Temperature Guide](../user-guide/temperature-guide.md)
 
@@ -151,9 +137,9 @@ temperature = 0.5
 
 **Type**: String
 **Valid Values**: Model-dependent: `"none"`, `"low"`, `"medium"`, `"high"`, `"xhigh"`, `"max"`
-**Default**: `"high"` (for the default model `deepseek-flash`)
+**Default**: `"high"` in `app_defaults.toml.example`; `"none"` if the key is missing or the file is auto-created
 
-**Purpose**: Enable/disable reasoning capabilities by default
+**Purpose**: Default reasoning level, saved with the other defaults in Settings → Default LLM
 
 **Availability**:
 - **OpenAI**: `gpt-6.1-sol` / `gpt-6-astra`: low/medium/high/xhigh (always reason, default medium); other models: none/low/medium/high/xhigh (default none)
@@ -170,9 +156,9 @@ thinking_level = "medium"
 ```
 
 **Impact**:
-- New experts use this thinking level
-- Increases response time and cost when enabled
-- Use for complex problem-solving tasks
+- Preselected in Settings → Default LLM
+- New experts currently start at `"none"` in the "Add Chat" dialog (or the model's default effort if the model doesn't support `"none"`), not at this value
+- Thinking increases response time and cost when enabled
 
 **Use Cases**:
 - **None**: Quick responses, simple tasks
@@ -229,6 +215,22 @@ code = "de"  # German
 
 ---
 
+### Display Settings (`[display]`)
+
+#### `git_branch`
+
+**Type**: Boolean
+**Default**: `true`
+
+**Purpose**: Show the current Git branch in the sidebar footer. Set to `false` to hide it.
+
+```toml
+[display]
+git_branch = false
+```
+
+---
+
 ## Configuration Lifecycle
 
 ### First Run
@@ -246,12 +248,12 @@ code = "de"  # German
 
 1. **Load Preferences**:
    - Read from `app_defaults.toml`
-   - Apply to all new experts
+   - Provider/model preselected for new experts
    - UI starts in saved language
 
 2. **Updates**:
    - Changed via Settings page
-   - Saved immediately
+   - LLM defaults saved with "Save Defaults"; language saved on click
    - Applied to next expert created
 
 ### Resetting Defaults
@@ -262,11 +264,7 @@ rm .streamlit/app_defaults.toml
 # App will recreate on next run with auto-detected language
 ```
 
-**Option 2: Reset via Settings Page** (if available)
-- Navigate to Settings → General
-- Reset to defaults button
-
-**Option 3: Manual Edit**
+**Option 2: Manual Edit**
 ```bash
 vim .streamlit/app_defaults.toml
 # Edit values
@@ -277,11 +275,9 @@ vim .streamlit/app_defaults.toml
 
 ### Via Settings Page (Recommended)
 
-1. Navigate to **Settings** → **General** tab
-2. Find the setting you want to change
-3. Use dropdown/slider to adjust
-4. Click outside the control to save
-5. Settings saved immediately to `app_defaults.toml`
+1. **LLM defaults**: **Settings** → **Default LLM** tab. Pick provider (only providers with an API key are listed), model and thinking mode, then click **"Save Defaults"**
+2. **Language**: **Settings** → **General** tab. Click a language button; it is saved immediately and the app reloads
+3. All settings are written to `app_defaults.toml`
 
 **Benefits**:
 - Automatic validation
@@ -305,7 +301,6 @@ For advanced users or automated setup.
    [llm]
    provider = "openai"
    model = "gpt-6.1-sol"
-   temperature = 1.0  # fixed at 1.0 for OpenAI models
    thinking_level = "medium"
 
    [language]
@@ -314,7 +309,7 @@ For advanced users or automated setup.
 
 3. **Save and restart app**:
    ```bash
-   streamlit run app.py
+   uv run streamlit run app.py
    ```
 
 **Caution**:
@@ -333,7 +328,6 @@ For advanced users or automated setup.
 [llm]
 provider = "deepseek"
 model = "deepseek-flash"
-temperature = 0.7
 thinking_level = "none"
 
 [language]
@@ -343,7 +337,6 @@ code = "en"
 **Rationale**:
 - DeepSeek: Most cost-effective provider
 - deepseek-flash: DeepSeek V4.1 Flash, good quality, 1M context
-- Temperature 0.7: Balanced for most use cases
 - No reasoning: Faster responses (set to "high" or "max" to enable thinking mode)
 
 ---
@@ -356,7 +349,6 @@ code = "en"
 [llm]
 provider = "openai"
 model = "gpt-6.1-sol"
-temperature = 1.0
 thinking_level = "medium"
 
 [language]
@@ -366,7 +358,7 @@ code = "en"
 **Rationale**:
 - OpenAI: Advanced reasoning capabilities
 - gpt-6.1-sol: Default GPT-6 flagship, always reasons
-- Temperature 1.0: Fixed for all OpenAI models (other values are overridden)
+- Temperature: Fixed at 1.0 for all OpenAI models (per expert, not set here)
 - Medium thinking: Balanced reasoning
 
 ---
@@ -379,7 +371,6 @@ code = "en"
 [llm]
 provider = "zai"
 model = "glm-5.3"
-temperature = 0.7
 thinking_level = "high"
 
 [language]
@@ -389,7 +380,6 @@ code = "zh-CN"
 **Rationale**:
 - Z.AI: GLM models optimized for Chinese
 - Simplified Chinese: Primary language
-- Temperature 0.7: Balanced responses
 - High reasoning effort: GLM-5.3 always reasons (low/high/max)
 
 ---
@@ -402,7 +392,6 @@ code = "zh-CN"
 [llm]
 provider = "deepseek"
 model = "deepseek-flash"
-temperature = 0.3
 thinking_level = "none"
 
 [language]
@@ -410,7 +399,6 @@ code = "en"
 ```
 
 **Rationale**:
-- Low temperature: Consistent, predictable responses
 - DeepSeek: Cost-effective for testing
 - No reasoning: Faster iterations
 - English: Universal development language
@@ -422,23 +410,22 @@ code = "en"
 ### Understanding Precedence
 
 **Priority Order**:
-1. **Session State** (current session override)
-2. **Expert Config** (per-expert setting)
-3. **App Defaults** (global default)
-4. **Application Defaults** (hardcoded fallback)
+1. **Expert Config** (per-expert setting; chat toolbox changes are saved here immediately)
+2. **App Defaults** (global default, used when creating an expert)
+3. **Application Defaults** (hardcoded fallback in `lib/shared/constants.py`)
 
-**Example**: Temperature setting
+**Example**: Model setting
 ```
-User changes temperature in current session → 0.8
+User picks a model in the chat toolbox → saved to configs/{expert_id}.yaml
     ↓
-Expert config has temperature → 0.6
+Expert config metadata.model → used for every request
     ↓
-App defaults temperature → 0.7
+App defaults model → only preselected when creating a new expert
     ↓
-Application fallback → 0.7
+Application fallback → deepseek-flash (DEFAULT_LLM_MODEL)
 ```
 
-**Result**: Session state wins (0.8)
+**Result**: The expert config wins
 
 ### When Defaults Apply
 
@@ -449,26 +436,25 @@ Application fallback → 0.7
 
 **Defaults don't apply to**:
 - ❌ Existing experts (they keep their settings)
-- ❌ Session state overrides
 - ❌ Expert-specific configuration
 
 **Example Workflow**:
 ```toml
-# Initial: App defaults temperature = 0.7
+# Initial: App defaults model = "deepseek-flash"
 
-# Create Expert A → Uses 0.7
-# Create Expert B → Uses 0.7
+# Create Expert A → Uses deepseek-flash
+# Create Expert B → Uses deepseek-flash
 
-# Change app defaults to 0.5
+# Change app defaults to provider = "openai", model = "gpt-6.1-sol"
 
-# Create Expert C → Uses 0.5 (new default)
-# Expert A → Still uses 0.7 (existing)
-# Expert B → Still uses 0.7 (existing)
+# Create Expert C → Uses gpt-6.1-sol (new default)
+# Expert A → Still uses deepseek-flash (existing)
+# Expert B → Still uses deepseek-flash (existing)
 
-# Edit Expert A to temperature 0.3
+# Switch Expert A to glm-5.3 in the chat toolbox
 
-# Expert A → Uses 0.3 (expert-specific)
-# App defaults → Still 0.7
+# Expert A → Uses glm-5.3 (expert-specific)
+# App defaults → Still gpt-6.1-sol
 ```
 
 ## Best Practices
@@ -513,7 +499,7 @@ thinking_level = "none"
 
 ### 4. Use Temperature Wisely
 
-**Default Temperature**:
+Temperature is set per expert (dialog or chat toolbox), not in `app_defaults.toml`:
 - **0.7** for general use (recommended)
 - **0.3-0.5** for technical/development work
 - **0.8-1.0** for creative/advisory work
@@ -588,32 +574,50 @@ chmod 600 .streamlit/app_defaults.toml
 
 ### Complete Example
 
+**Location**: `.streamlit/app_defaults.toml.example`
+
 ```toml
-# ExpertGPTs Application Defaults
+# Application Default Settings
+# This file persists your default LLM and other app-wide settings
 #
-# This file stores your default LLM settings and language preference
+# Copy this file to app_defaults.toml and customize it with your preferences
+# The app will automatically create app_defaults.toml when you save settings
+# through the UI, but you can also create/edit this file manually
+#
+# Location: .streamlit/app_defaults.toml
+# Permissions: 600 (read/write for owner only)
 
 [llm]
-# Default LLM provider: "deepseek", "openai", or "zai"
+# Default LLM provider
+# Options: deepseek, openai, zai, kimi
 provider = "deepseek"
 
-# Default model for the provider
-# DeepSeek: "deepseek-flash", "deepseek-v4-pro"
-# OpenAI: "gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5.4-nano"
-# Z.AI: "glm-5.3", "glm-5.2", "glm-5", "glm-4.7-flash"
-# KIMI: "kimi-k3", "kimi-k2.7-code", "kimi-k2.7-code-highspeed", "kimi-k2.6"
+# Default model for the selected provider
+# DeepSeek: deepseek-flash, deepseek-v4-pro
+# OpenAI: gpt-6.1-sol, gpt-6-astra, gpt-6-luna, gpt-5.6-sol, gpt-5.6-terra,
+#         gpt-5.6-luna, gpt-5.4-mini, gpt-5.4-nano
+# Z.AI: glm-5.3, glm-5.2, glm-5, glm-4.7-flash (free)
+# KIMI: kimi-k3, kimi-k2.7-code, kimi-k2.7-code-highspeed, kimi-k2.6
 model = "deepseek-flash"
 
-# Default temperature for new experts (0.0 - 2.0)
-temperature = 0.7
-
-# Default thinking level (model-dependent): "none", "low", "medium", "high", "xhigh", "max"
+# Default thinking/reasoning level
+# OpenAI GPT-6.1 Sol / GPT-6 Astra: low, medium, high, xhigh (always reason)
+# OpenAI GPT-6 Luna / GPT-5.x: none, low, medium, high, xhigh
+# Z.AI GLM-5.3: low, high, max | GLM-5.2: high, max | older GLM: enabled, disabled
+# KIMI K3: low, high, max | K2.7 Code: always thinks | K2.6: enabled, disabled
+# DeepSeek: none, high, max
 thinking_level = "high"
 
 [language]
-# Language code for UI and expert responses
-# Supported: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
+# Default interface language
+# Options: en, de, es, fr, it, pt, ru, tr, id, ms, zh-CN, zh-TW, wyw, yue
+# The app will auto-detect your system language on first run
 code = "en"
+
+[display]
+# Show Git branch in sidebar footer
+# Set to false to hide the Git branch display
+git_branch = true
 ```
 
 ## Next Steps

@@ -23,7 +23,7 @@ This guide explains the temperature parameter in ExpertGPTs, helping you choose 
 |-------------|----------|-----------------|
 | **0.0** | Deterministic | Same input always produces same output |
 | **0.3** | Focused | Precise, factual, minimal variation |
-| **0.7** | Balanced | Natural conversational tone (default) |
+| **0.7** | Balanced | Natural conversational tone (recommended starting point) |
 | **1.2** | Creative | Varied, exploratory responses |
 | **2.0** | Highly Creative | Unpredictable, diverse outputs |
 
@@ -38,6 +38,8 @@ Only some models honor the temperature you set. The app adjusts the control auto
 | **OpenAI** | All models | Fixed **1.0** | OpenAI rejects other values while the model reasons. |
 | **KIMI** | K3, K2.7 Code, K2.7 Code HighSpeed | Fixed **1.0** | Fixed by the API. |
 | **KIMI** | K2.6 | Fixed **1.0** with thinking, **0.6** without | One fixed value per mode. |
+
+**Where to set it**: in the toolbox below the chat input (the temperature field next to the model and thinking mode; changes are saved immediately), or in the **Add Chat** / **Edit** expert forms (default for new experts: 1.0). For models with a fixed temperature the field is hidden in the toolbox and shown disabled in the forms.
 
 The ranges below use the full 0.0 – 2.0 scale. For Z.AI, values from 1.3 upwards are not available; use 0.8 – 1.0 for creative tasks instead.
 
@@ -272,7 +274,7 @@ High Temp (1.2) + Reasoning:
 
 ### Tuning Workflow
 
-1. **Start with default (0.7)**
+1. **Start with 0.7** (new experts start at 1.0)
 2. **Test with typical questions**
 3. **Adjust based on results**:
    - Too repetitive/boring → Increase
@@ -459,7 +461,7 @@ Reality bends to the programmer's will
 
 - **[User Guide - Basics](basics.md)** - Learn about expert interaction
 - **[Creating Experts](creating-experts.md)** - Apply temperature to expert creation
-- **[Customization Guide](customization.md)** - Set default temperatures
+- **[Customization Guide](customization.md)** - Set default provider, model and thinking mode
 
 ---
 

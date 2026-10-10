@@ -20,7 +20,7 @@ The application will open in your browser at `http://localhost:8501`
 
 ### 1. Language Selection
 
-ExpertGPTs supports **13 languages** with automatic detection.
+ExpertGPTs supports **14 languages** with automatic detection.
 
 **What happens on first run**:
 1. The app detects your system language automatically
@@ -41,23 +41,23 @@ ExpertGPTs supports **13 languages** with automatic detection.
 - 🇨🇳 Simplified Chinese (简体中文) (zh-CN)
 - 🇹🇼 Traditional Chinese (繁體中文) (zh-TW)
 - 🇭🇰 Cantonese (粵語) (yue)
-- 🗣️ Wu Chinese (文言文) (wyw)
+- 🏛️ Classical Chinese (文言文) (wyw)
 
 **To change language manually**:
 1. Navigate to **Settings** → **General** tab
-2. Select your preferred language from the dropdown
-3. Click outside the selector to save
-4. The app restarts in the selected language
+2. Scroll to the **Language** section
+3. Click the button of your preferred language (grouped by script)
+4. The preference is saved and the app reloads in the selected language
 
 ### 2. API Key Configuration
 
-ExpertGPTs requires an API key to function. You can set it up in two ways:
+ExpertGPTs requires an API key for at least one provider (DeepSeek, OpenAI, Z.AI or KIMI). You can set it up in two ways:
 
 #### Option 1: Via Settings Page (Recommended)
 
 1. Navigate to **Settings** in the app
-2. Go to the **API Keys** tab
-3. Enter your DeepSeek API key
+2. Go to the **API Key** tab
+3. Select the LLM provider and enter your API key
 4. Click **"Save API Key"**
 5. The key will be automatically saved to `.streamlit/secrets.toml`
 
@@ -71,9 +71,13 @@ ExpertGPTs requires an API key to function. You can set it up in two ways:
 2. Edit `.streamlit/secrets.toml` and add your API key:
    ```toml
    DEEPSEEK_API_KEY = "your_actual_api_key_here"
+   # Optional, for other providers:
+   # OPENAI_API_KEY = "..."
+   # ZAI_API_KEY = "..."
+   # MOONSHOT_API_KEY = "..."
    ```
 
-**Get your API key from**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
+**Get a DeepSeek API key from**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
 
 > **Security Note**: The `.streamlit/secrets.toml` file is gitignored and will never be committed to version control. The file is automatically set to 600 permissions (read/write for owner only) when created or modified.
 
@@ -85,7 +89,8 @@ ExpertGPTs uses Streamlit's modern navigation with Material Design icons:
 
 - **:material/home:** Home - Expert list and Add Chat button
 - **:material/psychology:** Expert Pages - Your custom expert agents
-- **:material/settings:** Settings - Configure API keys, themes, language, and defaults
+- **:material/settings:** Settings - Configure API keys, themes, language, defaults, and experts
+- **:material/help:** Help - In-app documentation
 
 ### Default Experts
 
@@ -105,8 +110,9 @@ On first run, 9 example experts are created:
 
 ### Layout
 
-- **Sidebar**: Navigation menu with expert list
+- **Sidebar**: Navigation menu with expert list (on the Home page also the **Toolbox** with **"➕ Add Chat"**)
 - **Main Content**: Chat interface with expert
+- **Chat Toolbox**: Below the chat input on expert pages (attachments, voice input, clear history, context usage, model settings)
 - **Settings Panel**: Configuration options (when on Settings page)
 
 ## Your First Chat
@@ -114,14 +120,16 @@ On first run, 9 example experts are created:
 ### Selecting an Expert
 
 1. Click on any expert in the sidebar navigation
-2. The expert's page loads with a welcome message
+2. The expert's page loads with its name and description (and any previous chat history)
 3. You'll see the chat interface with a text input at the bottom
 
 ### Sending Your First Message
 
 1. Type your question or prompt in the chat input
 2. Press **Enter** or click the send button
-3. The expert responds maintaining conversation context
+3. The expert responds maintaining conversation context; each answer shows the avatar of the provider that produced it
+
+Instead of typing, you can use **Voice input** in the toolbox below the chat input: record a message, and it is transcribed and sent automatically (OpenAI experts use `gpt-transcribe`, all others Z.AI `glm-asr-2512` with a 30-second limit; this requires the corresponding API key). **Attach file** adds text files (up to 200 KB) to your next message, **Attach image** adds images (up to 5 MB) for models that support vision.
 
 ### Conversation Features
 
@@ -154,34 +162,36 @@ Each provider offers multiple models:
 
 ### Temperature Adjustment
 
-Control response creativity:
+Control response creativity with the temperature field below the chat input:
 - **Lower (0.0-0.3)**: Focused, factual responses
 - **Medium (0.4-0.7)**: Balanced (recommended for most use cases)
 - **Higher (0.8-2.0)**: Creative, exploratory responses
+
+Z.AI accepts at most 1.0. The field is disabled for DeepSeek while thinking is enabled (DeepSeek ignores it) and hidden for models with a fixed temperature (all OpenAI models and some KIMI models).
 
 ### Theme Customization
 
 Personalize the app's appearance:
 
 1. Go to **Settings** → **General** tab
-2. Use color pickers to adjust:
+2. Select a preset theme, or select **Custom** and use the color pickers to adjust:
    - **Buttons and Interactive Elements**
    - **Background Color**
    - **Secondary Background** (sidebar)
    - **Text Color**
-3. Click **"Apply Changes"** to save
+3. Click **"Save & Apply Theme"** to save
 
-**Preset Themes**: Quick access to Light (Red, Blue, Green, Purple) and Dark (Dark Blue, Dark Gray) themes.
+**Preset Themes**: Modern Red, Ocean Blue, Forest Green, Royal Purple, Dark Blue, Dark Gray, plus Custom.
 
 ## Creating Your First Expert
 
-1. Navigate to the **Home** page (the "Add Chat" button is only available there)
-2. Click the **"➕ Add Chat"** button in the sidebar
+1. Navigate to the **Home** page (or **Settings** → **Expert Management**, button **"➕ Add new Chat"**)
+2. Click the **"➕ Add Chat"** button in the sidebar Toolbox
 3. Fill in the form:
+   - **LLM Provider & Model**: Provider, model, thinking mode and temperature (default: 1.0)
    - **Expert Name**: A descriptive name (e.g., "Legal Advisor")
    - **Agent Description**: Describe the expert's domain and capabilities
-   - **Temperature**: Set response creativity (default: 0.7)
-   - **Custom System Prompt** (optional): Provide a custom system prompt
+   - **Customize Expert Behavior** (optional): Provide a custom system prompt
 4. Click **"Create Expert"**
 5. You'll be automatically navigated to your new expert page
 
@@ -192,11 +202,11 @@ Personalize the app's appearance:
 
 ### Multilingual Experts
 
-You can create experts in any language! For example:
+You can describe experts in any language (the name itself is limited to ASCII letters, numbers, spaces, `_`, `-` and `.`). For example:
 
 - **German Expert**: Name "Datenexperte" with German description
-- **Chinese Expert**: Name "数据专家" with Chinese description
-- **French Expert**: Name "Expert Français" with French description
+- **Chinese Expert**: Name "Data Expert CN" with Chinese description
+- **French Expert**: Name "Expert Francais" with French description
 
 The expert will automatically respond in the user's selected language, regardless of the language used to create it.
 
@@ -241,7 +251,7 @@ Chat history is stored in `chat_history/{expert_id}.json` files.
 ### Clearing History
 
 To clear chat history:
-1. Use **🗑️ Clear chat history** in the toolbox below the chat input and confirm with **Delete permanently**
+1. Use **Clear Chat History** (trash icon) in the toolbox below the chat input and confirm with **Delete permanently**
 2. Or delete the corresponding `chat_history/{expert_id}.json` file
 
 ## Getting Help
@@ -250,7 +260,7 @@ To clear chat history:
 
 If you encounter issues:
 
-- **"Configuration not found"**: Run `python3 scripts/setup.py` to create example experts
+- **"Configuration not found"**: Run `uv run python scripts/setup.py` to create example experts
 - **API key errors**: Verify your API key is valid and has sufficient credits
 - **Expert not appearing**: Check that the expert page exists in `pages/` directory
 - **Import errors**: Ensure dependencies are installed: `uv sync`

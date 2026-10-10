@@ -59,35 +59,31 @@ ExpertGPTs uses a **master template** (`templates/template.py`) to generate all 
 ### Example Template Structure
 
 ```python
-# templates/template.py
+# templates/template.py (excerpt)
 
 import streamlit as st
-from utils.config_manager import ConfigManager
-from utils.llm_client import LLMClient
-from utils.chat_history_manager import ChatHistoryManager
-from utils.i18n import i18n
+from lib.config.config_manager import get_config_manager, get_llm_metadata
+from lib.shared.session_state import initialize_shared_session_state
+from lib.i18n import i18n
+from lib.storage import load_chat_history, save_chat_history, StreamingCache
+from lib.ui.chat_toolbox import render_chat_toolbox, render_user_message
 
-# Expert configuration
+# Expert Configuration
 EXPERT_ID = "{{EXPERT_ID}}"
 EXPERT_NAME = "{{EXPERT_NAME}}"
 
-# Page config
-st.set_page_config(
-    page_title=f"{EXPERT_NAME}",
-    page_icon=":material/psychology:",
-    layout="wide"
-)
 
-# Load expert configuration
-config_manager = ConfigManager()
-config = config_manager.load_config(EXPERT_ID)
+def initialize_session_state():
+    initialize_shared_session_state()
+    messages_key = f"messages_{EXPERT_ID}"
+    if messages_key not in st.session_state:
+        st.session_state[messages_key] = load_chat_history(EXPERT_ID)
+    return messages_key
 
-# Initialize session state for this expert
-if f"messages_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"messages_{EXPERT_ID}"] = []
-
-# ... rest of the page logic
+# ... load_expert_config(), render_chat_interface(), handle_user_input(), main()
 ```
+
+`st.set_page_config()` is not called in the template; `app.py` sets the page configuration once before `st.navigation()`.
 
 ### Generated Expert Page
 
@@ -95,36 +91,15 @@ if f"messages_{EXPERT_ID}" not in st.session_state:
 
 **Example**: `pages/1005_sql_expert.py`
 
-After placeholder replacement:
+After placeholder replacement only the two constants differ from the template:
 ```python
 # pages/1005_sql_expert.py
 
-import streamlit as st
-from utils.config_manager import ConfigManager
-from utils.llm_client import LLMClient
-from utils.chat_history_manager import ChatHistoryManager
-from utils.i18n import i18n
-
-# Expert configuration
+# Expert Configuration
 EXPERT_ID = "1005_sql_expert"
 EXPERT_NAME = "SQL Expert"
 
-# Page config
-st.set_page_config(
-    page_title=f"SQL Expert",
-    page_icon=":material/psychology:",
-    layout="wide"
-)
-
-# Load expert configuration
-config_manager = ConfigManager()
-config = config_manager.load_config("1005_sql_expert")
-
-# Initialize session state for this expert
-if f"messages_1005_sql_expert" not in st.session_state:
-    st.session_state[f"messages_1005_sql_expert"] = []
-
-# ... rest of the page logic
+# ... rest identical to templates/template.py
 ```
 
 ## Page Numbering Scheme
@@ -134,8 +109,9 @@ if f"messages_1005_sql_expert" not in st.session_state:
 | Number | Page | Type | Description |
 |--------|------|------|-------------|
 | **1000** | Home | Permanent | Expert list and management |
-| **1001-9998** | Experts | Generated | Individual expert pages |
-| **9999** | Settings | Permanent | App settings and configuration |
+| **1001-9997** | Experts | Generated | Individual expert pages |
+| **9998** | Settings | Permanent | App settings and configuration |
+| **9999** | Help | Permanent | Documentation viewer |
 
 ### Expert ID Generation
 
@@ -148,10 +124,10 @@ if f"messages_1005_sql_expert" not in st.session_state:
 - `1010_career_coach`
 
 **Sanitization Rules**:
-- Convert to lowercase
+- Unicode NFC normalization, convert to lowercase
 - Replace spaces/hyphens with underscores
 - Remove special characters
-- Limit to alphanumeric and underscores
+- Limit to alphanumeric and underscores, max 64 characters, no leading/trailing underscores
 
 **Implementation**: `lib/shared/helpers.py` - `sanitize_name()` function
 
@@ -188,7 +164,7 @@ Expert configs (`configs/`), chat history (`chat_history/`) and chat images (`ch
 
 **Generated pages are local**: Expert pages (`pages/1001_*.py` and higher) are gitignored, so only `templates/template.py` is committed. After pulling a template change on another machine, run `regenerate_pages.py` there as well.
 
-**Not for template changes**: `scripts/reset_application.py` deletes all configs, pages, chat history and the streaming cache and recreates the example experts. Use it only when you want a full reset.
+**Not for template changes**: `scripts/reset_application.py` deletes all configs, pages, chat history, chat images and the streaming cache and recreates the example experts. Use it only when you want a full reset.
 
 **Best Practice**: Keep all expert-specific logic in the template or in YAML configs. Never edit generated expert pages directly.
 
@@ -219,7 +195,7 @@ Expert configs (`configs/`), chat history (`chat_history/`) and chat images (`ch
 
 ### Generated Expert Pages
 
-**Expert Pages** (`pages/1001_*.py` to `pages/9998_*.py`):
+**Expert Pages** (`pages/1001_*.py` to `pages/9997_*.py`):
 - Generated from template
 - Auto-generated, not manually edited
 - Regenerated via `regenerate_pages.py`
@@ -275,101 +251,98 @@ All expert pages now have the export button.
 
 ## Template Components
 
-### Page Configuration
-
-```python
-st.set_page_config(
-    page_title=f"{EXPERT_NAME}",
-    page_icon=":material/psychology:",
-    layout="wide"
-)
-```
-
 ### Expert Config Loading
 
 ```python
-config_manager = ConfigManager()
-config = config_manager.load_config(EXPERT_ID)
+@st.cache_data(ttl=CONFIG_CACHE_TTL, show_spinner="Loading expert configuration...")
+def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
+    config_manager = get_config_manager()
+    try:
+        return config_manager.load_config(expert_id)
+    except FileNotFoundError:
+        return {}
+
+
+def load_expert_config() -> dict:
+    cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
+    return load_expert_config_cached(EXPERT_ID, cache_version)
 ```
+
+Provider, model and thinking level come from the config metadata: `provider, model, thinking_level = get_llm_metadata(config)`.
 
 ### Session State Initialization
 
 ```python
-# Messages history
-if f"messages_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"messages_{EXPERT_ID}"] = []
+def initialize_session_state():
+    # Shared state first (API keys, defaults, language)
+    initialize_shared_session_state()
 
-# Provider selection
-if f"provider_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"provider_{EXPERT_ID}"] = "deepseek"
+    # Messages history, loaded from chat_history/{EXPERT_ID}.json on first run
+    messages_key = f"messages_{EXPERT_ID}"
+    if messages_key not in st.session_state:
+        st.session_state[messages_key] = load_chat_history(EXPERT_ID)
 
-# Model selection
-if f"model_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"model_{EXPERT_ID}"] = config.get("metadata", {}).get("model", "deepseek-flash")
-
-# Temperature
-if f"temperature_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"temperature_{EXPERT_ID}"] = config.get("temperature", 0.7)
-
-# Thinking level
-if f"thinking_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"thinking_{EXPERT_ID}"] = "none"
+    return messages_key
 ```
+
+Provider, model, temperature and thinking level are not kept in session state; the toolbox model row writes them directly to the expert config.
 
 ### Chat Interface
 
 ```python
-# Display chat history (user messages show image thumbnails and
-# text attachments as expanders)
-for message in st.session_state[f"messages_{EXPERT_ID}"]:
-    with st.chat_message(message["role"]):
-        if message["role"] == "user":
+# Display chat history (assistant avatar per message; user messages show
+# image thumbnails and text attachments as expanders)
+provider, _, _ = get_llm_metadata(config)
+for message in st.session_state[messages_key]:
+    if message["role"] == "assistant":
+        avatar = get_provider_avatar(message.get("provider") or provider)
+        with st.chat_message("assistant", avatar=avatar):
+            st.markdown(sanitize_markdown_content(message["content"]))
+    else:
+        with st.chat_message("user"):
             render_user_message(message["content"])
-        else:
-            st.markdown(message["content"])
 
-# Chat input with the toolbox (attachments, context usage) pinned below it
+# Chat input with the toolbox pinned below it (handle_user_input())
 with st.bottom:
     prompt = st.chat_input(i18n.t("home.chat_input_placeholder"))
-    attachments, images = render_chat_toolbox(uploader_key, config, messages)
+    toolbox = render_chat_toolbox(
+        f"{attachments_key}_{attachments_generation}", config, EXPERT_ID, messages_key
+    )
 
+# A transcribed voice message is sent like a typed prompt
+prompt = prompt or toolbox.voice_prompt
 if prompt:
     # Store images on disk, embed references and text files into the message
-    image_refs = [(name, save_image(EXPERT_ID, name, data)) for name, data in images]
-    content = build_message_content(prompt, attachments, image_refs)
+    image_refs = [
+        (name, save_image(EXPERT_ID, name, data)) for name, data in toolbox.images
+    ]
+    content = build_message_content(prompt, toolbox.attachments, image_refs)
 
     # Add user message to history
-    st.session_state[f"messages_{EXPERT_ID}"].append({
-        "role": "user",
-        "content": content
-    })
+    st.session_state[messages_key].append({"role": "user", "content": content})
+    save_chat_history(EXPERT_ID, st.session_state[messages_key])
 
     # Generate response: image tags become image parts (or a text note)
     images_supported = supports_images(provider, model)
     api_messages = [
         {"role": m["role"], "content": to_api_content(m["content"], images_supported)}
-        for m in st.session_state[f"messages_{EXPERT_ID}"]
+        for m in st.session_state[messages_key]
     ]
-    # ... LLM API call ...
+    # ... background streaming via StreamingCache, see background-streaming.md ...
 
-    # Add assistant response to history
-    st.session_state[f"messages_{EXPERT_ID}"].append({
-        "role": "assistant",
-        "content": response
-    })
-
-    # Save chat history
-    chat_history_manager.save_chat_history(EXPERT_ID, st.session_state[f"messages_{EXPERT_ID}"])
+    # Add assistant response to history, attributed to the producing LLM
+    st.session_state[messages_key].append(assistant_message(response, provider, model))
+    save_chat_history(EXPERT_ID, st.session_state[messages_key])
 ```
 
 **Chat toolbox and attachments** (see `handle_user_input()` in the template):
-- `st.chat_input` and the toolbox row (`render_chat_toolbox(widget_key, config, messages)` in `lib/ui/chat_toolbox.py`) are rendered inside `with st.bottom:`, so the toolbox stays pinned below the input. Left to right: "Attach file" and "Attach image" (popovers with a multi-file `st.file_uploader` each), status captions (skipped files, attached files/images) and, right-aligned via `st.space("stretch")`, the context usage. It returns `(attachments, images)`: text files as (name, text), images as (name, bytes).
+- `st.chat_input` and the toolbox row (`render_chat_toolbox(widget_key, config, expert_id, messages_key)` in `lib/ui/chat_toolbox.py`) are rendered inside `with st.bottom:`, so the toolbox stays pinned below the input. Left to right: "Attach file" and "Attach image" (popovers with a multi-file `st.file_uploader` each), "Voice input", status captions (skipped files, attached files/images) and, right-aligned via `st.space("stretch")`, "Clear chat history" and the context usage. It returns a `ToolboxInput(attachments, images, voice_prompt)`: text files as (name, text), images as (name, bytes), plus an optional transcribed voice prompt.
 - **Text files** (UTF-8, at most `ATTACHMENT_MAX_SIZE_KB` = 200 KB each, extensions from `ATTACHMENT_FILE_TYPES` in `lib/shared/constants.py`): too-large or non-UTF-8 files are reported in the toolbox and skipped. On send, `build_message_content()` (`lib/shared/attachments.py`) appends each file to the prompt as an `<attachment name="...">...</attachment>` block, so token counting, chat history persistence and size limits need no changes.
 - **Images** (`IMAGE_FILE_TYPES` = PNG/JPEG/WebP/GIF, at most `IMAGE_MAX_SIZE_MB` = 5 MB each, validated with Pillow by `validate_image_attachment()`): the button is disabled, with the tooltip "<model> does not support images", unless `supports_images(provider, model)` is true, i.e. the model config in `LLM_PROVIDERS` declares `"vision": True`.
   - On send, `save_image()` (`lib/storage/attachment_store.py`) writes each image to `chat_attachments/{expert_id}/<uuid>.<ext>` (resolved from the project root, path-traversal safe via `safe_path_join`) and returns a reference. The message content only gets an `<image name="..." ref="...">` tag after the prompt (before any `<attachment>` blocks), which keeps the chat history small and the token count undistorted. Images are therefore **not** counted in the context usage.
   - When a request is sent, every message goes through `to_api_content(content, images_supported)`: image tags become OpenAI-style `image_url` parts with base64 data URLs (`get_image_data_url()`). For models without image support each image is replaced by the text note "[Image <name> omitted: the selected model does not support images]", so switching an expert to a text-only model keeps earlier conversations working; a missing file becomes "[Image <name> is no longer available]". Messages without images are passed through unchanged.
-  - "Voice input": `_render_voice_input()` records with `st.audio_input` and calls `lib/audio/transcription.py`. `get_transcription_provider()` routes OpenAI experts to OpenAI (`gpt-transcribe`) and all other experts to Z.AI (`glm-asr-2512`, max 30 s, checked via `get_audio_duration()` before sending); both use the OpenAI-compatible `/audio/transcriptions` endpoint through the pooled client (`get_cached_client(...).client.audio.transcriptions.create`). Without the transcription provider's API key the recorder is disabled with a notice. GLM-ASR gets the localized sentence `chat_toolbox.voice_asr_context` as `prompt` (it has no language parameter; without context it answered German in Chinese or English); OpenAI gets the app language as ISO-639-1 `language`. The transcript is sent automatically: it is returned right away as `ToolboxInput.voice_prompt`, which `handle_user_input()` treats like a typed prompt (`prompt = prompt or toolbox.voice_prompt`). Each recording is transcribed, and therefore sent, once: the result is cached in session state by audio hash, and the recorder key changes after the message was sent. `render_chat_toolbox()` returns a `ToolboxInput` dataclass (attachments, images, voice_prompt).
-  - "Clear chat history" lives in the toolbox (right side, left of the context usage) as a popover with a confirmation button (`_render_clear_history()` in `lib/ui/chat_toolbox.py`; the sidebar button and the template's `clear_chat_history()` were removed). `delete_chat_history()` also calls `delete_expert_attachments()`; `scripts/reset_application.py` deletes the whole `chat_attachments/` directory.
+- "Voice input": `_render_voice_input()` records with `st.audio_input` and calls `lib/audio/transcription.py`. `get_transcription_provider()` routes OpenAI experts to OpenAI (`gpt-transcribe`) and all other experts to Z.AI (`glm-asr-2512`, max 30 s, checked via `get_audio_duration()` before sending); both use the OpenAI-compatible `/audio/transcriptions` endpoint through the pooled client (`get_cached_client(...).client.audio.transcriptions.create`). Without the transcription provider's API key the recorder is disabled with a notice. GLM-ASR gets the localized sentence `chat_toolbox.voice_asr_context` as `prompt` (it has no language parameter; without context it answered German in Chinese or English); OpenAI gets the app language as ISO-639-1 `language`. The transcript is sent automatically: it is returned right away as `ToolboxInput.voice_prompt`, which `handle_user_input()` treats like a typed prompt (`prompt = prompt or toolbox.voice_prompt`). Each recording is transcribed, and therefore sent, once: the result is cached in session state by audio hash, and the recorder key changes after the message was sent. `render_chat_toolbox()` returns a `ToolboxInput` dataclass (attachments, images, voice_prompt).
+- "Clear chat history" lives in the toolbox (right side, left of the context usage) as a popover with a confirmation button (`_render_clear_history()` in `lib/ui/chat_toolbox.py`; the sidebar button and the template's `clear_chat_history()` were removed). `delete_chat_history()` also calls `delete_expert_attachments()`; `scripts/reset_application.py` deletes the whole `chat_attachments/` directory.
 - `render_user_message()` uses `split_message_content()`, which returns `(prompt, text attachments, images)`, to show the prompt, image thumbnails (`st.image(..., width=240, alt=<file name>)`, or a "no longer available" caption) and one collapsible "📎 <filename>" expander per text attachment, also after a reload.
 - **Context usage**: `_render_context_usage()` shows a compact popover button "<severity emoji> <percent>%" on the right of the toolbox; it opens the details (usage %, total/max tokens, system prompt tokens, chat message tokens), calculated by `_calculate_context_stats()` via `TokenManager.calculate_usage_statistics()`. It replaces the former sidebar metric card and breakdown expander (`display_context_usage()` in the template, removed).
 - The uploader keys include a counter that is incremented after each sent message, which clears the attachments.
@@ -491,9 +464,9 @@ if EXPERT_ID == "1001_python_expert":
 **Good**:
 ```python
 # In template
-from utils.helpers import get_expert_welcome_message
+from lib.shared.helpers import translate_expert_name
 
-st.markdown(get_expert_welcome_message(config))
+st.title(f"🤖 {translate_expert_name(config.get('expert_name', EXPERT_NAME))}")
 ```
 
 **Bad**:

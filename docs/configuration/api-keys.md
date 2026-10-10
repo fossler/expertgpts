@@ -12,7 +12,10 @@ ExpertGPTs supports multiple LLM providers, each requiring an API key for authen
 |----------|--------------|----------|---------------|
 | **DeepSeek** | `DEEPSEEK_API_KEY` | `https://api.deepseek.com` | [DeepSeek API Docs](https://api-docs.deepseek.com/) |
 | **OpenAI** | `OPENAI_API_KEY` | `https://api.openai.com/v1` | [OpenAI API Docs](https://platform.openai.com/docs/api-reference) |
-| **Z.AI** | `ZAI_API_KEY` | `https://api.z.ai/v1` | [Z.AI Documentation](https://z.ai/) |
+| **Z.AI** | `ZAI_API_KEY` | `https://api.z.ai/api/paas/v4` | [Z.AI Documentation](https://docs.z.ai/) |
+| **KIMI** | `MOONSHOT_API_KEY` | `https://api.moonshot.ai/v1` | [KIMI API Docs](https://platform.kimi.ai/docs) |
+
+**Voice input**: the chat toolbox transcribes voice messages with OpenAI's `gpt-transcribe` (experts using OpenAI, needs `OPENAI_API_KEY`) or Z.AI's `glm-asr-2512` (all other experts, needs `ZAI_API_KEY`). See `lib/audio/transcription.py`.
 
 ## Setting API Keys
 
@@ -23,16 +26,16 @@ The Settings page provides a secure, user-friendly interface for API key managem
 **Steps**:
 
 1. Navigate to **Settings** in the app
-2. Go to the **API Keys** tab
-3. Select the provider tab (DeepSeek, OpenAI, or Z.AI)
+2. Go to the **API Key** tab
+3. Select the provider in the **Select LLM Provider** dropdown (DeepSeek, OpenAI, Z.AI, or KIMI)
 4. Enter your API key in the input field
 5. Click **"Save API Key"**
 
 **What Happens**:
-- Key is validated for minimum length (20 characters)
+- Key format is validated per provider (see `validate_api_key()` in `lib/shared/helpers.py`)
 - Key is saved to `.streamlit/secrets.toml`
 - File permissions automatically set to 600 (owner read/write only)
-- Key available for use immediately
+- The app reruns and the key is available immediately
 
 **Benefits**:
 - Automatic validation
@@ -62,6 +65,7 @@ For advanced users or automated setup.
    DEEPSEEK_API_KEY = "sk-your-deepseek-key-here"
    OPENAI_API_KEY = "sk-your-openai-key-here"
    ZAI_API_KEY = "your-zai-key-here"
+   MOONSHOT_API_KEY = "sk-your-kimi-key-here"
    ```
 
 4. **Set secure permissions**:
@@ -111,7 +115,7 @@ For advanced users or automated setup.
 
 ### Z.AI API Key
 
-**URL**: [https://z.ai/](https://z.ai/)
+**URL**: [https://z.ai/manage-apikey/subscription](https://z.ai/manage-apikey/subscription)
 
 **Steps**:
 1. Sign up or log in to Z.AI platform
@@ -124,6 +128,18 @@ For advanced users or automated setup.
 - GLM models optimized for Chinese
 - Competitive pricing
 - Good for multilingual applications
+- Also used for voice input (`glm-asr-2512`) for all non-OpenAI experts
+
+### KIMI API Key
+
+**URL**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
+
+**Steps**:
+1. Sign up or log in to the KIMI (Moonshot AI) platform
+2. Navigate to API Keys section
+3. Create new API key
+4. Copy key (starts with `sk-`)
+5. Paste into ExpertGPTs Settings
 
 ## API Key Security
 
@@ -142,14 +158,13 @@ ExpertGPTs implements multiple security layers:
 - Example file provided instead
 
 **3. Validation**
-- Minimum 20 characters enforced
-- Format validation via UI
-- Clear error messages
+- Provider-specific format check (regex) before saving
+- Clear error messages with an example of the expected format
 
 **4. Secure Storage**
-- Only accessed via Streamlit secrets API
+- Read directly from `.streamlit/secrets.toml` (`lib/config/secrets_manager.py`)
 - Never logged or printed
-- Not included in error messages
+- Redacted from error messages (`sanitize_error_message()`)
 
 ### Verifying Security
 
@@ -193,10 +208,10 @@ git status
 You can configure API keys for all providers simultaneously:
 
 **Via Settings Page**:
-1. Go to Settings → API Keys tab
-2. Enter DeepSeek key in DeepSeek tab
-3. Enter OpenAI key in OpenAI tab
-4. Enter Z.AI key in Z.AI tab
+1. Go to Settings → API Key tab
+2. Select a provider in the dropdown
+3. Enter its key and click **"Save API Key"**
+4. Repeat for the other providers
 5. Each saved independently
 
 **Manual Configuration**:
@@ -204,6 +219,7 @@ You can configure API keys for all providers simultaneously:
 DEEPSEEK_API_KEY = "sk-deepseek-key"
 OPENAI_API_KEY = "sk-openai-key"
 ZAI_API_KEY = "zai-key"
+MOONSHOT_API_KEY = "sk-kimi-key"
 ```
 
 ### Switching Between Providers
@@ -211,14 +227,14 @@ ZAI_API_KEY = "zai-key"
 Once configured, you can use different providers per expert:
 
 1. Go to expert's page
-2. Use "Provider" dropdown in sidebar
-3. Select desired provider
-4. Expert uses that provider's API key
+2. Open the model dropdown in the chat toolbox below the chat input (it lists all models of providers with an API key)
+3. Select a model of the desired provider
+4. The choice is saved to the expert's config right away; the expert uses that provider's API key
 
 **Use Cases**:
 - Use **DeepSeek** for cost-effective daily tasks
 - Use **OpenAI** for complex reasoning tasks
-- Use **Z.AI** for Chinese language optimization
+- Use **Z.AI** or **KIMI** for Chinese language optimization
 
 ## Troubleshooting API Keys
 
@@ -233,7 +249,7 @@ Once configured, you can use different providers per expert:
 4. Wrong key for provider
 
 **Solutions**:
-1. **Verify key**: Re-check key in Settings → API Keys
+1. **Verify key**: Re-check key in Settings → API Key
 2. **Check provider dashboard**: Ensure key is active
 3. **Check credits**: Verify sufficient balance
 4. **Regenerate key**: Create new key if needed
@@ -280,9 +296,9 @@ curl https://api.deepseek.com/v1/models \
 
 ### "Configuration Not Found" Error
 
-**Symptoms**: Error when trying to access Settings → API Keys
+**Symptoms**: Error when trying to access Settings → API Key
 
-**Possible Cause**: `secrets.toml` file doesn't exist
+**Possible Cause**: `secrets.toml` file doesn't exist (saving a key via the Settings page also creates it)
 
 **Solution**:
 ```bash
@@ -299,19 +315,22 @@ vim .streamlit/secrets.toml
 ### Provider-Specific Issues
 
 **DeepSeek**:
-- Ensure key starts with `sk-`
-- Minimum 20 characters
+- Ensure key starts with `sk-` followed by lowercase hex characters
 - Check platform status
 
 **OpenAI**:
-- Ensure key starts with `sk-`
+- Ensure key starts with `sk-` (e.g. `sk-proj-...`)
 - Check organization settings if applicable
 - Verify billing is set up
 
 **Z.AI**:
-- Check key format
+- Expected format: 32 hex characters, a dot, 16 alphanumeric characters
 - Verify account is active
 - Contact Z.AI support if issues persist
+
+**KIMI**:
+- Ensure key starts with `sk-`
+- Check balance in the KIMI console
 
 ## API Key Rotation
 
@@ -365,30 +384,19 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml.prod
 # Use appropriate file for environment
 ```
 
-### Environment Variables (Advanced)
+### Environment Variables
 
-For containerized deployments:
-
-```bash
-# Set environment variables
-export DEEPSEEK_API_KEY="sk-key"
-export OPENAI_API_KEY="sk-key"
-
-# Or in .env file (gitignored)
-echo "DEEPSEEK_API_KEY=sk-key" > .env
-echo "OPENAI_API_KEY=sk-key" >> .env
-```
-
-**Note**: ExpertGPTs primarily uses `secrets.toml` for local development.
+ExpertGPTs does **not** read API keys from environment variables or `.env` files. Keys are loaded only from `.streamlit/secrets.toml` (no env var fallback, see `initialize_shared_session_state()` in `lib/shared/session_state.py`). For containerized deployments, mount or generate `secrets.toml` instead.
 
 ## API Key Monitoring
 
 ### Monitoring Usage
 
 **Provider Dashboards**:
-- DeepSeek: [https://platform.deepseek.com/](https://platform.deepseek.com/)
+- DeepSeek: [https://platform.deepseek.com/usage](https://platform.deepseek.com/usage)
 - OpenAI: [https://platform.openai.com/usage](https://platform.openai.com/usage)
-- Z.AI: Check provider dashboard
+- Z.AI: [https://z.ai/manage-apikey/subscription](https://z.ai/manage-apikey/subscription)
+- KIMI: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 **What to Monitor**:
 - Request count
@@ -426,7 +434,7 @@ echo "OPENAI_API_KEY=sk-key" >> .env
 1. ✅ Use example file as template
 2. ✅ Validate before committing
 3. ✅ Don't hardcode keys in code
-4. ✅ Use secrets API, not environment variables
+4. ✅ Use `secrets.toml`, not environment variables (they are not read)
 5. ✅ Test with free/low-cost tiers first
 
 ## File Reference
@@ -436,27 +444,31 @@ echo "OPENAI_API_KEY=sk-key" >> .env
 **Location**: `.streamlit/secrets.toml.example`
 
 ```toml
-# ExpertGPTs API Keys Configuration
+# Streamlit Secrets Configuration Example
 #
-# Copy this file to secrets.toml and add your actual API keys
+# Copy this file to secrets.toml and add your actual API keys:
+# cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 #
-# IMPORTANT: Never commit secrets.toml to version control!
-# The .gitignore file is configured to ignore secrets.toml
+# IMPORTANT: secrets.toml is gitignored and should never be committed!
 #
-# Security: File permissions should be 600 (owner read/write only)
-# Set with: chmod 600 .streamlit/secrets.toml
+# You can also set your API key through the Settings page in the app,
+# which will automatically save it to secrets.toml
 
 # DeepSeek API Key
-# Get your key at: https://platform.deepseek.com/
-DEEPSEEK_API_KEY = ""
+# Get your API key from: https://platform.deepseek.com/
+DEEPSEEK_API_KEY = "your_deepseek_api_key_here"
 
 # OpenAI API Key
-# Get your key at: https://platform.openai.com/api-keys
-OPENAI_API_KEY = ""
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY = "your_openai_api_key_here"
 
 # Z.AI API Key
-# Get your key at: https://z.ai/
-ZAI_API_KEY = ""
+# Get your API key from: https://z.ai/manage-apikey/subscription
+ZAI_API_KEY = "your_zai_api_key_here"
+
+# KIMI API Key (Moonshot AI)
+# Get your API key from: https://platform.kimi.ai/console
+MOONSHOT_API_KEY = "your_moonshot_api_key_here"
 ```
 
 ## Next Steps

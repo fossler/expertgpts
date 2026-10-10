@@ -15,11 +15,14 @@ This guide covers everything you need to know about testing the ExpertGPTs appli
 
 ExpertGPTs uses **pytest** as its testing framework. The test suite focuses on:
 
-- ✅ Agent configuration management
-- ✅ Page file generation
-- ✅ Full agent creation workflow
-- ✅ System prompt handling
-- ✅ Expert listing and deletion
+- ✅ Agent configuration management, page generation and regeneration
+- ✅ System prompt handling, expert listing and deletion
+- ✅ Internationalization (language prefixes, locale files)
+- ✅ Provider/model parameters (reasoning effort, temperature limits)
+- ✅ Background streaming cache
+- ✅ Chat attachments (text files, images, attachment store)
+- ✅ Voice input transcription
+- ✅ Assistant message origin (provider/model)
 
 ### Test Requirements
 
@@ -78,7 +81,7 @@ pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
 Generate a coverage report:
 
 ```bash
-pytest --cov=utils --cov-report=html
+pytest --cov=lib --cov-report=html
 ```
 
 This creates an `htmlcov/` directory. Open `htmlcov/index.html` in your browser to view the report.
@@ -86,7 +89,7 @@ This creates an `htmlcov/` directory. Open `htmlcov/index.html` in your browser 
 ### Run with Coverage for Specific Module
 
 ```bash
-pytest --cov=utils.config_manager tests/test_agent_generation.py::TestAgentGeneration::test_create_config
+pytest --cov=lib.config.config_manager tests/test_agent_generation.py::TestAgentGeneration::test_create_config
 ```
 
 ### Run Marked Tests
@@ -118,9 +121,22 @@ To add a new marker, register it in the `markers` list in `pyproject.toml` first
 
 ### Current Tests
 
-The test suite is located in `tests/test_agent_generation.py`.
+The test suite is located in `tests/`:
 
-#### `TestAgentGeneration` Class
+| File | Tests | Covers |
+|------|-------|--------|
+| `test_agent_generation.py` | 8 | Config and page generation, listing, deletion, system prompts |
+| `test_attachments.py` | 23 | `lib/shared/attachments.py` (message content, validation, `to_api_content()`), `lib/storage/attachment_store.py`, `supports_images()` |
+| `test_i18n.py` | 24 | Language prefixes, system prompts, locale files, YAML configs |
+| `test_llm_params.py` | 53 | Model catalog, reasoning effort and temperature handling per provider |
+| `test_message_origin.py` | 3 | Provider/model stored on assistant messages |
+| `test_page_regeneration.py` | 1 | `PageGenerator.regenerate_pages()` keeps expert identity |
+| `test_streaming_cache.py` | 14 | `StreamingCache` background streaming |
+| `test_transcription.py` | 17 | `lib/audio/transcription.py` (routing, transcribe, helpers) |
+
+The tests in `test_attachments.py`, `test_llm_params.py`, `test_message_origin.py`, `test_page_regeneration.py` and `test_transcription.py` are marked `@pytest.mark.unit` (`pytest -m unit` selects 97 tests); no test currently uses the `integration` or `slow` markers.
+
+#### `TestAgentGeneration` Class (`test_agent_generation.py`)
 
 | Test | Description |
 |------|-------------|
@@ -128,14 +144,14 @@ The test suite is located in `tests/test_agent_generation.py`.
 | `test_create_page` | Verifies page files are generated with correct content |
 | `test_full_agent_generation` | Tests complete workflow (config + page) |
 | `test_list_experts` | Tests listing multiple experts |
-| `test_page_naming` | Verifies pages are named with proper ordering (1_, 2_, etc.) |
+| `test_page_naming` | Verifies pages are named with proper ordering (1001_, 1002_, etc.) |
 | `test_delete_expert` | Tests expert deletion functionality |
 | `test_custom_system_prompt` | Verifies custom prompts are handled correctly |
 | `test_auto_generated_system_prompt` | Tests automatic prompt generation |
 
 ### Test Data
 
-All tests use **fictitious test data** (no real user data):
+All tests use **fictitious test data** (no real user data), e.g. in `test_agent_generation.py`:
 
 - **Test Wizard**: Testing and QA expert
 - **Code Reviewer**: Code review specialist
@@ -143,10 +159,10 @@ All tests use **fictitious test data** (no real user data):
 
 ### Test Results
 
-Current status (8 tests):
+Current status (143 tests):
 
 ```
-============================== 8 passed in 1.24s ==============================
+============================= 143 passed in 3.16s ==============================
 ```
 
 ## Writing Tests
@@ -211,7 +227,7 @@ def test_my_new_feature(temp_dirs):
 """Tests for my new feature."""
 
 import pytest
-from utils.my_module import MyClass
+from lib.shared.my_module import MyClass
 
 
 class TestMyNewFeature:
@@ -373,7 +389,7 @@ pytest -m "not slow"  # Everything except slow tests
 
 ### Import Errors
 
-**Problem**: `ModuleNotFoundError: No module named 'utils'`
+**Problem**: `ModuleNotFoundError: No module named 'lib'`
 
 **Solution**:
 ```bash

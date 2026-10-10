@@ -6,9 +6,9 @@ This guide provides detailed installation instructions for ExpertGPTs.
 
 Before installing ExpertGPTs, ensure you have:
 
-- **Python 3.11 or higher** installed
+- **Python 3.12 or higher** installed (uv can install it for you)
 - **uv** (Python package manager) - [Installation instructions](#installing-uv)
-- **A DeepSeek API key** - Get one free at [https://platform.deepseek.com/](https://platform.deepseek.com/)
+- **An API key** for at least one provider: [DeepSeek](https://platform.deepseek.com/), [OpenAI](https://platform.openai.com/), [Z.AI](https://z.ai/) or [KIMI](https://platform.kimi.ai/)
 - Git (for cloning the repository)
 
 ## Installing uv
@@ -95,7 +95,8 @@ The application should open in your browser at `http://localhost:8501`
 # Check your Python version
 python3 --version
 
-# If < 3.11, install a newer version
+# If < 3.12, install a newer version (or let uv manage it)
+# uv python install 3.12
 # macOS: brew install python3
 # Ubuntu: sudo apt-get install python3.12
 ```

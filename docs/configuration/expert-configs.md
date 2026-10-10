@@ -15,12 +15,12 @@ Each expert in ExpertGPTs is defined by a **YAML configuration file** stored in 
 **Naming Convention**: `{expert_id}.yaml`
 
 **Examples**:
-- `configs/1001_python_expert.yaml`
-- `configs/1002_data_scientist.yaml`
-- `configs/1005_sql_expert.yaml`
+- `configs/1001_helpful_assistant.yaml`
+- `configs/1007_data_scientist.yaml`
+- `configs/1011_sql_expert.yaml`
 
 **Expert ID Format**: `{number}_{sanitized_name}`
-- Number: 1001-9997 (reserved: 1000=Home, 9998=Settings, 9999=Help)
+- Number: next free number from 1001 upward (highest existing expert page + 1; reserved: 1000=Home, 9998=Settings, 9999=Help)
 - Sanitized name: Lowercase, spaces/hyphens to underscores
 
 ### Example Configuration
@@ -42,8 +42,10 @@ system_prompt: |
   - Use clear, professional language appropriate for your domain
 created_at: "2025-01-17T12:00:00.123456"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "high"
 ```
 
 ## Configuration Fields
@@ -139,11 +141,13 @@ description: "An expert that helps with stuff."
 #### `temperature`
 
 **Type**: Float
-**Required**: Yes
-**Range**: 0.0 to 2.0
-**Default**: 0.7
+**Required**: No (falls back to `1.0`)
+**Range**: 0.0 to 2.0 (Z.AI: 0.0 to 1.0, `max_temperature`)
+**Default**: 1.0
 
 **Purpose**: Controls response creativity and randomness
+
+**Limits**: Some models ignore the stored value and use a fixed temperature (`fixed_temperature`): all OpenAI models `1.0`; KIMI `kimi-k3` / `kimi-k2.7-code*` `1.0`; `kimi-k2.6` `1.0` with thinking, `0.6` without. DeepSeek ignores temperature while thinking is enabled. Change it in the chat toolbox on the expert page (saved immediately) or in the edit dialog.
 
 **Quick Reference**:
 - **0.0 - 0.3**: Focused, deterministic (coding, math)
@@ -226,8 +230,8 @@ system_prompt: |
   Your responses should be clear, accurate, and include appropriate disclaimers.
 ```
 
-**Auto-Generated Prompt** (if not provided):
-The system generates a prompt based on the description field.
+**Auto-Generated Prompt** (if left empty in the UI):
+The system generates a prompt based on the description field (AI-generated with the selected provider, or a template fallback). A manually created YAML file without `system_prompt` gets no generated prompt.
 
 ---
 
@@ -254,17 +258,23 @@ created_at: "2025-01-17T12:00:00.123456"
 **Required**: No
 
 **Common Fields**:
-- `version`: Expert configuration version
-- `model`: Default LLM model
+- `version`: Expert configuration version (`"2.0"` for new experts)
+- `provider`: LLM provider (`deepseek`, `openai`, `zai`, `kimi`; fallback `deepseek`)
+- `model`: LLM model of that provider (fallback: the provider's default model)
+- `thinking_level`: Thinking/reasoning level (e.g. `none`, `low`, `medium`, `high`, `xhigh`, `max`; fallback `none`; unsupported levels fall back to the model's default)
 
 **Example**:
 ```yaml
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "high"
 ```
 
-**Purpose**: Stores additional expert information
+**Purpose**: Stores the expert's LLM settings (read by `get_llm_metadata()` in `lib/config/config_manager.py`)
+
+**Updated by**: the model, thinking and temperature controls in the chat toolbox (`lib/ui/chat_toolbox.py`), which save `provider`, `model`, `thinking_level` and `temperature` to `configs/{expert_id}.yaml` immediately, and by the edit dialog. Updates also set an `updated_at` timestamp.
 
 **Extensibility**: Can add custom fields as needed
 
@@ -307,18 +317,20 @@ system_prompt: |
   - Practical, real-world applications
 created_at: "2025-01-17T10:00:00.000000"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
 
 ---
 
 ### Example 2: General-Purpose Expert
 
-**File**: `configs/1005_helpful_assistant.yaml`
+**File**: `configs/1001_helpful_assistant.yaml`
 
 ```yaml
-expert_id: "1005_helpful_assistant"
+expert_id: "1001_helpful_assistant"
 expert_name: "Helpful Assistant"
 description: "As an AI, I embrace the role of a helpful generalist assistant, designed to provide accurate, safe, and broadly useful information across a wide range of topics and tasks."
 temperature: 1.0
@@ -330,7 +342,9 @@ system_prompt: |
 created_at: "2026-01-24T23:07:42.584965"
 metadata:
   version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "high"
 ```
 
 ---
@@ -372,8 +386,10 @@ system_prompt: |
   - Open to diverse styles and genres
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
 
 ---
@@ -389,7 +405,7 @@ description: "Helpful assistant for general questions and tasks."
 temperature: 0.7
 ```
 
-**Note**: All fields except `system_prompt`, `created_at`, and `metadata` are optional with defaults.
+**Note**: `system_prompt`, `created_at` and `metadata` are optional. Without `metadata`, the expert uses `deepseek` with its default model (`deepseek-flash`) and thinking level `none`; without `temperature`, `1.0` is used.
 
 ---
 
@@ -397,7 +413,7 @@ temperature: 0.7
 
 ### Via UI (Recommended)
 
-1. Navigate to **Home** page
+1. Navigate to **Home** page (or Settings → Expert Management)
 2. Click **"➕ Add Chat"**
 3. Fill in the form
 4. Click **"Create Expert"**
@@ -436,17 +452,19 @@ Do not use `reset_application.py` here: it deletes all configs, including the ne
 - Must be valid YAML syntax
 - Indentation matters (use spaces, not tabs)
 - Expert ID must be unique
-- Must use correct number range (1001-9998)
+- Use a number of 1001 or higher that no other expert uses (1000, 9998 and 9999 are reserved)
 
 ## Editing Configuration Files
 
 ### Via UI
 
-1. Navigate to **Home** page
+1. Navigate to **Settings** → **Expert Management**
 2. Find expert in list
 3. Click **Edit**
 4. Modify fields
 5. Click **"Save Changes"**
+
+Model, thinking level and temperature can also be changed directly in the chat toolbox below the chat input on the expert page; changes are saved immediately.
 
 **Benefits**:
 - Automatic validation
@@ -465,7 +483,7 @@ Do not use `reset_application.py` here: it deletes all configs, including the ne
 vim configs/1001_python_expert.yaml
 # Edit temperature: 0.7 → 0.3
 # Save and exit
-streamlit run app.py  # Restart app
+uv run streamlit run app.py  # Restart app
 ```
 
 **Caution**:
@@ -478,7 +496,7 @@ streamlit run app.py  # Restart app
 
 ### Via UI (Recommended)
 
-1. Navigate to **Home** page
+1. Navigate to **Settings** → **Expert Management**
 2. Find expert in list
 3. Click **Delete**
 4. Confirm deletion
@@ -486,7 +504,8 @@ streamlit run app.py  # Restart app
 **Removes**:
 - Configuration file: `configs/{expert_id}.yaml`
 - Expert page: `pages/{expert_id}.py`
-- Chat history: `chat_history/{expert_id}.json`
+
+The chat history file (`chat_history/{expert_id}.json`) and images in `chat_attachments/{expert_id}/` stay on disk. Use "Clear chat history" in the chat toolbox before deleting, or remove them manually.
 
 ### Manual Deletion
 
@@ -500,8 +519,9 @@ rm configs/1001_python_expert.yaml
 # Delete expert page
 rm pages/1001_python_expert.py
 
-# Delete chat history (optional)
+# Delete chat history and attached images (optional)
 rm chat_history/1001_python_expert.json
+rm -r chat_attachments/1001_python_expert/
 ```
 
 **Warning**: Irreversible. Backup important conversations first.
@@ -514,7 +534,8 @@ All configurations must have:
 - `expert_id` (unique)
 - `expert_name` (non-empty)
 - `description` (non-empty)
-- `temperature` (0.0-2.0)
+
+`temperature` (0.0-2.0) is optional and defaults to `1.0`.
 
 ### Type Validation
 
@@ -528,8 +549,8 @@ All configurations must have:
 
 ### Range Validation
 
-- `temperature`: Must be between 0.0 and 2.0
-- `expert_id` number: 1001-9998
+- `temperature`: Must be between 0.0 and 2.0 (Z.AI: at most 1.0)
+- `expert_id` number: 1001 or higher (1000, 9998, 9999 reserved)
 
 ### Uniqueness Validation
 
@@ -539,12 +560,7 @@ All configurations must have:
 
 ### 1. Use Version Control
 
-**Recommended**: Commit expert configs to git
-
-```bash
-git add configs/*.yaml
-git commit -m "Add SQL expert configuration"
-```
+`configs/` is gitignored in the ExpertGPTs repository. To version your experts, keep them in a separate (private) repository, or download them via Settings → Danger Zone (ZIP backup).
 
 **Benefits**:
 - Tracks changes over time
@@ -554,7 +570,7 @@ git commit -m "Add SQL expert configuration"
 
 ### 2. Document Custom Prompts
 
-Add comments to explain expert behavior:
+Add comments to explain expert behavior (note: the app rewrites the file without comments when it saves changes, e.g. from the chat toolbox):
 
 ```yaml
 expert_id: "1005_code_reviewer"
@@ -588,15 +604,11 @@ Keep similar structure across expert configs:
 
 ### 5. Validate Before Committing
 
-Test configuration before committing:
+Test configuration before committing it to your own repository:
 
 ```bash
 # Test app loads without errors
-streamlit run app.py
-
-# If no errors, commit
-git add configs/1001_python_expert.yaml
-git commit -m "Update Python Expert temperature to 0.3"
+uv run streamlit run app.py
 ```
 
 ## Troubleshooting
@@ -631,7 +643,7 @@ git commit -m "Update Python Expert temperature to 0.3"
 
 **Problem**: Expert not responding as expected
 
-**Cause**: Temperature set outside 0.0-2.0 range
+**Cause**: Temperature set outside the 0.0-2.0 range (Z.AI clamps values above 1.0 to 1.0)
 
 **Solution**:
 ```yaml
@@ -675,8 +687,10 @@ system_prompt: |
   - Acknowledge uncertainty when appropriate
 created_at: "YYYY-MM-DDTHH:MM:SS.ffffff"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
 
 ### Advisory Expert Template
@@ -704,8 +718,10 @@ system_prompt: |
   - Tailored to individual needs
 created_at: "YYYY-MM-DDTHH:MM:SS.ffffff"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
 
 ### Creative Expert Template
@@ -733,8 +749,10 @@ system_prompt: |
   - Open to diverse approaches
 created_at: "YYYY-MM-DDTHH:MM:SS.ffffff"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
 
 ## Next Steps

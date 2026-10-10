@@ -60,6 +60,7 @@ System architecture and design:
 - **[Overview](architecture/overview.md)** - High-level architecture
 - **[Template System](architecture/template-system.md)** - Page generation
 - **[Multi-Provider LLM](architecture/multi-provider-llm.md)** - LLM integration
+- **[Background Streaming](architecture/background-streaming.md)** - File-based background streaming
 - **[State Management](architecture/state-management.md)** - Session state
 
 ### Internationalization
@@ -128,11 +129,11 @@ ExpertGPTs uses a single template to generate all expert pages. See [Template Sy
 
 ### Multi-Provider Support
 
-ExpertGPTs integrates with DeepSeek, OpenAI, and Z.AI. See [Multi-Provider LLM](architecture/multi-provider-llm.md).
+ExpertGPTs integrates with DeepSeek, OpenAI, Z.AI and KIMI. See [Multi-Provider LLM](architecture/multi-provider-llm.md).
 
 ### Internationalization
 
-Full support for 13 languages with automatic detection. See [I18N Guide](internationalization/I18N_GUIDE.md).
+Full support for 14 languages with automatic detection. See [I18N Guide](internationalization/I18N_GUIDE.md).
 
 ## Contributing to Documentation
 

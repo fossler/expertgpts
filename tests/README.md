@@ -6,28 +6,30 @@ This directory contains automated tests for the ExpertGPTs application.
 
 ### Run all tests:
 ```bash
-pytest
+uv run pytest
 ```
 
-### Run with verbose output:
+### Run unit tests only:
 ```bash
-pytest -v
+uv run pytest -m unit
 ```
 
 ### Run specific test file:
 ```bash
-pytest tests/test_agent_generation.py
+uv run pytest tests/test_agent_generation.py
 ```
 
 ### Run with coverage report:
 ```bash
-pytest --cov=utils --cov-report=html
+uv run pytest --cov=lib --cov-report=html
 ```
 
 ### Run a specific test:
 ```bash
-pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
+uv run pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
 ```
+
+Pytest is configured in `[tool.pytest.ini_options]` of `pyproject.toml` (verbose output, strict markers `unit`, `integration`, `slow`).
 
 ## Test Files
 
@@ -42,9 +44,30 @@ Tests for the agent generation functionality, including:
 - Custom system prompts
 - Auto-generated system prompts
 
+### `test_attachments.py`
+Text and image attachments: message content round trip, size/type validation, image store (incl. path traversal), `to_api_content()` and `supports_images()`.
+
+### `test_i18n.py`
+Language prefixes, system prompt construction, locale files without expert content, YAML configs with expert content, end-to-end language workflows.
+
+### `test_llm_params.py`
+Model catalog consistency, provider-specific reasoning parameters (OpenAI, DeepSeek, Z.AI, KIMI) and temperature rules (fixed, capped, ignored while thinking).
+
+### `test_message_origin.py`
+Assistant messages record `provider`/`model`, which survive saving and loading the chat history.
+
+### `test_page_regeneration.py`
+`PageGenerator.regenerate_pages()` keeps each page's identity and skips system pages.
+
+### `test_streaming_cache.py`
+Background streaming via `StreamingCache`: cache files, completion/error handling, cleanup, concurrent experts, resume after navigation, crash resilience.
+
+### `test_transcription.py`
+Voice input: transcription provider routing, OpenAI language hint vs. GLM-ASR context prompt, error results, audio duration.
+
 ## Test Data
 
-Tests use fictitious test data:
+`test_agent_generation.py` uses fictitious test data:
 - **Test Wizard**: Testing and QA expert
 - **Code Reviewer**: Code review specialist
 - **Storyteller**: Creative writing assistant

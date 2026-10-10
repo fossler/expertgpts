@@ -6,18 +6,19 @@ A multi-expert AI chat application built with Streamlit, providing access to dom
 
 ## Overview
 
-ExpertGPTs is a powerful AI chat interface that lets you create and interact with specialized AI experts. Each expert has deep knowledge in specific domains—from Python programming to career coaching—and maintains independent conversation history. Switch between LLM providers (DeepSeek, OpenAI, Z.AI) per expert, customize responses with temperature controls, and enjoy a fully internationalized interface supporting 13 languages.
+ExpertGPTs is a powerful AI chat interface that lets you create and interact with specialized AI experts. Each expert has deep knowledge in specific domains—from Python programming to career coaching—and maintains independent conversation history. Switch between LLM providers (DeepSeek, OpenAI, Z.AI, KIMI) per expert, customize responses with temperature controls, and enjoy a fully internationalized interface supporting 14 languages.
 
 ## Key Features
 
 - **🤖 Multiple Expert Agents** - Chat with domain-specific AI experts, each specialized in different areas
-- **🔄 Multi-Provider Support** - Choose between DeepSeek, OpenAI, and Z.AI (with free models) per expert
+- **🔄 Multi-Provider Support** - Choose between DeepSeek, OpenAI, Z.AI (with free models) and KIMI per expert
 - **✨ AI-Generated System Prompts** - Let the LLM craft expert prompts from your description—no prompt engineering required
-- **🌍 Full Internationalization** - 13 languages with automatic detection and AI language response
+- **🌍 Full Internationalization** - 14 languages with automatic detection and AI language response
 - **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
 - **💾 Persistent Chat History** - Conversations saved automatically per expert
 - **📎 File & Image Attachments** - Attach text files (code, Markdown, CSV, JSON, logs, ...) and images (PNG, JPEG, WebP, GIF, up to 5 MB; for models with image support) to a message via the toolbox below the chat input
+- **🎤 Voice Input** - Record a voice message in the toolbox; it is transcribed (OpenAI experts: `gpt-transcribe`, all others: Z.AI `glm-asr-2512`) and sent automatically
 - **📊 Context Usage** - See how much of the model's context window a chat uses, right in the toolbox below the chat input
 - **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0, range depends on the provider) for each expert
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
@@ -27,8 +28,9 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 
 | Category | Technology | Purpose |
 |----------|------------|---------|
-| **Framework** | [Streamlit](https://streamlit.io/) >= 1.52.0 | Web application framework |
-| **Languages** | Python 3.11+ | Primary development language |
+| **Framework** | [Streamlit](https://streamlit.io/) 1.65 | Web application framework |
+| **Languages** | Python 3.12+ | Primary development language |
+| **Packaging** | [uv](https://docs.astral.sh/uv/) (`pyproject.toml`, `uv.lock`) | Dependency management |
 
 ## Code Hosting
 
@@ -113,7 +115,7 @@ uv run streamlit run app.py
 
 **Get your API key**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
 
-Set it via **Settings → API Keys** in the app.
+Set it via **Settings → API Key** in the app.
 
 **That's it!** Start chatting with experts.
 
@@ -129,22 +131,24 @@ expertgpts/
 │   ├── 1000_Home.py              # Home page (permanent)
 │   ├── 1001_*.py                 # Expert pages (generated from template)
 │   ├── 9998_Settings.py          # Settings page (permanent)
-│   └── 9999_Help.py              # Help page (permanent)
+│   ├── 9999_Help.py              # Help page (permanent)
+│   └── _debug.py                 # Hidden /debug diagnostics page (permanent)
 ├── templates/template.py          # Template for expert pages
 ├── configs/{expert_id}.yaml       # Expert configurations
 ├── lib/                           # Core library (domain-driven structure)
 │   ├── llm/                      # LLM client, connection pooling, token management
+│   ├── audio/                    # Voice input transcription (speech-to-text)
 │   ├── config/                   # Expert config, secrets, app defaults, theme config
 │   ├── i18n/                     # Internationalization
 │   ├── storage/                  # Chat history, chat image files, streaming cache
-│   ├── ui/                       # Dialogs and UI components
-│   └── shared/                   # Constants, helpers, file ops, types, session state
-└── locales/ui/*.json             # UI translations (13 languages)
+│   ├── ui/                       # Dialogs, chat toolbox and UI components
+│   └── shared/                   # Constants, helpers, file ops, attachments, types, session state
+└── locales/ui/*.json             # UI translations (14 languages)
 ```
 
 **Key Architecture Principles**:
 - **Template-Based**: Single template generates all expert pages
-- **Multi-Provider Abstraction**: Unified client interface for DeepSeek, OpenAI, Z.AI
+- **Multi-Provider Abstraction**: Unified client interface for DeepSeek, OpenAI, Z.AI, KIMI
 - **Clean Architecture**: Expert content in YAML (English), UI in locale files
 - **State Management**: Multi-layered session state with persistent storage
 
@@ -152,9 +156,9 @@ expertgpts/
 
 ## Internationalization
 
-ExpertGPTs supports **13 languages** with automatic detection:
+ExpertGPTs supports **14 languages** with automatic detection:
 
-🇺🇸 English | 🇩🇪 German | 🇪🇸 Spanish | 🇫🇷 French | 🇮🇹 Italian | 🇮🇩 Indonesian | 🇲🇾 Malay | 🇵🇹 Portuguese | 🇷🇺 Russian | 🇹🇷 Turkish | 🇨🇳 Simplified Chinese | 🇹🇼 Traditional Chinese | 🇭🇰 Cantonese | 🗣️ Wu Chinese
+🇺🇸 English | 🇩🇪 German | 🇪🇸 Spanish | 🇫🇷 French | 🇮🇹 Italian | 🇮🇩 Indonesian | 🇲🇾 Malay | 🇵🇹 Portuguese | 🇷🇺 Russian | 🇹🇷 Turkish | 🇨🇳 Simplified Chinese | 🇹🇼 Traditional Chinese | 🇭🇰 Cantonese | 🏛️ Classical Chinese
 
 **How it works**: Language prefix injected at runtime ensures AI responds in your selected language, while expert content remains in English (single source of truth).
 
@@ -290,7 +294,7 @@ The three biggest challenges are:
 
 1. **No Asynchronicity**: Streamlit doesn't support `async/await`, meaning all LLM streaming requests are blocking. I had to implement a file-based background streaming system with daemon threads just to allow responses to complete when users navigate away—a 250-line solution for what should be a simple async operation.
 
-2. **Execution Model**: Streamlit reruns your entire script from top to bottom on every interaction. This means changing session state doesn't update the UI until you explicitly call `st.rerun()`. ExpertGPTs has 36 such calls—for everything from toggling dialogs to reloading API keys—because the script can't re-evaluate conditionals mid-execution.
+2. **Execution Model**: Streamlit reruns your entire script from top to bottom on every interaction. This means changing session state doesn't update the UI until you explicitly call `st.rerun()`. ExpertGPTs has 26 such calls—for everything from toggling dialogs to reloading API keys—because the script can't re-evaluate conditionals mid-execution.
 
 3. **State Management Complexity**: Session state doesn't persist across app restarts, and external file changes (configs, API keys) aren't detected automatically. I built a multi-layered state system with manual cache invalidation to work around this.
 

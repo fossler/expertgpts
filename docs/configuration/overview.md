@@ -17,14 +17,14 @@ ExpertGPTs uses a **multi-layered configuration system** with different files fo
 ┌─────────────────────────────────────────────────────────────┐
 │  2. USER PREFERENCES                                        │
 │  Location: .streamlit/app_defaults.toml                     │
-│  Purpose: Default provider, model, language                 │
+│  Purpose: Default provider, model, language, display        │
 │  Managed: Via Settings page                                  │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  3. THEME SETTINGS                                          │
 │  Location: .streamlit/config.toml                           │
-│  Purpose: UI appearance (colors, fonts)                     │
+│  Purpose: UI theme (base = theme file), client settings     │
 │  Managed: Via Settings page                                  │
 └─────────────────────────────────────────────────────────────┘
                               ↓
@@ -56,14 +56,17 @@ system_prompt: |
   You are Python Expert, a domain-specific expert AI assistant...
 created_at: "2025-01-17T12:00:00.123456"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "high"
 ```
 
 **Naming Convention**: `{expert_id}.yaml`
 
 **Management**:
 - Created automatically when adding experts via UI
+- Model, thinking level and temperature are saved immediately when changed in the chat toolbox
 - Can be edited manually (advanced users)
 - Deleted when expert is deleted via UI
 
@@ -73,7 +76,7 @@ metadata:
 
 ### 2. User Preferences (`.streamlit/app_defaults.toml`)
 
-**Purpose**: Store default LLM settings and language preference
+**Purpose**: Store default LLM settings, language preference and display settings
 
 **Location**: `.streamlit/app_defaults.toml`
 
@@ -84,19 +87,21 @@ metadata:
 [llm]
 provider = "deepseek"
 model = "deepseek-flash"
-temperature = 0.7
-thinking_level = "none"
+thinking_level = "high"
 
 [language]
 code = "en"
+
+[display]
+git_branch = true
 ```
 
 **Settings**:
-- **provider**: Default LLM provider (deepseek, openai, zai)
+- **provider**: Default LLM provider (deepseek, openai, zai, kimi)
 - **model**: Default model for the provider
-- **temperature**: Default temperature for new experts
 - **thinking_level**: Default reasoning level (model-dependent: none, low, medium, high, xhigh, max; unsupported levels fall back to the model's default)
 - **language.code**: UI language code
+- **display.git_branch**: Show the Git branch in the sidebar footer
 
 **Management**:
 - Created on first run (auto-detects language)
@@ -109,7 +114,7 @@ code = "en"
 
 ### 3. Theme Settings (`.streamlit/config.toml`)
 
-**Purpose**: UI appearance customization
+**Purpose**: UI appearance customization (plus Streamlit client, browser and logger settings)
 
 **Location**: `.streamlit/config.toml`
 
@@ -118,23 +123,15 @@ code = "en"
 **Example**:
 ```toml
 [theme]
-primaryColor = "#6366F1"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F3F4F6"
-textColor = "#1F2937"
-font = "sans serif"
+base = ".streamlit/themes/dark_gray.toml"
 ```
 
 **Settings**:
-- **primaryColor**: Buttons and interactive elements
-- **backgroundColor**: Main content area
-- **secondaryBackgroundColor**: Sidebar and secondary areas
-- **textColor**: Main text color
-- **font**: Font family (sans serif, serif, monospace)
+- **theme.base**: Path to a theme file in `.streamlit/themes/` (e.g. `dark_gray.toml`, `ocean_blue.toml`, `custom.toml`). The colors (`primaryColor`, `backgroundColor`, `secondaryBackgroundColor`, `textColor`, fonts, ...) live in that theme file, not in `config.toml`
 
 **Management**:
-- Created when theme is first customized
-- Updated via Settings page
+- Created on app start from `config.toml.example` if missing
+- Theme selected and saved via Settings → General ("Save & Apply Theme"); custom colors are written to `.streamlit/themes/custom.toml`
 - Can be edited manually
 
 ---
@@ -152,17 +149,19 @@ font = "sans serif"
 DEEPSEEK_API_KEY = "sk-..."
 OPENAI_API_KEY = "sk-..."
 ZAI_API_KEY = "..."
+MOONSHOT_API_KEY = "sk-..."
 ```
 
 **Providers**:
 - **DEEPSEEK_API_KEY**: For DeepSeek API
-- **OPENAI_API_KEY**: For OpenAI API
-- **ZAI_API_KEY**: For Z.AI API
+- **OPENAI_API_KEY**: For OpenAI API (also voice input via `gpt-transcribe` for OpenAI experts)
+- **ZAI_API_KEY**: For Z.AI API (also voice input via `glm-asr-2512` for all other experts)
+- **MOONSHOT_API_KEY**: For KIMI API
 
 **Security**:
 - **File permissions**: Automatically set to 600 (owner read/write only)
 - **Git status**: Ignored (not tracked in version control)
-- **Validation**: Minimum 20 characters required
+- **Validation**: Provider-specific key format check before saving
 
 **Management**:
 - Created via Settings page (recommended)
@@ -184,30 +183,33 @@ expertgpts/
 │   ├── config.toml.example       # Template for theme
 │   ├── app_defaults.toml         # User preferences (gitignored)
 │   └── app_defaults.toml.example # Template for defaults
+│   └── themes/                   # Theme files referenced by config.toml
 ├── configs/
-│   ├── 1001_python_expert.yaml   # Expert configurations
-│   ├── 1002_data_scientist.yaml
+│   ├── 1001_helpful_assistant.yaml  # Expert configurations
+│   ├── 1002_email_assistant.yaml
 │   └── ...
 ├── pages/
 │   ├── 1000_Home.py
-│   ├── 1001_python_expert.py
+│   ├── 1001_helpful_assistant.py
 │   └── ...
 ├── chat_history/
-│   ├── 1001_python_expert.json   # Conversation history
+│   ├── 1001_helpful_assistant.json  # Conversation history
 │   └── ...
 └── chat_attachments/
-    ├── 1001_python_expert/       # Images attached in the chat
+    ├── 1001_helpful_assistant/      # Images attached in the chat
     └── ...
 ```
 
 ### Which Files Are Tracked in Git?
 
 **Tracked** (committed to version control):
-- `configs/*.yaml` - Expert configurations
-- `pages/*.py` - Expert pages
+- `pages/1000_Home.py`, `pages/9998_Settings.py`, `pages/9999_Help.py`, `pages/_debug.py` - System pages
 - `.streamlit/*.example` - Template files
+- `.streamlit/themes/` - Theme files
 
 **Not Tracked** (gitignored):
+- `configs/` - Expert configurations (auto-generated)
+- `pages/*.py` expert pages (auto-generated)
 - `.streamlit/secrets.toml` - Contains sensitive API keys
 - `.streamlit/config.toml` - Personal theme preferences
 - `.streamlit/app_defaults.toml` - Personal user preferences
@@ -218,44 +220,43 @@ expertgpts/
 
 When multiple configuration sources exist, precedence is:
 
-1. **Session State** (highest priority)
-   - Current user session settings
-   - Per-expert overrides
+1. **Expert Config** (`configs/*.yaml`) (highest priority)
+   - Expert-specific settings (provider, model, thinking level, temperature)
+   - Loaded when expert page is accessed; chat toolbox changes are written here immediately
 
-2. **Expert Config** (`configs/*.yaml`)
-   - Expert-specific settings
-   - Loaded when expert page is accessed
-
-3. **User Defaults** (`.streamlit/app_defaults.toml`)
-   - Default settings for new experts
+2. **User Defaults** (`.streamlit/app_defaults.toml`)
+   - Default provider/model for new experts
    - User preferences
 
-4. **Application Defaults** (lowest priority)
-   - Hardcoded fallbacks in code
+3. **Application Defaults** (lowest priority)
+   - Hardcoded fallbacks in code (`lib/shared/constants.py`)
 
-**Example**: Temperature setting precedence:
+**Example**: Model setting precedence:
 ```
-Session state override (if user changed in current session)
+Expert config metadata.model (if set)
     ↓
-Expert config temperature (if set)
-    ↓
-App defaults temperature (global default)
-    ↓
-Application default (0.7)
+Default model of the expert's provider (DEFAULT_MODELS in constants.py)
 ```
+
+New experts start with the provider/model from `app_defaults.toml` (fallback: `deepseek` / `deepseek-flash`) and temperature `1.0`. The temperature sent to the API is then limited by the model: fixed values (`fixed_temperature`) override it and the provider's `max_temperature` caps it.
 
 ## Configuration Management
 
 ### Via UI (Recommended)
 
 **Settings Page** (`:material/settings:`):
-- **General Tab**: Theme, language, provider/model defaults
-- **API Keys Tab**: Manage API keys for all providers
+- **General Tab**: Theme, language
+- **API Key Tab**: Manage API keys for all providers
+- **Default LLM Tab**: Default provider, model and thinking level
+- **Expert Management Tab**: Add, edit, delete experts
+- **Danger Zone Tab**: Reset application
 - **About Tab**: Version information
 
 **Home Page** (`:material/home:`):
-- Add, edit, delete experts
-- Expert configuration managed via forms
+- Add experts ("Add Chat" in the sidebar)
+
+**Expert Page** (chat toolbox below the chat input):
+- Model, thinking level and temperature, saved to the expert config immediately
 
 ### Manual Configuration
 
@@ -286,7 +287,7 @@ These provide reference for manual configuration.
 ### Creating Configuration
 
 **Expert Configs**:
-1. User creates expert via UI (Home page)
+1. User creates expert via UI ("Add Chat" on Home page or Settings → Expert Management)
 2. `PageGenerator` creates expert ID
 3. `ConfigManager` saves YAML config
 4. Expert page generated from template
@@ -294,16 +295,16 @@ These provide reference for manual configuration.
 **User Defaults**:
 1. First run: Language auto-detected
 2. Saved to `app_defaults.toml`
-3. Default provider/model saved when changed
+3. Default provider/model/thinking level saved via Settings → Default LLM ("Save Defaults")
 
 **Theme Settings**:
 1. User customizes theme (Settings page)
-2. `ConfigTomlManager` saves to `config.toml`
-3. Applied immediately
+2. `config_toml_manager.save_theme_settings()` saves the theme path to `config.toml`
+3. Applied after the automatic reload
 
 **API Keys**:
 1. User enters key via Settings page
-2. `SecretsManager` saves to `secrets.toml`
+2. `secrets_manager.save_provider_api_key()` saves to `secrets.toml`
 3. File permissions set to 600
 
 ### Updating Configuration
@@ -319,8 +320,8 @@ These provide reference for manual configuration.
 ### Deleting Configuration
 
 **Expert Configs**:
-- Deleted via UI (Home page)
-- Removes: YAML config, expert page, chat history
+- Deleted via UI (Settings → Expert Management)
+- Removes: YAML config, expert page (the chat history file in `chat_history/` is kept on disk)
 - Irreversible
 
 **Other Configs**:
@@ -336,7 +337,7 @@ These provide reference for manual configuration.
 - `expert_id`: Must be unique, alphanumeric with underscores
 - `expert_name`: Required, non-empty string
 - `description`: Required, non-empty string
-- `temperature`: Number between 0.0 and 2.0
+- `temperature`: Number between 0.0 and 2.0 (Z.AI: 0.0 to 1.0; fixed for OpenAI and KIMI models)
 - `system_prompt`: String (can be multi-line with `|`)
 
 **Validation Errors**:
@@ -347,7 +348,7 @@ These provide reference for manual configuration.
 ### API Keys
 
 **Validation**:
-- Minimum 20 characters
+- Provider-specific format (regex) check; minimum 20 characters for unknown providers
 - Checked via UI before saving
 - No API call made (validation is format only)
 
@@ -413,6 +414,7 @@ Do not run `reset_application.py` after an import: it deletes all configs, inclu
 - `.streamlit/secrets.toml` - API keys
 - `.streamlit/config.toml` - Theme settings
 - `.streamlit/app_defaults.toml` - User preferences
+- `configs/*.yaml`, `chat_history/*.json` - Expert configs and chat history
 
 **Verification**:
 ```bash
@@ -432,12 +434,12 @@ ls -la .streamlit/
 **API Keys**:
 - Never stored in expert configs
 - Never logged or printed
-- Only accessed via Streamlit secrets API
+- Read directly from `.streamlit/secrets.toml` by `lib/config/secrets_manager.py` (no environment variable fallback)
 - Gitignored (not tracked in version control)
 
 **Chat History**:
 - Stored locally, not transmitted except to LLM API
-- Gitignored
+- Gitignored (`chat_history/`, `chat_attachments/`)
 - No sensitive metadata beyond messages
 
 ## Configuration Best Practices
@@ -460,9 +462,9 @@ ls -la .streamlit/
 3. Test application
 4. Restore if issues occur
 
-### 3. Version Control Expert Configs
+### 3. Back Up Expert Configs
 
-**Recommended**: Commit expert configs to git
+`configs/` and the expert pages are gitignored. To version your experts, keep them in a separate (private) repository or use the backup/export steps above (Settings → Danger Zone also offers a ZIP download of the configs).
 
 **Why**:
 - Tracks expert evolution
@@ -496,9 +498,13 @@ system_prompt: |
 # Created for: Production database optimization team
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
+
+Note: comments are lost when the app rewrites the file (e.g. after a change in the chat toolbox or the edit dialog).
 
 ## Troubleshooting
 

@@ -6,16 +6,19 @@ This guide covers common issues and solutions for ExpertGPTs.
 
 ### "Python version too old"
 
-**Problem**: `Python version < 3.8 required`
+**Problem**: uv finds no interpreter matching `requires-python = ">=3.12"` (from `pyproject.toml`)
 
 **Solution**:
 ```bash
 # Check version
 python3 --version
 
-# Install newer Python
-# macOS: brew install python3
-# Ubuntu: sudo apt-get install python3.11
+# Let uv install a matching Python
+uv python install 3.12
+
+# Or install it system-wide
+# macOS: brew install python@3.12
+# Ubuntu: sudo apt-get install python3.12
 ```
 
 ---
@@ -64,7 +67,7 @@ uv sync
 
 **Solution**:
 ```bash
-python3 scripts/setup.py
+uv run python scripts/setup.py
 ```
 
 ---
@@ -74,7 +77,7 @@ python3 scripts/setup.py
 **Problem**: `Invalid API key` or `Authentication failed`
 
 **Solutions**:
-1. Verify API key in Settings → API Keys
+1. Verify API key in Settings → API Key
 2. Check key has sufficient credits
 3. Ensure key copied correctly (no extra spaces)
 4. Regenerate key if needed
@@ -97,7 +100,7 @@ python3 scripts/setup.py
 
 ### Application won't start
 
-**Problem**: `streamlit run app.py` fails
+**Problem**: `uv run streamlit run app.py` fails
 
 **Possible causes**:
 1. Dependencies not installed
@@ -110,10 +113,10 @@ python3 scripts/setup.py
 uv sync
 
 # Use different port
-streamlit run app.py --server.port 8502
+uv run streamlit run app.py --server.port 8502
 
 # Check Python version
-python3 --version  # Must be 3.8+
+uv run python --version  # Must be 3.12+
 ```
 
 ---
@@ -123,7 +126,7 @@ python3 --version  # Must be 3.8+
 **Problem**: Expert takes too long to respond
 
 **Solutions**:
-1. Disable thinking level (set to "None")
+1. Disable thinking in the model row below the chat input ("🧠 None" or "🧠 Disabled"; not available for models that always reason)
 2. Switch to faster provider/model
 3. Reduce message length
 4. Check internet connection
@@ -149,7 +152,7 @@ python3 --version  # Must be 3.8+
 **Problem**: Selected different language but UI still in English
 
 **Solutions**:
-1. App restarts automatically - wait for reload
+1. The app reruns automatically after selecting a language - wait for reload
 2. Clear browser cache
 3. Check `.streamlit/app_defaults.toml` for correct language code
 
@@ -159,7 +162,7 @@ python3 --version  # Must be 3.8+
 
 **Solution**:
 ```bash
-python3 scripts/update_translations.py
+uv run python scripts/update_translations.py
 ```
 
 ## Development Issues
@@ -180,13 +183,13 @@ uv run python scripts/regenerate_pages.py
 **Solutions**:
 ```bash
 # Run tests in verbose mode
-pytest -v
+uv run pytest -v
 
 # Run specific test
-pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
+uv run pytest tests/test_agent_generation.py::TestAgentGeneration::test_create_config
 
 # Check for import errors
-pytest --tb=long
+uv run pytest --tb=long
 ```
 
 ---
@@ -215,9 +218,10 @@ chmod 600 .streamlit/secrets.toml
 
 **Solutions**:
 1. Check `chat_history/` directory exists
-2. Verify file permissions
-3. Check disk space
-4. Ensure `save_chat_history()` is being called
+2. Verify file size is under the 1 MB limit (see the App status tab of the [Debug Page](debug-page.md))
+3. Verify file permissions
+4. Check disk space
+5. Ensure `save_chat_history()` is being called
 
 ---
 

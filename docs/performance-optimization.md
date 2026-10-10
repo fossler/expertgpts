@@ -25,7 +25,7 @@ This document outlines identified performance optimization opportunities in the 
 **Severity:** HIGH
 **Impact:** 200-500ms during large chat saves (O(n²) complexity)
 **Effort:** LOW
-**Location:** `lib/storage/chat_history_manager.py:167-230`
+**Location:** `lib/storage/chat_history_manager.py:196-262`
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -88,7 +88,7 @@ def truncate_messages_by_size(
 **Severity:** HIGH
 **Impact:** 100-150ms on first app load
 **Effort:** LOW
-**Location:** `lib/i18n/i18n.py:15-50`
+**Location:** `lib/i18n/i18n.py:21-96`
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -154,7 +154,7 @@ class I18nManager:
 **Severity:** HIGH
 **Impact:** ~80% reduction in initial translation load time (load 1-2 files vs 13)
 **Effort:** MEDIUM
-**Location:** `lib/i18n/i18n.py:17-80`
+**Location:** `lib/i18n/i18n.py:21-96`
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -218,11 +218,11 @@ def t(self, key: str, **kwargs) -> str:
 **Severity:** HIGH
 **Impact:** 50-100ms per page load (Settings, Home)
 **Effort:** MEDIUM
-**Location:** `lib/config/config_manager.py:195-270`
+**Location:** `lib/config/config_manager.py:169-239`
 **Status:** Implemented February 13, 2026
-- `lib/config/config_manager.py:164-190` (list_experts)
-- `pages/9998_Settings.py:797-798`
-- `pages/1000_Home.py:14-15`
+- `lib/config/config_manager.py` (original `list_experts()`, since replaced by `list_experts_lightweight()`)
+- `pages/9998_Settings.py:847-848`
+- `pages/1000_Home.py:15-16`
 
 #### Issue
 
@@ -253,7 +253,7 @@ Create a lightweight index cache that only stores metadata needed for display:
 ```python
 # Optimized Code (LIGHTWEIGHT INDEX)
 @st.cache_data(ttl=60)
-def _list_experts_lightweight(self) -> List[Dict]:
+def list_experts_lightweight(_self) -> List[Dict]:
     """List experts with minimal metadata (cached).
 
     Only loads fields needed for list display, avoiding expensive
@@ -310,6 +310,8 @@ def _load_config_partial(self, expert_id: str) -> Optional[Dict]:
     except Exception:
         return None
 ```
+
+**Note (current code):** `_load_config_partial()` now reads the full YAML via `read_yaml()` and returns only the list fields (`expert_id`, `expert_name`, `description`, `temperature`, `metadata`, `created_at`; no `system_prompt`); the 30-line header parsing shown above is no longer used.
 
 #### Achieved Impact
 
@@ -386,8 +388,8 @@ config_manager = get_config_manager()
 **Impact:** 5-10ms per expert list render
 **Effort:** LOW
 **Location:**
-- `lib/shared/helpers.py:32-61`
-- Called in loops in Settings.py (lines 821, 880, 916)
+- `lib/shared/helpers.py:64-137`
+- Called in loops in Settings.py (now batched via `translate_expert_names_batch()`, line 860)
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -452,7 +454,7 @@ for expert in experts:
 **Severity:** MEDIUM
 **Impact:** 10-20ms on every rerun with chat history
 **Effort:** LOW
-**Location:** `lib/llm/token_manager.py:70-91`
+**Location:** `lib/llm/token_manager.py` (code since removed, see note below)
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -502,6 +504,8 @@ def count_messages_tokens(messages_key: str, messages_hash: str, _messages: list
 **Files updated:**
 - `lib/llm/token_manager.py` - Added `get_messages_hash()` function and updated signature
 
+**Note (current code):** `count_messages_tokens()` and `get_messages_hash()` were later removed as dead code (PR #4). The context usage is now computed per rerun by `_calculate_context_stats()` in `lib/ui/chat_toolbox.py` via `TokenManager.calculate_usage_statistics()` (no `st.cache_data`; only the tiktoken encoding is cached).
+
 #### Achieved Impact
 
 - **Accuracy:** Prevents stale token counts
@@ -516,7 +520,7 @@ def count_messages_tokens(messages_key: str, messages_hash: str, _messages: list
 **Severity:** LOW
 **Impact:** 5-10ms per tab switch
 **Effort:** LOW
-**Location:** `pages/9998_Settings.py:1173-1184`
+**Location:** `pages/9998_Settings.py:1267-1282`
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -563,7 +567,7 @@ elif active_tab_index == 1:
 **Severity:** LOW
 **Impact:** 5-10ms on Settings page load
 **Effort:** LOW
-**Location:** `lib/config/secrets_manager.py:108-124`
+**Location:** `lib/config/secrets_manager.py:113-150`
 **Status:** Implemented February 13, 2026
 
 #### Issue
@@ -629,15 +633,15 @@ The following areas are already well-optimized:
    - Uses `@st.cache_resource` for client instances
    - Avoids repeated connection initialization
 
-2. **✅ Config Caching** (`templates/template.py:64`)
+2. **✅ Config Caching** (`templates/template.py:62`)
    - Expert configs cached with TTL
    - Automatic invalidation on edit
 
-3. **✅ Page Indexing** (`lib/shared/page_generator.py:216`)
+3. **✅ Page Indexing** (`lib/shared/page_generator.py:243`)
    - Page list cached at resource level
    - Fast expert discovery without reading files
 
-4. **✅ O(1) Provider Lookups** (`lib/shared/constants.py:86-122`)
+4. **✅ O(1) Provider Lookups** (`lib/shared/constants.py:219-254`)
    - Pre-computed lookup tables
    - No nested dictionary access
 
@@ -645,7 +649,7 @@ The following areas are already well-optimized:
    - Battery-optimized file I/O with DMA
    - Smart cleanup of cache files
 
-6. **✅ Token Encoding** (`lib/llm/token_manager.py:24`)
+6. **✅ Token Encoding** (`lib/llm/token_manager.py:22`)
    - Cached at resource level
    - Expensive tiktoken initialization shared across session
 
