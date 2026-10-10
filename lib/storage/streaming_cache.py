@@ -80,8 +80,15 @@ class StreamingCache:
         )
         thread.start()
 
-        # Store thread info in metadata
-        self._write_metadata({"thread_id": thread.ident, "start_time": time.time()})
+        # Store thread info and the producing LLM (for the answer's avatar)
+        self._write_metadata(
+            {
+                "thread_id": thread.ident,
+                "start_time": time.time(),
+                "provider": client.provider,
+                "model": model,
+            }
+        )
 
         return thread
 
@@ -241,6 +248,15 @@ class StreamingCache:
             write_json(self.metadata_file, existing_metadata)
         except Exception:
             pass
+
+    def get_llm_origin(self) -> tuple:
+        """Get the provider and model that produced the cached stream.
+
+        Returns:
+            tuple: (provider, model); either may be None for older caches
+        """
+        metadata = self._read_metadata()
+        return metadata.get("provider"), metadata.get("model")
 
     def _read_metadata(self) -> dict:
         """Read metadata from metadata file.

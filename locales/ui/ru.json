@@ -53,8 +53,7 @@
       "theme_customization": "Настройка Темы"
     },
     "chat_input_placeholder": "Спросите эксперта...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Добавить чат",
@@ -384,6 +383,24 @@
     "attach_help": "Текстовые файлы до {size} КБ. Они добавляются к вашему следующему сообщению.",
     "attached": "📎 Прикреплено: {files}",
     "error_too_large": "{name} больше {size} КБ и не был прикреплён.",
-    "error_not_text": "{name} не является текстовым файлом UTF-8 и не был прикреплён."
+    "error_not_text": "{name} не является текстовым файлом UTF-8 и не был прикреплён.",
+    "attach_image": "Прикрепить изображение",
+    "attach_image_help": "Изображения (PNG, JPEG, WebP, GIF) до {size} МБ. Они отправляются модели вместе с вашим следующим сообщением.",
+    "image_not_supported": "{model} не поддерживает изображения.",
+    "attached_images": "🖼️ Изображения: {files}",
+    "error_image_too_large": "{name} больше {size} МБ и не было прикреплено.",
+    "error_not_image": "{name} не является допустимым изображением и не было прикреплено.",
+    "image_unavailable": "больше недоступно",
+    "clear_confirm": "Вся история чата этого эксперта, включая прикреплённые изображения, будет удалена.",
+    "clear_button": "Удалить навсегда",
+    "voice_input": "Голосовой ввод",
+    "voice_help": "Запишите голосовое сообщение. После остановки оно преобразуется в текст и отправляется автоматически.",
+    "voice_transcribing": "Расшифровка…",
+    "voice_error": "Ошибка расшифровки: {error}",
+    "error_audio_too_large": "Запись больше {size} МБ и не может быть расшифрована.",
+    "voice_model": "Расшифровка: {model}",
+    "voice_key_missing": "Для голосового ввода нужен API-ключ {provider} ({model}). Его можно добавить в настройках.",
+    "error_audio_too_long": "Запись длиннее {seconds} секунд — это лимит {model}.",
+    "voice_asr_context": "Это голосовое сообщение на русском языке."
   }
 }

@@ -58,7 +58,7 @@ Click on any expert in the sidebar to load their page. You'll see:
 
 ### Attaching Files
 
-Below the chat input is a toolbox row. Use **📎 Attach file** to add text files to your next message:
+Below the chat input are two rows: the toolbox row and, below it, the [model selection](#switching-providers). The toolbox row has, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
 
 1. Click **Attach file** and choose one or more files in the popover
 2. The toolbox lists the attached files ("📎 Attached: ...")
@@ -73,6 +73,56 @@ Below the chat input is a toolbox row. Use **📎 Attach file** to add text file
 - Each attachment appears in your message as a collapsible "📎 <filename>" section, also after reloading the page
 - The file content becomes part of your message, so it counts toward the model's context and the chat history size limit
 - Attachments are cleared after the message is sent; attach them again for later messages if needed (the expert still sees earlier attachments as part of the conversation)
+
+### Attaching Images
+
+Use **🖼️ Attach image** to send screenshots, photos or diagrams with your next message:
+
+1. Click **Attach image** and choose one or more images in the popover
+2. The toolbox lists the attached images ("🖼️ Images: ...")
+3. Type your prompt and send it; the images are sent to the model together with the message
+
+**Supported images:**
+- PNG, JPEG, WebP and GIF, up to **5 MB** each
+- Files that are too large or not valid images are reported in the toolbox and skipped
+
+**Which models support images:**
+- **DeepSeek**: `deepseek-flash` (not `deepseek-v4-pro`)
+- **OpenAI**: all models
+- **KIMI**: all models
+- **Z.AI**: none (the GLM models are text-only)
+
+For models without image support the button is disabled; hover over it to see "<model> does not support images". Switch the expert to a model that supports images to use it.
+
+**Good to know:**
+- Images appear as thumbnails in your message, also after reloading the page
+- Images are stored locally in `chat_attachments/{expert_id}/` (not committed to git); the chat history only keeps a reference to them
+- Images are not included in the context usage shown in the toolbox, although they do use part of the model's context
+- If you later switch the expert to a model without image support, earlier images in the conversation are replaced by a short note ("[Image <name> omitted: the selected model does not support images]") when the conversation is sent; switching back sends them again
+- If an image file was deleted, the message shows "no longer available" and the model receives a note instead of the image
+- **🗑️ Clear chat history** in the toolbox also deletes the expert's images
+
+### Voice Input
+
+**🎤 Voice input** in the toolbox records a voice message with your microphone (your browser asks for permission the first time):
+
+1. Open **Voice input** and start the recording
+2. Stop the recording: it is converted to text and **sent automatically** like a typed message, together with any attached files and images
+
+**Which speech-to-text model is used** depends on the expert's provider:
+
+| Expert provider | Transcription model | API key needed | Limit |
+|---|---|---|---|
+| OpenAI | `gpt-transcribe` (OpenAI) | OpenAI | 25 MB |
+| DeepSeek, Z.AI, KIMI | `glm-asr-2512` (Z.AI GLM-ASR) | Z.AI | 30 seconds, 25 MB |
+
+The popover shows the model in use. If the required API key is missing, the recorder is disabled and a notice tells you which key to add in Settings.
+
+**Language**: Speak in the app's interface language for best results. OpenAI receives the interface language as a hint; for GLM-ASR, which has no language setting, a short sentence in the interface language is sent as context — without it, GLM-ASR often returned German speech in Chinese or translated it to English.
+
+### Context Usage
+
+The right side of the toolbox shows how much of the model's context window the conversation uses, as a compact button with a severity emoji and the percentage (e.g. "🟢 3.2%"; 🟢 below 50%, 🟡 below 75%, 🟠 below 90%, 🔴 from 90%). Click it for details: usage percentage, total and maximum tokens, and the tokens used by the system prompt and by the chat messages. Text attachments are counted; images are not.
 
 ### Conversation Context
 
@@ -116,11 +166,18 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 
 ### Selecting a Provider
 
-Each expert can use a different provider:
+Each expert can use a different provider and model. Switch directly below the chat input:
 
 1. Go to the expert's page
-2. Use the "Provider" dropdown in the sidebar
-3. Select your preferred provider
+2. Open the **model dropdown** in the second row below the chat input. It lists all models of every provider that has an API key, in this order: DeepSeek, OpenAI, Z.AI, KIMI
+3. Select a model — the change is saved for this expert immediately (no save button)
+
+Next to the model, only the settings the model actually supports are shown:
+
+- **🧠 Thinking mode**: the model's reasoning levels (e.g. Low/Medium/High), or On/Off for GLM-5, GLM-4.7-Flash and KIMI K2.6. Nothing is shown for KIMI K2.7 Code, which always thinks. If the previous level isn't available for the new model, its default is used
+- **🌡️ Temperature**: only for DeepSeek and Z.AI models. OpenAI and KIMI models use a fixed temperature, so the field is hidden
+
+Switching models mid-conversation keeps the history. Each answer keeps the logo of the provider that wrote it (answers saved before this feature show the current provider's logo).
 
 **Use case examples**:
 - Use **DeepSeek** for cost-effective daily tasks
@@ -224,13 +281,14 @@ When you revisit an expert:
 
 ### Clearing History
 
-**Option 1: Via File System**
+**Option 1: In-App**
+Use **🗑️ Clear chat history** in the toolbox below the chat input (left of the context usage). It opens a confirmation; **Delete permanently** removes the whole conversation of this expert, including attached images. The button is disabled while the history is empty.
+
+**Option 2: Via File System**
 ```bash
 rm chat_history/{expert_id}.json
+rm -r chat_attachments/{expert_id}/   # attached images, if any
 ```
-
-**Option 2: In-App** (if implemented)
-Use the "Clear Chat" button in the chat interface.
 
 ## Session State Management
 
@@ -252,6 +310,7 @@ ExpertGPTs uses multi-layered state management:
 
 ### Persistent Storage
 - **Chat history**: `chat_history/{expert_id}.json`
+- **Image attachments**: `chat_attachments/{expert_id}/` (local only, gitignored)
 - **Expert configurations**: `configs/{expert_id}.yaml`
 - **User preferences**: `.streamlit/app_defaults.toml`
 - **Theme settings**: `.streamlit/config.toml`
@@ -356,7 +415,7 @@ Create focused experts:
 
 ### 4. Manage Token Usage
 
-- Monitor token counts in chat interface
+- Monitor the context usage on the right of the toolbox below the chat input
 - Lower temperature for shorter, focused responses
 - Switch to cost-effective providers (DeepSeek) for simple tasks
 

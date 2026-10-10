@@ -182,7 +182,7 @@ uv run python scripts/regenerate_pages.py
 2. Reads each page's `EXPERT_ID` and `EXPERT_NAME`
 3. Rewrites the page from `templates/template.py` with the same filename, ID and name
 
-Expert configs (`configs/`) and chat history (`chat_history/`) are not touched and stay attached to their pages.
+Expert configs (`configs/`), chat history (`chat_history/`) and chat images (`chat_attachments/`) are not touched and stay attached to their pages.
 
 **Warning**: Custom edits to individual expert pages will be lost, because each page is overwritten with the template.
 
@@ -319,7 +319,8 @@ if f"thinking_{EXPERT_ID}" not in st.session_state:
 ### Chat Interface
 
 ```python
-# Display chat history (user messages show attachments as expanders)
+# Display chat history (user messages show image thumbnails and
+# text attachments as expanders)
 for message in st.session_state[f"messages_{EXPERT_ID}"]:
     with st.chat_message(message["role"]):
         if message["role"] == "user":
@@ -327,14 +328,15 @@ for message in st.session_state[f"messages_{EXPERT_ID}"]:
         else:
             st.markdown(message["content"])
 
-# Chat input with the toolbox pinned below it
+# Chat input with the toolbox (attachments, context usage) pinned below it
 with st.bottom:
     prompt = st.chat_input(i18n.t("home.chat_input_placeholder"))
-    attachments = render_chat_toolbox(uploader_key)
+    attachments, images = render_chat_toolbox(uploader_key, config, messages)
 
 if prompt:
-    # Embed attached files into the message content
-    content = build_message_content(prompt, attachments)
+    # Store images on disk, embed references and text files into the message
+    image_refs = [(name, save_image(EXPERT_ID, name, data)) for name, data in images]
+    content = build_message_content(prompt, attachments, image_refs)
 
     # Add user message to history
     st.session_state[f"messages_{EXPERT_ID}"].append({
@@ -342,7 +344,12 @@ if prompt:
         "content": content
     })
 
-    # Generate response
+    # Generate response: image tags become image parts (or a text note)
+    images_supported = supports_images(provider, model)
+    api_messages = [
+        {"role": m["role"], "content": to_api_content(m["content"], images_supported)}
+        for m in st.session_state[f"messages_{EXPERT_ID}"]
+    ]
     # ... LLM API call ...
 
     # Add assistant response to history
@@ -356,29 +363,28 @@ if prompt:
 ```
 
 **Chat toolbox and attachments** (see `handle_user_input()` in the template):
-- `st.chat_input` and the toolbox row (`render_chat_toolbox()` in `lib/ui/chat_toolbox.py`) are rendered inside `with st.bottom:`, so the toolbox stays pinned below the input. Its only entry so far is "Attach file", a popover with a multi-file `st.file_uploader`.
-- Only text files are accepted (UTF-8, at most `ATTACHMENT_MAX_SIZE_KB` = 200 KB each, extensions from `ATTACHMENT_FILE_TYPES` in `lib/shared/constants.py`). Too-large or non-UTF-8 files are reported in the toolbox and skipped.
-- On send, `build_message_content()` (`lib/shared/attachments.py`) appends each file to the prompt as an `<attachment name="...">...</attachment>` block. Because the attachments are part of the message content, the LLM request, token counting, chat history persistence and size limits need no changes.
-- `render_user_message()` uses `split_message_content()` to show the prompt plus one collapsible "📎 <filename>" expander per attachment, also after a reload.
-- The uploader key includes a counter that is incremented after each sent message, which clears the attachments.
+- `st.chat_input` and the toolbox row (`render_chat_toolbox(widget_key, config, messages)` in `lib/ui/chat_toolbox.py`) are rendered inside `with st.bottom:`, so the toolbox stays pinned below the input. Left to right: "Attach file" and "Attach image" (popovers with a multi-file `st.file_uploader` each), status captions (skipped files, attached files/images) and, right-aligned via `st.space("stretch")`, the context usage. It returns `(attachments, images)`: text files as (name, text), images as (name, bytes).
+- **Text files** (UTF-8, at most `ATTACHMENT_MAX_SIZE_KB` = 200 KB each, extensions from `ATTACHMENT_FILE_TYPES` in `lib/shared/constants.py`): too-large or non-UTF-8 files are reported in the toolbox and skipped. On send, `build_message_content()` (`lib/shared/attachments.py`) appends each file to the prompt as an `<attachment name="...">...</attachment>` block, so token counting, chat history persistence and size limits need no changes.
+- **Images** (`IMAGE_FILE_TYPES` = PNG/JPEG/WebP/GIF, at most `IMAGE_MAX_SIZE_MB` = 5 MB each, validated with Pillow by `validate_image_attachment()`): the button is disabled, with the tooltip "<model> does not support images", unless `supports_images(provider, model)` is true, i.e. the model config in `LLM_PROVIDERS` declares `"vision": True`.
+  - On send, `save_image()` (`lib/storage/attachment_store.py`) writes each image to `chat_attachments/{expert_id}/<uuid>.<ext>` (resolved from the project root, path-traversal safe via `safe_path_join`) and returns a reference. The message content only gets an `<image name="..." ref="...">` tag after the prompt (before any `<attachment>` blocks), which keeps the chat history small and the token count undistorted. Images are therefore **not** counted in the context usage.
+  - When a request is sent, every message goes through `to_api_content(content, images_supported)`: image tags become OpenAI-style `image_url` parts with base64 data URLs (`get_image_data_url()`). For models without image support each image is replaced by the text note "[Image <name> omitted: the selected model does not support images]", so switching an expert to a text-only model keeps earlier conversations working; a missing file becomes "[Image <name> is no longer available]". Messages without images are passed through unchanged.
+  - "Voice input": `_render_voice_input()` records with `st.audio_input` and calls `lib/audio/transcription.py`. `get_transcription_provider()` routes OpenAI experts to OpenAI (`gpt-transcribe`) and all other experts to Z.AI (`glm-asr-2512`, max 30 s, checked via `get_audio_duration()` before sending); both use the OpenAI-compatible `/audio/transcriptions` endpoint through the pooled client (`get_cached_client(...).client.audio.transcriptions.create`). Without the transcription provider's API key the recorder is disabled with a notice. GLM-ASR gets the localized sentence `chat_toolbox.voice_asr_context` as `prompt` (it has no language parameter; without context it answered German in Chinese or English); OpenAI gets the app language as ISO-639-1 `language`. The transcript is sent automatically: it is returned right away as `ToolboxInput.voice_prompt`, which `handle_user_input()` treats like a typed prompt (`prompt = prompt or toolbox.voice_prompt`). Each recording is transcribed, and therefore sent, once: the result is cached in session state by audio hash, and the recorder key changes after the message was sent. `render_chat_toolbox()` returns a `ToolboxInput` dataclass (attachments, images, voice_prompt).
+  - "Clear chat history" lives in the toolbox (right side, left of the context usage) as a popover with a confirmation button (`_render_clear_history()` in `lib/ui/chat_toolbox.py`; the sidebar button and the template's `clear_chat_history()` were removed). `delete_chat_history()` also calls `delete_expert_attachments()`; `scripts/reset_application.py` deletes the whole `chat_attachments/` directory.
+- `render_user_message()` uses `split_message_content()`, which returns `(prompt, text attachments, images)`, to show the prompt, image thumbnails (`st.image(..., width=240, alt=<file name>)`, or a "no longer available" caption) and one collapsible "📎 <filename>" expander per text attachment, also after a reload.
+- **Context usage**: `_render_context_usage()` shows a compact popover button "<severity emoji> <percent>%" on the right of the toolbox; it opens the details (usage %, total/max tokens, system prompt tokens, chat message tokens), calculated by `_calculate_context_stats()` via `TokenManager.calculate_usage_statistics()`. It replaces the former sidebar metric card and breakdown expander (`display_context_usage()` in the template, removed).
+- The uploader keys include a counter that is incremented after each sent message, which clears the attachments.
 
-### Sidebar Controls
+### Model Settings (toolbox, second row)
 
-```python
-with st.sidebar:
-    st.title(f"{EXPERT_NAME}")
+The former sidebar "Model settings" (model, thinking mode, temperature, provider links, save button) were replaced by a row in the toolbox, rendered by `_render_model_settings()` in `lib/ui/chat_toolbox.py` below the toolbox row:
 
-    # Provider selection
-    provider = st.selectbox(
-        "Provider",
-        ["deepseek", "openai", "zai"],
-        index=["deepseek", "openai", "zai"].index(st.session_state[f"provider_{EXPERT_ID}"])
-    )
-    st.session_state[f"provider_{EXPERT_ID}"] = provider
+- **Model dropdown**: options are `"provider/model"` for every provider with an API key (`_model_options()`, catalog order of `LLM_PROVIDERS`; the current model is always included). Choosing a model of another provider switches the expert's provider.
+- **Thinking**: `_render_thinking_select()` shows an effort selectbox for models with `reasoning_efforts` (unsupported stored levels → model default via `resolve_reasoning_effort()`), nothing for `thinking_always_on` models, and enabled/disabled for older Z.AI models and KIMI K2.6.
+- **Temperature**: a number input only if `get_fixed_temperature()` is None (DeepSeek, Z.AI).
+- **Saving**: immediately via `ConfigManager.update_config()` (provider, model, thinking_level, temperature) + `invalidate_expert_cache()` + rerun — but only after a real user change, signalled by the widgets' `on_change` callback (`_mark_model_settings_changed()`), so merely displaying a normalized default never writes the config.
+- **Avatars per answer**: assistant messages are created with `assistant_message(content, provider, model)` (`lib/storage/chat_history_manager.py`); the chat history persists `provider`/`model` per message, background streams store them in the stream metadata (`StreamingCache.get_llm_origin()`), and `render_chat_interface()` picks the avatar per message (fallback: current provider for older messages).
 
-    # Model selection
-    # ... similar for model, temperature, thinking level ...
-```
+The sidebar now only contains the page navigation and the Git branch footer.
 
 ## Advantages of Template System
 
@@ -414,7 +420,7 @@ All experts have:
 
 **Adding a feature**: Update template once, regenerate all
 
-**Example**: Add "Clear Chat" button
+**Example**: Add a new button to the chat page
 ```bash
 # 1. Add button to template (1 file)
 vim templates/template.py
@@ -422,7 +428,7 @@ vim templates/template.py
 # 2. Regenerate all expert pages
 uv run python scripts/regenerate_pages.py
 
-# 3. Done! All experts now have "Clear Chat" button
+# 3. Done! All experts now have the new button
 ```
 
 ### 4. Scalability

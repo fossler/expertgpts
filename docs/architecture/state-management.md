@@ -30,6 +30,7 @@ ExpertGPTs uses a **multi-layered state system** with different lifetimes and pu
 │  3. PERSISTENT STORAGE                                      │
 │  Survives app restarts                                       │
 │  - Chat history: chat_history/{expert_id}.json              │
+│  - Chat images: chat_attachments/{expert_id}/               │
 │  - Expert configs: configs/{expert_id}.yaml                 │
 │  - User preferences: .streamlit/app_defaults.toml           │
 │  - Theme settings: .streamlit/config.toml                   │
@@ -234,7 +235,24 @@ Populate st.session_state[f"messages_{expert_id}"]
 Display conversation in UI
 ```
 
-### 2. Expert Configurations
+### 2. Chat Image Attachments
+
+**Location**: `chat_attachments/{expert_id}/<uuid>.<ext>` (project root, gitignored, local per machine)
+
+**Format**: Original image bytes (PNG, JPEG, WebP, GIF)
+
+**Manager**: `lib/storage/attachment_store.py`
+
+**Operations**:
+- `save_image(expert_id, name, data)` - Save an attached image, return its reference (`"{expert_id}/<uuid>.<ext>"`)
+- `get_image_path(ref)` - Resolve a reference to a file path (None if invalid or missing)
+- `get_image_data_url(ref)` - Base64 data URL for the LLM request
+- `delete_expert_attachments(expert_id)` - Delete all images of an expert (called by `delete_chat_history()`)
+- All paths go through `safe_path_join()` to prevent path traversal
+
+The chat history only stores an `<image name="..." ref="...">` tag in the user message, not the image itself, so the JSON file stays small and token counting is not distorted. `to_api_content()` (`lib/shared/attachments.py`) loads the images when a request is sent. If an image file is deleted, the message shows "no longer available" and the model receives a short note instead. `scripts/reset_application.py` deletes the whole directory.
+
+### 3. Expert Configurations
 
 **Location**: `configs/{expert_id}.yaml`
 
@@ -262,7 +280,7 @@ metadata:
 - `delete_config(expert_id)` - Delete YAML file
 - `list_experts()` - List all expert IDs
 
-### 3. User Preferences
+### 4. User Preferences
 
 **Location**: `.streamlit/app_defaults.toml`
 
@@ -291,7 +309,7 @@ code = "en"
 - `save_provider_preference()` - Save default provider
 - `save_language_preference()` - Save language code
 
-### 4. Theme Settings
+### 5. Theme Settings
 
 **Location**: `.streamlit/config.toml`
 

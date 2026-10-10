@@ -2,7 +2,7 @@
 
 This page lists which input and output modalities (text, image, audio, video) each model configured in ExpertGPTs supports **at the provider API level**.
 
-> **Important**: This describes what the models accept, not what ExpertGPTs sends. The app currently sends **text only**. Chat attachments are limited to text files whose content is embedded into the user message (see `ATTACHMENT_FILE_TYPES` in `lib/shared/constants.py`); there is no image, audio or video upload. Image and video capabilities listed below are therefore not usable in the app yet.
+> **Important**: This describes what the models accept, not what ExpertGPTs sends. The app sends **text and images**: text files are embedded into the user message (see `ATTACHMENT_FILE_TYPES` in `lib/shared/constants.py`), and images can be attached for models marked `"vision": True` in `LLM_PROVIDERS`. Voice input is transcribed to text first (see [Speech-to-text](#integration-notes)). There is no audio or video upload, so the video capabilities listed below are not usable in the app yet.
 
 **Last verified**: 2026-10-10 against the provider documentation listed under [Sources](#sources).
 
@@ -68,7 +68,7 @@ Context sizes come from `LLM_PROVIDERS` in `lib/shared/constants.py`.
 
 ## Other Provider Models (Not Configured)
 
-Models from the same providers that cover the missing capabilities (audio, video input, media generation). None of them are configured in ExpertGPTs.
+Models from the same providers that cover the missing capabilities (audio, video input, media generation). None of them are configured as chat models in ExpertGPTs; only GPT-Transcribe and GLM-ASR-2512 are used, for voice input.
 
 | Capability | DeepSeek | OpenAI | Z.AI | KIMI |
 |---|---|---|---|---|
@@ -83,12 +83,12 @@ Models from the same providers that cover the missing capabilities (audio, video
 
 ExpertGPTs sends requests to the Chat Completions endpoint, so only chat models plug into the existing flow:
 
-- **GLM-5.3-Flash / FlashX (Z.AI)**: the simplest addition. It is a regular chat model that takes image and video as message content, and it would give Z.AI image and video input. It needs an entry in `LLM_PROVIDERS` plus image/video upload in the chat UI (which the existing image-capable models need as well).
+- **GLM-5.3-Flash / FlashX (Z.AI)**: the simplest addition. It is a regular chat model that takes image and video as message content, and it would give Z.AI image and video input. It needs an entry in `LLM_PROVIDERS` with `"vision": True` for image input; video input would also need a video upload in the chat UI.
 - **GPT-Audio-1.5 (OpenAI)**: the only audio model on Chat Completions (Responses and Realtime are not supported). It needs audio recording/upload and playback of audio responses in the UI.
 
 The other models use their own endpoints:
 
-- **Speech-to-text** (GPT-Transcribe, GLM-ASR-2512): works as a pre-processing step. Transcribe audio to text, then send it to any configured model; this gives all models indirect voice input.
+- **Speech-to-text** (GPT-Transcribe, GLM-ASR-2512): works as a pre-processing step. Transcribe audio to text, then send it to any configured model; this gives all models indirect voice input. ExpertGPTs uses both for voice input in the chat toolbox: GPT-Transcribe for OpenAI experts, GLM-ASR-2512 for all others (see `lib/audio/transcription.py`).
 - **Text-to-speech** (GPT-4o Mini TTS): could read responses aloud, independent of the chat model.
 - **Image and video generation** (GPT-Image, GLM-Image, CogView-4, CogVideoX-3): separate features, not chat extensions.
 

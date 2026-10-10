@@ -141,7 +141,7 @@ ExpertGPTs supports multiple LLM providers:
 - **Z.AI** - GLM models
 - **KIMI** - Moonshot KIMI models
 
-Switch providers per expert using the dropdown in the sidebar.
+Switch the model (and with it the provider) per expert using the model dropdown below the chat input; only providers with an API key are listed.
 
 ### Model Selection
 
@@ -241,8 +241,8 @@ Chat history is stored in `chat_history/{expert_id}.json` files.
 ### Clearing History
 
 To clear chat history:
-1. Delete the corresponding `chat_history/{expert_id}.json` file
-2. Or restart the conversation using the chat interface
+1. Use **🗑️ Clear chat history** in the toolbox below the chat input and confirm with **Delete permanently**
+2. Or delete the corresponding `chat_history/{expert_id}.json` file
 
 ## Getting Help
 

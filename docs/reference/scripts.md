@@ -93,7 +93,7 @@ uv run python scripts/regenerate_pages.py
 **What it does**:
 - Deletes all expert configurations
 - Deletes all expert pages
-- Deletes all chat history and the streaming cache
+- Deletes all chat history, chat images (`chat_attachments/`) and the streaming cache
 - Runs `setup.py` to recreate example experts
 - **Warning**: Irreversible, deletes all custom experts and conversations
 

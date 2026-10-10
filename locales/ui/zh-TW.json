@@ -53,8 +53,7 @@
       "theme_customization": "主題自訂"
     },
     "chat_input_placeholder": "向專家提問...",
-    "toolbox": "工具箱",
-    "status": "狀態"
+    "toolbox": "工具箱"
   },
   "buttons": {
     "add_chat": "新增聊天",
@@ -384,6 +383,24 @@
     "attach_help": "最大 {size} KB 的文字檔案，將附加到您的下一則訊息。",
     "attached": "📎 已附加：{files}",
     "error_too_large": "{name} 超過 {size} KB，未附加。",
-    "error_not_text": "{name} 不是 UTF-8 文字檔案，未附加。"
+    "error_not_text": "{name} 不是 UTF-8 文字檔案，未附加。",
+    "attach_image": "附加圖片",
+    "attach_image_help": "最大 {size} MB 的圖片（PNG、JPEG、WebP、GIF），將隨您的下一則訊息傳送給模型。",
+    "image_not_supported": "{model} 不支援圖片。",
+    "attached_images": "🖼️ 圖片：{files}",
+    "error_image_too_large": "{name} 超過 {size} MB，未附加。",
+    "error_not_image": "{name} 不是有效的圖片，未附加。",
+    "image_unavailable": "已無法使用",
+    "clear_confirm": "將刪除此專家的全部聊天記錄，包括附加的圖片。",
+    "clear_button": "永久刪除",
+    "voice_input": "語音輸入",
+    "voice_help": "錄製語音訊息。停止後將轉換為文字並自動傳送。",
+    "voice_transcribing": "正在轉寫…",
+    "voice_error": "轉寫失敗：{error}",
+    "error_audio_too_large": "錄音超過 {size} MB，無法轉寫。",
+    "voice_model": "轉寫模型：{model}",
+    "voice_key_missing": "語音輸入需要 {provider} 的 API 金鑰（{model}）。您可以在設定中新增。",
+    "error_audio_too_long": "錄音超過 {seconds} 秒，這是 {model} 的上限。",
+    "voice_asr_context": "這是一則中文語音訊息。"
   }
 }

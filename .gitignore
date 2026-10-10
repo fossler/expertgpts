@@ -58,6 +58,7 @@ credentials.json
 configs/
 logs/
 chat_history/
+chat_attachments/
 llm_comm/
 streaming_cache/
 

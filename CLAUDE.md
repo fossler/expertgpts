@@ -123,8 +123,8 @@ uv run ruff format --check .
 # Regenerate expert pages from templates/template.py (keeps configs and chat history)
 uv run python scripts/regenerate_pages.py
 
-# Reset application - DELETES all configs, pages, chat history and streaming cache,
-# then recreates the example experts
+# Reset application - DELETES all configs, pages, chat history, chat images and
+# streaming cache, then recreates the example experts
 echo "yes" | uv run python scripts/reset_application.py
 
 # Update translations - syncs English source with all locale files
@@ -156,7 +156,7 @@ A unified client interface supports multiple LLM providers through OpenAI-compat
   - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter. `glm-5.3` (default; low/high/max, default max) and `glm-5.2` (high/max) always think and add a direct `reasoning_effort`.
   - **KIMI**: generation-dependent. `kimi-k3` uses a top-level `reasoning_effort` (low/high/max, default max; always reasons). `kimi-k2.7-code` / `kimi-k2.7-code-highspeed` always think (`thinking_always_on: True`; reasoning_effort ignored; UI shows a fixed, disabled "Enabled" selector). `kimi-k2.6` uses the `thinking.type` (enabled/disabled) extra_body toggle; "none" sends `type=disabled` explicitly because the API thinks by default. Detected by whether the model config defines `reasoning_efforts` (same pattern as Z.AI's GLM-5.2/5.3).
 - **Fixed temperature**: `fixed_temperature` may be declared provider-wide (OpenAI = 1.0, since OpenAI rejects temperature != 1 while reasoning) or per model (kimi-k3, kimi-k2.7-code* = 1.0); `fixed_temperature_without_thinking` covers per-mode values (kimi-k2.6: 1.0 thinking / 0.6 without). Resolved by `get_fixed_temperature(provider, model=None, thinking=True)`; `LLMClient._effective_temperature()` overrides the user-selected temperature on every call path; `render_temperature_input()` disables the control for such models.
-- **Temperature limits**: provider-level `max_temperature` (Z.AI = 1.0, API range [0, 1]; default `DEFAULT_MAX_TEMPERATURE` = 2.0) caps the UI control and is clamped in `_effective_temperature()`. Provider flag `temperature_ignored_with_thinking` (DeepSeek: thinking mode silently ignores temperature) makes `render_temperature_input(thinking_level=...)` disable the control with a hint (`dialogs.temperature.ignored_with_thinking`) unless thinking is `none`. Helpers: `get_max_temperature()`, `is_temperature_ignored()`, `is_thinking_enabled()`.
+- **Temperature limits**: provider-level `max_temperature` (Z.AI = 1.0, API range [0, 1]; default `DEFAULT_MAX_TEMPERATURE` = 2.0) caps the UI control and is clamped in `_effective_temperature()`. Provider flag `temperature_ignored_with_thinking` (DeepSeek: thinking mode silently ignores temperature) makes `render_temperature_input(thinking_level=...)` disable the control with a hint (`dialogs.temperature.ignored_with_thinking`) unless thinking is `none`; the toolbox model row (`_render_model_settings()`) applies the same cap and disabled state. Helpers: `get_max_temperature()`, `is_temperature_ignored()`, `is_thinking_enabled()`.
 - **Effort helpers**: `get_default_reasoning_effort(provider, model)` and `resolve_reasoning_effort(provider, model, thinking_level)` in `constants.py`. The UI preselects the model's default effort when a stored level isn't supported, and shows effort selectors for every model with `reasoning_efforts`.
 - **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
 - **Connection pooling**: `lib/llm/client_pool.py` caches client instances for performance
@@ -182,6 +182,7 @@ Multi-layered state system with different lifetimes:
 
 - **Persistent storage** (survives app restarts):
   - Chat history: `chat_history/{expert_id}.json` (1MB file size limit)
+  - Chat images: `chat_attachments/{expert_id}/<uuid>.<ext>` (gitignored, local per machine; messages only hold `<image ... ref="...">` references)
   - Expert configurations: `configs/{expert_id}.yaml`
   - User preferences: `.streamlit/app_defaults.toml`
   - Theme settings: `.streamlit/config.toml`
@@ -259,14 +260,16 @@ Clean separation of concerns for 13-language support:
 ### Core Library (`lib/`)
 - **`config_manager.py`** - Expert YAML config operations (load, update, delete, list)
 - **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs; `regenerate_pages()` rewrites existing expert pages from the template (keeps filename, `EXPERT_ID`, `EXPERT_NAME`)
-- **`chat_toolbox.py`** (`lib/ui/`) - Toolbox row below the chat input (`render_chat_toolbox()`, currently "Attach file"); `render_user_message()` shows embedded attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
-- **`attachments.py`** (`lib/shared/`) - Text file attachments (UTF-8, ≤ `ATTACHMENT_MAX_SIZE_KB`, extensions in `ATTACHMENT_FILE_TYPES`); `build_message_content()` embeds them into the user message as `<attachment name="...">` blocks, `split_message_content()` reverses it for display
+- **`chat_toolbox.py`** (`lib/ui/`) - Model row (`_render_model_settings()`: dropdown of all models of providers with an API key, thinking/temperature where supported, saved immediately after an `on_change`; replaces the former sidebar "Model settings") and toolbox row below the chat input (`render_chat_toolbox(widget_key, config, expert_id, messages_key)` → `ToolboxInput(attachments, images, voice_prompt)`): "Attach file", "Attach image" (disabled with a tooltip unless `supports_images()`), "Voice input" (scaffold, `_render_voice_input()`), status captions and, right-aligned, "Clear chat history" (confirmation popover) and the context usage popover (`_calculate_context_stats()`, `_render_context_usage()`; replaces the former sidebar metric). `render_user_message()` shows image thumbnails (width 240) and text attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
+- **`transcription.py`** (`lib/audio/`) - Speech-to-text for voice input: `get_transcription_provider(chat_provider)` (OpenAI → "openai", else "zai"), `TRANSCRIPTION_MODELS` (`gpt-transcribe`, `glm-asr-2512`), `MAX_DURATION_SECONDS` (Z.AI: 30), `get_audio_duration()`, `transcribe(audio, chat_provider, api_key, mime_type, language, context)` → `TranscriptionResult(text, error)` (`language` → OpenAI hint, `context` → GLM-ASR `prompt`)
+- **`attachments.py`** (`lib/shared/`) - Text file attachments (UTF-8, ≤ `ATTACHMENT_MAX_SIZE_KB`, extensions in `ATTACHMENT_FILE_TYPES`) and images (`IMAGE_FILE_TYPES`, ≤ `IMAGE_MAX_SIZE_MB`, `validate_image_attachment()` via Pillow); `build_message_content()` appends `<image name="..." ref="...">` tags and `<attachment name="...">` blocks to the prompt, `split_message_content()` returns `(prompt, attachments, images)`, `to_api_content(content, images_supported)` turns image tags into `image_url` parts (base64) or a text note for text-only models / missing files
+- **`attachment_store.py`** (`lib/storage/`) - Image files under `chat_attachments/{expert_id}/` (`save_image()`, `get_image_path()`, `get_image_data_url()`, `delete_expert_attachments()`); path-traversal safe via `safe_path_join()`, directory resolved from the project root
 - **`llm_client.py`** - Multi-provider LLM client; handles thinking parameter differences via `_prepare_thinking_param()`
 - **`client_pool.py`** - Cached client connections; use `get_cached_client()` instead of direct instantiation
 - **`secrets_manager.py`** - Secure API key management; reads/writes `.streamlit/secrets.toml` with 600 permissions
 - **`app_defaults_manager.py`** - User preferences management (default provider, model, language)
 - **`config_toml_manager.py`** - Theme configuration management for `.streamlit/config.toml`
-- **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit
+- **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit; `delete_chat_history()` also deletes the expert's images
 - **`session_state.py`** - Initializes shared session state (API keys, navigation, defaults) - **UPDATED**: Added `ensure_dialog_state()` helper
 - **`streaming_cache.py`** - Background streaming with file-based caching; battery-optimized polling for LLM responses
 - **`token_manager.py`** - Token counting and context usage tracking; calculates percentage of context used
@@ -309,6 +312,7 @@ Do NOT use `reset_application.py` for this: it deletes all configs, pages and ch
 1. **Add provider configuration** in `lib/shared/constants.py`:
    - Add entry to `LLM_PROVIDERS` dict with name, base_url, default_model, models dict
    - Models must include: display_name, max_tokens, thinking_param
+   - Add `"vision": True` only if the model accepts image input (verify live; some models silently ignore images)
 
 2. **Update thinking parameter handling** in `lib/llm/llm_client.py`:
    - Modify `_prepare_thinking_param()` method if provider uses custom thinking parameters
@@ -424,7 +428,16 @@ Requires `watchdog` package (included in development dependencies). Provides ins
 - UI preselects the model's default effort for unsupported stored levels; expert dialog shows effort selectors for every model with `reasoning_efforts` (incl. GLM-5.2/5.3)
 - Updated README, this file and `docs/`
 - **Chat toolbox**: toolbox row pinned below the chat input (`st.chat_input` + `render_chat_toolbox()` inside `with st.bottom:`); first entry "Attach file" (`lib/ui/chat_toolbox.py`, `lib/shared/attachments.py`, i18n section `chat_toolbox`)
-  - Text files only (UTF-8, ≤ 200 KB each); embedded into the user message as `<attachment name="...">` blocks, so LLM request, token counting and chat history work unchanged; shown as "📎 <filename>" expanders
+  - **Attach file**: text files only (UTF-8, ≤ 200 KB each); embedded into the user message as `<attachment name="...">` blocks, so LLM request, token counting and chat history work unchanged; shown as "📎 <filename>" expanders
+  - **Attach image**: PNG/JPEG/WebP/GIF, ≤ 5 MB each (`IMAGE_FILE_TYPES`, `IMAGE_MAX_SIZE_MB`, Pillow validation); only for models with `"vision": True` (`supports_images()`), otherwise disabled with tooltip. Verified live via Chat Completions: deepseek-flash, all 8 OpenAI and all 4 KIMI models accept images; deepseek-v4-pro silently ignores them (no flag); Z.AI text-only per docs (no flag, not live-tested)
+  - Images saved to `chat_attachments/{expert_id}/<uuid>.<ext>` (`lib/storage/attachment_store.py`, gitignored); the message only holds an `<image name="..." ref="...">` tag (before `<attachment>` blocks), so images are not counted in the context usage
+  - `to_api_content()` builds `image_url` parts (base64 data URLs) per request; text-only models get "[Image <name> omitted: ...]", missing files "[Image <name> is no longer available]"; user messages show thumbnails, also after reload
+  - "Clear chat history" moved from the sidebar into the toolbox (left of the context usage) with a confirmation popover; it also deletes the expert's images; `reset_application.py` deletes `chat_attachments/`
+  - **Voice input**: "🎤 Voice input" popover with `st.audio_input`; `lib/audio/transcription.py` routes OpenAI experts to `gpt-transcribe` and all others to Z.AI `glm-asr-2512` (30 s limit), both via the OpenAI-compatible `/audio/transcriptions` endpoint and the pooled client. The transcript is sent automatically (`ToolboxInput.voice_prompt`); each recording is sent once (cached by audio hash, recorder key resets). GLM-ASR has no language parameter, so the localized sentence `chat_toolbox.voice_asr_context` is sent as `prompt` (without it German came back as Chinese/English). Both paths verified end-to-end; also live-tested GLM-5.3 (low/high/max) and the other Z.AI chat models
+  - **Model settings** moved from the sidebar into a toolbox row: dropdown of all models of providers with an API key (switches provider), thinking/temperature only where the model supports them, saved immediately; provider links ("Chat | Platform") removed
+  - **Avatar per answer**: `assistant_message()` stores `provider`/`model` on assistant messages (persisted in the chat history, stream metadata for background streams); older messages fall back to the current provider
+  - **Context usage** moved from the sidebar into the toolbox (right side): popover "<emoji> <percent>%" with usage %, total/max, system prompt and chat message tokens; `display_context_usage()` removed from the template
+  - New i18n keys in `chat_toolbox` (all 14 locales): `attach_image`, `attach_image_help`, `image_not_supported`, `attached_images`, `error_image_too_large`, `error_not_image`, `image_unavailable`
 - **`scripts/regenerate_pages.py`** (`PageGenerator.regenerate_pages()`): rewrites existing expert pages from the template without touching configs or chat history; replaces `reset_application.py` as the way to apply template changes
 - **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
 

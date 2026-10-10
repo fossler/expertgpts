@@ -39,12 +39,13 @@ expertgpts/
 │   │   └── i18n.py                # Language detection and translation
 │   ├── storage/                   # Data persistence
 │   │   ├── chat_history_manager.py # Chat history persistence
+│   │   ├── attachment_store.py    # Chat image files (chat_attachments/)
 │   │   └── streaming_cache.py     # Background response caching
 │   ├── ui/                        # UI components
-│   │   ├── chat_toolbox.py        # Toolbox below the chat input ("Attach file")
+│   │   ├── chat_toolbox.py        # Toolbox below the chat input (attach file/image, context usage)
 │   │   └── dialogs.py             # Shared dialog rendering
 │   └── shared/                    # Shared utilities
-│       ├── attachments.py         # Text file attachments in chat messages
+│       ├── attachments.py         # Text file and image attachments in chat messages
 │       ├── constants.py           # Provider/model configurations
 │       ├── file_ops.py            # File system operations
 │       ├── format_ops.py          # File format operations (TOML, YAML, JSON)
@@ -62,6 +63,10 @@ expertgpts/
 │
 ├── chat_history/                   # Conversation storage (JSON)
 │   ├── 1001_python_expert.json
+│   └── ...
+│
+├── chat_attachments/               # Images attached in the chat (gitignored)
+│   ├── 1001_python_expert/
 │   └── ...
 │
 ├── .streamlit/                     # Streamlit configuration
@@ -149,12 +154,13 @@ from lib.i18n import i18n, I18nManager
 ```
 
 ### `lib/storage/` - Data Persistence
-**Purpose**: Long-term and short-term data storage (chat history, caching).
+**Purpose**: Long-term and short-term data storage (chat history, chat images, caching).
 
 **When to use**: Adding new persistence mechanisms, modifying storage backends, implementing caching strategies.
 
 **Modules**:
-- `chat_history_manager.py` - Chat conversation persistence (JSON files)
+- `chat_history_manager.py` - Chat conversation persistence (JSON files); `delete_chat_history()` also deletes the expert's images
+- `attachment_store.py` - Image attachments on disk under `chat_attachments/{expert_id}/` (save, resolve, base64 data URL, delete per expert; path-traversal safe)
 - `streaming_cache.py` - Background streaming response caching
 
 **Imports**:
@@ -168,7 +174,7 @@ from lib.storage import load_chat_history, save_chat_history, StreamingCache
 **When to use**: Adding new dialog types, creating reusable UI components, modifying shared rendering logic.
 
 **Modules**:
-- `chat_toolbox.py` - Toolbox row below the chat input ("Attach file") and rendering of user messages with attachments
+- `chat_toolbox.py` - Toolbox row below the chat input ("Attach file", "Attach image", context usage popover on the right) and rendering of user messages with image thumbnails and text attachments
 - `dialogs.py` - Dialog rendering (add expert, delete expert, LLM configuration)
 
 **Imports**:
@@ -186,7 +192,7 @@ from lib.ui import render_add_chat_dialog, render_llm_configuration
 - Defining types and interfaces
 
 **Modules**:
-- `attachments.py` - Text file attachments: read/validate uploads, embed them into the user message, split them out for display
+- `attachments.py` - Text file and image attachments: read/validate uploads, embed text files and image references into the user message, split them out for display, convert stored content for the LLM request (`to_api_content()`)
 - `constants.py` - Provider/model configurations, thresholds, lookup tables
 - `file_ops.py` - File system operations (permissions, paths, directories)
 - `format_ops.py` - File format operations (TOML, YAML, JSON)
@@ -246,6 +252,7 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 - `.streamlit/config.toml` - Theme settings
 - `.streamlit/app_defaults.toml` - User preferences
 - `chat_history/*.json` - Conversation history
+- `chat_attachments/` - Images attached in the chat
 
 ## File Purposes
 
@@ -351,6 +358,12 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 
 **Location**: `chat_history/`
 
+### Chat Attachment Files
+
+**Format**: `{expert_id}/<uuid>.<ext>` (PNG, JPEG, WebP, GIF)
+
+**Location**: `chat_attachments/` (referenced from the chat history by `<image ... ref="...">` tags)
+
 ## Import Structure
 
 ### Utility Module Imports
@@ -381,6 +394,7 @@ from utils.i18n import i18n
 **Users create/manage**:
 - Expert configs (`configs/*.yaml`)
 - Chat history (`chat_history/*.json`)
+- Chat images (`chat_attachments/`)
 - App defaults (`.streamlit/app_defaults.toml`)
 - Theme settings (`.streamlit/config.toml`)
 

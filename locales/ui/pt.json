@@ -53,8 +53,7 @@
       "theme_customization": "Personalização de Tema"
     },
     "chat_input_placeholder": "Pergunte ao especialista...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Adicionar Chat",
@@ -384,6 +383,24 @@
     "attach_help": "Ficheiros de texto até {size} KB. São adicionados à sua próxima mensagem.",
     "attached": "📎 Anexado: {files}",
     "error_too_large": "{name} excede {size} KB e não foi anexado.",
-    "error_not_text": "{name} não é um ficheiro de texto UTF-8 e não foi anexado."
+    "error_not_text": "{name} não é um ficheiro de texto UTF-8 e não foi anexado.",
+    "attach_image": "Anexar imagem",
+    "attach_image_help": "Imagens (PNG, JPEG, WebP, GIF) até {size} MB. São enviadas ao modelo com a sua próxima mensagem.",
+    "image_not_supported": "{model} não suporta imagens.",
+    "attached_images": "🖼️ Imagens: {files}",
+    "error_image_too_large": "{name} excede {size} MB e não foi anexada.",
+    "error_not_image": "{name} não é uma imagem válida e não foi anexada.",
+    "image_unavailable": "já não está disponível",
+    "clear_confirm": "Todo o histórico de conversa deste especialista, incluindo as imagens anexadas, será eliminado.",
+    "clear_button": "Eliminar definitivamente",
+    "voice_input": "Entrada de voz",
+    "voice_help": "Grave uma mensagem de voz. Ao parar, é convertida em texto e enviada automaticamente.",
+    "voice_transcribing": "A transcrever…",
+    "voice_error": "A transcrição falhou: {error}",
+    "error_audio_too_large": "A gravação excede {size} MB e não pode ser transcrita.",
+    "voice_model": "Transcrição: {model}",
+    "voice_key_missing": "A entrada de voz precisa de uma chave API para {provider} ({model}). Pode adicioná-la nas definições.",
+    "error_audio_too_long": "A gravação excede {seconds} segundos, o limite de {model}.",
+    "voice_asr_context": "Esta é uma mensagem de voz em português."
   }
 }

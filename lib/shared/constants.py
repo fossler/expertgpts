@@ -17,6 +17,7 @@ LLM_PROVIDERS = {
         "temperature_ignored_with_thinking": True,
         "models": {
             "deepseek-flash": {
+                "vision": True,  # accepts image input
                 "display_name": "DeepSeek V4.1 Flash",
                 "max_tokens": 1000000,
                 "reasoning_efforts": ["none", "high", "max"],
@@ -45,6 +46,7 @@ LLM_PROVIDERS = {
             # GPT-6.1 Sol / Astra always reason: no "none". "max" exists only in
             # the Responses API, not in Chat Completions (which the app uses).
             "gpt-6.1-sol": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-6.1 Sol",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["low", "medium", "high", "xhigh"],
@@ -52,6 +54,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "medium"}},
             },
             "gpt-6-astra": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-6 Astra",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["low", "medium", "high", "xhigh"],
@@ -59,6 +62,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "medium"}},
             },
             "gpt-6-luna": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-6 Luna",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
@@ -66,6 +70,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5.6-sol": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-5.6 Sol",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
@@ -73,6 +78,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5.6-terra": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-5.6 Terra",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
@@ -80,6 +86,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5.6-luna": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-5.6 Luna",
                 "max_tokens": 1050000,  # 1.05M context window
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
@@ -87,6 +94,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5.4-mini": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-5.4 Mini",
                 "max_tokens": 400000,
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
@@ -94,6 +102,7 @@ LLM_PROVIDERS = {
                 "thinking_param": {"reasoning": {"effort": "none"}},
             },
             "gpt-5.4-nano": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-5.4 Nano",
                 "max_tokens": 400000,
                 "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
@@ -145,6 +154,7 @@ LLM_PROVIDERS = {
         "icon_path": "icons/kimi-logo.png",
         "models": {
             "kimi-k3": {
+                "vision": True,  # accepts image input
                 "display_name": "KIMI K3",
                 "max_tokens": 1048576,  # 1M context window
                 # K3 reasons via a top-level reasoning_effort field.
@@ -157,6 +167,7 @@ LLM_PROVIDERS = {
             # K2.7 Code always thinks: thinking can't be disabled and
             # reasoning_effort is ignored.
             "kimi-k2.7-code": {
+                "vision": True,  # accepts image input
                 "display_name": "KIMI K2.7 Code",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
@@ -164,6 +175,7 @@ LLM_PROVIDERS = {
                 "fixed_temperature": 1.0,
             },
             "kimi-k2.7-code-highspeed": {
+                "vision": True,  # accepts image input
                 "display_name": "KIMI K2.7 Code HighSpeed",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
@@ -171,6 +183,7 @@ LLM_PROVIDERS = {
                 "fixed_temperature": 1.0,
             },
             "kimi-k2.6": {
+                "vision": True,  # accepts image input
                 "display_name": "KIMI K2.6",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
@@ -256,6 +269,14 @@ ATTACHMENT_FILE_TYPES = [
     "cfg", "conf", "log", "html", "css", "js", "ts", "py", "java", "c", "cpp",
     "h", "cs", "go", "rs", "rb", "php", "sh", "sql",
 ]  # fmt: skip
+
+# Image attachments ("Attach image"), only for models with "vision": True.
+# Images are stored under chat_attachments/ and sent as image parts.
+IMAGE_MAX_SIZE_MB = 5
+IMAGE_FILE_TYPES = ["png", "jpg", "jpeg", "webp", "gif"]
+
+# Voice input: maximum recording size passed to speech-to-text
+AUDIO_MAX_SIZE_MB = 25
 
 # Model Context Limits
 DEEPSEEK_MAX_CONTEXT_TOKENS = 1000000
@@ -609,6 +630,22 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
     """
     model_config = get_model_config(provider, model)
     return model_config.get("reasoning_efforts", ["none", "low", "medium", "high"])
+
+
+def supports_images(provider: str, model: str) -> bool:
+    """Check whether a model accepts image input.
+
+    Args:
+        provider: Provider key (e.g., "openai")
+        model: Model ID (e.g., "gpt-6.1-sol")
+
+    Returns:
+        bool: True if the model config declares ``"vision": True``
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    return get_model_config(provider, model).get("vision", False)
 
 
 def get_default_reasoning_effort(provider: str, model: str):

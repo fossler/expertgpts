@@ -188,7 +188,7 @@ rm -rf expertgpts
 # so it's removed automatically when you delete the project
 ```
 
-Configuration files in `.streamlit/` and `chat_history/` will also need to be manually deleted if desired.
+Configuration files in `.streamlit/`, `chat_history/` and `chat_attachments/` will also need to be manually deleted if desired.
 
 ## Support
 

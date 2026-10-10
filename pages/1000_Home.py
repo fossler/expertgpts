@@ -5,7 +5,7 @@ Welcome page for the ExpertGPTs multi-expert AI chat application.
 
 import streamlit as st
 from lib.config.config_manager import get_config_manager
-from lib.ui import render_add_chat_dialog, render_api_key_status
+from lib.ui import render_add_chat_dialog
 from lib.i18n import i18n
 from lib.shared.helpers import render_git_branch_footer
 
@@ -47,16 +47,8 @@ def main():
             st.session_state.show_add_chat_dialog = True
             st.rerun()
 
-        st.divider()
-
-        # Status section
-        st.caption(f"**{i18n.t('home.status')}**")
-
-        # API Key status (using shared helper)
-        render_api_key_status(use_sidebar=True)
-
         # Git branch footer (at very bottom)
-        render_git_branch_footer()
+        render_git_branch_footer(divider=True)
 
     # Render add chat dialog if active
     if st.session_state.show_add_chat_dialog:

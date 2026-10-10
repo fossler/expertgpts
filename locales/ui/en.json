@@ -53,8 +53,7 @@
       "file_config_desc": "Each expert has its own YAML config for easy management"
     },
     "chat_input_placeholder": "Ask the expert...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Add Chat",
@@ -384,6 +383,24 @@
     "attach_help": "Text files up to {size} KB. They are added to your next message.",
     "attached": "📎 Attached: {files}",
     "error_too_large": "{name} is larger than {size} KB and was not attached.",
-    "error_not_text": "{name} is not a UTF-8 text file and was not attached."
+    "error_not_text": "{name} is not a UTF-8 text file and was not attached.",
+    "attach_image": "Attach image",
+    "attach_image_help": "Images (PNG, JPEG, WebP, GIF) up to {size} MB. They are sent to the model with your next message.",
+    "image_not_supported": "{model} does not support images.",
+    "attached_images": "🖼️ Images: {files}",
+    "error_image_too_large": "{name} is larger than {size} MB and was not attached.",
+    "error_not_image": "{name} is not a valid image and was not attached.",
+    "image_unavailable": "no longer available",
+    "clear_confirm": "The entire chat history of this expert, including attached images, will be deleted.",
+    "clear_button": "Delete permanently",
+    "voice_input": "Voice input",
+    "voice_help": "Record a voice message. When you stop, it is converted to text and sent automatically.",
+    "voice_transcribing": "Transcribing…",
+    "voice_error": "Transcription failed: {error}",
+    "error_audio_too_large": "The recording is larger than {size} MB and cannot be transcribed.",
+    "voice_model": "Transcription: {model}",
+    "voice_key_missing": "Voice input needs an API key for {provider} ({model}). You can add it in Settings.",
+    "error_audio_too_long": "The recording is longer than {seconds} seconds, the limit of {model}.",
+    "voice_asr_context": "This is a voice message in English."
   }
 }

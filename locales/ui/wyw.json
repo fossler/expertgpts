@@ -53,8 +53,7 @@
       "theme_customization": "主题自定义"
     },
     "chat_input_placeholder": "詢諸專家...",
-    "toolbox": "工具箱",
-    "status": "狀態"
+    "toolbox": "工具箱"
   },
   "buttons": {
     "add_chat": "新增言談",
@@ -384,6 +383,24 @@
     "attach_help": "文本之件，限 {size} KB，附於次言。",
     "attached": "📎 已附：{files}",
     "error_too_large": "{name} 逾 {size} KB，未附。",
-    "error_not_text": "{name} 非 UTF-8 文本之件，未附。"
+    "error_not_text": "{name} 非 UTF-8 文本之件，未附。",
+    "attach_image": "附圖",
+    "attach_image_help": "圖（PNG、JPEG、WebP、GIF），限 {size} MB，隨次言送於模型。",
+    "image_not_supported": "{model} 不識圖。",
+    "attached_images": "🖼️ 圖：{files}",
+    "error_image_too_large": "{name} 逾 {size} MB，未附。",
+    "error_not_image": "{name} 非有效之圖，未附。",
+    "image_unavailable": "已不存",
+    "clear_confirm": "此專家之言錄，連所附之圖，盡將刪去。",
+    "clear_button": "永刪",
+    "voice_input": "語入",
+    "voice_help": "錄言為音，止則化為文而自發。",
+    "voice_transcribing": "正轉錄…",
+    "voice_error": "轉錄未成：{error}",
+    "error_audio_too_large": "所錄逾 {size} MB，不能轉錄。",
+    "voice_model": "轉錄之模：{model}",
+    "voice_key_missing": "語入須 {provider} 之 API 鑰（{model}），可於設置中增之。",
+    "error_audio_too_long": "所錄逾 {seconds} 秒，{model} 之限也。",
+    "voice_asr_context": "此乃中文語音之訊。"
   }
 }

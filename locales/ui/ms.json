@@ -53,8 +53,7 @@
       "theme_customization": "Penyesuaian Tema"
     },
     "chat_input_placeholder": "Tanya pakarnya...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Tambah Chat",
@@ -384,6 +383,24 @@
     "attach_help": "Fail teks sehingga {size} KB. Fail ditambah pada mesej anda yang seterusnya.",
     "attached": "📎 Dilampirkan: {files}",
     "error_too_large": "{name} melebihi {size} KB dan tidak dilampirkan.",
-    "error_not_text": "{name} bukan fail teks UTF-8 dan tidak dilampirkan."
+    "error_not_text": "{name} bukan fail teks UTF-8 dan tidak dilampirkan.",
+    "attach_image": "Lampirkan imej",
+    "attach_image_help": "Imej (PNG, JPEG, WebP, GIF) sehingga {size} MB. Imej dihantar kepada model bersama mesej anda yang seterusnya.",
+    "image_not_supported": "{model} tidak menyokong imej.",
+    "attached_images": "🖼️ Imej: {files}",
+    "error_image_too_large": "{name} melebihi {size} MB dan tidak dilampirkan.",
+    "error_not_image": "{name} bukan imej yang sah dan tidak dilampirkan.",
+    "image_unavailable": "tidak lagi tersedia",
+    "clear_confirm": "Keseluruhan sejarah sembang pakar ini, termasuk imej yang dilampirkan, akan dipadam.",
+    "clear_button": "Padam secara kekal",
+    "voice_input": "Input suara",
+    "voice_help": "Rakam mesej suara. Selepas berhenti, ia ditukar kepada teks dan dihantar secara automatik.",
+    "voice_transcribing": "Sedang mentranskripsi…",
+    "voice_error": "Transkripsi gagal: {error}",
+    "error_audio_too_large": "Rakaman melebihi {size} MB dan tidak boleh ditranskripsi.",
+    "voice_model": "Transkripsi: {model}",
+    "voice_key_missing": "Input suara memerlukan kunci API untuk {provider} ({model}). Anda boleh menambahkannya dalam Tetapan.",
+    "error_audio_too_long": "Rakaman melebihi {seconds} saat, had bagi {model}.",
+    "voice_asr_context": "Ini ialah mesej suara dalam bahasa Melayu."
   }
 }

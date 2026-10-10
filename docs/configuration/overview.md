@@ -192,8 +192,11 @@ expertgpts/
 │   ├── 1000_Home.py
 │   ├── 1001_python_expert.py
 │   └── ...
-└── chat_history/
-    ├── 1001_python_expert.json   # Conversation history
+├── chat_history/
+│   ├── 1001_python_expert.json   # Conversation history
+│   └── ...
+└── chat_attachments/
+    ├── 1001_python_expert/       # Images attached in the chat
     └── ...
 ```
 
@@ -209,6 +212,7 @@ expertgpts/
 - `.streamlit/config.toml` - Personal theme preferences
 - `.streamlit/app_defaults.toml` - Personal user preferences
 - `chat_history/*.json` - Personal conversation history
+- `chat_attachments/` - Images attached in the chat (referenced from the chat history)
 
 ## Configuration Precedence
 
@@ -364,6 +368,7 @@ mkdir backup
 cp .streamlit/*.toml backup/
 cp -r configs/ backup/
 cp -r chat_history/ backup/
+cp -r chat_attachments/ backup/
 ```
 
 ### Restore
@@ -378,6 +383,7 @@ cp -r configs.backup/* configs/
 cp backup/*.toml .streamlit/
 cp -r backup/configs/* configs/
 cp -r backup/chat_history/* chat_history/
+cp -r backup/chat_attachments/ chat_attachments/
 ```
 
 ### Export/Import
@@ -469,6 +475,7 @@ ls -la .streamlit/
 - `.streamlit/config.toml` (personal theme)
 - `.streamlit/app_defaults.toml` (personal preferences)
 - `chat_history/` (personal conversations)
+- `chat_attachments/` (images attached in the chat)
 
 ### 4. Document Custom Configs
 

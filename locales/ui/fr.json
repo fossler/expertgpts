@@ -53,8 +53,7 @@
       "theme_customization": "Personnalisation du Thème"
     },
     "chat_input_placeholder": "Posez une question à l'expert...",
-    "toolbox": "Boîte à Outils",
-    "status": "Statut"
+    "toolbox": "Boîte à Outils"
   },
   "buttons": {
     "add_chat": "Ajouter Chat",
@@ -384,6 +383,24 @@
     "attach_help": "Fichiers texte jusqu'à {size} Ko. Ils sont ajoutés à votre prochain message.",
     "attached": "📎 Joint : {files}",
     "error_too_large": "{name} dépasse {size} Ko et n'a pas été joint.",
-    "error_not_text": "{name} n'est pas un fichier texte UTF-8 et n'a pas été joint."
+    "error_not_text": "{name} n'est pas un fichier texte UTF-8 et n'a pas été joint.",
+    "attach_image": "Joindre une image",
+    "attach_image_help": "Images (PNG, JPEG, WebP, GIF) jusqu'à {size} Mo. Elles sont envoyées au modèle avec votre prochain message.",
+    "image_not_supported": "{model} ne prend pas en charge les images.",
+    "attached_images": "🖼️ Images : {files}",
+    "error_image_too_large": "{name} dépasse {size} Mo et n'a pas été jointe.",
+    "error_not_image": "{name} n'est pas une image valide et n'a pas été jointe.",
+    "image_unavailable": "n'est plus disponible",
+    "clear_confirm": "Tout l'historique de discussion de cet expert, y compris les images jointes, sera supprimé.",
+    "clear_button": "Supprimer définitivement",
+    "voice_input": "Saisie vocale",
+    "voice_help": "Enregistrez un message vocal. À l'arrêt, il est converti en texte et envoyé automatiquement.",
+    "voice_transcribing": "Transcription en cours…",
+    "voice_error": "Échec de la transcription : {error}",
+    "error_audio_too_large": "L'enregistrement dépasse {size} Mo et ne peut pas être transcrit.",
+    "voice_model": "Transcription : {model}",
+    "voice_key_missing": "La saisie vocale nécessite une clé API pour {provider} ({model}). Vous pouvez l'ajouter dans les paramètres.",
+    "error_audio_too_long": "L'enregistrement dépasse {seconds} secondes, la limite de {model}.",
+    "voice_asr_context": "Ceci est un message vocal en français."
   }
 }

@@ -129,7 +129,7 @@ For the input modalities (text, image, audio, video) of each model, see [Model C
 **Characteristics**:
 - `kimi-k3`: 1M context window (1,048,576 tokens), always-on reasoning (`low`/`high`/`max`)
 - `kimi-k2.7-code`, `kimi-k2.7-code-highspeed`, `kimi-k2.6`: 256K context window (262,144 tokens)
-- Native multimodal support (images, videos), see [Model Capabilities](model-capabilities.md)
+- Native multimodal support (images, videos), see [Model Capabilities](model-capabilities.md); the app sends images only
 - Strong reasoning capabilities
 
 **Get API Key**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
@@ -190,6 +190,19 @@ ExpertGPTs caches client instances per provider/api_key combination.
 - `kimi-k2.7-code*`: always thinks; no adjustable thinking parameter
 - `kimi-k2.6`: `thinking.type` (`enabled`/`disabled`) via extra_body; `disabled` is sent explicitly since the API thinks by default
 
+### Image Input
+
+Models that accept images declare `"vision": True` in their `LLM_PROVIDERS` config; `supports_images(provider, model)` in `lib/shared/constants.py` reads the flag. Only for these models is "Attach image" enabled in the chat toolbox, and images are sent as OpenAI-style `image_url` content parts with base64 data URLs (Chat Completions).
+
+| Provider | Image input | Notes |
+|----------|-------------|-------|
+| **DeepSeek** | `deepseek-flash` | `deepseek-v4-pro` silently ignores images, so it has no flag |
+| **OpenAI** | All 8 models | |
+| **Z.AI** | None | GLM models are text-only per the Z.AI docs (not live-tested) |
+| **KIMI** | All 4 models | Including `kimi-k2.7-code-highspeed` |
+
+Verified live via Chat Completions on 2026-10-10 (except Z.AI). For models without the flag, earlier images in a conversation are replaced by a text note when the request is sent (see `to_api_content()` in `lib/shared/attachments.py`).
+
 ### Model Selection
 
 Each provider offers multiple models with different capabilities:
@@ -200,6 +213,7 @@ Each provider offers multiple models with different capabilities:
 **Large Context**: KIMI K3, DeepSeek, Z.AI GLM-5.3, OpenAI GPT-6 / GPT-5.6 (1M+ tokens)
 **Reasoning**: DeepSeek V4 (thinking mode), OpenAI GPT-6, Z.AI GLM-5.3, KIMI K3 (always-on)
 **Coding**: KIMI K2.7 Code / K2.7 Code HighSpeed
+**Image Input**: DeepSeek Flash, all OpenAI models, all KIMI models
 
 ---
 

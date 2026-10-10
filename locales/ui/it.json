@@ -53,8 +53,7 @@
       "theme_customization": "Personalizzazione Tema"
     },
     "chat_input_placeholder": "Chiedi all'esperto...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Aggiungi Chat",
@@ -384,6 +383,24 @@
     "attach_help": "File di testo fino a {size} KB. Vengono aggiunti al tuo prossimo messaggio.",
     "attached": "📎 Allegato: {files}",
     "error_too_large": "{name} supera i {size} KB e non è stato allegato.",
-    "error_not_text": "{name} non è un file di testo UTF-8 e non è stato allegato."
+    "error_not_text": "{name} non è un file di testo UTF-8 e non è stato allegato.",
+    "attach_image": "Allega immagine",
+    "attach_image_help": "Immagini (PNG, JPEG, WebP, GIF) fino a {size} MB. Vengono inviate al modello con il tuo prossimo messaggio.",
+    "image_not_supported": "{model} non supporta le immagini.",
+    "attached_images": "🖼️ Immagini: {files}",
+    "error_image_too_large": "{name} supera i {size} MB e non è stata allegata.",
+    "error_not_image": "{name} non è un'immagine valida e non è stata allegata.",
+    "image_unavailable": "non più disponibile",
+    "clear_confirm": "L'intera cronologia chat di questo esperto, comprese le immagini allegate, verrà eliminata.",
+    "clear_button": "Elimina definitivamente",
+    "voice_input": "Input vocale",
+    "voice_help": "Registra un messaggio vocale. Quando ti fermi, viene convertito in testo e inviato automaticamente.",
+    "voice_transcribing": "Trascrizione in corso…",
+    "voice_error": "Trascrizione non riuscita: {error}",
+    "error_audio_too_large": "La registrazione supera i {size} MB e non può essere trascritta.",
+    "voice_model": "Trascrizione: {model}",
+    "voice_key_missing": "L'input vocale richiede una chiave API per {provider} ({model}). Puoi aggiungerla nelle impostazioni.",
+    "error_audio_too_long": "La registrazione supera i {seconds} secondi, il limite di {model}.",
+    "voice_asr_context": "Questo è un messaggio vocale in italiano."
   }
 }

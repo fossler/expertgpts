@@ -53,8 +53,7 @@
       "theme_customization": "主题自定义"
     },
     "chat_input_placeholder": "向专家提问...",
-    "toolbox": "工具箱",
-    "status": "状态"
+    "toolbox": "工具箱"
   },
   "buttons": {
     "add_chat": "添加聊天",
@@ -384,6 +383,24 @@
     "attach_help": "最大 {size} KB 的文本文件，将附加到您的下一条消息。",
     "attached": "📎 已附加：{files}",
     "error_too_large": "{name} 超过 {size} KB，未附加。",
-    "error_not_text": "{name} 不是 UTF-8 文本文件，未附加。"
+    "error_not_text": "{name} 不是 UTF-8 文本文件，未附加。",
+    "attach_image": "附加图片",
+    "attach_image_help": "最大 {size} MB 的图片（PNG、JPEG、WebP、GIF），将随您的下一条消息发送给模型。",
+    "image_not_supported": "{model} 不支持图片。",
+    "attached_images": "🖼️ 图片：{files}",
+    "error_image_too_large": "{name} 超过 {size} MB，未附加。",
+    "error_not_image": "{name} 不是有效的图片，未附加。",
+    "image_unavailable": "已不可用",
+    "clear_confirm": "将删除此专家的全部聊天记录，包括附加的图片。",
+    "clear_button": "永久删除",
+    "voice_input": "语音输入",
+    "voice_help": "录制语音消息。停止后将转换为文本并自动发送。",
+    "voice_transcribing": "正在转写…",
+    "voice_error": "转写失败：{error}",
+    "error_audio_too_large": "录音超过 {size} MB，无法转写。",
+    "voice_model": "转写模型：{model}",
+    "voice_key_missing": "语音输入需要 {provider} 的 API 密钥（{model}）。您可以在设置中添加。",
+    "error_audio_too_long": "录音超过 {seconds} 秒，这是 {model} 的上限。",
+    "voice_asr_context": "这是一条中文语音消息。"
   }
 }

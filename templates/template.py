@@ -9,7 +9,7 @@ import streamlit as st
 from pathlib import Path
 from lib.config.config_manager import get_config_manager
 from lib.config.config_manager import get_llm_metadata
-from lib.llm import LLMClient, TokenManager
+from lib.llm import LLMClient
 from lib.shared.session_state import initialize_shared_session_state
 from lib.i18n import i18n
 from lib.shared.helpers import (
@@ -19,28 +19,19 @@ from lib.shared.helpers import (
     add_error_to_history,
     render_git_branch_footer,
 )
-from lib.storage import load_chat_history, save_chat_history, delete_chat_history
+from lib.storage import load_chat_history, save_chat_history
+from lib.storage.chat_history_manager import assistant_message
 from lib.shared import (
     LLM_PROVIDERS,
     get_provider_display_name,
     get_model_display_name,
     get_provider_avatar,
-    get_provider_links,
-    get_max_tokens,
-    CONTEXT_USAGE_ALERT_THRESHOLD,
-    CONTEXT_USAGE_WARNING_THRESHOLD,
-    CONTEXT_USAGE_SAFE_THRESHOLD,
-    CONTEXT_USAGE_COLORS,
     CONFIG_CACHE_TTL,
 )
-from lib.ui.dialogs import (
-    render_temperature_input,
-    render_thinking_mode_ui,
-    render_model_selection,
-)
 from lib.ui.chat_toolbox import render_chat_toolbox, render_user_message
-from lib.shared.attachments import build_message_content
-from lib.shared.session_state import invalidate_expert_cache
+from lib.shared.attachments import build_message_content, to_api_content
+from lib.shared.constants import supports_images
+from lib.storage.attachment_store import save_image
 from lib.shared.format_ops import read_json
 from lib.shared.helpers import validate_api_key
 from lib.storage import StreamingCache
@@ -172,9 +163,15 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
             )
 
             if not already_displayed and response.strip():
-                # Add to chat history
+                # Add to chat history, attributed to the LLM that produced it
+                origin = read_json(metadata_file) if metadata_file.exists() else None
+                config_provider, config_model, _ = get_llm_metadata(config)
                 st.session_state[messages_key].append(
-                    {"role": "assistant", "content": response}
+                    assistant_message(
+                        response,
+                        (origin or {}).get("provider") or config_provider,
+                        (origin or {}).get("model") or config_model,
+                    )
                 )
 
                 # Save to persistent chat history
@@ -282,9 +279,9 @@ def poll_incomplete_stream(expert_id: str, messages_key: str) -> None:
 
     # Only add to chat history if response is not empty
     if response.strip():
-        # Add assistant response to chat history
+        # Add assistant response, attributed to the LLM that produced it
         st.session_state[messages_key].append(
-            {"role": "assistant", "content": response}
+            assistant_message(response, *cache.get_llm_origin())
         )
 
         # Persist to file
@@ -315,11 +312,12 @@ def render_chat_interface(config: dict, messages_key: str):
         st.markdown(f"*{config['description']}*")
         st.divider()
 
-    # Display chat messages
+    # Display chat messages. Each answer shows the avatar of the provider that
+    # produced it; older messages without that info use the current provider.
     provider, _, _ = get_llm_metadata(config)
     for message in st.session_state[messages_key]:
         if message["role"] == "assistant":
-            avatar = get_provider_avatar(provider)
+            avatar = get_provider_avatar(message.get("provider") or provider)
             with st.chat_message("assistant", avatar=avatar):
                 st.markdown(sanitize_markdown_content(message["content"]))
         else:
@@ -338,14 +336,21 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     # Get provider and model from config metadata
     provider, model, thinking_level = get_llm_metadata(config)
 
-    # Chat input with the toolbox ("Attach file") pinned below it.
-    # The uploader key changes after each sent message to clear attachments.
+    # Chat input with the toolbox (attachments, context usage) pinned below it.
+    # The uploader keys change after each sent message to clear attachments.
     attachments_key = f"attachments_{EXPERT_ID}"
     attachments_generation = st.session_state.get(attachments_key, 0)
     with st.bottom:
         prompt = st.chat_input(i18n.t("home.chat_input_placeholder"))
-        attachments = render_chat_toolbox(f"{attachments_key}_{attachments_generation}")
+        toolbox = render_chat_toolbox(
+            f"{attachments_key}_{attachments_generation}",
+            config,
+            EXPERT_ID,
+            messages_key,
+        )
 
+    # A transcribed voice message is sent like a typed prompt
+    prompt = prompt or toolbox.voice_prompt
     if prompt:
         # Validate API key format with provider-specific validation
         is_valid, error_msg = validate_api_key(api_key, provider=provider)
@@ -353,8 +358,11 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
             st.error(f"❌ {error_msg}")
             return
 
-        # Embed attached files into the message and clear the attachments
-        content = build_message_content(prompt, attachments)
+        # Store images, embed attachments into the message, clear the toolbox
+        image_refs = [
+            (name, save_image(EXPERT_ID, name, data)) for name, data in toolbox.images
+        ]
+        content = build_message_content(prompt, toolbox.attachments, image_refs)
         st.session_state[attachments_key] = attachments_generation + 1
 
         # Add user message to chat history
@@ -378,9 +386,14 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
                 client = get_cached_client(provider=provider, api_key=api_key)
 
-                # Convert messages to format expected by API
+                # Convert messages to format expected by API (images become
+                # image parts, or a text note if the model doesn't support them)
+                images_supported = supports_images(provider, model)
                 api_messages = [
-                    {"role": msg["role"], "content": msg["content"]}
+                    {
+                        "role": msg["role"],
+                        "content": to_api_content(msg["content"], images_supported),
+                    }
                     for msg in st.session_state[messages_key]
                 ]
 
@@ -419,7 +432,7 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 if response.strip():  # Prevent empty responses
                     # Add assistant response to chat history
                     st.session_state[messages_key].append(
-                        {"role": "assistant", "content": response}
+                        assistant_message(response, provider, model)
                     )
 
                     # Persist to file
@@ -435,13 +448,17 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 provider_name = get_provider_display_name(provider)
                 error_msg = i18n.t("errors.network_error", provider_name=provider_name)
                 message_placeholder.error(f"❌ {error_msg}")
-                add_error_to_history(EXPERT_ID, messages_key, error_msg)
+                add_error_to_history(
+                    EXPERT_ID, messages_key, error_msg, provider, model
+                )
             except ValueError as e:
                 error_msg = i18n.t(
                     "errors.api_response_error", error=sanitize_error_message(str(e))
                 )
                 message_placeholder.error(f"❌ {error_msg}")
-                add_error_to_history(EXPERT_ID, messages_key, error_msg)
+                add_error_to_history(
+                    EXPERT_ID, messages_key, error_msg, provider, model
+                )
             except Exception as e:
                 error_msg = i18n.t(
                     "errors.unexpected_error",
@@ -449,162 +466,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     message=sanitize_error_message(str(e)),
                 )
                 message_placeholder.error(f"❌ {error_msg}")
-                add_error_to_history(EXPERT_ID, messages_key, error_msg)
-
-
-def clear_chat_history(messages_key: str):
-    """Clear the chat history for this expert.
-
-    Clears both session state and persistent file storage.
-
-    Args:
-        messages_key: Session state key for this expert's messages
-    """
-    if st.sidebar.button(f"🗑️ {i18n.t('sidebar.clear_chat_history')}"):
-        # Clear from session state
-        st.session_state[messages_key] = []
-
-        # Delete from file
-        delete_chat_history(EXPERT_ID)
-
-        st.rerun()
-
-
-def display_model_settings(config: dict, messages_key: str):
-    """Display editable model settings in the sidebar.
-
-    Args:
-        config: Expert configuration dictionary
-        messages_key: Session state key for this expert's messages
-    """
-    # Get provider and model from config metadata
-    provider, model, thinking_level = get_llm_metadata(config)
-
-    # Get cache version for dynamic widget keys (ensures fresh state after save)
-    cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
-
-    # Display model settings (editable)
-    st.sidebar.markdown(f"### ⚙️ {i18n.t('sidebar.model_settings')}")
-
-    # Model selection (using shared helper)
-    new_model = render_model_selection(
-        provider=provider,
-        current_model=model,
-        widget_key=f"{EXPERT_ID}_model_selector_v{cache_version}",
-        use_sidebar=True,
-    )
-
-    # Thinking Mode Level (using shared helper, with model-specific efforts)
-    new_thinking_level = render_thinking_mode_ui(
-        provider=provider,
-        current_thinking=thinking_level,
-        widget_key=f"{EXPERT_ID}_thinking_selector_v{cache_version}",
-        model=new_model,
-        use_sidebar=True,
-    )
-
-    # Temperature (using shared helper)
-    current_temperature = config.get("temperature", 1.0)
-    new_temperature = render_temperature_input(
-        value=float(current_temperature),
-        provider=provider,
-        use_sidebar=True,
-        widget_key=f"{EXPERT_ID}_temperature_input_v{cache_version}",
-        show_help=False,
-        model=new_model,
-        thinking_level=new_thinking_level,
-    )
-
-    # Display provider links below temperature
-    st.sidebar.markdown(get_provider_links(provider))
-
-    # Save button if any setting changed
-    if (
-        new_model != model
-        or new_thinking_level != thinking_level
-        or new_temperature != float(current_temperature)
-    ):
-        if st.sidebar.button(
-            f"💾 {i18n.t('sidebar.save_settings')}",
-            key=f"{EXPERT_ID}_save_settings_v{cache_version}",
-            type="primary",
-        ):
-            try:
-                config_manager = get_config_manager()
-                config_manager.update_config(
-                    expert_id=EXPERT_ID,
-                    updates={
-                        "model": new_model,
-                        "thinking_level": new_thinking_level,
-                        "temperature": new_temperature,
-                    },
+                add_error_to_history(
+                    EXPERT_ID, messages_key, error_msg, provider, model
                 )
-                # Invalidate cache to force reload (using shared helper)
-                invalidate_expert_cache(EXPERT_ID)
-                st.success("✅ Settings saved successfully!")
-                st.rerun()
-            except Exception as e:
-                st.sidebar.error(
-                    f"❌ Error saving settings: {sanitize_error_message(str(e))}"
-                )
-
-
-def display_context_usage(config: dict, messages_key: str):
-    """Display context length usage in the sidebar.
-
-    Args:
-        config: Expert configuration dictionary
-        messages_key: Session state key for this expert's messages
-    """
-    # Get provider and model from config metadata
-    provider, model, _ = get_llm_metadata(config)
-
-    # Get provider/model-specific max tokens
-    max_tokens = get_max_tokens(provider, model)
-
-    # Calculate usage statistics using TokenManager
-    # Use system prompt with language prefix for accurate token counting
-    raw_system_prompt = config.get("system_prompt", "")
-    system_prompt = i18n.get_system_prompt_with_language(raw_system_prompt)
-    messages = st.session_state.get(messages_key, [])
-
-    try:
-        stats = TokenManager.calculate_usage_statistics(
-            system_prompt=system_prompt, messages=messages, max_tokens=max_tokens
-        )
-    except (ImportError, OSError, ValueError, TypeError) as e:
-        st.sidebar.caption(f"ℹ️ Token counting unavailable: {type(e).__name__}")
-        return
-
-    if "error" in stats:
-        st.sidebar.caption(f"ℹ️ {stats['error']}")
-        return
-
-    # Display context usage in sidebar as a metric card. The severity emoji
-    # (stats["color"]) stays in the label because st.metric cannot color the
-    # value itself; the token count rides along as a neutral delta sub-line.
-    total_tokens_formatted = f"{stats['total_tokens']:,}"
-    max_tokens_formatted = f"{stats['max_tokens']:,}"
-    st.sidebar.metric(
-        label=f"{stats['color']} {i18n.t('sidebar.context_usage')}",
-        value=f"{stats['usage_percent']:.1f}%",
-        delta=i18n.t(
-            "sidebar.total_tokens",
-            total=total_tokens_formatted,
-            max=max_tokens_formatted,
-        ),
-        delta_color="off",
-        border=True,
-    )
-
-    # Show breakdown
-    with st.sidebar.expander(i18n.t("sidebar.see_breakdown")):
-        st.caption(
-            f"📝 {i18n.t('sidebar.system_prompt')}: {stats['system_tokens']:,} tokens"
-        )
-        st.caption(
-            f"💬 {i18n.t('sidebar.chat_messages')}: {stats['messages_tokens']:,} tokens"
-        )
 
 
 def main():
@@ -630,17 +494,6 @@ def main():
         st.warning(f"⚠️ {i18n.t('sidebar.no_api_key_warning', provider=provider_name)}")
         st.info(i18n.t("sidebar.go_to_settings_api_key", provider=provider_name))
         st.stop()
-
-    # Display model settings (at the top of sidebar)
-    display_model_settings(config, messages_key)
-
-    st.sidebar.divider()
-
-    # Clear chat button (in sidebar)
-    clear_chat_history(messages_key)
-
-    # Display context usage in sidebar (at the bottom)
-    display_context_usage(config, messages_key)
 
     # Git branch footer in sidebar (at very bottom)
     render_git_branch_footer()
