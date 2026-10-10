@@ -295,6 +295,7 @@
     "temperature": {
       "fixed_for_openai": "OpenAI模型固定为1.0",
       "openai_warning": "OpenAI模型仅支持温度值1.0",
+      "ignored_with_thinking": "DeepSeek 在思考模式下会忽略温度。将思考设为“none”即可生效。",
       "help_creativity": "控制响应创造性和专注度",
       "recommended_values": "推荐值",
       "use_case_guidelines": "用例指南：",

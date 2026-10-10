@@ -305,6 +305,7 @@
     "temperature": {
       "fixed_for_openai": "Tetap pada 1.0 untuk model OpenAI",
       "openai_warning": "Model OpenAI hanya mendukung nilai suhu 1.0",
+      "ignored_with_thinking": "DeepSeek mengabaikan suhu dalam mode berpikir. Atur mode berpikir ke \"none\" untuk menggunakannya.",
       "help_creativity": "Mengontrol kreativitas dan fokus respons",
       "recommended_values": "Nilai yang direkomendasikan",
       "use_case_guidelines": "Panduan Kasus Penggunaan:",

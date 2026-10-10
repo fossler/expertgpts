@@ -134,12 +134,17 @@ LLM_PROVIDERS = {
 - `reasoning_efforts` / `reasoning_effort_default` (model) — effort levels shown in the UI and the fallback used when a requested level isn't supported
 - `fixed_temperature` (provider or model) — the only temperature the API accepts; a model-level value overrides the provider-level one
 - `fixed_temperature_without_thinking` (model) — fixed temperature used when thinking is disabled (kimi-k2.6)
+- `max_temperature` (provider) — highest temperature the API accepts (Z.AI `1.0`); defaults to `DEFAULT_MAX_TEMPERATURE` (`2.0`)
+- `temperature_ignored_with_thinking` (provider) — the API silently ignores temperature while thinking (DeepSeek); the UI disables the control for thinking levels other than `none`
 - `thinking_always_on` (model) — the model always thinks and the thinking toggle is shown fixed/disabled (kimi-k2.7-code, kimi-k2.7-code-highspeed)
 
 **Helpers** (`lib/shared/constants.py`):
 - `get_default_reasoning_effort(provider, model)` — the model's `reasoning_effort_default` (or first effort), `None` if the model has no efforts
 - `resolve_reasoning_effort(provider, model, thinking_level)` — returns `thinking_level` if supported, otherwise the model's default effort
 - `get_fixed_temperature(provider, model=None, thinking=True)` — the enforced temperature, or `None` if adjustable
+- `get_max_temperature(provider)` — the provider's `max_temperature`, or `DEFAULT_MAX_TEMPERATURE`
+- `is_temperature_ignored(provider, thinking_level)` — `True` if the API ignores temperature for this thinking level
+- `is_thinking_enabled(thinking_level)` — `True` for any level other than empty/`"none"`
 
 ### O(1) Lookup Tables
 
@@ -308,7 +313,11 @@ def _prepare_thinking_param(self, model, thinking_level):
 > `LLMClient._effective_temperature(model, temperature, thinking_level)` resolves
 > the value via `get_fixed_temperature()` and overrides the user-selected
 > temperature on every call path, so the UI disables the temperature control for
-> such models.
+> such models. Adjustable temperatures are clamped to the provider's
+> `max_temperature` (Z.AI `1.0`), and `render_temperature_input()` uses the same
+> bound for its control. DeepSeek (`temperature_ignored_with_thinking`) still
+> sends the value, but the UI disables the control while thinking is on because
+> the API ignores it.
 
 ### Unified Implementation
 

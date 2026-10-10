@@ -328,6 +328,7 @@
     "temperature": {
       "fixed_for_openai": "Fixed at 1.0 for OpenAI models",
       "openai_warning": "OpenAI models only support temperature value of 1.0",
+      "ignored_with_thinking": "DeepSeek ignores temperature in thinking mode. Set thinking to \"none\" to use it.",
       "help_creativity": "Controls response creativity and focus",
       "recommended_values": "Recommended values",
       "use_case_guidelines": "Use Case Guidelines:",

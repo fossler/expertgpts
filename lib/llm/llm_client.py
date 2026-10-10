@@ -17,6 +17,8 @@ from lib.shared.constants import (
     get_provider_base_url,
     get_model_config,
     get_fixed_temperature,
+    get_max_temperature,
+    is_thinking_enabled,
     resolve_reasoning_effort,
     SYSTEM_PROMPT_TEMPLATE,
 )
@@ -126,8 +128,9 @@ class LLMClient:
 
         Most models honor the user-selected temperature, but some (e.g.
         kimi-k3, and every OpenAI model via the provider-wide setting) only
-        accept a single fixed value and reject anything else.
-        This centralizes that override so every code path (streaming,
+        accept a single fixed value and reject anything else, and some
+        providers (Z.AI) cap the range below the UI default of 2.0.
+        This centralizes those overrides so every code path (streaming,
         non-streaming, system-prompt generation) stays consistent.
 
         Args:
@@ -138,11 +141,14 @@ class LLMClient:
 
         Returns:
             The temperature to send: the model's fixed value if it enforces
-            one, otherwise the caller-supplied temperature unchanged.
+            one, otherwise the caller-supplied temperature capped at the
+            provider's maximum.
         """
-        thinking = bool(thinking_level) and thinking_level != "none"
+        thinking = is_thinking_enabled(thinking_level)
         fixed_temp = get_fixed_temperature(self.provider, model, thinking)
-        return fixed_temp if fixed_temp is not None else temperature
+        if fixed_temp is not None:
+            return fixed_temp
+        return min(temperature, get_max_temperature(self.provider))
 
     def chat(
         self,

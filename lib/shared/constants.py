@@ -12,6 +12,9 @@ LLM_PROVIDERS = {
         "base_url": "https://api.deepseek.com",
         "default_model": "deepseek-flash",
         "icon_path": "icons/deepseek_icon_blue.png",
+        # Thinking mode ignores temperature (no error, no effect); it only
+        # applies with thinking disabled.
+        "temperature_ignored_with_thinking": True,
         "models": {
             "deepseek-flash": {
                 "display_name": "DeepSeek V4.1 Flash",
@@ -105,6 +108,8 @@ LLM_PROVIDERS = {
         "base_url": "https://api.z.ai/api/paas/v4",
         "default_model": "glm-5.3",
         "icon_path": "icons/zai_logo.svg",
+        # Z.AI accepts temperature only within [0.0, 1.0].
+        "max_temperature": 1.0,
         "models": {
             "glm-5.3": {
                 "display_name": "GLM-5.3",
@@ -239,6 +244,9 @@ MAX_TOKENS = {
 DEFAULT_LLM_PROVIDER = "deepseek"
 DEFAULT_LLM_MODEL = LLM_PROVIDERS[DEFAULT_LLM_PROVIDER]["default_model"]
 DEFAULT_THINKING_ENABLED = True
+
+# Upper temperature bound for providers without their own "max_temperature"
+DEFAULT_MAX_TEMPERATURE = 2.0
 
 # Chat Attachments ("Attach file" in the chat toolbox)
 # Text files only: their content is embedded into the user message.
@@ -645,6 +653,53 @@ def resolve_reasoning_effort(provider: str, model: str, thinking_level: str):
     if thinking_level in efforts:
         return thinking_level
     return get_default_reasoning_effort(provider, model)
+
+
+def is_thinking_enabled(thinking_level) -> bool:
+    """Whether a thinking level requests thinking (anything but empty/"none").
+
+    Args:
+        thinking_level: Thinking level (e.g., "none", "high"), or None
+
+    Returns:
+        bool: True if thinking is requested
+    """
+    return bool(thinking_level) and thinking_level != "none"
+
+
+def get_max_temperature(provider: str) -> float:
+    """Get the highest temperature a provider accepts.
+
+    Args:
+        provider: Provider key (e.g., "zai")
+
+    Returns:
+        float: The provider's ``max_temperature``, or DEFAULT_MAX_TEMPERATURE
+
+    Raises:
+        ValueError: If provider is not found
+    """
+    return get_provider_config(provider).get("max_temperature", DEFAULT_MAX_TEMPERATURE)
+
+
+def is_temperature_ignored(provider: str, thinking_level) -> bool:
+    """Whether the provider's API ignores temperature for a thinking level.
+
+    DeepSeek accepts temperature in thinking mode but silently ignores it.
+
+    Args:
+        provider: Provider key (e.g., "deepseek")
+        thinking_level: Requested thinking level (e.g., "none", "high")
+
+    Returns:
+        bool: True if the temperature has no effect for this request
+
+    Raises:
+        ValueError: If provider is not found
+    """
+    return get_provider_config(provider).get(
+        "temperature_ignored_with_thinking", False
+    ) and is_thinking_enabled(thinking_level)
 
 
 def get_fixed_temperature(provider: str, model: str = None, thinking: bool = True):

@@ -18,7 +18,7 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
 - **💾 Persistent Chat History** - Conversations saved automatically per expert
 - **📎 File Attachments** - Attach text files (code, Markdown, CSV, JSON, logs, ...) to a message via the toolbox below the chat input
-- **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0) for each expert
+- **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0, range depends on the provider) for each expert
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
 - **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
 

@@ -305,6 +305,7 @@
     "temperature": {
       "fixed_for_openai": "OpenAI modelleri için 1.0 değerinde sabitlendi",
       "openai_warning": "OpenAI modelleri sadece 1.0 sıcaklık değerini destekler",
+      "ignored_with_thinking": "DeepSeek, düşünme modunda sıcaklığı yok sayar. Kullanmak için düşünmeyi \"none\" olarak ayarlayın.",
       "help_creativity": "Yanıt yaratıcılığını ve odağını kontrol eder",
       "recommended_values": "Önerilen değerler",
       "use_case_guidelines": "Kullanım Durumu İlkeleri:",
