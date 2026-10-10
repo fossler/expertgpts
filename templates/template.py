@@ -175,13 +175,13 @@ def check_and_display_cached_responses(config: dict, messages_key: str) -> bool:
         origin_model or config_model,
     )
 
+    # No rerun needed: this runs before the chat is rendered, so the new
+    # messages show in this run (and a toast before a rerun on page load
+    # would be lost)
     if failed:
         st.toast(i18n.t("errors.background_stream_error"), icon="⚠️")
     else:
         st.toast(i18n.t("success.background_stream_complete"), icon="✅")
-
-    # Rerun to display the new messages
-    st.rerun()
     return True
 
 
