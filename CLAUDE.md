@@ -120,7 +120,11 @@ uv run ruff format --check .
 
 ### Administrative Scripts
 ```bash
-# Reset application - regenerates all expert pages from template
+# Regenerate expert pages from templates/template.py (keeps configs and chat history)
+uv run python scripts/regenerate_pages.py
+
+# Reset application - DELETES all configs, pages, chat history and streaming cache,
+# then recreates the example experts
 echo "yes" | uv run python scripts/reset_application.py
 
 # Update translations - syncs English source with all locale files
@@ -139,7 +143,7 @@ The application uses a **template-driven architecture** where expert pages are g
 - **Configuration files**: Each expert has a YAML config in `configs/{expert_id}.yaml`
 - **Page numbering scheme**: Home (1000) → Experts (1001+) → Settings (9999)
 
-**Key insight**: When modifying expert page UI/UX, edit the template and regenerate all pages. When modifying Home/Settings, edit the permanent files directly.
+**Key insight**: When modifying expert page UI/UX, edit the template and regenerate all pages (`uv run python scripts/regenerate_pages.py`). When modifying Home/Settings, edit the permanent files directly.
 
 ### 2. Multi-Provider LLM Abstraction
 
@@ -246,14 +250,16 @@ Clean separation of concerns for 13-language support:
 
 ### Core Application
 - **`app.py`** - Main entry point using `st.navigation()`; handles first-run detection and dynamic page loading
-- **`templates/template.py`** - Master template for all expert pages; edit here then regenerate to update all experts
+- **`templates/template.py`** - Master template for all expert pages; edit here then run `scripts/regenerate_pages.py` to update all experts
 - **`pages/1000_Home.py`** - Home page with expert list and "Add Chat" functionality (permanent file)
 - **`pages/9998_Settings.py`** - Settings page for API keys, themes, language, provider defaults (permanent file)
 - **`pages/9999_Help.py`** - Help page with documentation and links (permanent file)
 
 ### Core Library (`lib/`)
 - **`config_manager.py`** - Expert YAML config operations (load, update, delete, list)
-- **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs
+- **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs; `regenerate_pages()` rewrites existing expert pages from the template (keeps filename, `EXPERT_ID`, `EXPERT_NAME`)
+- **`chat_toolbox.py`** (`lib/ui/`) - Toolbox row below the chat input (`render_chat_toolbox()`, currently "Attach file"); `render_user_message()` shows embedded attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
+- **`attachments.py`** (`lib/shared/`) - Text file attachments (UTF-8, ≤ `ATTACHMENT_MAX_SIZE_KB`, extensions in `ATTACHMENT_FILE_TYPES`); `build_message_content()` embeds them into the user message as `<attachment name="...">` blocks, `split_message_content()` reverses it for display
 - **`llm_client.py`** - Multi-provider LLM client; handles thinking parameter differences via `_prepare_thinking_param()`
 - **`client_pool.py`** - Cached client connections; use `get_cached_client()` instead of direct instantiation
 - **`secrets_manager.py`** - Secure API key management; reads/writes `.streamlit/secrets.toml` with 600 permissions
@@ -286,8 +292,10 @@ Clean separation of concerns for 13-language support:
 
 **To update ALL expert pages** (UI, layout, functionality):
 1. Edit `templates/template.py`
-2. Run `echo "yes" | python3 scripts/reset_application.py`
-3. All expert pages (1001+) are regenerated from the updated template
+2. Run `uv run python scripts/regenerate_pages.py`
+3. All existing expert pages (1001+) are rewritten from the updated template; each keeps its filename, `EXPERT_ID` and `EXPERT_NAME`, so configs and chat history stay attached
+
+Do NOT use `reset_application.py` for this: it deletes all configs, pages and chat history.
 
 **To update Home or Settings pages only**:
 - Edit `pages/1000_Home.py` or `pages/9998_Settings.py` directly (these are permanent files)
@@ -389,8 +397,8 @@ expert_id = generator.generate_page(
 ## Git Workflow Notes
 
 - **Permanent pages**: `pages/1000_Home.py` and `pages/9998_Settings.py` are committed to git
-- **Generated pages**: `pages/1001_*.py` and higher are auto-generated; typically gitignored or regenerated via `setup.py`
-- **Template changes**: After modifying `templates/template.py`, run `reset_application.py` and commit regenerated pages
+- **Generated pages**: `pages/1001_*.py` and higher are auto-generated and gitignored (created by `setup.py` / the UI, refreshed via `regenerate_pages.py`)
+- **Template changes**: Commit `templates/template.py` only; generated pages are gitignored and local. Run `uv run python scripts/regenerate_pages.py` after changing the template, and again on every other machine after pulling a template change
 - **Configurations**: Expert YAML configs in `configs/` are committed to git (contain prompts, not secrets)
 
 ## File Watching During Development
@@ -414,6 +422,10 @@ Requires `watchdog` package (included in development dependencies). Provides ins
   - **K2.6 fix**: "none" now sends `thinking.type=disabled` explicitly; temperature fixed per mode (1.0 thinking / 0.6 without, `fixed_temperature_without_thinking`)
 - UI preselects the model's default effort for unsupported stored levels; expert dialog shows effort selectors for every model with `reasoning_efforts` (incl. GLM-5.2/5.3)
 - Updated README, this file and `docs/`
+- **Chat toolbox**: toolbox row pinned below the chat input (`st.chat_input` + `render_chat_toolbox()` inside `with st.bottom:`); first entry "Attach file" (`lib/ui/chat_toolbox.py`, `lib/shared/attachments.py`, i18n section `chat_toolbox`)
+  - Text files only (UTF-8, ≤ 200 KB each); embedded into the user message as `<attachment name="...">` blocks, so LLM request, token counting and chat history work unchanged; shown as "📎 <filename>" expanders
+- **`scripts/regenerate_pages.py`** (`PageGenerator.regenerate_pages()`): rewrites existing expert pages from the template without touching configs or chat history; replaces `reset_application.py` as the way to apply template changes
+- **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
 
 ### Previous Session (2026-07-18)
 

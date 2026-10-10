@@ -392,10 +392,12 @@ tar czf expert-configs.tar.gz configs/
 tar xzf expert-configs.tar.gz
 ```
 
-**Note**: Imported configs require expert pages to be regenerated:
+**Note**: An expert only appears if its page (`pages/{expert_id}.py`) exists. Expert pages are gitignored, so copy them along with the configs (e.g. add the matching `pages/{expert_id}.py` files to the archive), then bring them in line with your current template:
 ```bash
-python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 ```
+
+Do not run `reset_application.py` after an import: it deletes all configs, including the imported ones.
 
 ## Configuration Security
 

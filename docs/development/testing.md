@@ -104,6 +104,16 @@ pytest -m "not slow"
 pytest -m integration
 ```
 
+### Test Configuration
+
+Pytest is configured in `pyproject.toml` under `[tool.pytest.ini_options]` (there is no `pytest.ini`), so all commands work from the project root:
+
+- `testpaths = ["tests"]` - tests are collected from `tests/`
+- `markers` - registers `unit`, `integration` and `slow`
+- `addopts = "-v --strict-markers --tb=short"` - verbose output by default; an unregistered marker is an error
+
+To add a new marker, register it in the `markers` list in `pyproject.toml` first.
+
 ## Test Suite
 
 ### Current Tests
@@ -341,6 +351,8 @@ def test_fast_unit_test():
 def test_slow_integration_test():
     """Test that takes time to run."""
 ```
+
+Only the markers registered in `pyproject.toml` (`unit`, `integration`, `slow`) are allowed (`--strict-markers`).
 
 Run specific categories:
 ```bash

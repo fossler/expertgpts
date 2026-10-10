@@ -377,5 +377,12 @@
     "doc_not_found": "搵唔到文件",
     "go_home": "返到文件主頁",
     "tip": "提示：用左邊欄嚟瀏覽文件"
+  },
+  "chat_toolbox": {
+    "attach_file": "附加檔案",
+    "attach_help": "最多 {size} KB 嘅文字檔案，會附加喺你下一條訊息度。",
+    "attached": "📎 已附加：{files}",
+    "error_too_large": "{name} 超過 {size} KB，冇附加到。",
+    "error_not_text": "{name} 唔係 UTF-8 文字檔案，冇附加到。"
   }
 }

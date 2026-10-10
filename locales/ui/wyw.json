@@ -377,5 +377,12 @@
     "doc_not_found": "寻勿着文档",
     "go_home": "转去文档首页",
     "tip": "提示：用左边栏浏览文档"
+  },
+  "chat_toolbox": {
+    "attach_file": "附文件",
+    "attach_help": "文本之件，限 {size} KB，附於次言。",
+    "attached": "📎 已附：{files}",
+    "error_too_large": "{name} 逾 {size} KB，未附。",
+    "error_not_text": "{name} 非 UTF-8 文本之件，未附。"
   }
 }

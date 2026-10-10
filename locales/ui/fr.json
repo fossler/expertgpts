@@ -377,5 +377,12 @@
     "doc_not_found": "Documentation non trouvée",
     "go_home": "Aller à l'Accueil",
     "tip": "Astuce : Utilisez la barre latérale gauche pour parcourir la documentation"
+  },
+  "chat_toolbox": {
+    "attach_file": "Joindre un fichier",
+    "attach_help": "Fichiers texte jusqu'à {size} Ko. Ils sont ajoutés à votre prochain message.",
+    "attached": "📎 Joint : {files}",
+    "error_too_large": "{name} dépasse {size} Ko et n'a pas été joint.",
+    "error_not_text": "{name} n'est pas un fichier texte UTF-8 et n'a pas été joint."
   }
 }

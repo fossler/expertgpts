@@ -377,5 +377,12 @@
     "doc_not_found": "Belgeler bulunamadı",
     "go_home": "Ana Sayfaya Git",
     "tip": "İpucu: Belgelere göz atmak için sol kenar çubuğunu kullanın"
+  },
+  "chat_toolbox": {
+    "attach_file": "Dosya ekle",
+    "attach_help": "{size} KB'a kadar metin dosyaları. Bir sonraki mesajınıza eklenir.",
+    "attached": "📎 Eklendi: {files}",
+    "error_too_large": "{name} {size} KB'tan büyük olduğu için eklenmedi.",
+    "error_not_text": "{name} bir UTF-8 metin dosyası olmadığı için eklenmedi."
   }
 }

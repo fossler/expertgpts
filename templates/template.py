@@ -38,6 +38,8 @@ from lib.ui.dialogs import (
     render_thinking_mode_ui,
     render_model_selection,
 )
+from lib.ui.chat_toolbox import render_chat_toolbox, render_user_message
+from lib.shared.attachments import build_message_content
 from lib.shared.session_state import invalidate_expert_cache
 from lib.shared.format_ops import read_json
 from lib.shared.helpers import validate_api_key
@@ -322,7 +324,7 @@ def render_chat_interface(config: dict, messages_key: str):
                 st.markdown(sanitize_markdown_content(message["content"]))
         else:
             with st.chat_message("user"):
-                st.markdown(sanitize_markdown_content(message["content"]))
+                render_user_message(message["content"])
 
 
 def handle_user_input(api_key: str, config: dict, messages_key: str):
@@ -336,22 +338,34 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     # Get provider and model from config metadata
     provider, model, thinking_level = get_llm_metadata(config)
 
-    if prompt := st.chat_input(i18n.t("home.chat_input_placeholder")):
+    # Chat input with the toolbox ("Attach file") pinned below it.
+    # The uploader key changes after each sent message to clear attachments.
+    attachments_key = f"attachments_{EXPERT_ID}"
+    attachments_generation = st.session_state.get(attachments_key, 0)
+    with st.bottom:
+        prompt = st.chat_input(i18n.t("home.chat_input_placeholder"))
+        attachments = render_chat_toolbox(f"{attachments_key}_{attachments_generation}")
+
+    if prompt:
         # Validate API key format with provider-specific validation
         is_valid, error_msg = validate_api_key(api_key, provider=provider)
         if not is_valid:
             st.error(f"❌ {error_msg}")
             return
 
+        # Embed attached files into the message and clear the attachments
+        content = build_message_content(prompt, attachments)
+        st.session_state[attachments_key] = attachments_generation + 1
+
         # Add user message to chat history
-        st.session_state[messages_key].append({"role": "user", "content": prompt})
+        st.session_state[messages_key].append({"role": "user", "content": content})
 
         # Persist to file
         save_chat_history(EXPERT_ID, st.session_state[messages_key])
 
         # Display user message
         with st.chat_message("user"):
-            st.markdown(prompt)
+            render_user_message(content)
 
         # Generate assistant response
         avatar = get_provider_avatar(provider)

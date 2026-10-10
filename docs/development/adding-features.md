@@ -21,7 +21,7 @@ This guide explains how to add new features to ExpertGPTs.
 **When modifying expert page UI**:
 1. Edit `templates/template.py`
 2. Test with one expert
-3. Run `reset_application.py` to regenerate all
+3. Run `uv run python scripts/regenerate_pages.py` to regenerate all (configs and chat history are kept)
 4. Test multiple experts
 
 **When modifying Home/Settings/Help**:
@@ -67,7 +67,7 @@ This guide explains how to add new features to ExpertGPTs.
 
 3. Regenerate all expert pages:
    ```bash
-   echo "yes" | python3 scripts/reset_application.py
+   uv run python scripts/regenerate_pages.py
    ```
 
 4. Test multiple experts
