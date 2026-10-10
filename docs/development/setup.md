@@ -4,7 +4,7 @@ This guide covers setting up a development environment for ExpertGPTs.
 
 ## Prerequisites
 
-- Python 3.12 or higher (`requires-python = ">=3.12"` in `pyproject.toml`)
+- Python 3.14 or higher (`requires-python = ">=3.14"` in `pyproject.toml`)
 - uv (Python package manager)
 - Git (for version control)
 - Code editor or IDE (VSCode, PyCharm, etc.)

@@ -29,7 +29,7 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 | Category | Technology | Purpose |
 |----------|------------|---------|
 | **Framework** | [Streamlit](https://streamlit.io/) 1.65 | Web application framework |
-| **Languages** | Python 3.12+ | Primary development language |
+| **Languages** | Python 3.14+ | Primary development language |
 | **Packaging** | [uv](https://docs.astral.sh/uv/) (`pyproject.toml`, `uv.lock`) | Dependency management |
 
 ## Code Hosting

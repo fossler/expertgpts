@@ -1,16 +1,15 @@
 [project]
 name = "expertgpts"
 version = "0.1.0"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
-    "openai>=2.45.0",
+    "openai>=3.28.0",
     "packaging>=26.3",
     "pillow>=12.3.0",
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
     "streamlit~=1.65.0",
     "tiktoken>=0.13.0",
-    "tomli>=2.4.1",
     "tomli-w>=1.2.0",
 ]
 
@@ -18,7 +17,7 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
-    "ruff>=0.16.10",
+    "ruff>=0.17.0",
     "watchdog>=6.0.0",
 ]
 

@@ -4,7 +4,7 @@ Get ExpertGPTs up and running in 5 minutes!
 
 ## Prerequisites
 
-- Python 3.12+ installed
+- Python 3.14+ installed
 - uv (Python package manager) - [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
 - An API key for at least one provider: DeepSeek ([Get one here](https://platform.deepseek.com/)), OpenAI, Z.AI or KIMI
 

@@ -7,11 +7,7 @@ with consistent error handling and permissions management.
 from pathlib import Path
 from typing import Any, Dict, Optional
 import json
-
-try:
-    import tomllib  # Python 3.11+
-except ImportError:
-    import tomli as tomllib  # Fallback for Python < 3.11
+import tomllib
 
 import yaml
 
