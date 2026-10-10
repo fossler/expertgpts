@@ -106,7 +106,7 @@ For advanced users or automated setup.
 
 **Pricing** (as of 2025):
 - Higher cost but advanced capabilities
-- gpt-5.6-terra offers advanced reasoning capabilities (1.05M context)
+- gpt-6.1-sol (default) offers advanced reasoning capabilities (1.05M context)
 - Check platform for current rates
 
 ### Z.AI API Key

@@ -16,6 +16,7 @@ from lib.shared.constants import (
     get_reasoning_efforts,
     get_model_config,
     get_fixed_temperature,
+    get_default_reasoning_effort,
 )
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
@@ -51,14 +52,15 @@ def render_thinking_mode_ui(
     """
     st_func = st.sidebar if use_sidebar else st
 
-    def _render_effort_selectbox(effort_options):
+    def _render_effort_selectbox(effort_options, default_effort=None):
         """Render a reasoning-effort selectbox and return the chosen effort."""
-        # If current thinking not in options, use first option (default)
-        effort_index = (
-            effort_options.index(current_thinking)
-            if current_thinking in effort_options
-            else 0
-        )
+        # If current thinking not in options, preselect the model's default
+        if current_thinking in effort_options:
+            effort_index = effort_options.index(current_thinking)
+        elif default_effort in effort_options:
+            effort_index = effort_options.index(default_effort)
+        else:
+            effort_index = 0
         return st_func.selectbox(
             label or i18n.t("sidebar.thinking_mode"),
             options=effort_options,
@@ -70,18 +72,31 @@ def render_thinking_mode_ui(
 
     if provider == "openai":
         # Get model-specific reasoning efforts
-        effort_options = (
-            get_reasoning_efforts(provider, model)
-            if model
-            else ["none", "low", "medium", "high"]
-        )
-        return _render_effort_selectbox(effort_options)
+        if model:
+            return _render_effort_selectbox(
+                get_reasoning_efforts(provider, model),
+                get_default_reasoning_effort(provider, model),
+            )
+        return _render_effort_selectbox(["none", "low", "medium", "high"])
     elif provider in ("zai", "kimi"):
-        # Models that expose an adjustable reasoning_effort (GLM-5.2, kimi-k3)
-        # show an effort selector; the rest use the enabled/disabled toggle.
+        # Models that expose an adjustable reasoning_effort (GLM-5.2/5.3,
+        # kimi-k3) show an effort selector; models that always think
+        # (kimi-k2.7-code) show a fixed "enabled"; the rest use the toggle.
         model_config = get_model_config(provider, model) if model else {}
         if model_config and "reasoning_efforts" in model_config:
-            return _render_effort_selectbox(model_config["reasoning_efforts"])
+            return _render_effort_selectbox(
+                model_config["reasoning_efforts"],
+                get_default_reasoning_effort(provider, model),
+            )
+        if model_config.get("thinking_always_on"):
+            st_func.selectbox(
+                label or i18n.t("sidebar.thinking_mode"),
+                options=[i18n.t("sidebar.enabled")],
+                help=help_text,
+                disabled=True,
+                key=widget_key,
+            )
+            return "medium"
 
         thinking_options = [i18n.t("sidebar.disabled"), i18n.t("sidebar.enabled")]
         option_index = 1 if current_thinking and current_thinking != "none" else 0
@@ -178,11 +193,8 @@ def render_temperature_input(
     st_func = st.sidebar if use_sidebar else st
 
     # Determine whether temperature is fixed for this provider/model:
-    # - All OpenAI models only support temperature=1.0
-    # - Some models (e.g. kimi-k3) enforce a fixed value declared in config
-    fixed_temperature = 1.0 if provider == "openai" else None
-    if fixed_temperature is None and provider and model:
-        fixed_temperature = get_fixed_temperature(provider, model)
+    # OpenAI pins it provider-wide; some models (e.g. kimi-k3) declare their own
+    fixed_temperature = get_fixed_temperature(provider, model) if provider else None
 
     if fixed_temperature is not None:
         temperature = st_func.number_input(
@@ -303,7 +315,9 @@ def render_provider_selection(
         current_provider = st.session_state.get("default_provider", "deepseek")
 
     if current_model is None:
-        current_model = st.session_state.get("default_model", "deepseek-v4-flash")
+        current_model = st.session_state.get(
+            "default_model", get_default_model_for_provider(current_provider)
+        )
 
     # Set default thinking level if not provided
     if current_thinking is None:
@@ -375,13 +389,12 @@ def render_provider_selection(
     # Display model info
     model_config = LLM_PROVIDERS[provider]["models"][model]
 
-    # Determine UI type based on provider:
-    # - Reasoning-effort selector (OpenAI, DeepSeek V4, kimi-k3): per-model effort list
-    # - Enabled/Disabled toggle (Z.AI, KIMI K2.x): simple binary
-    uses_reasoning_efforts = (
-        provider in {"openai", "deepseek", "kimi"}
-        and "reasoning_efforts" in model_config
-    )
+    # Determine UI type based on the model:
+    # - Reasoning-effort selector (OpenAI, DeepSeek V4, GLM-5.2/5.3, kimi-k3)
+    # - Fixed "Enabled" (kimi-k2.7-code: always thinks, can't be disabled)
+    # - Enabled/Disabled toggle (older Z.AI models, KIMI K2.6)
+    uses_reasoning_efforts = "reasoning_efforts" in model_config
+    thinking_always_on = model_config.get("thinking_always_on", False)
 
     optional_thinking_providers = {"zai", "kimi"}
     supports_optional_thinking = (
@@ -395,9 +408,7 @@ def render_provider_selection(
             col1, col2 = st.columns(2)
             with col1:
                 effort_options = model_config["reasoning_efforts"]
-                default_effort = model_config.get(
-                    "reasoning_effort_default", effort_options[0]
-                )
+                default_effort = get_default_reasoning_effort(provider, model)
                 if current_thinking in effort_options:
                     effort_index = effort_options.index(current_thinking)
                 else:
@@ -409,6 +420,18 @@ def render_provider_selection(
                     help=thinking_help,
                     key=thinking_key,
                 )
+
+        elif thinking_always_on:
+            col1, col2 = st.columns(2)
+            with col1:
+                st.selectbox(
+                    thinking_label,
+                    options=["Enabled"],
+                    help=thinking_help,
+                    disabled=True,
+                    key=thinking_key,
+                )
+                thinking_level = "medium"
 
         elif supports_optional_thinking:
             col1, col2 = st.columns(2)

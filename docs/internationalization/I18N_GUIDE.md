@@ -159,7 +159,7 @@ else:
 
 [llm]
 provider = "deepseek"
-model = "deepseek-v4-flash"
+model = "deepseek-flash"
 thinking_level = "none"
 
 [language]

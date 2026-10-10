@@ -40,7 +40,7 @@ These defaults apply when:
 
 [llm]
 provider = "deepseek"
-model = "deepseek-v4-flash"
+model = "deepseek-flash"
 temperature = 0.7
 thinking_level = "high"
 
@@ -83,18 +83,22 @@ provider = "deepseek"
 **Valid Values**: Depends on provider
 
 **DeepSeek Models**:
-- `"deepseek-v4-flash"` - Cost-effective, 1M context, dual thinking modes (default)
+- `"deepseek-flash"` - Cost-effective, 1M context, dual thinking modes (default)
 - `"deepseek-v4-pro"` - Premium flagship, 1M context, dual thinking modes
 
 **OpenAI Models**:
+- `"gpt-6.1-sol"` - GPT-6.1 Sol, 1.05M context, always reasons (default)
+- `"gpt-6-astra"` - GPT-6 Astra, top tier, 1.05M context, always reasons
+- `"gpt-6-luna"` - GPT-6 Luna, cost-effective, 1.05M context
 - `"gpt-5.6-sol"` - Frontier flagship, 1.05M context
-- `"gpt-5.6-terra"` - Balanced performance/price, 1.05M context (default)
+- `"gpt-5.6-terra"` - Balanced performance/price, 1.05M context
 - `"gpt-5.6-luna"` - Efficient, high-volume, 1.05M context
 - `"gpt-5.4-mini"` - Cost-effective option, 400K context
 - `"gpt-5.4-nano"` - High-throughput option, 400K context
 
 **Z.AI Models**:
-- `"glm-5.2"` - Flagship model, 1M context, adjustable reasoning effort high/max (default)
+- `"glm-5.3"` - Flagship model, 1M context, always reasons, adjustable reasoning effort low/high/max (default)
+- `"glm-5.2"` - 1M context, adjustable reasoning effort high/max
 - `"glm-5"` - 200K context
 - `"glm-4.7-flash"` - Free model, 200K context
 
@@ -102,7 +106,7 @@ provider = "deepseek"
 ```toml
 [llm]
 provider = "openai"
-model = "gpt-5.6-terra"
+model = "gpt-6.1-sol"
 ```
 
 **Impact**:
@@ -119,6 +123,8 @@ model = "gpt-5.6-terra"
 **Default**: 0.7
 
 **Purpose**: Default temperature for new experts
+
+**Note**: Some models only accept a fixed temperature, and the app overrides this value for them: all OpenAI models use `1.0`; KIMI `kimi-k3` and `kimi-k2.7-code*` use `1.0`; `kimi-k2.6` uses `1.0` with thinking and `0.6` without.
 
 **Quick Reference**:
 - **0.0 - 0.3**: Focused, deterministic (coding, math)
@@ -144,15 +150,18 @@ temperature = 0.5
 #### `thinking_level`
 
 **Type**: String
-**Valid Values**: `"none"`, `"low"`, `"medium"`, `"high"`
-**Default**: `"none"`
+**Valid Values**: Model-dependent: `"none"`, `"low"`, `"medium"`, `"high"`, `"xhigh"`, `"max"`
+**Default**: `"high"` (for the default model `deepseek-flash`)
 
 **Purpose**: Enable/disable reasoning capabilities by default
 
 **Availability**:
-- **OpenAI**: All levels supported
-- **DeepSeek**: Enabled/disabled based on model selection
-- **Z.AI**: Enabled/disabled via extra_body parameter
+- **OpenAI**: `gpt-6.1-sol` / `gpt-6-astra`: low/medium/high/xhigh (always reason, default medium); other models: none/low/medium/high/xhigh (default none)
+- **DeepSeek**: none/high/max (default high) for both models
+- **Z.AI**: GLM-5.3: low/high/max (default max); GLM-5.2: high/max; GLM-5 / GLM-4.7-Flash: enabled/disabled
+- **KIMI**: K3: low/high/max (default max); K2.7 Code: always on; K2.6: enabled/disabled
+
+If the saved level isn't supported by the selected model, the model's default effort is used instead.
 
 **Example**:
 ```toml
@@ -295,8 +304,8 @@ For advanced users or automated setup.
    ```toml
    [llm]
    provider = "openai"
-   model = "gpt-5.6-terra"
-   temperature = 0.5
+   model = "gpt-6.1-sol"
+   temperature = 1.0  # fixed at 1.0 for OpenAI models
    thinking_level = "medium"
 
    [language]
@@ -323,7 +332,7 @@ For advanced users or automated setup.
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-v4-flash"
+model = "deepseek-flash"
 temperature = 0.7
 thinking_level = "none"
 
@@ -333,7 +342,7 @@ code = "en"
 
 **Rationale**:
 - DeepSeek: Most cost-effective provider
-- deepseek-v4-flash: Smaller V4 variant, good quality, 1M context
+- deepseek-flash: DeepSeek V4.1 Flash, good quality, 1M context
 - Temperature 0.7: Balanced for most use cases
 - No reasoning: Faster responses (set to "high" or "max" to enable thinking mode)
 
@@ -346,8 +355,8 @@ code = "en"
 ```toml
 [llm]
 provider = "openai"
-model = "gpt-5.6-terra"
-temperature = 0.5
+model = "gpt-6.1-sol"
+temperature = 1.0
 thinking_level = "medium"
 
 [language]
@@ -356,8 +365,8 @@ code = "en"
 
 **Rationale**:
 - OpenAI: Advanced reasoning capabilities
-- gpt-5.6-terra: Balanced flagship optimized for reasoning tasks
-- Temperature 0.5: Focused but flexible
+- gpt-6.1-sol: Default GPT-6 flagship, always reasons
+- Temperature 1.0: Fixed for all OpenAI models (other values are overridden)
 - Medium thinking: Balanced reasoning
 
 ---
@@ -369,7 +378,7 @@ code = "en"
 ```toml
 [llm]
 provider = "zai"
-model = "glm-5.2"
+model = "glm-5.3"
 temperature = 0.7
 thinking_level = "high"
 
@@ -381,7 +390,7 @@ code = "zh-CN"
 - Z.AI: GLM models optimized for Chinese
 - Simplified Chinese: Primary language
 - Temperature 0.7: Balanced responses
-- No reasoning: Faster responses
+- High reasoning effort: GLM-5.3 always reasons (low/high/max)
 
 ---
 
@@ -392,7 +401,7 @@ code = "zh-CN"
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-v4-flash"
+model = "deepseek-flash"
 temperature = 0.3
 thinking_level = "none"
 
@@ -551,14 +560,14 @@ thinking_level = "none"
 ```toml
 # INVALID
 provider = "deepseek"
-model = "gpt-5.6-terra"  # Wrong! gpt-5.6-terra is OpenAI
+model = "gpt-6.1-sol"  # Wrong! gpt-6.1-sol is OpenAI
 ```
 
 **Solution**: Match provider with correct model:
 ```toml
 # VALID
 provider = "openai"
-model = "gpt-5.6-terra"  # Correct!
+model = "gpt-6.1-sol"  # Correct!
 ```
 
 ### File Permission Errors
@@ -589,16 +598,17 @@ chmod 600 .streamlit/app_defaults.toml
 provider = "deepseek"
 
 # Default model for the provider
-# DeepSeek: "deepseek-v4-flash", "deepseek-v4-pro"
-# OpenAI: "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5.4-nano"
-# Z.AI: "glm-5.2", "glm-5", "glm-4.7-flash"
-model = "deepseek-v4-flash"
+# DeepSeek: "deepseek-flash", "deepseek-v4-pro"
+# OpenAI: "gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5.4-nano"
+# Z.AI: "glm-5.3", "glm-5.2", "glm-5", "glm-4.7-flash"
+# KIMI: "kimi-k3", "kimi-k2.7-code", "kimi-k2.7-code-highspeed", "kimi-k2.6"
+model = "deepseek-flash"
 
 # Default temperature for new experts (0.0 - 2.0)
 temperature = 0.7
 
-# Default thinking level: "none", "low", "medium", "high"
-thinking_level = "none"
+# Default thinking level (model-dependent): "none", "low", "medium", "high", "xhigh", "max"
+thinking_level = "high"
 
 [language]
 # Language code for UI and expert responses

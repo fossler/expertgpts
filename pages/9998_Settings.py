@@ -8,7 +8,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 import streamlit as st
-from lib.config.config_manager import get_config_manager
+from lib.config.config_manager import get_config_manager, get_llm_metadata
 from lib.shared.page_generator import PageGenerator, is_system_page
 from lib.shared.constants import (
     EXPERT_BEHAVIOR_DOCS,
@@ -656,10 +656,7 @@ def render_edit_expert_dialog():
     st.title(f"✏️ Edit Expert: {translated_name}")
 
     # LLM Configuration (Provider, Model, Temperature, Thinking)
-    metadata = expert_config.get("metadata", {})
-    current_provider = metadata.get("provider", "deepseek")
-    current_model = metadata.get("model", "deepseek-v4-flash")
-    current_thinking = metadata.get("thinking_level", "none")
+    current_provider, current_model, current_thinking = get_llm_metadata(expert_config)
     current_temperature = expert_config.get("temperature", 1.0)
 
     provider, model, temperature, thinking_level = render_llm_configuration(
@@ -867,10 +864,7 @@ def render_expert_management_section():
     # Display experts in a table
     for idx, expert in enumerate(experts):
         # Get provider and model info
-        metadata = expert.get("metadata", {})
-        provider = metadata.get("provider", "deepseek")
-        model = metadata.get("model", "deepseek-v4-flash")
-        thinking_level = metadata.get("thinking_level", "none")
+        provider, model, thinking_level = get_llm_metadata(expert)
 
         provider_name = get_provider_display_name(provider)
         model_name = get_model_display_name(provider, model)

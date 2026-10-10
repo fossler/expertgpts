@@ -15,9 +15,9 @@ except ImportError:
 from lib.shared.constants import (
     get_provider_config,
     get_provider_base_url,
-    get_reasoning_efforts,
     get_model_config,
     get_fixed_temperature,
+    resolve_reasoning_effort,
     SYSTEM_PROMPT_TEMPLATE,
 )
 from lib.shared.helpers import sanitize_error_message
@@ -80,78 +80,68 @@ class LLMClient:
             # "none" or any other falsy value: disable thinking explicitly.
             return {"thinking": {"type": "disabled"}}, {}
 
-        # Z.AI: GLM-5.2 supports adjustable reasoning_effort (thinking always on);
-        # older GLM models only support the enabled/disabled toggle.
+        # Z.AI: GLM-5.2/5.3 support adjustable reasoning_effort (thinking always
+        # on); older GLM models only support the enabled/disabled toggle.
         if self.provider == "zai":
             model_config = get_model_config(self.provider, model) or {}
             if "reasoning_efforts" in model_config:
-                efforts = model_config["reasoning_efforts"]
-                effort = (
-                    thinking_level
-                    if thinking_level in efforts
-                    else model_config.get("reasoning_effort_default", efforts[0])
-                )
+                effort = resolve_reasoning_effort(self.provider, model, thinking_level)
                 return {"thinking": {"type": "enabled"}}, {"reasoning_effort": effort}
             # glm-5 / glm-4.7-flash: enabled/disabled toggle
             if not thinking_level or thinking_level == "none":
                 return {"thinking": {"type": "disabled"}}, {}
             return {"thinking": {"type": "enabled"}}, {}
 
-        # KIMI: K3 always reasons via a top-level reasoning_effort field
-        # ("max" is the only supported level today); K2.x uses the
-        # enabled/disabled thinking toggle in extra_body. Handled before the
-        # "none" early-return below so K3 always sends its effort level.
+        # KIMI: K3 always reasons via a top-level reasoning_effort field;
+        # K2.x uses the enabled/disabled thinking toggle in extra_body. The API
+        # thinks by default, so "none" must send type=disabled explicitly,
+        # except for K2.7 Code, which always thinks and rejects type=disabled.
         if self.provider == "kimi":
             model_config = get_model_config(self.provider, model) or {}
             if "reasoning_efforts" in model_config:
-                efforts = model_config["reasoning_efforts"]
-                effort = (
-                    thinking_level
-                    if thinking_level in efforts
-                    else model_config.get("reasoning_effort_default", efforts[0])
-                )
+                effort = resolve_reasoning_effort(self.provider, model, thinking_level)
                 return {}, {"reasoning_effort": effort}
             # K2.x: enabled/disabled toggle
             if not thinking_level or thinking_level == "none":
-                return {}, {}
+                if model_config.get("thinking_always_on"):
+                    return {}, {}
+                return {"thinking": {"type": "disabled"}}, {}
             return {"thinking": {"type": "enabled"}}, {}
 
-        # No thinking specified or explicitly set to none
-        if not thinking_level or thinking_level == "none":
-            return {}, {}
-
-        # OpenAI: use reasoning effort parameter (direct parameter, not in extra_body)
+        # OpenAI: always send reasoning_effort explicitly. If it's omitted, the
+        # API applies its own default and GPT-6 models reason even when "none"
+        # was selected. Unsupported levels (e.g. "none" for gpt-6.1-sol) fall
+        # back to the model's default effort.
         if self.provider == "openai":
-            # Get supported efforts for this specific model
-            supported_efforts = get_reasoning_efforts(self.provider, model)
+            effort = resolve_reasoning_effort(self.provider, model, thinking_level)
+            return {}, {"reasoning_effort": effort}
 
-            # Validate that the thinking_level is supported by this model
-            if thinking_level in supported_efforts:
-                return {}, {"reasoning_effort": thinking_level}
-            else:
-                # Effort not supported by this model, use default (no reasoning_effort param)
-                return {}, {}
-
-        # Other providers: return empty for now
+        # Other providers: no thinking parameter
         return {}, {}
 
-    def _effective_temperature(self, model: str, temperature: float) -> float:
+    def _effective_temperature(
+        self, model: str, temperature: float, thinking_level: str = None
+    ) -> float:
         """Resolve the temperature actually sent to the API for a model.
 
         Most models honor the user-selected temperature, but some (e.g.
-        kimi-k3) only accept a single fixed value and reject anything else.
+        kimi-k3, and every OpenAI model via the provider-wide setting) only
+        accept a single fixed value and reject anything else.
         This centralizes that override so every code path (streaming,
         non-streaming, system-prompt generation) stays consistent.
 
         Args:
             model: Model ID
             temperature: User-selected temperature
+            thinking_level: Requested thinking level (kimi-k2.6 needs a
+                different fixed value with thinking disabled)
 
         Returns:
             The temperature to send: the model's fixed value if it enforces
             one, otherwise the caller-supplied temperature unchanged.
         """
-        fixed_temp = get_fixed_temperature(self.provider, model)
+        thinking = bool(thinking_level) and thinking_level != "none"
+        fixed_temp = get_fixed_temperature(self.provider, model, thinking)
         return fixed_temp if fixed_temp is not None else temperature
 
     def chat(
@@ -182,7 +172,7 @@ class LLMClient:
             model = self.config["default_model"]
 
         # Some models (e.g. kimi-k3) reject any temperature but a fixed value.
-        temperature = self._effective_temperature(model, temperature)
+        temperature = self._effective_temperature(model, temperature, thinking_level)
 
         # Prepare messages with system prompt
         prepared_messages = []
@@ -249,7 +239,7 @@ class LLMClient:
             model = self.config["default_model"]
 
         # Some models (e.g. kimi-k3) reject any temperature but a fixed value.
-        temperature = self._effective_temperature(model, temperature)
+        temperature = self._effective_temperature(model, temperature, thinking_level)
 
         # Prepare messages with system prompt
         prepared_messages = []

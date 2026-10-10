@@ -14,16 +14,18 @@
 provider = "deepseek"
 
 # Default model for the selected provider
-# DeepSeek: deepseek-v4-flash, deepseek-v4-pro
-# OpenAI: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, gpt-5.4-mini, gpt-5.4-nano
-# Z.AI: glm-5.2, glm-5, glm-4.7-flash (free)
-# KIMI: kimi-k3, kimi-k2.6
-model = "deepseek-v4-flash"
+# DeepSeek: deepseek-flash, deepseek-v4-pro
+# OpenAI: gpt-6.1-sol, gpt-6-astra, gpt-6-luna, gpt-5.6-sol, gpt-5.6-terra,
+#         gpt-5.6-luna, gpt-5.4-mini, gpt-5.4-nano
+# Z.AI: glm-5.3, glm-5.2, glm-5, glm-4.7-flash (free)
+# KIMI: kimi-k3, kimi-k2.7-code, kimi-k2.7-code-highspeed, kimi-k2.6
+model = "deepseek-flash"
 
 # Default thinking/reasoning level
-# OpenAI: none, low, medium, high, xhigh
-# Z.AI / KIMI K2.x: enabled, disabled
-# KIMI K3: max (only supported level; always reasons)
+# OpenAI GPT-6.1 Sol / GPT-6 Astra: low, medium, high, xhigh (always reason)
+# OpenAI GPT-6 Luna / GPT-5.x: none, low, medium, high, xhigh
+# Z.AI GLM-5.3: low, high, max | GLM-5.2: high, max | older GLM: enabled, disabled
+# KIMI K3: low, high, max | K2.7 Code: always thinks | K2.6: enabled, disabled
 # DeepSeek: none, high, max
 thinking_level = "high"
 
