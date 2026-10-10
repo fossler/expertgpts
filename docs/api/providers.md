@@ -22,6 +22,8 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 
 **UI effort values**: `none`, `high`, `max`
 
+**Temperature**: adjustable (`0.0`–`2.0`), but **only with thinking disabled** (`none`). In thinking mode the API ignores `temperature` without an error, so the app disables the temperature control and shows a hint while a thinking level is selected (provider flag `temperature_ignored_with_thinking`). See [Thinking Mode](https://api-docs.deepseek.com/guides/thinking_mode).
+
 **API Documentation**: [https://api-docs.deepseek.com/](https://api-docs.deepseek.com/)
 
 **Characteristics**:
@@ -87,6 +89,8 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 - Values: `"enabled"`, `"disabled"`
 - Passed via extra_body
 - `glm-5.3` and `glm-5.2` always send `thinking.type = "enabled"` plus `reasoning_effort` as a direct parameter (`low`/`high`/`max` for GLM-5.3, `high`/`max` for GLM-5.2)
+
+**Temperature**: adjustable within `0.0`–`1.0` (API default `1.0`), with or without thinking. The provider config sets `max_temperature: 1.0`: the UI caps the control at `1.0`, and the client clamps higher stored values (e.g. an expert created with `1.5` under another provider) to `1.0`. See the [Chat Completion API reference](https://docs.z.ai/api-reference/llm/chat-completion).
 
 **API Documentation**: [https://z.ai/](https://z.ai/)
 

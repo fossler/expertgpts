@@ -4,7 +4,7 @@ This guide explains the temperature parameter in ExpertGPTs, helping you choose 
 
 ## What is Temperature?
 
-**Temperature** is a parameter that controls the randomness and creativity of AI responses. It's a value between **0.0 and 2.0** that influences how the language model generates text.
+**Temperature** is a parameter that controls the randomness and creativity of AI responses. It's a value between **0.0 and 2.0** that influences how the language model generates text. Not every model lets you use the full range; see [Temperature Support by Provider](#temperature-support-by-provider).
 
 ### How Temperature Works
 
@@ -26,6 +26,20 @@ This guide explains the temperature parameter in ExpertGPTs, helping you choose 
 | **0.7** | Balanced | Natural conversational tone (default) |
 | **1.2** | Creative | Varied, exploratory responses |
 | **2.0** | Highly Creative | Unpredictable, diverse outputs |
+
+## Temperature Support by Provider
+
+Only some models honor the temperature you set. The app adjusts the control automatically:
+
+| Provider | Models | Temperature | Notes |
+|----------|--------|-------------|-------|
+| **Z.AI** | GLM-5.3, GLM-5.2, GLM-5, GLM-4.7-Flash | **0.0 – 1.0** | Honored with and without thinking. Higher values are capped at 1.0. |
+| **DeepSeek** | V4.1 Flash, V4 Pro | **0.0 – 2.0**, only with thinking `none` | In thinking mode the API ignores temperature, so the control is disabled and a hint is shown. |
+| **OpenAI** | All models | Fixed **1.0** | OpenAI rejects other values while the model reasons. |
+| **KIMI** | K3, K2.7 Code, K2.7 Code HighSpeed | Fixed **1.0** | Fixed by the API. |
+| **KIMI** | K2.6 | Fixed **1.0** with thinking, **0.6** without | One fixed value per mode. |
+
+The ranges below use the full 0.0 – 2.0 scale. For Z.AI, values from 1.3 upwards are not available; use 0.8 – 1.0 for creative tasks instead.
 
 ## Temperature Ranges
 
@@ -224,6 +238,8 @@ Response: Fascinating, speculative scenarios
 | **Analyst** | 0.5 - 0.7 | Balanced analysis |
 
 ## Temperature and Thinking Level
+
+> **Note**: This only applies to models that honor temperature while thinking (currently the Z.AI models). DeepSeek ignores temperature in thinking mode, and OpenAI and KIMI use a fixed value. See [Temperature Support by Provider](#temperature-support-by-provider).
 
 **Thinking Level** (reasoning) interacts with temperature:
 

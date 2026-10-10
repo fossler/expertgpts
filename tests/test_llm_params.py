@@ -4,8 +4,11 @@ import pytest
 
 from lib.llm.llm_client import LLMClient
 from lib.shared.constants import (
+    DEFAULT_MAX_TEMPERATURE,
     LLM_PROVIDERS,
     get_fixed_temperature,
+    get_max_temperature,
+    is_temperature_ignored,
     resolve_reasoning_effort,
 )
 
@@ -78,6 +81,17 @@ class TestOtherProviders:
     def test_deepseek_keeps_user_temperature(self):
         assert _client("deepseek")._effective_temperature("deepseek-flash", 0.2) == 0.2
 
+    def test_deepseek_allows_temperature_above_one(self):
+        client = _client("deepseek")
+        assert client._effective_temperature("deepseek-flash", 1.5) == 1.5
+
+    @pytest.mark.parametrize("model", ["glm-5.3", "glm-4.7-flash"])
+    def test_zai_temperature_capped_at_one(self, model):
+        # Z.AI accepts temperature only within [0.0, 1.0]
+        client = _client("zai")
+        assert client._effective_temperature(model, 1.5) == 1.0
+        assert client._effective_temperature(model, 0.7) == 0.7
+
     @pytest.mark.parametrize("level,expected", [("low", "low"), ("none", "max")])
     def test_glm_5_3_effort(self, level, expected):
         extra, direct = _client("zai")._prepare_thinking_param("glm-5.3", level)
@@ -119,3 +133,21 @@ class TestHelpers:
     def test_fixed_temperature_provider_wide(self):
         assert get_fixed_temperature("openai") == 1.0
         assert get_fixed_temperature("deepseek") is None
+
+    def test_max_temperature(self):
+        assert get_max_temperature("zai") == 1.0
+        assert get_max_temperature("deepseek") == DEFAULT_MAX_TEMPERATURE
+
+    @pytest.mark.parametrize(
+        "provider,level,expected",
+        [
+            ("deepseek", "high", True),
+            ("deepseek", "max", True),
+            ("deepseek", "none", False),
+            ("deepseek", None, False),
+            ("zai", "max", False),
+        ],
+    )
+    def test_temperature_ignored_with_thinking(self, provider, level, expected):
+        # DeepSeek's thinking mode silently ignores temperature
+        assert is_temperature_ignored(provider, level) is expected
