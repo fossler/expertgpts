@@ -320,6 +320,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "openai" },
+    { name = "packaging" },
     { name = "pillow" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
@@ -340,6 +341,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "openai", specifier = ">=2.45.0" },
+    { name = "packaging", specifier = ">=26.3" },
     { name = "pillow", specifier = ">=12.3.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "pyyaml", specifier = ">=6.0.3" },
