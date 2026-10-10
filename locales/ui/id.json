@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "Kunci API {provider} tidak diset",
     "application_will_rerun": "Aplikasi akan sekarang jalankan ulang untuk memuat kunci baru.",
     "found_experts": "{count} agen ahli ditemukan",
-    "refreshing": "Menyegarkan...",
     "recreating_experts": "Membuat ulang ahli contoh...",
-    "restarting_application": "Memulai ulang aplikasi...",
     "expert_updated": "Ahli '{name}' berhasil diperbarui!",
     "expert_deleted": "Ahli '{name}' berhasil dihapus!",
     "theme_saved_reloading": "Tema disimpan! Memuat ulang halaman..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Menavigasi ke ahli baru Anda...",
     "ai_generating": "Generasi bertenaga AI!",
     "first_run": "Jalanan Pertama Terdeteksi",
     "select_llm_tip": "Pilih penyedia LLM dan model Anda terlebih dahulu, lalu isi detail ahli di bawah.",

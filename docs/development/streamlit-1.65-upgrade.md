@@ -64,12 +64,14 @@ None of the breaking changes require code changes in ExpertGPTs.
 
 ### Good fit
 
-1. **Real dialogs via `st.dialog(position=...)` (1.65)**
-   The "Add Chat" and "Edit Expert" dialogs are rendered inline using
-   `show_*_dialog` session state flags (`lib/ui/dialogs.py:render_add_chat_dialog`,
-   `pages/9998_Settings.py:render_edit_expert_dialog`). A real `@st.dialog` — as a modal
-   or a side drawer — would remove that flag handling. Several dialog bugs were fixed in
-   1.62–1.65 (color picker in dialogs, popovers in dialogs, dialogs closing on reruns).
+1. **Real dialogs via `st.dialog(position=...)` (1.65)** — *done (2026-10-10)*
+   "Add Chat", "Edit Expert", the delete confirmation and the reset confirmation are now
+   blocking modal `st.dialog`s (`dismissible=False`, closed only by their own buttons;
+   `lib/ui/dialogs.py:open_add_chat_dialog`,
+   `pages/9998_Settings.py:open_edit_expert_dialog` / `open_delete_expert_dialog` /
+   `open_reset_dialog`). The `show_*_dialog`, `editing_expert_*`, `confirm_delete_*` and
+   `confirm_reset` session state flags and `ensure_dialog_state()` are gone. Success
+   messages use `st.toast`, which survives the closing `st.rerun()` (1.62).
 
 2. **`st.tabs` with query param binding (1.65) and `height` (1.60)**
    Settings emulates tabs with `st.segmented_control` plus `settings_active_tab` in

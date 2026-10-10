@@ -618,8 +618,23 @@ def create_new_expert(
     return expert_id, page_path
 
 
-def render_add_chat_dialog():
-    """Render the Add Chat dialog.
+def open_add_chat_dialog() -> None:
+    """Open the Add Chat dialog as a modal.
+
+    Call it when the "Add Chat" button is clicked. The dialog is blocking
+    (not dismissible): it closes only on cancel or after the expert was
+    created.
+    """
+    st.dialog(
+        i18n.t("buttons.add_chat"),
+        width="large",
+        icon=":material/add:",
+        dismissible=False,
+    )(_render_add_chat_dialog)()
+
+
+def _render_add_chat_dialog() -> None:
+    """Render the body of the Add Chat dialog.
 
     This dialog allows users to create a new Domain Expert Agent by providing:
     - Chat Name
@@ -629,11 +644,6 @@ def render_add_chat_dialog():
 
     The dialog creates a new expert configuration and generates a dedicated page.
     """
-    if not st.session_state.show_add_chat_dialog:
-        return
-
-    st.title(f"➕ {i18n.t('buttons.add_chat')}")
-
     # Check for API keys - at least one provider must have a key
     api_keys = st.session_state.get("api_keys", {})
     api_key_available = any(api_keys.values())
@@ -645,8 +655,15 @@ def render_add_chat_dialog():
         {i18n.t("dialogs.add_chat.api_key_required_desc")}
         """)
 
-        if st.button(f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"):
+        with st.container(horizontal=True):
+            go_to_settings = st.button(
+                f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"
+            )
+            cancel = st.button(i18n.t("buttons.cancel"))
+        if go_to_settings:
             st.switch_page("pages/9998_Settings.py")
+        if cancel:
+            st.rerun()
 
         return
 
@@ -754,12 +771,9 @@ def render_add_chat_dialog():
 
                 # Store the page path for navigation after rerun
                 st.session_state.pending_expert_page = page_path
-                st.session_state.show_add_chat_dialog = False
+                st.toast(i18n.t("success.expert_created", name=chat_name), icon="✅")
 
-                st.success(i18n.t("success.expert_created", name=chat_name))
-                st.info("🔄 " + i18n.t("info.navigating"))
-
-                # Rerun to let Streamlit discover the new page
+                # Rerun closes the dialog and lets Streamlit discover the new page
                 st.rerun()
 
             except ValueError as e:
@@ -774,5 +788,4 @@ def render_add_chat_dialog():
                 st.error(f"❌ {i18n.t('errors.error_creating_expert')}: {str(e)}")
 
         if cancel_button:
-            st.session_state.show_add_chat_dialog = False
             st.rerun()

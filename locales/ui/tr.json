@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "{provider} API anahtarı ayarlanmadı",
     "application_will_rerun": "Uygulama yeni anahtarı yüklemek için şimdi yeniden başlatılacak.",
     "found_experts": "{count} uzman ajan bulundu",
-    "refreshing": "Yenileniyor...",
     "recreating_experts": "Örnek uzmanlar yeniden oluşturuluyor...",
-    "restarting_application": "Uygulama yeniden başlatılıyor...",
     "expert_updated": "Uzman '{name}' başarıyla güncellendi!",
     "expert_deleted": "Uzman '{name}' başarıyla silindi!",
     "theme_saved_reloading": "Tema kaydedildi! Sayfa yeniden yükleniyor..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Yeni uzmanınıza gidiliyor...",
     "ai_generating": "AI destekli oluşturma!",
     "first_run": "İlk Çalışma Algılandı",
     "select_llm_tip": "Önce LLM sağlayıcınızı ve modelinizi seçin, sonra aşağıdaki uzman ayrıntılarını doldurun.",

@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "API-ключ {provider} не установлен",
     "application_will_rerun": "Приложение перезапустится для загрузки нового ключа.",
     "found_experts": "Найдено эксперт-агентов: {count}",
-    "refreshing": "Обновление...",
     "recreating_experts": "Пересоздание примеров экспертов...",
-    "restarting_application": "Перезапуск приложения...",
     "expert_updated": "Эксперт '{name}' успешно обновлён!",
     "expert_deleted": "Эксперт '{name}' успешно удалён!",
     "theme_saved_reloading": "Тема сохранена! Перезагрузка страницы..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Переход к вашему новому эксперту...",
     "ai_generating": "Генерация на базе ИИ!",
     "first_run": "Обнаружен первый запуск",
     "select_llm_tip": "Сначала выберите поставщика и модель LLM, затем заполните данные эксперта ниже.",

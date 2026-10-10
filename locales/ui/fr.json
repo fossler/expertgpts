@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "La clé API {provider} n'est pas définie",
     "application_will_rerun": "L'application va maintenant redémarrer pour charger la nouvelle clé.",
     "found_experts": "{count} agent(s) expert(s) trouvé(s)",
-    "refreshing": "Actualisation...",
     "recreating_experts": "Recréation des experts d'exemple...",
-    "restarting_application": "Redémarrage de l'application...",
     "expert_updated": "Expert '{name}' mis à jour avec succès !",
     "expert_deleted": "Expert '{name}' supprimé avec succès !",
     "theme_saved_reloading": "Thème enregistré ! Rechargement de la page..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Navigation vers votre nouvel expert...",
     "ai_generating": "Génération par IA !",
     "first_run": "Première Exécution Détectée",
     "select_llm_tip": "Sélectionnez d'abord votre fournisseur et modèle LLM, puis remplissez les détails de l'expert ci-dessous.",

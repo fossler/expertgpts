@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "{provider} API金鑰未設定",
     "application_will_rerun": "應用程式將重新執行以載入新金鑰。",
     "found_experts": "找到{count}個智能代理",
-    "refreshing": "重新整理中...",
     "recreating_experts": "重新建立範例智能...",
-    "restarting_application": "重新啟動應用程式...",
     "expert_updated": "智能'{name}'更新成功！",
     "expert_deleted": "智能'{name}'刪除成功！",
     "theme_saved_reloading": "主題已儲存！重新載入頁面中..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "正在導覽至汝之新智能...",
     "ai_generating": "人工智能驅動生成！",
     "first_run": "偵測到首次執行",
     "select_llm_tip": "首先選擇汝之大型語言模型提供商與模型，然後於下方填寫智能詳細資訊。",

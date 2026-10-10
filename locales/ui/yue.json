@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "{provider} API密鑰未設定",
     "application_will_rerun": "應用程式而家會重新行嚟載入新密鑰。",
     "found_experts": "搵到{count}個專家代理",
-    "refreshing": "刷新緊...",
     "recreating_experts": "重新建立範例專家緊...",
-    "restarting_application": "重新啟動應用程式緊...",
     "expert_updated": "專家'{name}'更新成功！",
     "expert_deleted": "專家'{name}'刪除成功！",
     "theme_saved_reloading": "主題已儲存！重新載入頁面入面..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "正緊導覽去你嘅新專家...",
     "ai_generating": "AI 驅動嘅生成！",
     "first_run": "偵測到首次執行",
     "select_llm_tip": "首先揀你嘅大語言模型提供商同模型，然後喺下面填寫專家詳細資料。",
