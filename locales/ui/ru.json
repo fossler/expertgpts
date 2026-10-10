@@ -53,8 +53,7 @@
       "theme_customization": "Настройка Темы"
     },
     "chat_input_placeholder": "Спросите эксперта...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Добавить чат",

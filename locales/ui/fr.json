@@ -53,8 +53,7 @@
       "theme_customization": "Personnalisation du Thème"
     },
     "chat_input_placeholder": "Posez une question à l'expert...",
-    "toolbox": "Boîte à Outils",
-    "status": "Statut"
+    "toolbox": "Boîte à Outils"
   },
   "buttons": {
     "add_chat": "Ajouter Chat",

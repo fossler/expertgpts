@@ -53,8 +53,7 @@
       "theme_customization": "主题自定义"
     },
     "chat_input_placeholder": "詢諸專家...",
-    "toolbox": "工具箱",
-    "status": "狀態"
+    "toolbox": "工具箱"
   },
   "buttons": {
     "add_chat": "新增言談",

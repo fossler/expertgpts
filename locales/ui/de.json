@@ -53,8 +53,7 @@
       "theme_customization": "Design-Anpassung"
     },
     "chat_input_placeholder": "Den Experten fragen...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Chat hinzufügen",

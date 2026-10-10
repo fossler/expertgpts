@@ -53,8 +53,7 @@
       "theme_customization": "Tema Özelleştirme"
     },
     "chat_input_placeholder": "Uzmanına sorun...",
-    "toolbox": "Araç Kutusu",
-    "status": "Durum"
+    "toolbox": "Araç Kutusu"
   },
   "buttons": {
     "add_chat": "Sohbet Ekle",

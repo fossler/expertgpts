@@ -53,8 +53,7 @@
       "theme_customization": "主题自定义"
     },
     "chat_input_placeholder": "向专家提问...",
-    "toolbox": "工具箱",
-    "status": "状态"
+    "toolbox": "工具箱"
   },
   "buttons": {
     "add_chat": "添加聊天",

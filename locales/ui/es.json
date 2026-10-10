@@ -53,8 +53,7 @@
       "theme_customization": "Personalización de Temas"
     },
     "chat_input_placeholder": "Pregúntale al experto...",
-    "toolbox": "Caja de Herramientas",
-    "status": "Estado"
+    "toolbox": "Caja de Herramientas"
   },
   "buttons": {
     "add_chat": "Agregar Chat",

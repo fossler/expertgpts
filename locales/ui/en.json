@@ -53,8 +53,7 @@
       "file_config_desc": "Each expert has its own YAML config for easy management"
     },
     "chat_input_placeholder": "Ask the expert...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Add Chat",

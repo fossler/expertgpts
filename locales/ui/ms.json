@@ -53,8 +53,7 @@
       "theme_customization": "Penyesuaian Tema"
     },
     "chat_input_placeholder": "Tanya pakarnya...",
-    "toolbox": "Toolbox",
-    "status": "Status"
+    "toolbox": "Toolbox"
   },
   "buttons": {
     "add_chat": "Tambah Chat",

@@ -53,8 +53,7 @@
       "theme_customization": "Kustomisasi Tema"
     },
     "chat_input_placeholder": "Tanya ahlinya...",
-    "toolbox": "Kotak Perkakas",
-    "status": "Status"
+    "toolbox": "Kotak Perkakas"
   },
   "buttons": {
     "add_chat": "Tambah Chat",
