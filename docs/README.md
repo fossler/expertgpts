@@ -87,6 +87,7 @@ Reference documentation:
 ### API
 
 - **[Providers](api/providers.md)** - LLM provider APIs
+- **[Model Capabilities](api/model-capabilities.md)** - Text/image/audio/video support per model
 
 ## How to Use This Documentation
 
@@ -117,6 +118,7 @@ Start with → Development Setup → Project Structure → Adding Features
 - **Contribute code**: [Development Setup](development/setup.md)
 - **Fix an issue**: [Troubleshooting](reference/troubleshooting.md)
 - **Diagnose the running app**: [Debug Page](reference/debug-page.md)
+- **Check which models accept images or video**: [Model Capabilities](api/model-capabilities.md)
 
 ## Key Concepts
 

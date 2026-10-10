@@ -6,6 +6,8 @@ This guide provides details about supported LLM providers and their APIs.
 
 ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs.
 
+For the input modalities (text, image, audio, video) of each model, see [Model Capabilities](model-capabilities.md).
+
 ### DeepSeek
 
 **Base URL**: `https://api.deepseek.com`
@@ -123,7 +125,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 **Characteristics**:
 - `kimi-k3`: 1M context window (1,048,576 tokens), always-on reasoning (`low`/`high`/`max`)
 - `kimi-k2.7-code`, `kimi-k2.7-code-highspeed`, `kimi-k2.6`: 256K context window (262,144 tokens)
-- Native multimodal support (images, videos)
+- Native multimodal support (images, videos), see [Model Capabilities](model-capabilities.md)
 - Strong reasoning capabilities
 
 **Get API Key**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
