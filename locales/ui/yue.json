@@ -16,7 +16,7 @@
     "getting_started": "開始使用",
     "getting_started_steps": {
       "step1": "設定你嘅API密鑰",
-      "step1_desc": "喺設定度輸入你嘅DeepSeek API密鑰（會被安全保存）",
+      "step1_desc": "喺設定度輸入DeepSeek、OpenAI、Z.AI或者KIMI嘅API密鑰（會被安全保存）",
       "step2": "揀個專家",
       "step2_desc": "喺導覽選單度揀個專家代理",
       "step3": "開始傾偈",
@@ -49,7 +49,7 @@
       "file_config_desc": "每個專家都有自己嘅 YAML 設定檔，方便管理",
       "multiple_experts": "多專家代理",
       "multi_provider": "多供應商支援",
-      "internationalization_desc": "支援13種語言，自動檢測並使用AI語言回應",
+      "internationalization_desc": "支援{count}種語言，自動檢測並使用AI語言回應",
       "theme_customization": "主題自訂"
     },
     "chat_input_placeholder": "問專家...",

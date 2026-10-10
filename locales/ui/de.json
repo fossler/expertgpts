@@ -16,7 +16,7 @@
     "getting_started": "Erste Schritte",
     "getting_started_steps": {
       "step1": "API-Schlüssel festlegen",
-      "step1_desc": "Geben Sie Ihren DeepSeek-API-Schlüssel in den Einstellungen ein (er wird sicher gespeichert)",
+      "step1_desc": "Geben Sie in den Einstellungen einen API-Schlüssel für DeepSeek, OpenAI, Z.AI oder KIMI ein (er wird sicher gespeichert)",
       "step2": "Experten auswählen",
       "step2_desc": "Wählen Sie einen Experten aus dem Navigationsmenü",
       "step3": "Chatten starten",
@@ -49,7 +49,7 @@
       "file_config_desc": "Jeder Experte hat seine eigene YAML-Konfiguration für einfache Verwaltung",
       "multiple_experts": "Mehrere Experten-Agenten",
       "multi_provider": "Multi-Provider-Unterstützung",
-      "internationalization_desc": "13 Sprachen mit automatischer Erkennung und KI-Sprachantwort",
+      "internationalization_desc": "{count} Sprachen mit automatischer Erkennung und KI-Sprachantwort",
       "theme_customization": "Design-Anpassung"
     },
     "chat_input_placeholder": "Den Experten fragen...",

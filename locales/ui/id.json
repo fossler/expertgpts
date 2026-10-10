@@ -16,7 +16,7 @@
     "getting_started": "Memulai",
     "getting_started_steps": {
       "step1": "Atur Kunci API Anda",
-      "step1_desc": "Masukkan kunci API DeepSeek Anda di Pengaturan (akan disimpan dengan aman)",
+      "step1_desc": "Masukkan kunci API DeepSeek, OpenAI, Z.AI, atau KIMI di Pengaturan (akan disimpan dengan aman)",
       "step2": "Pilih Seorang Ahli",
       "step2_desc": "Pilih agen ahli dari menu navigasi",
       "step3": "Mulai Mengobrol",
@@ -49,7 +49,7 @@
       "file_config_desc": "Setiap ahli memiliki konfigurasi YAML sendiri untuk pengelolaan mudah",
       "multiple_experts": "Banyak Agen Ahli",
       "multi_provider": "Dukungan Multi-Provider",
-      "internationalization_desc": "13 bahasa dengan deteksi otomatis dan respons bahasa AI",
+      "internationalization_desc": "{count} bahasa dengan deteksi otomatis dan respons bahasa AI",
       "theme_customization": "Kustomisasi Tema"
     },
     "chat_input_placeholder": "Tanya ahlinya...",

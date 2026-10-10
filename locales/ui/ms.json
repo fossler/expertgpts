@@ -16,7 +16,7 @@
     "getting_started": "Bermula",
     "getting_started_steps": {
       "step1": "Tetapkan Kunci API Anda",
-      "step1_desc": "Masukkan kunci API DeepSeek anda dalam Tetapan (ia akan disimpan dengan selamat)",
+      "step1_desc": "Masukkan kunci API DeepSeek, OpenAI, Z.AI atau KIMI dalam Tetapan (ia akan disimpan dengan selamat)",
       "step2": "Pilih Seorang Pakar",
       "step2_desc": "Pilih agen pakar dari menu navigasi",
       "step3": "Mula Berbual",
@@ -49,7 +49,7 @@
       "file_config_desc": "Setiap pakar mempunyai konfigurasi YAML sendiri untuk pengurusan mudah",
       "multiple_experts": "Pelbagai Pakar Ejen",
       "multi_provider": "Sokongan Multi-Pembekal",
-      "internationalization_desc": "13 bahasa dengan pengesanan automatik dan respons bahasa AI",
+      "internationalization_desc": "{count} bahasa dengan pengesanan automatik dan respons bahasa AI",
       "theme_customization": "Penyesuaian Tema"
     },
     "chat_input_placeholder": "Tanya pakarnya...",

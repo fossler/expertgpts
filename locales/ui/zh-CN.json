@@ -16,7 +16,7 @@
     "getting_started": "入门指南",
     "getting_started_steps": {
       "step1": "设置您的API密钥",
-      "step1_desc": "在设置中输入您的DeepSeek API密钥（将被安全保存）",
+      "step1_desc": "在设置中输入DeepSeek、OpenAI、Z.AI或KIMI的API密钥（将被安全保存）",
       "step2": "选择专家",
       "step2_desc": "从导航菜单中选择专家代理",
       "step3": "开始聊天",
@@ -49,7 +49,7 @@
       "file_config_desc": "每个专家都有自己的 YAML 配置文件，便于管理",
       "multiple_experts": "多专家代理",
       "multi_provider": "多提供商支持",
-      "internationalization_desc": "支持13种语言，自动检测并使用AI语言回复",
+      "internationalization_desc": "支持{count}种语言，自动检测并使用AI语言回复",
       "theme_customization": "主题自定义"
     },
     "chat_input_placeholder": "向专家提问...",
