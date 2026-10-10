@@ -24,6 +24,10 @@ The Settings page has six tabs:
 5. **Danger Zone** - Download all configurations (ZIP), reset the application
 6. **About** - Version information and acknowledgments
 
+The selected tab is part of the URL, so you can bookmark or share a link to a tab and it
+survives a reload: `/Settings?tab=general`, `api_key`, `default_llm`, `experts`,
+`danger_zone` or `about` (General is the default and has no parameter).
+
 ## Theme Customization
 
 ### Understanding Themes

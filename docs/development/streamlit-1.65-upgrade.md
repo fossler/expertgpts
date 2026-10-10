@@ -73,12 +73,17 @@ None of the breaking changes require code changes in ExpertGPTs.
    `confirm_reset` session state flags and `ensure_dialog_state()` are gone. Success
    messages use `st.toast`, which survives the closing `st.rerun()` (1.62).
 
-2. **`st.tabs` with query param binding (1.65) and `height` (1.60)**
-   Settings emulates tabs with `st.segmented_control` plus `settings_active_tab` in
-   session state. `st.tabs` with query param binding gives deep links such as
-   `/settings?tab=api` and keeps the active tab across reloads.
-   Trade-off: `st.tabs` executes the code of *all* tabs on every rerun, while the
-   segmented control only renders the active section.
+2. **`st.tabs` with query param binding (1.65) and `height` (1.60)** — *done differently (2026-10-10)*
+   Goal: deep links to a Settings section and keeping it across reloads. The built-in
+   `bind="query-params"` (on `st.tabs` and `st.segmented_control`) writes the displayed
+   label to the URL (`?tab=🔑+API-Schlüssel`), even with `format_func`, so links break on a
+   language change. Settings therefore keeps its `st.segmented_control` (only the active
+   section renders) and binds it manually to a stable key via `st.query_params`:
+   `/Settings?tab=api_key` (`SETTINGS_SECTIONS` in `pages/9998_Settings.py`, parameter
+   name `SETTINGS_TAB_PARAM`). Deep links, reloads and browser back/forward work; the
+   default section has no parameter, unknown values fall back to it. The
+   `settings_active_tab` session state is gone. "Go to Settings" in the Add Chat dialog
+   opens the API Key section.
 
 3. **`required` and client-side validation for `st.text_input` (1.62 / 1.65)**
    Mandatory fields in the add/edit expert forms (name, description) could be validated

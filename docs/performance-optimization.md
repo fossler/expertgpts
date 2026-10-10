@@ -540,6 +540,10 @@ elif tabs.index(active_tab) == 1:  # Repeated index() call!
 
 Calculate index once:
 
+> **Update (2026-10-10):** superseded. The sections now live in a `SETTINGS_SECTIONS`
+> dict (URL key → icon, label, renderer) and the active one is rendered with a single
+> lookup (`SETTINGS_SECTIONS[section][2]()`), bound to `?tab=<key>` in the URL.
+
 ```python
 # Optimized Code (CALCULATE ONCE) - IMPLEMENTED
 active_tab_index = tabs.index(active_tab)

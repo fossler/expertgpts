@@ -18,6 +18,7 @@ from lib.shared.constants import (
     get_provider_links,
     get_model_display_name,
     get_default_model_for_provider,
+    SETTINGS_TAB_PARAM,
 )
 from lib.ui import create_new_expert, open_add_chat_dialog, render_llm_configuration
 from lib.ui.dialogs import render_thinking_mode_ui, render_model_selection
@@ -43,10 +44,6 @@ def initialize_session_state():
     """Initialize session state variables."""
     # Initialize shared session state (API key, navigation, etc.)
     initialize_shared_session_state()
-
-    # Initialize active tab state
-    if "settings_active_tab" not in st.session_state:
-        st.session_state.settings_active_tab = 0  # Default to first tab (API Key)
 
     # Handle navigation to newly created expert (after rerun)
     handle_pending_navigation()
@@ -1204,6 +1201,36 @@ def render_about_section():
     )
 
 
+# Settings sections in display order: URL key -> (icon, i18n key, renderer).
+# The URL key (?tab=<key>) is language independent, unlike the labels.
+SETTINGS_SECTIONS = {
+    "general": ("🎨", "settings.sections.general", render_general_settings_section),
+    "api_key": ("🔑", "settings.sections.api_key", render_api_key_section),
+    "default_llm": (
+        "⚙️",
+        "settings.sections.default_llm",
+        render_default_llm_settings_section,
+    ),
+    "experts": (
+        "🤖",
+        "settings.sections.expert_management",
+        render_expert_management_section,
+    ),
+    "danger_zone": ("⚠️", "settings.sections.danger_zone", render_danger_zone_section),
+    "about": ("ℹ️", "settings.sections.about", render_about_section),
+}
+DEFAULT_SECTION = "general"
+
+
+def _store_section_in_url() -> None:
+    """Write the selected section to the URL (removed for the default section)."""
+    section = st.session_state.settings_section
+    if section == DEFAULT_SECTION:
+        st.query_params.pop(SETTINGS_TAB_PARAM, None)
+    else:
+        st.query_params[SETTINGS_TAB_PARAM] = section
+
+
 def main():
     """Main settings page entry point."""
     initialize_session_state()
@@ -1212,41 +1239,28 @@ def main():
 
     st.title(f"⚙️ {i18n.t('settings.title')}")
 
-    # Tab-based navigation for different settings sections (stateful)
-    tabs = [
-        f"🎨 {i18n.t('settings.sections.general')}",
-        f"🔑 {i18n.t('settings.sections.api_key')}",
-        f"⚙️ {i18n.t('settings.sections.default_llm')}",
-        f"🤖 {i18n.t('settings.sections.expert_management')}",
-        f"⚠️ {i18n.t('settings.sections.danger_zone')}",
-        f"ℹ️ {i18n.t('settings.sections.about')}",
-    ]
-    active_tab = st.segmented_control(
+    # The URL selects the section (?tab=api_key): deep links, reloads and
+    # browser back/forward. Unknown values fall back to the default section.
+    section = st.query_params.get(SETTINGS_TAB_PARAM, DEFAULT_SECTION)
+    if section not in SETTINGS_SECTIONS:
+        st.query_params.pop(SETTINGS_TAB_PARAM, None)
+        section = DEFAULT_SECTION
+    st.session_state.settings_section = section
+
+    section = st.segmented_control(
         "Settings Sections",
-        options=tabs,
-        default=tabs[st.session_state.settings_active_tab],
+        options=list(SETTINGS_SECTIONS),
+        format_func=lambda key: (
+            f"{SETTINGS_SECTIONS[key][0]} {i18n.t(SETTINGS_SECTIONS[key][1])}"
+        ),
         label_visibility="collapsed",
-        key="settings_tabs",
+        key="settings_section",
+        on_change=_store_section_in_url,
         required=True,
     )
 
-    # Update session state with the current tab
-    active_tab_index = tabs.index(active_tab)
-    st.session_state.settings_active_tab = active_tab_index
-
-    # Render the appropriate section based on active tab
-    if active_tab_index == 0:
-        render_general_settings_section()
-    elif active_tab_index == 1:
-        render_api_key_section()
-    elif active_tab_index == 2:
-        render_default_llm_settings_section()
-    elif active_tab_index == 3:
-        render_expert_management_section()
-    elif active_tab_index == 4:
-        render_danger_zone_section()
-    elif active_tab_index == 5:
-        render_about_section()
+    # Render only the active section
+    SETTINGS_SECTIONS[section][2]()
 
     # Footer
     st.divider()

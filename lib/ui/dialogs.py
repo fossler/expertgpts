@@ -21,6 +21,7 @@ from lib.shared.constants import (
     is_temperature_ignored,
     is_thinking_enabled,
     get_default_reasoning_effort,
+    SETTINGS_TAB_PARAM,
 )
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.page_generator import PageGenerator
@@ -661,7 +662,9 @@ def _render_add_chat_dialog() -> None:
             )
             cancel = st.button(i18n.t("buttons.cancel"))
         if go_to_settings:
-            st.switch_page("pages/9998_Settings.py")
+            st.switch_page(
+                "pages/9998_Settings.py", query_params={SETTINGS_TAB_PARAM: "api_key"}
+            )
         if cancel:
             st.rerun()
 

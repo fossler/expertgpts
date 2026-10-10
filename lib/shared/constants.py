@@ -284,6 +284,9 @@ DEEPSEEK_MAX_CONTEXT_TOKENS = 1000000
 # Example Experts Configuration
 EXAMPLE_EXPERTS_COUNT = 9  # Number of default/example experts created during setup
 
+# Settings page: query parameter that selects the section (e.g. ?tab=api_key)
+SETTINGS_TAB_PARAM = "tab"
+
 # Context Usage Thresholds (percentages)
 CONTEXT_USAGE_SAFE_THRESHOLD = 50
 CONTEXT_USAGE_WARNING_THRESHOLD = 75
