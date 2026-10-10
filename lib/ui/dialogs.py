@@ -371,7 +371,7 @@ def render_provider_selection(
         model_key = "expert_model_selector"
         thinking_key = "expert_thinking_slider"
 
-    st.markdown(f"### 🤖 {i18n.t('dialogs.llm_config.title')}")
+    st.subheader(i18n.t("dialogs.llm_config.title"), icon=":material/memory:")
 
     # Provider selection
     provider_options = list(LLM_PROVIDERS.keys())
@@ -706,7 +706,10 @@ def _render_add_chat_dialog() -> None:
         st.divider()
 
         # Expert Behavior (Advanced) - The most important field!
-        st.markdown(f"### 🧠 {i18n.t('dialogs.add_chat.expert_behavior_title')}")
+        st.subheader(
+            i18n.t("dialogs.add_chat.expert_behavior_title"),
+            icon=":material/psychology_alt:",
+        )
         st.caption(f"💡 {i18n.t('info.ai_powered_tip')}")
 
         custom_system_prompt = st.text_area(

@@ -224,7 +224,10 @@ def main():
     if "selected_doc" not in st.session_state:
         st.session_state.selected_doc = "README.md"
 
-    st.title(f"📚 {i18n.t('help.title', default='Help & Documentation')}")
+    st.title(
+        i18n.t("help.title", default="Help & Documentation"),
+        icon=":material/menu_book:",
+    )
 
     # Two-column layout
     col1, col2 = st.columns([1, 3])
