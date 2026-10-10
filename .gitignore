@@ -41,6 +41,9 @@ env/
 .streamlit/app_defaults.toml
 .streamlit/config.toml
 
+# Caddy acme-dns credentials (only the .example is committed)
+deploy/caddy/acmedns.json
+
 # Testing
 .pytest_cache/
 htmlcov/

@@ -1,0 +1,47 @@
+# Caddy reverse proxy with TLS for ExpertGPTs.
+#
+# Caddy terminates HTTPS for the domain and forwards to Streamlit (including
+# its websocket). Install as /etc/caddy/Caddyfile and set the environment
+# variables for the Caddy service:
+#
+#   EXPERTGPTS_DOMAIN    public name of the app, e.g. chat.example.com (required)
+#   EXPERTGPTS_UPSTREAM  address of Streamlit (default: 127.0.0.1:8501)
+#
+# Setup and certificate options: docs/configuration/tls.md
+{
+	# Contact address for certificate expiry notices (optional)
+	# email admin@example.com
+}
+
+{$EXPERTGPTS_DOMAIN} {
+	# Certificate. Without a tls block, Caddy gets a Let's Encrypt certificate
+	# through the HTTP challenge; the domain must then be reachable from the
+	# internet on ports 80 and 443. For a name that only exists in a local
+	# network, enable ONE of the following blocks instead.
+
+	# DNS challenge with a plugin for your DNS provider (e.g. caddy-dns/cloudflare):
+	# tls {
+	# 	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	# }
+
+	# DNS challenge through acme-dns, for DNS providers without a plugin
+	# (plugin caddy-dns/acmedns, one-time CNAME for _acme-challenge.<domain>):
+	# tls {
+	# 	dns acmedns /etc/caddy/acmedns.json
+	# 	# Check the challenge record against public resolvers, in case the
+	# 	# local DNS overrides the domain
+	# 	resolvers 1.1.1.1 9.9.9.9
+	# }
+
+	# Caddy's own local CA (no public domain needed; every client has to
+	# trust Caddy's root certificate once):
+	# tls internal
+
+	# Login (recommended): ExpertGPTs has no login of its own, and everyone who
+	# reaches it can use the stored API keys. Hash: caddy hash-password
+	# basic_auth {
+	# 	<user> <hash>
+	# }
+
+	reverse_proxy {$EXPERTGPTS_UPSTREAM:127.0.0.1:8501}
+}
