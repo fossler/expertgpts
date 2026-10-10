@@ -362,11 +362,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                     for msg in st.session_state[messages_key]
                 ]
 
-                # Stream response with provider/model-specific settings
-                # OpenAI models only support temperature=1.0
+                # Fixed temperatures (OpenAI, some KIMI models) and provider
+                # limits are applied by LLMClient._effective_temperature()
                 api_temperature = config.get("temperature", 1.0)
-                if provider == "openai":
-                    api_temperature = 1.0
 
                 # Get system prompt with language prefix
                 # This ensures AI responds in the user's preferred language
