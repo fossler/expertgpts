@@ -38,10 +38,13 @@ from lib.shared.constants import (
     IMAGE_MAX_SIZE_MB,
     LLM_PROVIDERS,
     get_fixed_temperature,
+    get_max_temperature,
     get_max_tokens,
     get_model_config,
     get_model_display_name,
     get_provider_display_name,
+    is_temperature_ignored,
+    is_thinking_enabled,
     resolve_reasoning_effort,
     supports_images,
 )
@@ -269,8 +272,9 @@ def _render_model_settings(config: dict, expert_id: str) -> None:
 
     Shows a dropdown with all models of providers that have an API key and,
     next to it, the thinking mode and temperature where the model allows
-    them (fixed temperatures are hidden). Selecting a model of another
-    provider switches the expert's provider.
+    them (fixed temperatures are hidden, temperatures the provider ignores
+    while thinking are disabled). Selecting a model of another provider
+    switches the expert's provider.
 
     Args:
         config: Expert configuration dictionary
@@ -302,18 +306,35 @@ def _render_model_settings(config: dict, expert_id: str) -> None:
             expert_id=expert_id,
         )
         new_temperature = temperature
-        if get_fixed_temperature(new_provider, new_model) is None:
-            st.markdown(":material/device_thermostat:", width="content")
+        thinking = is_thinking_enabled(new_thinking)
+        if get_fixed_temperature(new_provider, new_model, thinking) is None:
+            # Z.AI caps the range at 1.0; DeepSeek ignores temperature while
+            # thinking. The cap is part of the key so a value above it from
+            # the previous provider doesn't stick in the widget.
+            max_temperature = get_max_temperature(new_provider)
+            ignored = is_temperature_ignored(new_provider, new_thinking)
+            new_temperature = min(temperature, max_temperature)
+            # The hint sits on the icon: a collapsed label hides the input's help
+            st.markdown(
+                ":material/device_thermostat:",
+                width="content",
+                help=(
+                    i18n.t("dialogs.temperature.ignored_with_thinking")
+                    if ignored
+                    else None
+                ),
+            )
             new_temperature = st.number_input(
                 i18n.t("forms.temperature"),
                 min_value=0.0,
-                max_value=2.0,
-                value=temperature,
+                max_value=max_temperature,
+                value=new_temperature,
                 step=0.1,
                 format="%.1f",
+                disabled=ignored,
                 label_visibility="collapsed",
                 width=120,
-                key=f"{expert_id}_toolbox_temperature_v{version}",
+                key=f"{expert_id}_toolbox_temperature_{max_temperature}_v{version}",
                 on_change=_mark_model_settings_changed,
                 args=(expert_id,),
             )

@@ -9,6 +9,7 @@ from pathlib import Path
 from lib.config.config_manager import get_config_manager
 from lib.shared.constants import (
     get_expert_behavior_docs,
+    DEFAULT_MAX_TEMPERATURE,
     LLM_PROVIDERS,
     get_provider_display_name,
     get_model_display_name,
@@ -16,6 +17,9 @@ from lib.shared.constants import (
     get_reasoning_efforts,
     get_model_config,
     get_fixed_temperature,
+    get_max_temperature,
+    is_temperature_ignored,
+    is_thinking_enabled,
     get_default_reasoning_effort,
 )
 from lib.config.app_defaults_manager import get_llm_defaults
@@ -99,7 +103,7 @@ def render_thinking_mode_ui(
             return "medium"
 
         thinking_options = [i18n.t("sidebar.disabled"), i18n.t("sidebar.enabled")]
-        option_index = 1 if current_thinking and current_thinking != "none" else 0
+        option_index = 1 if is_thinking_enabled(current_thinking) else 0
         selected_option = st_func.selectbox(
             label or i18n.t("sidebar.thinking_mode"),
             options=thinking_options,
@@ -176,6 +180,7 @@ def render_temperature_input(
     widget_key: str = None,
     show_help: bool = True,
     model: str = None,
+    thinking_level: str = None,
 ) -> float:
     """Render temperature input field.
 
@@ -186,6 +191,8 @@ def render_temperature_input(
         widget_key: Unique widget key
         show_help: If True, show help expander
         model: Model ID (used to detect models with a fixed temperature)
+        thinking_level: Selected thinking level (fixed temperatures can depend
+            on it, and DeepSeek ignores temperature while thinking)
 
     Returns:
         float: Temperature value from user input
@@ -194,7 +201,11 @@ def render_temperature_input(
 
     # Determine whether temperature is fixed for this provider/model:
     # OpenAI pins it provider-wide; some models (e.g. kimi-k3) declare their own
-    fixed_temperature = get_fixed_temperature(provider, model) if provider else None
+    fixed_temperature = (
+        get_fixed_temperature(provider, model, is_thinking_enabled(thinking_level))
+        if provider
+        else None
+    )
 
     if fixed_temperature is not None:
         temperature = st_func.number_input(
@@ -215,19 +226,28 @@ def render_temperature_input(
         if provider == "openai" and show_help:
             st.caption(f"⚠️ {i18n.t('dialogs.temperature.openai_warning')}")
     else:
+        # Z.AI caps the range at 1.0; DeepSeek ignores temperature while thinking
+        max_temperature = (
+            get_max_temperature(provider) if provider else DEFAULT_MAX_TEMPERATURE
+        )
+        ignored = bool(provider) and is_temperature_ignored(provider, thinking_level)
         temperature = st_func.number_input(
             i18n.t("forms.temperature"),
             min_value=0.0,
-            max_value=2.0,
-            value=value,
+            max_value=max_temperature,
+            value=min(value, max_temperature),
             step=0.1,
             help=i18n.t("dialogs.temperature.help_creativity") if show_help else None,
+            disabled=ignored,
             format="%.1f",
             key=widget_key,
         )
+        if ignored:
+            st_func.caption(f"⚠️ {i18n.t('dialogs.temperature.ignored_with_thinking')}")
 
-        # Add expander with detailed temperature guidance (only for non-OpenAI)
-        if show_help:
+        # Add expander with detailed temperature guidance (only for non-OpenAI).
+        # Its values go up to 1.5, so skip it for providers capped lower.
+        if show_help and not ignored and max_temperature >= DEFAULT_MAX_TEMPERATURE:
             with (st.sidebar if use_sidebar else st).expander(
                 f"📖 {i18n.t('dialogs.temperature.recommended_values')}", expanded=False
             ):
@@ -282,7 +302,10 @@ def render_llm_configuration(
     )
 
     temperature = render_temperature_input(
-        value=current_temperature, provider=provider, model=model
+        value=current_temperature,
+        provider=provider,
+        model=model,
+        thinking_level=thinking_level,
     )
 
     return provider, model, temperature, thinking_level
@@ -437,9 +460,7 @@ def render_provider_selection(
             col1, col2 = st.columns(2)
             with col1:
                 thinking_options = ["Disabled", "Enabled"]
-                option_index = (
-                    1 if current_thinking and current_thinking != "none" else 0
-                )
+                option_index = 1 if is_thinking_enabled(current_thinking) else 0
                 selected_option = st.selectbox(
                     thinking_label,
                     options=thinking_options,

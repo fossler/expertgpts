@@ -6,6 +6,8 @@ This guide provides details about supported LLM providers and their APIs.
 
 ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs.
 
+For the input modalities (text, image, audio, video) of each model, see [Model Capabilities](model-capabilities.md).
+
 ### DeepSeek
 
 **Base URL**: `https://api.deepseek.com`
@@ -21,6 +23,8 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 - `thinking.type = "disabled"` (via `extra_body`) — used only to turn thinking off; the API defaults to enabled
 
 **UI effort values**: `none`, `high`, `max`
+
+**Temperature**: adjustable (`0.0`–`2.0`), but **only with thinking disabled** (`none`). In thinking mode the API ignores `temperature` without an error, so the app disables the temperature control and shows a hint while a thinking level is selected (provider flag `temperature_ignored_with_thinking`). See [Thinking Mode](https://api-docs.deepseek.com/guides/thinking_mode).
 
 **API Documentation**: [https://api-docs.deepseek.com/](https://api-docs.deepseek.com/)
 
@@ -88,6 +92,8 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 - Passed via extra_body
 - `glm-5.3` and `glm-5.2` always send `thinking.type = "enabled"` plus `reasoning_effort` as a direct parameter (`low`/`high`/`max` for GLM-5.3, `high`/`max` for GLM-5.2)
 
+**Temperature**: adjustable within `0.0`–`1.0` (API default `1.0`), with or without thinking. The provider config sets `max_temperature: 1.0`: the UI caps the control at `1.0`, and the client clamps higher stored values (e.g. an expert created with `1.5` under another provider) to `1.0`. See the [Chat Completion API reference](https://docs.z.ai/api-reference/llm/chat-completion).
+
 **API Documentation**: [https://z.ai/](https://z.ai/)
 
 **Characteristics**:
@@ -123,7 +129,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 **Characteristics**:
 - `kimi-k3`: 1M context window (1,048,576 tokens), always-on reasoning (`low`/`high`/`max`)
 - `kimi-k2.7-code`, `kimi-k2.7-code-highspeed`, `kimi-k2.6`: 256K context window (262,144 tokens)
-- Native multimodal support (images, videos); the app sends images only
+- Native multimodal support (images, videos), see [Model Capabilities](model-capabilities.md); the app sends images only
 - Strong reasoning capabilities
 
 **Get API Key**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
