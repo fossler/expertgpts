@@ -166,11 +166,11 @@ python3 scripts/update_translations.py
 
 ### Template changes not appearing
 
-**Problem**: Modified template but expert pages unchanged
+**Problem**: Modified template (or pulled a template change) but expert pages unchanged
 
-**Solution**:
+**Solution**: Regenerate the expert pages (configs and chat history are kept):
 ```bash
-echo "yes" | python3 scripts/reset_application.py
+uv run python scripts/regenerate_pages.py
 ```
 
 ### Tests failing

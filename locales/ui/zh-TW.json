@@ -377,5 +377,12 @@
     "doc_not_found": "找不到文件",
     "go_home": "回到文件首頁",
     "tip": "提示：使用左側邊欄瀏覽文件"
+  },
+  "chat_toolbox": {
+    "attach_file": "附加檔案",
+    "attach_help": "最大 {size} KB 的文字檔案，將附加到您的下一則訊息。",
+    "attached": "📎 已附加：{files}",
+    "error_too_large": "{name} 超過 {size} KB，未附加。",
+    "error_not_text": "{name} 不是 UTF-8 文字檔案，未附加。"
   }
 }

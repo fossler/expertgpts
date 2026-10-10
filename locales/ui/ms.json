@@ -377,5 +377,12 @@
     "doc_not_found": "Dokumentasi tidak ditemui",
     "go_home": "Ke Laman Utama",
     "tip": "Tip: Gunakan sidebar di sebelah kiri untuk melayari dokumentasi"
+  },
+  "chat_toolbox": {
+    "attach_file": "Lampirkan fail",
+    "attach_help": "Fail teks sehingga {size} KB. Fail ditambah pada mesej anda yang seterusnya.",
+    "attached": "📎 Dilampirkan: {files}",
+    "error_too_large": "{name} melebihi {size} KB dan tidak dilampirkan.",
+    "error_not_text": "{name} bukan fail teks UTF-8 dan tidak dilampirkan."
   }
 }

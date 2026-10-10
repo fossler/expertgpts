@@ -56,6 +56,24 @@ Click on any expert in the sidebar to load their page. You'll see:
 2. Press **Enter** or click the send button
 3. The expert responds, maintaining conversation context
 
+### Attaching Files
+
+Below the chat input is a toolbox row. Use **📎 Attach file** to add text files to your next message:
+
+1. Click **Attach file** and choose one or more files in the popover
+2. The toolbox lists the attached files ("📎 Attached: ...")
+3. Type your prompt and send it; the files are sent together with the message
+
+**Supported files:**
+- Text files only (UTF-8), up to **200 KB** each
+- Common text and code formats such as `.txt`, `.md`, `.csv`, `.json`, `.yaml`, `.xml`, `.log`, `.html`, `.py`, `.js`, `.sql` and more
+- Files that are too large or not UTF-8 text are reported in the toolbox and skipped
+
+**Good to know:**
+- Each attachment appears in your message as a collapsible "📎 <filename>" section, also after reloading the page
+- The file content becomes part of your message, so it counts toward the model's context and the chat history size limit
+- Attachments are cleared after the message is sent; attach them again for later messages if needed (the expert still sees earlier attachments as part of the conversation)
+
 ### Conversation Context
 
 **What is context?**

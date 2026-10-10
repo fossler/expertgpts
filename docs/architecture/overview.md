@@ -81,8 +81,10 @@ expertgpts/
 │   │   ├── chat_history_manager.py # Chat history
 │   │   └── streaming_cache.py      # Response caching
 │   ├── ui/                        # UI components
+│   │   ├── chat_toolbox.py        # Chat toolbox ("Attach file")
 │   │   └── dialogs.py             # Shared dialogs
 │   └── shared/                    # Shared utilities
+│       ├── attachments.py         # Chat file attachments
 │       ├── page_generator.py      # Page generation
 │       ├── session_state.py       # Session state
 │       ├── constants.py           # Config constants
@@ -105,6 +107,7 @@ expertgpts/
 ├── uv.lock                         # Locked dependency versions
 └── scripts/                        # Administrative scripts
     ├── setup.py                    # Initial setup
+    ├── regenerate_pages.py         # Regenerate expert pages from template
     ├── reset_application.py        # Reset to factory defaults
     ├── update_translations.py      # Sync locales
     └── run_tests.sh                # Run test suite
@@ -464,7 +467,7 @@ Render expert interface
 
 **Steps**:
 1. Update `templates/template.py`
-2. Run `reset_application.py` to regenerate pages
+2. Run `uv run python scripts/regenerate_pages.py` to regenerate pages
 3. Update configuration schema if needed
 
 **Estimated Effort**: Depends on feature

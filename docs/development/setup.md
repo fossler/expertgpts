@@ -173,15 +173,23 @@ Create example experts.
 uv run python scripts/setup.py
 ```
 
+### `scripts/regenerate_pages.py`
+
+Regenerate all expert pages from `templates/template.py`. Each page keeps its filename, expert ID and name, so configs and chat history stay attached. Run it after changing the template (and on other machines after pulling a template change, since generated pages are gitignored).
+
+```bash
+uv run python scripts/regenerate_pages.py
+```
+
 ### `scripts/reset_application.py`
 
-Reset to factory defaults (regenerate expert pages from template).
+Reset to factory defaults: deletes all configs, expert pages, chat history and streaming cache, then recreates the example experts.
 
 ```bash
 echo "yes" | uv run python scripts/reset_application.py
 ```
 
-**Warning**: Deletes all custom experts and regenerates from template.
+**Warning**: Deletes all custom experts and chat history. Do not use it to apply template changes; use `regenerate_pages.py` instead.
 
 ### `scripts/update_translations.py`
 
@@ -230,7 +238,7 @@ Before writing code:
 When modifying expert pages:
 1. Edit `templates/template.py`
 2. Test with one expert
-3. Run `reset_application.py` to regenerate all
+3. Run `uv run python scripts/regenerate_pages.py` to regenerate all
 4. Test multiple experts
 
 ### 3. Test Before Committing
@@ -268,7 +276,7 @@ git commit -m "Description"
 
 1. Edit `templates/template.py`
 2. Test with one expert
-3. Run `uv run python scripts/reset_application.py`
+3. Run `uv run python scripts/regenerate_pages.py`
 4. Verify all experts work
 5. Commit changes
 

@@ -9,6 +9,7 @@ from lib.ui.dialogs import (
     render_model_selection,
     render_api_key_status,
 )
+from lib.ui.chat_toolbox import render_chat_toolbox, render_user_message
 
 __all__ = [
     "create_new_expert",
@@ -18,4 +19,6 @@ __all__ = [
     "render_thinking_mode_ui",
     "render_model_selection",
     "render_api_key_status",
+    "render_chat_toolbox",
+    "render_user_message",
 ]
