@@ -394,14 +394,13 @@
     "clear_confirm": "L'intera cronologia chat di questo esperto, comprese le immagini allegate, verrà eliminata.",
     "clear_button": "Elimina definitivamente",
     "voice_input": "Input vocale",
-    "voice_help": "Registra un messaggio vocale. Viene convertito in testo che puoi modificare prima dell'invio.",
+    "voice_help": "Registra un messaggio vocale. Quando ti fermi, viene convertito in testo e inviato automaticamente.",
     "voice_transcribing": "Trascrizione in corso…",
-    "voice_transcript": "Trascrizione",
-    "voice_send": "Invia come messaggio",
     "voice_error": "Trascrizione non riuscita: {error}",
     "error_audio_too_large": "La registrazione supera i {size} MB e non può essere trascritta.",
     "voice_model": "Trascrizione: {model}",
     "voice_key_missing": "L'input vocale richiede una chiave API per {provider} ({model}). Puoi aggiungerla nelle impostazioni.",
-    "error_audio_too_long": "La registrazione supera i {seconds} secondi, il limite di {model}."
+    "error_audio_too_long": "La registrazione supera i {seconds} secondi, il limite di {model}.",
+    "voice_asr_context": "Questo è un messaggio vocale in italiano."
   }
 }

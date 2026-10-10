@@ -106,9 +106,8 @@ For models without image support the button is disabled; hover over it to see "<
 
 **🎤 Voice input** in the toolbox records a voice message with your microphone (your browser asks for permission the first time):
 
-1. Open **Voice input** and start/stop the recording
-2. The recording is converted to text; the transcript appears in an editable field
-3. Fix the text if needed and click **Send as message** — it is sent like a typed message, together with any attached files and images
+1. Open **Voice input** and start the recording
+2. Stop the recording: it is converted to text and **sent automatically** like a typed message, together with any attached files and images
 
 **Which speech-to-text model is used** depends on the expert's provider:
 
@@ -118,6 +117,8 @@ For models without image support the button is disabled; hover over it to see "<
 | DeepSeek, Z.AI, KIMI | `glm-asr-2512` (Z.AI GLM-ASR) | Z.AI | 30 seconds, 25 MB |
 
 The popover shows the model in use. If the required API key is missing, the recorder is disabled and a notice tells you which key to add in Settings.
+
+**Language**: Speak in the app's interface language for best results. OpenAI receives the interface language as a hint; for GLM-ASR, which has no language setting, a short sentence in the interface language is sent as context — without it, GLM-ASR often returned German speech in Chinese or translated it to English.
 
 ### Context Usage
 

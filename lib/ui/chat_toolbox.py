@@ -189,8 +189,10 @@ def _render_voice_input(widget_key: str, chat_provider: str) -> Optional[str]:
     """Render "Voice input": record audio, transcribe it, send the text.
 
     OpenAI experts transcribe with OpenAI, all others with Z.AI GLM-ASR (see
-    ``lib.audio.transcription``). The transcript is shown in an editable text
-    area; "Send as message" returns it so it is sent like a typed prompt.
+    ``lib.audio.transcription``). The transcript is returned right away, so
+    it is sent automatically like a typed prompt. Each recording is
+    transcribed (and therefore sent) once: results are cached by audio hash,
+    and the recorder key changes after the message was sent.
 
     Args:
         widget_key: Key prefix; changes after each sent message, which also
@@ -257,24 +259,14 @@ def _render_voice_input(widget_key: str, chat_provider: str) -> Optional[str]:
                     api_key,
                     mime_type=audio.type or "audio/wav",
                     language=st.session_state.get("language"),
+                    context=i18n.t("chat_toolbox.voice_asr_context"),
                 )
         result = st.session_state[result_key]
         if not result.success:
             st.error(i18n.t("chat_toolbox.voice_error", error=result.error))
             return None
 
-        text = st.text_area(
-            i18n.t("chat_toolbox.voice_transcript"),
-            value=result.text,
-            key=f"{result_key}_text",
-        )
-        if st.button(
-            i18n.t("chat_toolbox.voice_send"),
-            type="primary",
-            key=f"{widget_key}_voice_send",
-            disabled=not text.strip(),
-        ):
-            return text.strip()
+        return result.text
     return None
 
 

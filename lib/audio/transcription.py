@@ -4,6 +4,10 @@ Experts that chat with OpenAI transcribe with OpenAI's transcription model;
 all other experts (DeepSeek, Z.AI, KIMI) use Z.AI's GLM-ASR. Both providers
 expose an OpenAI-compatible ``/audio/transcriptions`` endpoint, so the pooled
 OpenAI-compatible client is used for both.
+
+GLM-ASR has no language parameter and often answers German speech in Chinese
+or translates it to English. A short context sentence in the expected
+language (its ``prompt`` parameter) reliably fixes this.
 """
 
 import io
@@ -86,6 +90,7 @@ def transcribe(
     api_key: str,
     mime_type: str = "audio/wav",
     language: Optional[str] = None,
+    context: Optional[str] = None,
 ) -> TranscriptionResult:
     """Transcribe recorded audio to text.
 
@@ -96,6 +101,8 @@ def transcribe(
         api_key: API key of the transcription provider
         mime_type: MIME type of the audio
         language: Optional app language code used as a hint (OpenAI only)
+        context: Optional sentence in the expected language, sent as GLM-ASR
+            ``prompt`` to steer language detection (Z.AI only)
 
     Returns:
         TranscriptionResult: The text, or an error message
@@ -110,6 +117,8 @@ def transcribe(
     hint = _language_hint(language)
     if provider == "openai" and hint:
         params["language"] = hint
+    if provider == "zai" and context:
+        params["prompt"] = context
 
     try:
         client = get_cached_client(provider=provider, api_key=api_key).client

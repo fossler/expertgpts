@@ -394,14 +394,13 @@
     "clear_confirm": "Keseluruhan sejarah sembang pakar ini, termasuk imej yang dilampirkan, akan dipadam.",
     "clear_button": "Padam secara kekal",
     "voice_input": "Input suara",
-    "voice_help": "Rakam mesej suara. Ia ditukar kepada teks yang boleh anda sunting sebelum dihantar.",
+    "voice_help": "Rakam mesej suara. Selepas berhenti, ia ditukar kepada teks dan dihantar secara automatik.",
     "voice_transcribing": "Sedang mentranskripsi…",
-    "voice_transcript": "Transkrip",
-    "voice_send": "Hantar sebagai mesej",
     "voice_error": "Transkripsi gagal: {error}",
     "error_audio_too_large": "Rakaman melebihi {size} MB dan tidak boleh ditranskripsi.",
     "voice_model": "Transkripsi: {model}",
     "voice_key_missing": "Input suara memerlukan kunci API untuk {provider} ({model}). Anda boleh menambahkannya dalam Tetapan.",
-    "error_audio_too_long": "Rakaman melebihi {seconds} saat, had bagi {model}."
+    "error_audio_too_long": "Rakaman melebihi {seconds} saat, had bagi {model}.",
+    "voice_asr_context": "Ini ialah mesej suara dalam bahasa Melayu."
   }
 }

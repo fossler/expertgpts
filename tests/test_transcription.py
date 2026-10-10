@@ -79,12 +79,21 @@ class TestTranscribe:
         assert fake.calls[0]["language"] == "zh"
         assert fake.calls[0]["file"] == ("recording.wav", b"wav", "audio/wav")
 
-    def test_other_providers_use_glm_asr_without_language(self, fake_client):
+    def test_other_providers_use_glm_asr_with_context(self, fake_client):
+        # GLM-ASR has no language parameter; the context sentence steers it
         fake, providers = fake_client
-        transcription.transcribe(b"wav", "kimi", "key", language="de")
+        transcription.transcribe(
+            b"wav", "kimi", "key", language="de", context="Auf Deutsch."
+        )
         assert providers == ["zai"]
         assert fake.calls[0]["model"] == "glm-asr-2512"
+        assert fake.calls[0]["prompt"] == "Auf Deutsch."
         assert "language" not in fake.calls[0]
+
+    def test_openai_ignores_context(self, fake_client):
+        fake, _ = fake_client
+        transcription.transcribe(b"wav", "openai", "key", context="Auf Deutsch.")
+        assert "prompt" not in fake.calls[0]
 
     def test_api_error_becomes_error_result(self, fake_client):
         fake, _ = fake_client

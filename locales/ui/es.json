@@ -394,14 +394,13 @@
     "clear_confirm": "Se eliminará todo el historial de chat de este experto, incluidas las imágenes adjuntas.",
     "clear_button": "Eliminar definitivamente",
     "voice_input": "Entrada de voz",
-    "voice_help": "Graba un mensaje de voz. Se convierte en texto que puedes editar antes de enviarlo.",
+    "voice_help": "Graba un mensaje de voz. Al detenerlo, se convierte en texto y se envía automáticamente.",
     "voice_transcribing": "Transcribiendo…",
-    "voice_transcript": "Transcripción",
-    "voice_send": "Enviar como mensaje",
     "voice_error": "La transcripción ha fallado: {error}",
     "error_audio_too_large": "La grabación supera los {size} MB y no se puede transcribir.",
     "voice_model": "Transcripción: {model}",
     "voice_key_missing": "La entrada de voz necesita una clave API de {provider} ({model}). Puedes añadirla en la configuración.",
-    "error_audio_too_long": "La grabación dura más de {seconds} segundos, el límite de {model}."
+    "error_audio_too_long": "La grabación dura más de {seconds} segundos, el límite de {model}.",
+    "voice_asr_context": "Este es un mensaje de voz en español."
   }
 }

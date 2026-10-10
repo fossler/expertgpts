@@ -394,14 +394,13 @@
     "clear_confirm": "會刪除呢個專家嘅全部聊天記錄，包括附加嘅圖片。",
     "clear_button": "永久刪除",
     "voice_input": "語音輸入",
-    "voice_help": "錄一段語音訊息，會轉做文字，你send之前可以改。",
+    "voice_help": "錄一段語音訊息。停咗之後會轉做文字，再自動send出去。",
     "voice_transcribing": "轉緊文字…",
-    "voice_transcript": "轉寫文字",
-    "voice_send": "當訊息send出去",
     "voice_error": "轉寫失敗：{error}",
     "error_audio_too_large": "段錄音超過 {size} MB，轉唔到文字。",
     "voice_model": "轉寫模型：{model}",
     "voice_key_missing": "語音輸入要用 {provider} 嘅 API 金鑰（{model}）。你可以喺設定度加。",
-    "error_audio_too_long": "段錄音超過 {seconds} 秒，係 {model} 嘅上限。"
+    "error_audio_too_long": "段錄音超過 {seconds} 秒，係 {model} 嘅上限。",
+    "voice_asr_context": "呢個係一段廣東話語音訊息。"
   }
 }

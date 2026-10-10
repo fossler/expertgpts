@@ -394,14 +394,13 @@
     "clear_confirm": "The entire chat history of this expert, including attached images, will be deleted.",
     "clear_button": "Delete permanently",
     "voice_input": "Voice input",
-    "voice_help": "Record a voice message. It is converted to text that you can edit before sending.",
+    "voice_help": "Record a voice message. When you stop, it is converted to text and sent automatically.",
     "voice_transcribing": "Transcribing…",
-    "voice_transcript": "Transcript",
-    "voice_send": "Send as message",
     "voice_error": "Transcription failed: {error}",
     "error_audio_too_large": "The recording is larger than {size} MB and cannot be transcribed.",
     "voice_model": "Transcription: {model}",
     "voice_key_missing": "Voice input needs an API key for {provider} ({model}). You can add it in Settings.",
-    "error_audio_too_long": "The recording is longer than {seconds} seconds, the limit of {model}."
+    "error_audio_too_long": "The recording is longer than {seconds} seconds, the limit of {model}.",
+    "voice_asr_context": "This is a voice message in English."
   }
 }
