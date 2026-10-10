@@ -89,10 +89,13 @@ None of the breaking changes require code changes in ExpertGPTs.
    Mandatory fields in the add/edit expert forms (name, description) could be validated
    in the browser before submitting, replacing part of the custom validation.
 
-4. **`icon=` for `st.title` / `st.header` / `st.subheader` (1.63) and `st.metric` (1.61)**
-   Headings currently embed emojis in the string (e.g. `f"➕ {i18n.t(...)}"`). Material
-   icons would be consistent with the navigation, which already uses `:material/...`.
-   Cosmetic only.
+4. **`icon=` for `st.title` / `st.header` / `st.subheader` (1.63) and `st.metric` (1.61)** — *done (2026-10-10)*
+   Page titles, section headings and the Settings tab bar use Material icons via `icon=`
+   instead of emojis in the string: Home `smart_toy`, expert pages and the expert list
+   `psychology_alt`, Settings `settings` (tabs: `palette`, `vpn_key`, `smart_toy`,
+   `manage_accounts`, `warning`, `info`; sections also `language`, `library_books`,
+   `backup`), Help `menu_book`, dialog sub-headings `memory` and `psychology_alt`.
+   Emojis in buttons, alerts and captions are unchanged.
 
 ### Nice to have
 

@@ -19,7 +19,7 @@ def render_expert_list():
         st.info(f"🔍 {i18n.t('home.no_experts')}")
         return
 
-    st.subheader(f"📚 {i18n.t('home.available_experts')}")
+    st.subheader(i18n.t("home.available_experts"), icon=":material/psychology_alt:")
 
     # Display experts in a grid
     cols = st.columns(min(3, len(experts)))
@@ -49,7 +49,7 @@ def main():
         # Git branch footer (at very bottom)
         render_git_branch_footer(divider=True)
 
-    st.title(f"🤖 {i18n.t('home.title')}")
+    st.title(i18n.t("home.title"), icon=":material/smart_toy:")
 
     st.markdown(f"""
     ## {i18n.t("home.subtitle")}

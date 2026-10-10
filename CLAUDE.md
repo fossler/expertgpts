@@ -441,6 +441,7 @@ Requires `watchdog` package (in the `dev` dependency group of `pyproject.toml`, 
 - **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
 - **Real dialogs**: "Add Chat" (`open_add_chat_dialog()`), "Edit Expert", delete and reset confirmations are blocking modal `st.dialog`s (`dismissible=False`: no X, ESC or outside click; they close only via their own Cancel/confirm buttons) opened from the button click (title built at call time for i18n); the `show_*_dialog` / `editing_expert_*` / `confirm_*` flags and `ensure_dialog_state()` were removed, success messages use `st.toast`. The edit dialog now also validates the expert name
 - **Settings deep links**: the Settings section is bound to the URL with stable, language-independent keys (`/Settings?tab=api_key`; `SETTINGS_SECTIONS` in `pages/9998_Settings.py`, `SETTINGS_TAB_PARAM` in `constants.py`) via `st.query_params` instead of the built-in `bind="query-params"`, which puts the translated label in the URL. Only the active section renders; `settings_active_tab` was removed
+- **Heading icons**: page titles and section headings use `st.title/st.subheader(..., icon=":material/...:")` instead of emojis in the text (Home `smart_toy`, expert pages `psychology_alt`, Help `menu_book`, Settings sections per `SETTINGS_SECTIONS`); the Settings tab labels use `:material/<name>:` markup. Buttons, alerts and captions keep their emojis
 
 ### Previous Session (2026-07-18)
 

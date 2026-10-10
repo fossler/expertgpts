@@ -305,7 +305,7 @@ def render_chat_interface(config: dict, messages_key: str):
     expert_name = config.get("expert_name", EXPERT_NAME)
     translated_name = translate_expert_name(expert_name)
 
-    st.title(f"🤖 {translated_name}")
+    st.title(translated_name, icon=":material/psychology_alt:")
 
     # Display expert description
     if config.get("description"):

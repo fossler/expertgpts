@@ -53,7 +53,7 @@ def render_api_key_section():
     """Render the multi-provider API Key management section."""
     from lib.i18n import i18n
 
-    st.subheader(f"🔑 {i18n.t('api_key.title')}")
+    st.subheader(i18n.t("api_key.title"), icon=":material/vpn_key:")
 
     # Provider selection
 
@@ -174,7 +174,7 @@ def render_api_key_section():
     st.divider()
 
     # Resources links
-    st.subheader(f"📚 {i18n.t('api_key.resources')}")
+    st.subheader(i18n.t("api_key.resources"), icon=":material/library_books:")
 
     # Provider name and links (one-liner)
     provider_name = get_provider_display_name(selected_provider)
@@ -186,7 +186,7 @@ def render_default_llm_settings_section():
     """Render the Default LLM Settings section for configuring global defaults."""
     from lib.i18n import i18n
 
-    st.subheader(f"⚙️ {i18n.t('default_llm.title')}")
+    st.subheader(i18n.t("default_llm.title"), icon=":material/smart_toy:")
 
     st.caption(i18n.t("default_llm.description"))
 
@@ -316,7 +316,7 @@ def render_general_settings_section():
     from lib.i18n import i18n
 
     # Theme Customization
-    st.subheader(f"🎨 {i18n.t('theme.title')}")
+    st.subheader(i18n.t("theme.title"), icon=":material/palette:")
 
     st.caption(i18n.t("theme.description"))
 
@@ -541,7 +541,7 @@ def render_general_settings_section():
     st.divider()
 
     # Language selector
-    st.subheader(f"🌐 {i18n.t('language.title')}")
+    st.subheader(i18n.t("language.title"), icon=":material/language:")
 
     # Get current language
     current_lang = st.session_state.get("language", "en")
@@ -695,7 +695,10 @@ def _render_edit_expert_dialog(expert_id: str, expert_config: dict) -> None:
         expert_provider = metadata.get("provider", "deepseek")  # Backward compatible
 
         # Expert Behavior (Advanced) - The most important field!
-        st.markdown(f"### 🧠 {i18n.t('dialogs.add_chat.expert_behavior_title')}")
+        st.subheader(
+            i18n.t("dialogs.add_chat.expert_behavior_title"),
+            icon=":material/psychology_alt:",
+        )
 
         # Check if API key available for this expert's provider
         api_keys = st.session_state.get("api_keys", {})
@@ -803,7 +806,7 @@ def render_expert_management_section():
     """Render the Expert Management section."""
     from lib.i18n import i18n
 
-    st.subheader(f"🤖 {i18n.t('experts.management.title')}")
+    st.subheader(i18n.t("experts.management.title"), icon=":material/manage_accounts:")
 
     # Check if ANY provider API key is available
     api_keys = st.session_state.get("api_keys", {})
@@ -1004,13 +1007,13 @@ def render_danger_zone_section():
     """Render the Danger Zone section for destructive actions."""
     from lib.i18n import i18n
 
-    st.subheader(f"⚠️ {i18n.t('danger_zone.title')}")
+    st.subheader(i18n.t("danger_zone.title"), icon=":material/warning:")
 
     st.warning(f"⚠️ **{i18n.t('danger_zone.warning')}**")
 
     # Download configs section
     st.markdown("---")
-    st.markdown(f"### 💾 {i18n.t('danger_zone.backup_title')}")
+    st.subheader(i18n.t("danger_zone.backup_title"), icon=":material/backup:")
 
     st.markdown(i18n.t("danger_zone.backup_description"))
 
@@ -1125,7 +1128,7 @@ def render_about_section():
     """Render the About section."""
     from lib.i18n import i18n
 
-    st.subheader(f"ℹ️ {i18n.t('about.title')}")
+    st.subheader(i18n.t("about.title"), icon=":material/info:")
 
     st.markdown(f"""
     ### ExpertGPTs
@@ -1201,23 +1204,31 @@ def render_about_section():
     )
 
 
-# Settings sections in display order: URL key -> (icon, i18n key, renderer).
+# Settings sections in display order: URL key -> (Material icon, i18n key, renderer).
 # The URL key (?tab=<key>) is language independent, unlike the labels.
 SETTINGS_SECTIONS = {
-    "general": ("🎨", "settings.sections.general", render_general_settings_section),
-    "api_key": ("🔑", "settings.sections.api_key", render_api_key_section),
+    "general": (
+        "palette",
+        "settings.sections.general",
+        render_general_settings_section,
+    ),
+    "api_key": ("vpn_key", "settings.sections.api_key", render_api_key_section),
     "default_llm": (
-        "⚙️",
+        "smart_toy",
         "settings.sections.default_llm",
         render_default_llm_settings_section,
     ),
     "experts": (
-        "🤖",
+        "manage_accounts",
         "settings.sections.expert_management",
         render_expert_management_section,
     ),
-    "danger_zone": ("⚠️", "settings.sections.danger_zone", render_danger_zone_section),
-    "about": ("ℹ️", "settings.sections.about", render_about_section),
+    "danger_zone": (
+        "warning",
+        "settings.sections.danger_zone",
+        render_danger_zone_section,
+    ),
+    "about": ("info", "settings.sections.about", render_about_section),
 }
 DEFAULT_SECTION = "general"
 
@@ -1237,7 +1248,7 @@ def main():
 
     from lib.i18n import i18n
 
-    st.title(f"⚙️ {i18n.t('settings.title')}")
+    st.title(i18n.t("settings.title"), icon=":material/settings:")
 
     # The URL selects the section (?tab=api_key): deep links, reloads and
     # browser back/forward. Unknown values fall back to the default section.
@@ -1251,7 +1262,7 @@ def main():
         "Settings Sections",
         options=list(SETTINGS_SECTIONS),
         format_func=lambda key: (
-            f"{SETTINGS_SECTIONS[key][0]} {i18n.t(SETTINGS_SECTIONS[key][1])}"
+            f":material/{SETTINGS_SECTIONS[key][0]}: {i18n.t(SETTINGS_SECTIONS[key][1])}"
         ),
         label_visibility="collapsed",
         key="settings_section",
