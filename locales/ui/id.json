@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Gambar: {files}",
     "error_image_too_large": "{name} lebih besar dari {size} MB dan tidak dilampirkan.",
     "error_not_image": "{name} bukan gambar yang valid dan tidak dilampirkan.",
-    "image_unavailable": "tidak tersedia lagi"
+    "image_unavailable": "tidak tersedia lagi",
+    "clear_confirm": "Seluruh riwayat obrolan pakar ini, termasuk gambar yang dilampirkan, akan dihapus.",
+    "clear_button": "Hapus permanen"
   }
 }

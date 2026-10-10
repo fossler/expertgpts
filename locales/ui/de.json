@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Bilder: {files}",
     "error_image_too_large": "{name} ist größer als {size} MB und wurde nicht angehängt.",
     "error_not_image": "{name} ist kein gültiges Bild und wurde nicht angehängt.",
-    "image_unavailable": "nicht mehr verfügbar"
+    "image_unavailable": "nicht mehr verfügbar",
+    "clear_confirm": "Der gesamte Chatverlauf dieses Experten wird gelöscht, einschließlich angehängter Bilder.",
+    "clear_button": "Endgültig löschen"
   }
 }

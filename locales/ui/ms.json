@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Imej: {files}",
     "error_image_too_large": "{name} melebihi {size} MB dan tidak dilampirkan.",
     "error_not_image": "{name} bukan imej yang sah dan tidak dilampirkan.",
-    "image_unavailable": "tidak lagi tersedia"
+    "image_unavailable": "tidak lagi tersedia",
+    "clear_confirm": "Keseluruhan sejarah sembang pakar ini, termasuk imej yang dilampirkan, akan dipadam.",
+    "clear_button": "Padam secara kekal"
   }
 }

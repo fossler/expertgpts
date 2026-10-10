@@ -390,6 +390,8 @@
     "attached_images": "🖼️ 圖：{files}",
     "error_image_too_large": "{name} 逾 {size} MB，未附。",
     "error_not_image": "{name} 非有效之圖，未附。",
-    "image_unavailable": "已不存"
+    "image_unavailable": "已不存",
+    "clear_confirm": "此專家之言錄，連所附之圖，盡將刪去。",
+    "clear_button": "永刪"
   }
 }

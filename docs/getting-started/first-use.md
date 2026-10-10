@@ -241,8 +241,8 @@ Chat history is stored in `chat_history/{expert_id}.json` files.
 ### Clearing History
 
 To clear chat history:
-1. Delete the corresponding `chat_history/{expert_id}.json` file
-2. Or restart the conversation using the chat interface
+1. Use **🗑️ Clear chat history** in the toolbox below the chat input and confirm with **Delete permanently**
+2. Or delete the corresponding `chat_history/{expert_id}.json` file
 
 ## Getting Help
 

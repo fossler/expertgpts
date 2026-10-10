@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Images : {files}",
     "error_image_too_large": "{name} dépasse {size} Mo et n'a pas été jointe.",
     "error_not_image": "{name} n'est pas une image valide et n'a pas été jointe.",
-    "image_unavailable": "n'est plus disponible"
+    "image_unavailable": "n'est plus disponible",
+    "clear_confirm": "Tout l'historique de discussion de cet expert, y compris les images jointes, sera supprimé.",
+    "clear_button": "Supprimer définitivement"
   }
 }

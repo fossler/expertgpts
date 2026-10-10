@@ -19,7 +19,7 @@ from lib.shared.helpers import (
     add_error_to_history,
     render_git_branch_footer,
 )
-from lib.storage import load_chat_history, save_chat_history, delete_chat_history
+from lib.storage import load_chat_history, save_chat_history
 from lib.shared import (
     LLM_PROVIDERS,
     get_provider_display_name,
@@ -344,7 +344,8 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
         attachments, images = render_chat_toolbox(
             f"{attachments_key}_{attachments_generation}",
             config,
-            st.session_state[messages_key],
+            EXPERT_ID,
+            messages_key,
         )
 
     if prompt:
@@ -461,24 +462,6 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
                 add_error_to_history(EXPERT_ID, messages_key, error_msg)
 
 
-def clear_chat_history(messages_key: str):
-    """Clear the chat history for this expert.
-
-    Clears both session state and persistent file storage.
-
-    Args:
-        messages_key: Session state key for this expert's messages
-    """
-    if st.sidebar.button(f"🗑️ {i18n.t('sidebar.clear_chat_history')}"):
-        # Clear from session state
-        st.session_state[messages_key] = []
-
-        # Delete from file
-        delete_chat_history(EXPERT_ID)
-
-        st.rerun()
-
-
 def display_model_settings(config: dict, messages_key: str):
     """Display editable model settings in the sidebar.
 
@@ -583,11 +566,6 @@ def main():
 
     # Display model settings (at the top of sidebar)
     display_model_settings(config, messages_key)
-
-    st.sidebar.divider()
-
-    # Clear chat button (in sidebar)
-    clear_chat_history(messages_key)
 
     # Git branch footer in sidebar (at very bottom)
     render_git_branch_footer()

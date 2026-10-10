@@ -390,6 +390,8 @@
     "attached_images": "🖼️ 图片：{files}",
     "error_image_too_large": "{name} 超过 {size} MB，未附加。",
     "error_not_image": "{name} 不是有效的图片，未附加。",
-    "image_unavailable": "已不可用"
+    "image_unavailable": "已不可用",
+    "clear_confirm": "将删除此专家的全部聊天记录，包括附加的图片。",
+    "clear_button": "永久删除"
   }
 }

@@ -2,7 +2,7 @@
 
 The toolbox is rendered inside ``st.bottom`` right after ``st.chat_input``, so
 it stays pinned below the input. It offers "Attach file" and "Attach image"
-on the left and shows the context usage on the right.
+on the left, and "Clear chat history" and the context usage on the right.
 """
 
 from pathlib import Path
@@ -29,6 +29,7 @@ from lib.shared.constants import (
     supports_images,
 )
 from lib.shared.helpers import sanitize_markdown_content
+from lib.storage import delete_chat_history
 from lib.storage.attachment_store import get_image_path
 
 # (file name, image bytes) of an image attached but not yet sent
@@ -50,7 +51,7 @@ _CODE_LANGUAGES = {
 
 
 def render_chat_toolbox(
-    widget_key: str, config: dict, messages: list
+    widget_key: str, config: dict, expert_id: str, messages_key: str
 ) -> Tuple[List[Attachment], List[PendingImage]]:
     """Render the toolbox row and return the attachments for the next message.
 
@@ -61,12 +62,14 @@ def render_chat_toolbox(
         widget_key: Key prefix for the uploaders; change it to clear the
             attachments (e.g. after a message was sent)
         config: Expert configuration (provider, model, system prompt)
-        messages: Current chat messages (for the context usage)
+        expert_id: Unique expert identifier (for clearing the history)
+        messages_key: Session state key of the expert's messages
 
     Returns:
         tuple: (text attachments as (name, text), images as (name, bytes))
     """
     provider, model, _ = get_llm_metadata(config)
+    messages = st.session_state.get(messages_key, [])
     attachments, images, notes = [], [], []
 
     with st.container(horizontal=True, vertical_alignment="center"):
@@ -143,8 +146,9 @@ def render_chat_toolbox(
                 )
             )
 
-        # --- Context usage, right-aligned ---
+        # --- Right-aligned: clear chat history, context usage ---
         st.space("stretch")
+        _render_clear_history(expert_id, messages_key, has_messages=bool(messages))
         _render_context_usage(config, messages)
 
     return attachments, images
@@ -159,6 +163,35 @@ def _error_note(error: ValueError, name: str) -> str:
         if str(error) == "image_too_large"
         else ATTACHMENT_MAX_SIZE_KB,
     )
+
+
+def _render_clear_history(
+    expert_id: str, messages_key: str, has_messages: bool
+) -> None:
+    """Render "Clear chat history" as a popover with a confirmation button.
+
+    Deletes the persisted history and the expert's images, then reruns.
+
+    Args:
+        expert_id: Unique expert identifier
+        messages_key: Session state key of the expert's messages
+        has_messages: Whether there is anything to clear (disables otherwise)
+    """
+    with st.popover(
+        i18n.t("sidebar.clear_chat_history"),
+        icon=":material/delete:",
+        type="tertiary",
+        disabled=not has_messages,
+    ):
+        st.caption(i18n.t("chat_toolbox.clear_confirm"))
+        if st.button(
+            i18n.t("chat_toolbox.clear_button"),
+            type="primary",
+            key=f"clear_history_{expert_id}",
+        ):
+            st.session_state[messages_key] = []
+            delete_chat_history(expert_id)
+            st.rerun()
 
 
 def _calculate_context_stats(config: dict, messages: list) -> Optional[dict]:

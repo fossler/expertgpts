@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Görseller: {files}",
     "error_image_too_large": "{name} {size} MB'tan büyük olduğu için eklenmedi.",
     "error_not_image": "{name} geçerli bir görsel olmadığı için eklenmedi.",
-    "image_unavailable": "artık mevcut değil"
+    "image_unavailable": "artık mevcut değil",
+    "clear_confirm": "Bu uzmanın tüm sohbet geçmişi, eklenen görseller dahil, silinecek.",
+    "clear_button": "Kalıcı olarak sil"
   }
 }

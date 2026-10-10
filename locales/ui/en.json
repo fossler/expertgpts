@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Images: {files}",
     "error_image_too_large": "{name} is larger than {size} MB and was not attached.",
     "error_not_image": "{name} is not a valid image and was not attached.",
-    "image_unavailable": "no longer available"
+    "image_unavailable": "no longer available",
+    "clear_confirm": "The entire chat history of this expert, including attached images, will be deleted.",
+    "clear_button": "Delete permanently"
   }
 }

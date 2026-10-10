@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Imagens: {files}",
     "error_image_too_large": "{name} excede {size} MB e não foi anexada.",
     "error_not_image": "{name} não é uma imagem válida e não foi anexada.",
-    "image_unavailable": "já não está disponível"
+    "image_unavailable": "já não está disponível",
+    "clear_confirm": "Todo o histórico de conversa deste especialista, incluindo as imagens anexadas, será eliminado.",
+    "clear_button": "Eliminar definitivamente"
   }
 }

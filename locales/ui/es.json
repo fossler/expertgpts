@@ -390,6 +390,8 @@
     "attached_images": "🖼️ Imágenes: {files}",
     "error_image_too_large": "{name} supera los {size} MB y no se ha adjuntado.",
     "error_not_image": "{name} no es una imagen válida y no se ha adjuntado.",
-    "image_unavailable": "ya no está disponible"
+    "image_unavailable": "ya no está disponible",
+    "clear_confirm": "Se eliminará todo el historial de chat de este experto, incluidas las imágenes adjuntas.",
+    "clear_button": "Eliminar definitivamente"
   }
 }
