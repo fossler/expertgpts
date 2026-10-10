@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "{provider}-API-Schlüssel nicht festgelegt",
     "application_will_rerun": "Die Anwendung wird neu gestartet, um den neuen Schlüssel zu laden.",
     "found_experts": "{count} Experte(n) gefunden",
-    "refreshing": "Aktualisiere...",
     "recreating_experts": "Erstelle Beispiel-Experten neu...",
-    "restarting_application": "Starte Anwendung neu...",
     "expert_updated": "Experte '{name}' erfolgreich aktualisiert!",
     "expert_deleted": "Experte '{name}' erfolgreich gelöscht!",
     "theme_saved_reloading": "Thema gespeichert! Seite wird neu geladen..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Navigiere zu Ihrem neuen Experten...",
     "ai_generating": "KI-generierte Erstellung!",
     "first_run": "Erste Ausführung erkannt",
     "select_llm_tip": "Wählen Sie zuerst Ihren LLM-Anbieter und Ihr Modell, dann füllen Sie die Expertendetails unten aus.",

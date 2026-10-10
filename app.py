@@ -83,11 +83,6 @@ def initialize_session_state():
     # Initialize shared session state (API key, etc.)
     initialize_shared_session_state()
 
-    # Initialize add chat dialog state (using shared helper)
-    from lib.shared.session_state import ensure_dialog_state
-
-    ensure_dialog_state("add_chat")
-
 
 def main():
     """Main application entry point using st.navigation()."""

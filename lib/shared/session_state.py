@@ -103,34 +103,6 @@ def handle_pending_navigation():
         st.switch_page(page_path)
 
 
-def ensure_dialog_state(*dialog_names: str) -> None:
-    """Ensure dialog state variables exist in session state.
-
-    This helper function initializes multiple dialog state variables
-    at once, reducing repetitive boilerplate code across pages.
-
-    Args:
-        *dialog_names: Names of dialog state variables to initialize
-                      (e.g., "add_chat", "edit", "delete")
-
-    Example:
-        # Before (repetitive):
-        if "show_add_chat_dialog" not in st.session_state:
-            st.session_state.show_add_chat_dialog = False
-        if "show_edit_dialog" not in st.session_state:
-            st.session_state.show_edit_dialog = False
-        if "show_delete_dialog" not in st.session_state:
-            st.session_state.show_delete_dialog = False
-
-        # After (using helper):
-        ensure_dialog_state("add_chat", "edit", "delete")
-    """
-    for name in dialog_names:
-        key = f"show_{name}_dialog"
-        if key not in st.session_state:
-            st.session_state[key] = False
-
-
 def invalidate_expert_cache(expert_id: str) -> None:
     """Increment cache version for an expert to force config reload.
 

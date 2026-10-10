@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "{provider} API密钥未设置",
     "application_will_rerun": "应用程序将重新运行以加载新密钥。",
     "found_experts": "找到{count}个专家代理",
-    "refreshing": "刷新中...",
     "recreating_experts": "重新创建示例专家...",
-    "restarting_application": "重启应用程序...",
     "expert_updated": "专家'{name}'更新成功！",
     "expert_deleted": "专家'{name}'删除成功！",
     "theme_saved_reloading": "主题已保存！重新加载页面中..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "正在导航到您的新专家...",
     "ai_generating": "AI 驱动生成！",
     "first_run": "检测到首次运行",
     "select_llm_tip": "首先选择您的大语言模型提供商和模型，然后在下方填写专家详细信息。",

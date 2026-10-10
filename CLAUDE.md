@@ -270,7 +270,7 @@ Clean separation of concerns for 14-language support:
 - **`app_defaults_manager.py`** - User preferences management (default provider/model/thinking level, language, display settings)
 - **`config_toml_manager.py`** - Theme configuration management for `.streamlit/config.toml`
 - **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit; `delete_chat_history()` also deletes the expert's images
-- **`session_state.py`** - Initializes shared session state (API keys, navigation, defaults) - **UPDATED**: Added `ensure_dialog_state()` helper
+- **`session_state.py`** - Initializes shared session state (API keys, navigation, defaults); `handle_pending_navigation()`, `invalidate_expert_cache()`
 - **`streaming_cache.py`** - Background streaming with file-based caching; battery-optimized polling for LLM responses
 - **`token_manager.py`** - Token counting and context usage tracking; calculates percentage of context used
 - **`i18n.py`** - Internationalization engine; loads locale files and injects language prefixes
@@ -439,6 +439,7 @@ Requires `watchdog` package (in the `dev` dependency group of `pyproject.toml`, 
   - New i18n keys in `chat_toolbox` (all 14 locales): `attach_image`, `attach_image_help`, `image_not_supported`, `attached_images`, `error_image_too_large`, `error_not_image`, `image_unavailable`
 - **`scripts/regenerate_pages.py`** (`PageGenerator.regenerate_pages()`): rewrites existing expert pages from the template without touching configs or chat history; replaces `reset_application.py` as the way to apply template changes
 - **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
+- **Real dialogs**: "Add Chat" (`open_add_chat_dialog()`), "Edit Expert", delete and reset confirmations are modal `st.dialog`s opened from the button click (title built at call time for i18n); the `show_*_dialog` / `editing_expert_*` / `confirm_*` flags and `ensure_dialog_state()` were removed, success messages use `st.toast`. The edit dialog now also validates the expert name
 
 ### Previous Session (2026-07-18)
 

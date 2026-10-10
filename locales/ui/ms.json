@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "Kunci API {provider} tidak ditetapkan",
     "application_will_rerun": "Aplikasi akan dijalankan semula untuk memuatkan kunci baharu.",
     "found_experts": "{count} agen pakar dijumpai",
-    "refreshing": "Menyegarkan...",
     "recreating_experts": "Mencipta semula pakar contoh...",
-    "restarting_application": "Memulakan semula aplikasi...",
     "expert_updated": "Pakar '{name}' berjaya dikemas kini!",
     "expert_deleted": "Pakar '{name}' berjaya dipadamkan!",
     "theme_saved_reloading": "Tema disimpan! Memuatkan semula halaman..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Menavigasi ke pakar baharu anda...",
     "ai_generating": "Penjanaan berkuasa AI!",
     "first_run": "Larian Pertama Dikesan",
     "select_llm_tip": "Pilih penyedia dan model LLM anda terlebih dahulu, kemudian isi butiran pakar di bawah.",

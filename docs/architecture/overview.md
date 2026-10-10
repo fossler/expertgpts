@@ -284,9 +284,9 @@ Provider, model, temperature and thinking level are not kept in session state: t
 ### Creating a New Expert
 
 ```
-User clicks "Add Chat"
+User clicks "Add Chat" (Home sidebar or Settings → Expert Management)
     ↓
-Home page: Display creation form
+open_add_chat_dialog(): modal st.dialog with the creation form
     ↓
 User submits form (name, description, temperature, etc.)
     ↓
@@ -296,7 +296,7 @@ create_new_expert() (lib/ui/dialogs.py)
     ├─ Generate page from template (PageGenerator.generate_page() → pages/{expert_id}.py)
     └─ Return (expert_id, page_path)
     ↓
-pending_expert_page set → rerun → handle_pending_navigation() calls st.switch_page()
+pending_expert_page set → st.rerun() closes the dialog → handle_pending_navigation() calls st.switch_page()
     ↓
 Expert page loads (session state initialized)
 ```

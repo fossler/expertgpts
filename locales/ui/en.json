@@ -85,9 +85,7 @@
     "api_key_not_set_warning": "{provider} API key not set",
     "application_will_rerun": "The application will now rerun to load the new key.",
     "found_experts": "Found {count} expert agent(s)",
-    "refreshing": "Refreshing...",
     "recreating_experts": "Recreating example experts...",
-    "restarting_application": "Restarting application...",
     "expert_updated": "Expert '{name}' updated successfully!",
     "expert_deleted": "Expert '{name}' deleted successfully!",
     "theme_saved_reloading": "Theme saved! Reloading page..."
@@ -177,7 +175,6 @@
     "background_stream_complete": "Response completed from background stream"
   },
   "info": {
-    "navigating": "Navigating to your new expert...",
     "ai_generating": "AI-powered generation!",
     "first_run": "First Run Detected",
     "select_llm_tip": "Select your LLM provider and model first, then fill in the expert details below.",

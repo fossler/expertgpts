@@ -19,7 +19,7 @@ from lib.shared.constants import (
     get_model_display_name,
     get_default_model_for_provider,
 )
-from lib.ui import create_new_expert, render_add_chat_dialog, render_llm_configuration
+from lib.ui import create_new_expert, open_add_chat_dialog, render_llm_configuration
 from lib.ui.dialogs import render_thinking_mode_ui, render_model_selection
 from lib.shared.helpers import (
     sanitize_name,
@@ -35,29 +35,14 @@ from lib.shared.session_state import (
     initialize_shared_session_state,
     handle_pending_navigation,
     invalidate_expert_cache,
-    ensure_dialog_state,
 )
 from lib.shared.file_ops import safe_path_join, validate_cwd
-
-
-def _set_dialog_state(dialog_name: str, expert_id: str, value: bool = False) -> None:
-    """Set a dialog state variable for a specific expert.
-
-    Args:
-        dialog_name: Name of the dialog (e.g., "editing_expert", "confirm_delete")
-        expert_id: Expert ID to append to state key
-        value: Value to set (default: False)
-    """
-    st.session_state[f"{dialog_name}_{expert_id}"] = value
 
 
 def initialize_session_state():
     """Initialize session state variables."""
     # Initialize shared session state (API key, navigation, etc.)
     initialize_shared_session_state()
-
-    # Initialize add chat dialog state (using shared helper)
-    ensure_dialog_state("add_chat")
 
     # Initialize active tab state
     if "settings_active_tab" not in st.session_state:
@@ -620,40 +605,41 @@ def render_general_settings_section():
                 i18n.set_language(code)
 
 
-def render_edit_expert_dialog():
-    """Render the Edit Expert dialog.
+def open_edit_expert_dialog(expert_id: str) -> None:
+    """Open the Edit Expert dialog for an expert as a modal.
+
+    Args:
+        expert_id: Unique expert identifier
+    """
+    from lib.i18n import i18n
+
+    try:
+        expert_config = get_config_manager().load_config(expert_id)
+    except FileNotFoundError:
+        st.error(f"❌ {i18n.t('errors.expert_not_found', expert_id=expert_id)}")
+        return
+
+    translated_name = translate_expert_name(expert_config["expert_name"])
+    st.dialog(
+        i18n.t("dialogs.edit_expert.title", name=translated_name),
+        width="large",
+        icon=":material/edit:",
+    )(_render_edit_expert_dialog)(expert_id, expert_config)
+
+
+def _render_edit_expert_dialog(expert_id: str, expert_config: dict) -> None:
+    """Render the body of the Edit Expert dialog.
 
     This dialog allows users to edit an existing expert agent.
     Expert ID cannot be changed.
+
+    Args:
+        expert_id: Unique expert identifier
+        expert_config: The expert's configuration, loaded when the dialog opened
     """
-    # Find which expert is being edited
-    editing_expert_id = None
-    for key in st.session_state:
-        if key.startswith("editing_expert_") and st.session_state[key]:
-            editing_expert_id = key.replace("editing_expert_", "")
-            break
-
-    if not editing_expert_id:
-        return
-
-    # Load the expert's config
     from lib.i18n import i18n
 
     config_manager = get_config_manager()
-    try:
-        expert_config = config_manager.load_config(editing_expert_id)
-    except FileNotFoundError:
-        st.error(f"❌ {i18n.t('errors.expert_not_found', expert_id=editing_expert_id)}")
-        # Clear the editing state
-        for key in st.session_state:
-            if key.startswith("editing_expert_"):
-                st.session_state[key] = False
-        st.rerun()
-        return
-
-    # Translate expert name for title
-    translated_name = translate_expert_name(expert_config["expert_name"])
-    st.title(f"✏️ Edit Expert: {translated_name}")
 
     # LLM Configuration (Provider, Model, Temperature, Thinking)
     current_provider, current_model, current_thinking = get_llm_metadata(expert_config)
@@ -761,6 +747,11 @@ def render_edit_expert_dialog():
                 st.error(i18n.t("errors.required_fields"))
                 return
 
+            is_valid, error_msg = validate_expert_name(chat_name)
+            if not is_valid:
+                st.error(f"❌ {error_msg}")
+                return
+
             try:
                 # Determine if we need AI generation
                 # Empty string means "regenerate with AI" (if API key available)
@@ -782,7 +773,7 @@ def render_edit_expert_dialog():
 
                 # Update the config
                 config_manager.update_config(
-                    editing_expert_id,
+                    expert_id,
                     {
                         "expert_name": chat_name,
                         "description": description,
@@ -796,22 +787,17 @@ def render_edit_expert_dialog():
                 )
 
                 # Invalidate cache for this expert (using shared helper)
-                invalidate_expert_cache(editing_expert_id)
+                invalidate_expert_cache(expert_id)
 
-                # Clear the editing state
-                _set_dialog_state("editing_expert", editing_expert_id)
+                st.toast(i18n.t("status.expert_updated", name=chat_name), icon="✅")
 
-                st.success(f"✅ {i18n.t('status.expert_updated', name=chat_name)}")
-                st.info(f"🔄 {i18n.t('status.refreshing')}")
-
+                # Rerun closes the dialog and refreshes the expert list
                 st.rerun()
 
             except Exception as e:
                 st.error(f"❌ {i18n.t('errors.error_updating_expert', error=str(e))}")
 
         if cancel_button:
-            # Clear the editing state
-            _set_dialog_state("editing_expert", editing_expert_id)
             st.rerun()
 
 
@@ -829,8 +815,7 @@ def render_expert_management_section():
         if st.button(
             f"➕ {i18n.t('buttons.add_new_chat')}", type="primary", width="content"
         ):
-            st.session_state.show_add_chat_dialog = True
-            st.rerun()
+            open_add_chat_dialog()
     else:
         st.button(
             f"➕ {i18n.t('buttons.add_new_chat')}",
@@ -928,82 +913,70 @@ def render_expert_management_section():
                 if st.button(
                     f"✏️ {i18n.t('buttons.edit')}", key=edit_key, width="stretch"
                 ):
-                    st.session_state[f"editing_expert_{expert['expert_id']}"] = True
-                    st.rerun()
+                    open_edit_expert_dialog(expert["expert_id"])
 
                 delete_key = f"delete_{expert['expert_id']}"
                 if st.button(
                     f"🗑️ {i18n.t('buttons.delete')}", key=delete_key, width="stretch"
                 ):
-                    st.session_state[f"confirm_delete_{expert['expert_id']}"] = True
+                    open_delete_expert_dialog(expert)
 
-        # Confirmation dialog for deletion
-        if st.session_state.get(f"confirm_delete_{expert['expert_id']}"):
-            translated_name = translate_expert_name(expert["expert_name"])
-            st.warning(
-                f"⚠️ {i18n.t('experts.management.confirm_delete', name=translated_name)}"
-            )
 
-            col1, col2, col3 = st.columns(3)
+def open_delete_expert_dialog(expert: dict) -> None:
+    """Open the confirmation dialog for deleting an expert.
 
-            with col1:
-                if st.button(
-                    f"✅ {i18n.t('buttons.yes_delete')}",
-                    key=f"confirm_{expert['expert_id']}",
-                    type="primary",
-                ):
-                    try:
-                        # Import PageGenerator
-                        from lib.shared.page_generator import PageGenerator
+    Args:
+        expert: Expert entry from ``list_experts_lightweight()``
+    """
+    from lib.i18n import i18n
 
-                        # Delete the config file using ConfigManager
-                        config_manager = get_config_manager()
-                        config_manager.delete_config(expert["expert_id"])
+    st.dialog(i18n.t("buttons.delete"), icon=":material/delete:")(
+        _render_delete_expert_dialog
+    )(expert)
 
-                        # Delete the page file using PageGenerator
-                        page_generator = PageGenerator()
-                        page_generator.delete_page(expert["expert_id"])
 
-                        # Clear all cache for this expert
-                        expert_id = expert["expert_id"]
+def _render_delete_expert_dialog(expert: dict) -> None:
+    """Render the body of the delete confirmation dialog.
 
-                        # Clear cache version
-                        if f"cache_version_{expert_id}" in st.session_state:
-                            del st.session_state[f"cache_version_{expert_id}"]
+    Args:
+        expert: Expert entry from ``list_experts_lightweight()``
+    """
+    from lib.i18n import i18n
 
-                        # Clear chat history for this expert
-                        if f"messages_{expert_id}" in st.session_state:
-                            del st.session_state[f"messages_{expert_id}"]
+    expert_id = expert["expert_id"]
+    translated_name = translate_expert_name(expert["expert_name"])
+    st.warning(f"⚠️ {i18n.t('experts.management.confirm_delete', name=translated_name)}")
 
-                        # Clear any other expert-specific state
-                        keys_to_delete = [
-                            key
-                            for key in st.session_state.keys()
-                            if expert_id in str(key)
-                        ]
-                        for key in keys_to_delete:
-                            del st.session_state[key]
+    with st.container(horizontal=True):
+        confirm = st.button(
+            f"✅ {i18n.t('buttons.yes_delete')}",
+            key=f"confirm_{expert_id}",
+            type="primary",
+        )
+        cancel = st.button(f"❌ {i18n.t('buttons.cancel')}", key=f"cancel_{expert_id}")
 
-                        # Get translated name for success message
-                        translated_name = translate_expert_name(expert["expert_name"])
-                        st.success(
-                            f"✅ {i18n.t('success.expert_deleted', name=translated_name)}"
-                        )
-                        _set_dialog_state("confirm_delete", expert["expert_id"])
-                        st.rerun()
+    if cancel:
+        st.rerun()
 
-                    except Exception as e:
-                        st.error(
-                            f"❌ {i18n.t('errors.error_deleting_expert', error=str(e))}"
-                        )
+    if confirm:
+        try:
+            # Delete the config file and the page
+            get_config_manager().delete_config(expert_id)
+            PageGenerator().delete_page(expert_id)
 
-            with col2:
-                if st.button(
-                    f"❌ {i18n.t('buttons.cancel')}",
-                    key=f"cancel_{expert['expert_id']}",
-                ):
-                    _set_dialog_state("confirm_delete", expert["expert_id"])
-                    st.rerun()
+            # Clear all session state of this expert (cache version, messages, ...)
+            keys_to_delete = [
+                key for key in st.session_state.keys() if expert_id in str(key)
+            ]
+            for key in keys_to_delete:
+                del st.session_state[key]
+
+            st.toast(i18n.t("success.expert_deleted", name=translated_name), icon="✅")
+            # Rerun closes the dialog and refreshes the expert list
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"❌ {i18n.t('errors.error_deleting_expert', error=str(e))}")
 
 
 def get_configs_as_zip():
@@ -1066,84 +1039,86 @@ def render_danger_zone_section():
     if st.button(
         f"🔄 {i18n.t('danger_zone.reset_button')}", type="primary", width="content"
     ):
-        st.session_state.confirm_reset = True
+        open_reset_dialog()
 
-    if st.session_state.get("confirm_reset"):
-        st.error(f"🚨 **{i18n.t('danger_zone.final_warning')}**")
 
-        col1, col2, col3 = st.columns(3)
+def open_reset_dialog() -> None:
+    """Open the final confirmation dialog for resetting the application."""
+    from lib.i18n import i18n
 
-        with col1:
-            if st.button(
-                f"✅ {i18n.t('buttons.yes_reset_everything')}",
-                key="confirm_reset_button",
-                type="primary",
-            ):
-                try:
-                    # Delete all configs (with path validation)
-                    configs_dir = Path(__file__).parent.parent / "configs"
-                    if configs_dir.exists():
-                        for config_file in configs_dir.glob("*.yaml"):
-                            # Validate the config file path is safe before deletion
-                            safe_config_path = safe_path_join(
-                                configs_dir, config_file.name
-                            )
-                            if safe_config_path.exists():
-                                safe_config_path.unlink()
+    st.dialog(i18n.t("danger_zone.reset_button"), icon=":material/warning:")(
+        _render_reset_dialog
+    )()
 
-                    # Delete all expert pages, preserving system pages (Home,
-                    # Settings, Help) and any hidden "_"-prefixed page (e.g.
-                    # _debug.py). is_system_page() is the single source of truth.
-                    pages_dir = Path(__file__).parent
-                    if pages_dir.exists():
-                        for page_file in pages_dir.glob("*.py"):
-                            if not is_system_page(page_file.name):
-                                # Validate the page file path is safe before deletion
-                                safe_page_path = safe_path_join(
-                                    pages_dir, page_file.name
-                                )
-                                if safe_page_path.exists():
-                                    safe_page_path.unlink()
 
-                    # Recreate example experts using scripts/setup.py
-                    st.info(f"🔄 {i18n.t('status.recreating_experts')}")
+def _render_reset_dialog() -> None:
+    """Render the body of the reset confirmation dialog."""
+    from lib.i18n import i18n
 
-                    # Validate working directory before subprocess execution
-                    project_root = Path(__file__).parent.parent
-                    safe_cwd = validate_cwd(project_root)
+    st.error(f"🚨 **{i18n.t('danger_zone.final_warning')}**")
 
-                    # Run scripts/setup.py as a subprocess
-                    result = subprocess.run(
-                        [sys.executable, "scripts/setup.py"],
-                        check=True,
-                        capture_output=True,
-                        text=True,
-                        cwd=safe_cwd,
-                    )
+    with st.container(horizontal=True):
+        confirm = st.button(
+            f"✅ {i18n.t('buttons.yes_reset_everything')}",
+            key="confirm_reset_button",
+            type="primary",
+        )
+        cancel = st.button(f"❌ {i18n.t('buttons.cancel')}", key="cancel_reset_button")
 
-                    st.success(f"✅ {i18n.t('success.application_reset')}")
-                    st.info(f"🔄 {i18n.t('status.restarting_application')}")
+    if cancel:
+        st.rerun()
 
-                    st.session_state.confirm_reset = False
-                    st.rerun()
+    if confirm:
+        try:
+            # Delete all configs (with path validation)
+            configs_dir = Path(__file__).parent.parent / "configs"
+            if configs_dir.exists():
+                for config_file in configs_dir.glob("*.yaml"):
+                    # Validate the config file path is safe before deletion
+                    safe_config_path = safe_path_join(configs_dir, config_file.name)
+                    if safe_config_path.exists():
+                        safe_config_path.unlink()
 
-                except subprocess.CalledProcessError as e:
-                    st.error(
-                        f"❌ {i18n.t('errors.error_recreating_experts', error=str(e))}"
-                    )
-                    if e.stdout:
-                        st.error(f"Output: {e.stdout}")
-                    if e.stderr:
-                        st.error(f"Error: {e.stderr}")
-                except Exception as e:
-                    st.error(
-                        f"❌ {i18n.t('errors.error_resetting_application', error=str(e))}"
-                    )
+            # Delete all expert pages, preserving system pages (Home,
+            # Settings, Help) and any hidden "_"-prefixed page (e.g.
+            # _debug.py). is_system_page() is the single source of truth.
+            pages_dir = Path(__file__).parent
+            if pages_dir.exists():
+                for page_file in pages_dir.glob("*.py"):
+                    if not is_system_page(page_file.name):
+                        # Validate the page file path is safe before deletion
+                        safe_page_path = safe_path_join(pages_dir, page_file.name)
+                        if safe_page_path.exists():
+                            safe_page_path.unlink()
 
-        with col2:
-            if st.button(f"❌ {i18n.t('buttons.cancel')}", key="cancel_reset_button"):
-                st.session_state.confirm_reset = False
-                st.rerun()
+            # Recreate example experts using scripts/setup.py
+            st.info(f"🔄 {i18n.t('status.recreating_experts')}")
+
+            # Validate working directory before subprocess execution
+            project_root = Path(__file__).parent.parent
+            safe_cwd = validate_cwd(project_root)
+
+            # Run scripts/setup.py as a subprocess
+            result = subprocess.run(
+                [sys.executable, "scripts/setup.py"],
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=safe_cwd,
+            )
+
+            st.toast(i18n.t("success.application_reset"), icon="✅")
+            # Rerun closes the dialog and reloads the recreated experts
+            st.rerun()
+
+        except subprocess.CalledProcessError as e:
+            st.error(f"❌ {i18n.t('errors.error_recreating_experts', error=str(e))}")
+            if e.stdout:
+                st.error(f"Output: {e.stdout}")
+            if e.stderr:
+                st.error(f"Error: {e.stderr}")
+        except Exception as e:
+            st.error(f"❌ {i18n.t('errors.error_resetting_application', error=str(e))}")
 
 
 def render_about_section():
@@ -1229,17 +1204,6 @@ def render_about_section():
 def main():
     """Main settings page entry point."""
     initialize_session_state()
-
-    # Render edit expert dialog if active
-    for key in st.session_state:
-        if key.startswith("editing_expert_") and st.session_state[key]:
-            render_edit_expert_dialog()
-            return
-
-    # Render add chat dialog if active
-    if st.session_state.show_add_chat_dialog:
-        render_add_chat_dialog()
-        return
 
     from lib.i18n import i18n
 

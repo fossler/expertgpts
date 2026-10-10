@@ -66,9 +66,8 @@ st.session_state.default_thinking_enabled = True  # DEFAULT_THINKING_ENABLED
 # Language Preference (loaded from app_defaults.toml)
 st.session_state.language = "en"  # Auto-detected on first run
 
-# Navigation / Dialog State (set by app.py and the pages)
-st.session_state.pending_expert_page = None   # handle_pending_navigation()
-st.session_state.show_add_chat_dialog = False  # ensure_dialog_state("add_chat")
+# Navigation State (set by the Add Chat dialog, read by handle_pending_navigation())
+st.session_state.pending_expert_page = None
 ```
 
 **Initialization Flow**:
