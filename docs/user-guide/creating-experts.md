@@ -378,7 +378,9 @@ metadata:
 **What gets deleted**:
 - Expert configuration: `configs/{expert_id}.yaml`
 - Expert page: `pages/{expert_id}.py`
-- The chat history file `chat_history/{expert_id}.json` (and images in `chat_attachments/{expert_id}/`) is **not** deleted; remove it manually or use **Clear Chat History** before deleting
+- Chat history: `chat_history/{expert_id}.json`
+- Attached images: `chat_attachments/{expert_id}/`
+- A leftover streaming cache: `streaming_cache/{expert_id}_latest.*`
 
 **Warning**: Deletion is irreversible. Backup important conversations before deletion.
 

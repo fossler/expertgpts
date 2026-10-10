@@ -85,9 +85,11 @@ None of the breaking changes require code changes in ExpertGPTs.
    `settings_active_tab` session state is gone. "Go to Settings" in the Add Chat dialog
    opens the API Key section.
 
-3. **`required` and client-side validation for `st.text_input` (1.62 / 1.65)**
-   Mandatory fields in the add/edit expert forms (name, description) could be validated
-   in the browser before submitting, replacing part of the custom validation.
+3. **`required` and client-side validation for `st.text_input` (1.62 / 1.65)** — *not adopted (2026-10-10)*
+   Name and description are already mandatory and validated in Python after submitting;
+   the error shows inside the open dialog. `required` / `validate` exist only on
+   `st.text_input`, not on `st.text_area`, so only the expert name would gain browser-side
+   checks, and the server-side check has to stay anyway. Too little gain for now.
 
 4. **`icon=` for `st.title` / `st.header` / `st.subheader` (1.63) and `st.metric` (1.61)** — *done (2026-10-10)*
    Page titles, section headings and the Settings tab bar use Material icons via `icon=`
@@ -99,18 +101,23 @@ None of the breaking changes require code changes in ExpertGPTs.
 
 ### Nice to have
 
-5. **Background refresh for `st.cache_data` (1.61, TTL multiplier configurable in 1.63)**
-   Serves the stale value while refreshing in the background. Fits
-   `list_experts_lightweight` (ttl=60) and `translate_expert_names_batch` (ttl=300) to
-   avoid latency spikes when the TTL expires.
+5. **Background refresh for `st.cache_data` (1.61, TTL multiplier configurable in 1.63)** — *not adopted (2026-10-10)*
+   Serves the stale value while refreshing in the background. Measured uncached cost:
+   `list_experts_lightweight` (10 YAML files) ~10 ms, `translate_expert_names_batch`
+   ~0.01 ms, so there is no latency spike to hide. Serving stale values could instead show
+   an expert list without a just-created expert.
 
-6. **`on_change="ignore"` for almost all widgets (1.63–1.65)**
-   Changing the widget doesn't trigger a rerun. Useful for the theme selection, which
-   only takes effect on "Save & Apply".
+6. **`on_change="ignore"` for almost all widgets (1.63–1.65)** — *not adopted (2026-10-10)*
+   Changing the widget doesn't trigger a rerun. The theme selection needs the rerun: it
+   updates the color preview immediately and enables the color pickers for "Custom". No
+   other widget where a rerun is a problem.
 
-7. **Async support and async-aware caches (1.64)**
-   Not a real win for streaming: the background thread + file cache design exists so
-   streams survive page navigation, which in-script async can't provide.
+7. **Async support and async-aware caches (1.64)** — *not adopted (2026-10-10)*
+   Async only helps when a page run waits for several slow things at once; none does.
+   The chat stream runs in a background thread so it survives page navigation (an
+   in-script coroutine would be cancelled), transcription and system prompt generation
+   are single calls, and the rest takes milliseconds (git branch ~4 ms). Library imports
+   can't be made async and happen once per server process (~0.3 s, mostly `openai`).
 
 ### Bug fixes that help indirectly
 
