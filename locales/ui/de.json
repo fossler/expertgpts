@@ -395,11 +395,13 @@
     "clear_button": "Endgültig löschen",
     "voice_input": "Spracheingabe",
     "voice_help": "Nehmen Sie eine Sprachnachricht auf. Sie wird in Text umgewandelt, den Sie vor dem Senden bearbeiten können.",
-    "voice_not_available": "Die Umwandlung in Text ist noch nicht angebunden, die Aufnahme wird daher nicht verarbeitet. Das folgt in einem späteren Schritt.",
     "voice_transcribing": "Wird transkribiert…",
     "voice_transcript": "Transkript",
     "voice_send": "Als Nachricht senden",
     "voice_error": "Transkription fehlgeschlagen: {error}",
-    "error_audio_too_large": "Die Aufnahme ist größer als {size} MB und kann nicht transkribiert werden."
+    "error_audio_too_large": "Die Aufnahme ist größer als {size} MB und kann nicht transkribiert werden.",
+    "voice_model": "Transkription: {model}",
+    "voice_key_missing": "Für die Spracheingabe wird ein API-Schlüssel für {provider} benötigt ({model}). Sie können ihn in den Einstellungen hinterlegen.",
+    "error_audio_too_long": "Die Aufnahme ist länger als {seconds} Sekunden, das Limit von {model}."
   }
 }

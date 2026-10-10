@@ -13,7 +13,13 @@ from typing import List, Optional, Tuple
 
 import streamlit as st
 
-from lib.audio import is_transcription_available, transcribe
+from lib.audio import (
+    MAX_DURATION_SECONDS,
+    TRANSCRIPTION_MODELS,
+    get_audio_duration,
+    get_transcription_provider,
+    transcribe,
+)
 from lib.config.config_manager import get_llm_metadata
 from lib.i18n.i18n import i18n
 from lib.llm import TokenManager
@@ -31,6 +37,7 @@ from lib.shared.constants import (
     IMAGE_MAX_SIZE_MB,
     get_max_tokens,
     get_model_display_name,
+    get_provider_display_name,
     supports_images,
 )
 from lib.shared.helpers import sanitize_markdown_content
@@ -149,8 +156,8 @@ def render_chat_toolbox(
                 except ValueError as e:
                     notes.append(_error_note(e, file.name))
 
-        # --- Voice input (speech-to-text model connection follows later) ---
-        voice_prompt = _render_voice_input(widget_key)
+        # --- Voice input (speech-to-text) ---
+        voice_prompt = _render_voice_input(widget_key, provider)
 
         # --- Status: skipped files and current attachments ---
         for note in notes:
@@ -178,21 +185,25 @@ def render_chat_toolbox(
     return ToolboxInput(attachments, images, voice_prompt)
 
 
-def _render_voice_input(widget_key: str) -> Optional[str]:
+def _render_voice_input(widget_key: str, chat_provider: str) -> Optional[str]:
     """Render "Voice input": record audio, transcribe it, send the text.
 
-    The transcript is shown in an editable text area; "Send as message"
-    returns it so it is sent like a typed prompt. Until a speech-to-text model
-    is connected (see ``lib.audio.transcription``), only a notice is shown
-    after recording.
+    OpenAI experts transcribe with OpenAI, all others with Z.AI GLM-ASR (see
+    ``lib.audio.transcription``). The transcript is shown in an editable text
+    area; "Send as message" returns it so it is sent like a typed prompt.
 
     Args:
         widget_key: Key prefix; changes after each sent message, which also
             resets the recorder
+        chat_provider: The expert's chat provider
 
     Returns:
         str | None: The text to send, or None
     """
+    provider = get_transcription_provider(chat_provider)
+    model = TRANSCRIPTION_MODELS[provider]
+    api_key = st.session_state.get("api_keys", {}).get(provider)
+
     with st.popover(
         i18n.t("chat_toolbox.voice_input"),
         icon=":material/mic:",
@@ -202,19 +213,37 @@ def _render_voice_input(widget_key: str) -> Optional[str]:
             i18n.t("chat_toolbox.voice_input"),
             key=f"{widget_key}_voice",
             label_visibility="collapsed",
+            disabled=not api_key,
         )
         st.caption(i18n.t("chat_toolbox.voice_help"))
-        if audio is None:
+        st.caption(i18n.t("chat_toolbox.voice_model", model=model))
+        if not api_key:
+            st.info(
+                i18n.t(
+                    "chat_toolbox.voice_key_missing",
+                    provider=get_provider_display_name(provider),
+                    model=model,
+                )
+            )
             return None
-
-        if not is_transcription_available():
-            st.info(i18n.t("chat_toolbox.voice_not_available"))
+        if audio is None:
             return None
 
         data = audio.getvalue()
         if len(data) > AUDIO_MAX_SIZE_MB * 1024 * 1024:
             st.warning(
                 i18n.t("chat_toolbox.error_audio_too_large", size=AUDIO_MAX_SIZE_MB)
+            )
+            return None
+        max_seconds = MAX_DURATION_SECONDS[provider]
+        duration = get_audio_duration(data)
+        if max_seconds and duration and duration > max_seconds:
+            st.warning(
+                i18n.t(
+                    "chat_toolbox.error_audio_too_long",
+                    seconds=max_seconds,
+                    model=model,
+                )
             )
             return None
 
@@ -224,6 +253,8 @@ def _render_voice_input(widget_key: str) -> Optional[str]:
             with st.spinner(i18n.t("chat_toolbox.voice_transcribing")):
                 st.session_state[result_key] = transcribe(
                     data,
+                    chat_provider,
+                    api_key,
                     mime_type=audio.type or "audio/wav",
                     language=st.session_state.get("language"),
                 )

@@ -395,11 +395,13 @@
     "clear_button": "Padam secara kekal",
     "voice_input": "Input suara",
     "voice_help": "Rakam mesej suara. Ia ditukar kepada teks yang boleh anda sunting sebelum dihantar.",
-    "voice_not_available": "Penukaran suara kepada teks belum disambungkan, jadi rakaman belum diproses. Ini akan menyusul dalam langkah seterusnya.",
     "voice_transcribing": "Sedang mentranskripsi…",
     "voice_transcript": "Transkrip",
     "voice_send": "Hantar sebagai mesej",
     "voice_error": "Transkripsi gagal: {error}",
-    "error_audio_too_large": "Rakaman melebihi {size} MB dan tidak boleh ditranskripsi."
+    "error_audio_too_large": "Rakaman melebihi {size} MB dan tidak boleh ditranskripsi.",
+    "voice_model": "Transkripsi: {model}",
+    "voice_key_missing": "Input suara memerlukan kunci API untuk {provider} ({model}). Anda boleh menambahkannya dalam Tetapan.",
+    "error_audio_too_long": "Rakaman melebihi {seconds} saat, had bagi {model}."
   }
 }

@@ -104,9 +104,20 @@ For models without image support the button is disabled; hover over it to see "<
 
 ### Voice Input
 
-**🎤 Voice input** in the toolbox records a voice message with your microphone (your browser asks for permission the first time).
+**🎤 Voice input** in the toolbox records a voice message with your microphone (your browser asks for permission the first time):
 
-> **Note**: Speech-to-text is not connected yet. You can already record, but the recording is not processed; the popover shows a notice instead. Once a speech-to-text model is connected, the transcript will appear in an editable field, and **Send as message** sends it like a typed message (together with any attached files and images).
+1. Open **Voice input** and start/stop the recording
+2. The recording is converted to text; the transcript appears in an editable field
+3. Fix the text if needed and click **Send as message** — it is sent like a typed message, together with any attached files and images
+
+**Which speech-to-text model is used** depends on the expert's provider:
+
+| Expert provider | Transcription model | API key needed | Limit |
+|---|---|---|---|
+| OpenAI | `gpt-transcribe` (OpenAI) | OpenAI | 25 MB |
+| DeepSeek, Z.AI, KIMI | `glm-asr-2512` (Z.AI GLM-ASR) | Z.AI | 30 seconds, 25 MB |
+
+The popover shows the model in use. If the required API key is missing, the recorder is disabled and a notice tells you which key to add in Settings.
 
 ### Context Usage
 

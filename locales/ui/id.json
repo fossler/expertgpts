@@ -395,11 +395,13 @@
     "clear_button": "Hapus permanen",
     "voice_input": "Input suara",
     "voice_help": "Rekam pesan suara. Pesan diubah menjadi teks yang dapat Anda edit sebelum dikirim.",
-    "voice_not_available": "Konversi suara ke teks belum terhubung, sehingga rekaman belum diproses. Ini akan menyusul di langkah berikutnya.",
     "voice_transcribing": "Mentranskripsi…",
     "voice_transcript": "Transkrip",
     "voice_send": "Kirim sebagai pesan",
     "voice_error": "Transkripsi gagal: {error}",
-    "error_audio_too_large": "Rekaman lebih besar dari {size} MB dan tidak dapat ditranskripsi."
+    "error_audio_too_large": "Rekaman lebih besar dari {size} MB dan tidak dapat ditranskripsi.",
+    "voice_model": "Transkripsi: {model}",
+    "voice_key_missing": "Input suara memerlukan kunci API untuk {provider} ({model}). Anda dapat menambahkannya di Pengaturan.",
+    "error_audio_too_long": "Rekaman lebih dari {seconds} detik, batas dari {model}."
   }
 }

@@ -395,11 +395,13 @@
     "clear_button": "Eliminar definitivamente",
     "voice_input": "Entrada de voz",
     "voice_help": "Graba un mensaje de voz. Se convierte en texto que puedes editar antes de enviarlo.",
-    "voice_not_available": "La transcripción aún no está conectada, por lo que la grabación no se procesa. Esto llegará en un paso posterior.",
     "voice_transcribing": "Transcribiendo…",
     "voice_transcript": "Transcripción",
     "voice_send": "Enviar como mensaje",
     "voice_error": "La transcripción ha fallado: {error}",
-    "error_audio_too_large": "La grabación supera los {size} MB y no se puede transcribir."
+    "error_audio_too_large": "La grabación supera los {size} MB y no se puede transcribir.",
+    "voice_model": "Transcripción: {model}",
+    "voice_key_missing": "La entrada de voz necesita una clave API de {provider} ({model}). Puedes añadirla en la configuración.",
+    "error_audio_too_long": "La grabación dura más de {seconds} segundos, el límite de {model}."
   }
 }

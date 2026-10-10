@@ -395,11 +395,13 @@
     "clear_button": "永刪",
     "voice_input": "語入",
     "voice_help": "錄言為音，化為文，可修而後發。",
-    "voice_not_available": "音轉文之術未接，所錄暫不理，後當續成。",
     "voice_transcribing": "正轉錄…",
     "voice_transcript": "錄文",
     "voice_send": "發為言",
     "voice_error": "轉錄未成：{error}",
-    "error_audio_too_large": "所錄逾 {size} MB，不能轉錄。"
+    "error_audio_too_large": "所錄逾 {size} MB，不能轉錄。",
+    "voice_model": "轉錄之模：{model}",
+    "voice_key_missing": "語入須 {provider} 之 API 鑰（{model}），可於設置中增之。",
+    "error_audio_too_long": "所錄逾 {seconds} 秒，{model} 之限也。"
   }
 }

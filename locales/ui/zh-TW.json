@@ -395,11 +395,13 @@
     "clear_button": "永久刪除",
     "voice_input": "語音輸入",
     "voice_help": "錄製一則語音訊息，它將轉換為文字，您可以在傳送前編輯。",
-    "voice_not_available": "語音轉文字尚未接入，因此錄音暫不處理。此功能將在後續步驟中提供。",
     "voice_transcribing": "正在轉寫…",
     "voice_transcript": "轉寫文字",
     "voice_send": "作為訊息傳送",
     "voice_error": "轉寫失敗：{error}",
-    "error_audio_too_large": "錄音超過 {size} MB，無法轉寫。"
+    "error_audio_too_large": "錄音超過 {size} MB，無法轉寫。",
+    "voice_model": "轉寫模型：{model}",
+    "voice_key_missing": "語音輸入需要 {provider} 的 API 金鑰（{model}）。您可以在設定中新增。",
+    "error_audio_too_long": "錄音超過 {seconds} 秒，這是 {model} 的上限。"
   }
 }

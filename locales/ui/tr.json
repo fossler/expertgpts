@@ -395,11 +395,13 @@
     "clear_button": "Kalıcı olarak sil",
     "voice_input": "Sesli giriş",
     "voice_help": "Sesli bir mesaj kaydedin. Göndermeden önce düzenleyebileceğiniz metne dönüştürülür.",
-    "voice_not_available": "Konuşmadan metne dönüştürme henüz bağlı değil, bu nedenle kayıt işlenmiyor. Bu, sonraki bir adımda gelecek.",
     "voice_transcribing": "Metne dönüştürülüyor…",
     "voice_transcript": "Metin",
     "voice_send": "Mesaj olarak gönder",
     "voice_error": "Metne dönüştürme başarısız: {error}",
-    "error_audio_too_large": "Kayıt {size} MB'tan büyük olduğu için metne dönüştürülemiyor."
+    "error_audio_too_large": "Kayıt {size} MB'tan büyük olduğu için metne dönüştürülemiyor.",
+    "voice_model": "Metne dönüştürme: {model}",
+    "voice_key_missing": "Sesli giriş için {provider} API anahtarı gerekir ({model}). Ayarlar'dan ekleyebilirsiniz.",
+    "error_audio_too_long": "Kayıt {seconds} saniyeden uzun; bu, {model} sınırıdır."
   }
 }
