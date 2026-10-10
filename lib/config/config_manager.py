@@ -10,6 +10,9 @@ from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.format_ops import read_yaml, write_yaml
 from lib.shared.file_ops import ensure_directory_exists
 
+# Update fields stored in the config's metadata instead of at the top level
+METADATA_FIELDS = ("provider", "model", "thinking_level")
+
 
 class ConfigManager:
     """Manages configuration files for expert agents."""
@@ -121,9 +124,13 @@ class ConfigManager:
 
         Args:
             expert_id: Unique ID of the expert
-            updates: Dictionary of fields to update (can include provider, model, thinking_level)
+            updates: Dictionary of fields to update. "provider", "model" and
+                "thinking_level" are stored in the metadata. "api_key" is only
+                used to generate the system prompt and is never stored.
         """
         config = self.load_config(expert_id)
+        updates = dict(updates)
+        api_key = updates.pop("api_key", None)
 
         # Handle AI generation for system_prompt
         if "system_prompt" in updates:
@@ -131,7 +138,6 @@ class ConfigManager:
 
             # If None or empty string, trigger AI generation (if API key provided)
             if new_system_prompt is None or new_system_prompt.strip() == "":
-                api_key = updates.get("api_key")
                 expert_name = updates.get("expert_name", config.get("expert_name"))
                 description = updates.get("description", config.get("description"))
                 temperature = updates.get("temperature", config.get("temperature", 1.0))
@@ -144,18 +150,13 @@ class ConfigManager:
                     expert_name, description, temperature, api_key, provider, model
                 )
 
-        # Continue with normal update
-        config.update(updates)
-
-        # Update metadata if provider/model/thinking are specified
+        # Provider, model and thinking level live in the metadata only
         metadata = config.get("metadata", {})
-        if "provider" in updates:
-            metadata["provider"] = updates["provider"]
-        if "model" in updates:
-            metadata["model"] = updates["model"]
-        if "thinking_level" in updates:
-            metadata["thinking_level"] = updates["thinking_level"]
+        for field in METADATA_FIELDS:
+            if field in updates:
+                metadata[field] = updates.pop(field)
 
+        config.update(updates)
         config["metadata"] = metadata
         config["updated_at"] = datetime.now().isoformat()
 
