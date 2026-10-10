@@ -253,7 +253,7 @@ Clean separation of concerns for 14-language support:
 - **`app.py`** - Main entry point using `st.navigation()`; handles first-run detection and dynamic page loading
 - **`templates/template.py`** - Master template for all expert pages; edit here then run `scripts/regenerate_pages.py` to update all experts
 - **`pages/1000_Home.py`** - Home page with expert list and "Add Chat" functionality (permanent file)
-- **`pages/9998_Settings.py`** - Settings page for API keys, themes, language, provider defaults (permanent file)
+- **`pages/9998_Settings.py`** - Settings page for API keys, themes, language, provider defaults (permanent file); sections are deep-linkable via `?tab=<key>`
 - **`pages/9999_Help.py`** - Help page with documentation and links (permanent file)
 - **`pages/_debug.py`** - Hidden diagnostics page, reachable only via `/debug` (permanent file, not in the navigation)
 
@@ -440,6 +440,7 @@ Requires `watchdog` package (in the `dev` dependency group of `pyproject.toml`, 
 - **`scripts/regenerate_pages.py`** (`PageGenerator.regenerate_pages()`): rewrites existing expert pages from the template without touching configs or chat history; replaces `reset_application.py` as the way to apply template changes
 - **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
 - **Real dialogs**: "Add Chat" (`open_add_chat_dialog()`), "Edit Expert", delete and reset confirmations are blocking modal `st.dialog`s (`dismissible=False`: no X, ESC or outside click; they close only via their own Cancel/confirm buttons) opened from the button click (title built at call time for i18n); the `show_*_dialog` / `editing_expert_*` / `confirm_*` flags and `ensure_dialog_state()` were removed, success messages use `st.toast`. The edit dialog now also validates the expert name
+- **Settings deep links**: the Settings section is bound to the URL with stable, language-independent keys (`/Settings?tab=api_key`; `SETTINGS_SECTIONS` in `pages/9998_Settings.py`, `SETTINGS_TAB_PARAM` in `constants.py`) via `st.query_params` instead of the built-in `bind="query-params"`, which puts the translated label in the URL. Only the active section renders; `settings_active_tab` was removed
 
 ### Previous Session (2026-07-18)
 
