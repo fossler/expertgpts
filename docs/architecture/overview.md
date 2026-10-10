@@ -41,11 +41,11 @@ ExpertGPTs is a **multi-expert AI chat application** built with Streamlit, featu
                               │
 ┌─────────────────────────────┴───────────────────────────────────┐
 │                  External Services                               │
-│  ┌──────────────┐  ┌───────────────┐  ┌────────────────────┐  │
-│  │  DeepSeek    │  │    OpenAI     │  │      Z.AI          │  │
-│  │     API      │  │      API      │  │       API          │  │
-│  └──────────────┘  └───────────────┘  └────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐  │
+│  │  DeepSeek  │  │   OpenAI   │  │    Z.AI    │  │    KIMI    │  │
+│  │    API     │  │    API     │  │    API     │  │    API     │  │
+│  └────────────┘  └────────────┘  └────────────┘  └────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ## Project Structure
@@ -77,12 +77,14 @@ expertgpts/
 │   │   └── config_toml_manager.py  # Theme config
 │   ├── i18n/                      # Internationalization
 │   │   └── i18n.py                 # Language/translation
+│   ├── audio/                     # Voice input
+│   │   └── transcription.py        # Speech-to-text (OpenAI / Z.AI GLM-ASR)
 │   ├── storage/                   # Data persistence
 │   │   ├── chat_history_manager.py # Chat history
 │   │   ├── attachment_store.py     # Chat image files (chat_attachments/)
 │   │   └── streaming_cache.py      # Response caching
 │   ├── ui/                        # UI components
-│   │   ├── chat_toolbox.py        # Chat toolbox (attach file/image, context usage)
+│   │   ├── chat_toolbox.py        # Chat toolbox (attachments, voice input, clear history, context usage, model settings)
 │   │   └── dialogs.py             # Shared dialogs
 │   └── shared/                    # Shared utilities
 │       ├── attachments.py         # Chat file and image attachments
@@ -91,12 +93,13 @@ expertgpts/
 │       ├── constants.py           # Config constants
 │       ├── helpers.py             # Utilities
 │       ├── file_ops.py            # File operations
+│       ├── format_ops.py          # TOML/YAML/JSON read/write
 │       └── types.py               # Type definitions
 ├── locales/                        # UI translations
 │   └── ui/
 │       ├── en.json                 # English (source of truth)
 │       ├── de.json                 # German
-│       └── ... (13 language files)
+│       └── ... (14 language files)
 ├── chat_history/                   # Conversation storage
 │   ├── 1001_python_expert.json
 │   └── ...
@@ -161,6 +164,7 @@ expertgpts/
 - DeepSeek (default)
 - OpenAI
 - Z.AI
+- KIMI (Moonshot AI)
 
 **Architecture**:
 - OpenAI Python client with custom `base_url`
@@ -169,8 +173,9 @@ expertgpts/
 
 **Key Innovation**: `_prepare_thinking_param()` method handles provider differences:
 - OpenAI: `reasoning_effort` (none/low/medium/high/xhigh, model-dependent; always sent explicitly)
-- DeepSeek: `thinking.type` (model-dependent)
-- Z.AI: `thinking.type` (via extra_body)
+- DeepSeek: `reasoning_effort` (high/max), or `thinking.type=disabled` via extra_body to turn thinking off
+- Z.AI: `thinking.type` (via extra_body), plus `reasoning_effort` for GLM-5.3 / GLM-5.2
+- KIMI: `reasoning_effort` (kimi-k3) or `thinking.type` toggle (kimi-k2.6); kimi-k2.7-code* always think
 
 **See also**: [Multi-Provider LLM Guide](multi-provider-llm.md)
 
@@ -192,17 +197,19 @@ expertgpts/
 
 **Purpose**: Generate new expert pages from template
 
-**Process**:
-1. Generate unique expert ID
-2. Create YAML config
-3. Generate page file from template
-4. Register with navigation system
+**Process** (orchestrated by `create_new_expert()` in `lib/ui/dialogs.py`):
+1. Generate unique expert ID (`PageGenerator.get_next_page_number()` + `sanitize_name()`)
+2. Create YAML config (`ConfigManager.create_config()`)
+3. Generate page file from template (`PageGenerator.generate_page(expert_id, expert_name)`)
+4. Clear the page index cache (`clear_page_cache()`) so the navigation sees the new page
 
-**Auto-Navigation**: Automatically navigates to new expert after creation
+`PageGenerator.regenerate_pages()` rewrites all existing expert pages from the current template (`scripts/regenerate_pages.py`).
+
+**Auto-Navigation**: Automatically navigates to new expert after creation (`pending_expert_page` + `handle_pending_navigation()`)
 
 ### 6. Internationalization (`lib/i18n/i18n.py`)
 
-**Purpose**: Multi-language support (13 languages)
+**Purpose**: Multi-language support (14 languages)
 
 **Three-Layer Architecture**:
 
@@ -240,11 +247,11 @@ expertgpts/
 - Navigation state
 
 **Per-Expert Session State**:
-- Messages history
-- Provider selection
-- Model selection
-- Temperature
-- Thinking level
+- Messages history (`messages_{expert_id}`)
+- Config cache version (`cache_version_{expert_id}`)
+- Attachment uploader generation (`attachments_{expert_id}`)
+
+Provider, model, temperature and thinking level are not kept in session state: they are stored in the expert config (`configs/{expert_id}.yaml`, read via `get_llm_metadata()`) and changed in the chat toolbox's model row.
 
 **See also**: [State Management Guide](state-management.md)
 
@@ -258,6 +265,7 @@ expertgpts/
 - 1MB file size limit per expert
 - Auto-trimming when limit exceeded
 - Load/save operations
+- Assistant messages store the `provider`/`model` that produced them (`assistant_message()`, used for the avatar)
 - `delete_chat_history()` also deletes the expert's images
 
 ### 9. Attachment Store (`lib/storage/attachment_store.py`)
@@ -282,13 +290,13 @@ Home page: Display creation form
     ↓
 User submits form (name, description, temperature, etc.)
     ↓
-PageGenerator.generate_page()
-    ├─ Generate expert ID
+create_new_expert() (lib/ui/dialogs.py)
+    ├─ Generate expert ID (next page number + sanitized name)
     ├─ Create YAML config (configs/{expert_id}.yaml)
-    ├─ Generate page from template (pages/{expert_id}.py)
-    └─ Return expert ID
+    ├─ Generate page from template (PageGenerator.generate_page() → pages/{expert_id}.py)
+    └─ Return (expert_id, page_path)
     ↓
-st.navigation() navigates to new expert page
+pending_expert_page set → rerun → handle_pending_navigation() calls st.switch_page()
     ↓
 Expert page loads (session state initialized)
 ```
@@ -296,30 +304,34 @@ Expert page loads (session state initialized)
 ### Chat Interaction
 
 ```
-User enters message
+User enters message (st.chat_input, or a transcribed voice message from the toolbox)
     ↓
-Expert page: Capture input
+Expert page: handle_user_input()
     ↓
-Load chat history (if any)
+Store attached images, embed attachments (build_message_content)
     ↓
-Inject language prefix (runtime i18n)
+Append user message to session state + save_chat_history()
     ↓
-Construct system prompt
+Get cached client (get_cached_client() in client_pool.py)
     ↓
 Convert message content (to_api_content: image references → image parts, or a text note for text-only models)
     ↓
-LLMClient.generate_response()
-    ├─ Get cached client (client_pool.py)
-    ├─ Prepare thinking parameters (provider-specific)
-    ├─ Call LLM API (DeepSeek/OpenAI/Z.AI)
-    └─ Return response
+Inject language prefix into system prompt (i18n.get_system_prompt_with_language)
     ↓
-Display response to user
+StreamingCache.start_streaming_to_file()
+    └─ Background thread: LLMClient.chat_stream()
+         ├─ Resolve temperature (_effective_temperature)
+         ├─ Prepare thinking parameters (provider-specific)
+         └─ Call LLM API (DeepSeek/OpenAI/Z.AI/KIMI), write chunks to streaming_cache/
     ↓
-ChatHistoryManager.save_chat_history()
+poll_stream_and_display(): display response to user
     ↓
-Update session state
+Append assistant_message(response, provider, model) + save_chat_history()
+    ↓
+cache.cleanup() + st.rerun()
 ```
+
+See [Background Streaming](background-streaming.md) for details.
 
 ### Expert Page Load
 
@@ -329,14 +341,16 @@ User navigates to expert page
 Streamlit loads expert page (pages/{expert_id}.py)
     ↓
 Initialize per-expert session state
-    ├─ Load expert config (configs/{expert_id}.yaml)
     ├─ Load chat history (chat_history/{expert_id}.json)
-    └─ Initialize provider/model settings
+    ├─ Load expert config (configs/{expert_id}.yaml, cached)
+    └─ Read provider/model/thinking level from config metadata (get_llm_metadata)
+    ↓
+Check for cached background streams (check_and_display_cached_responses)
     ↓
 Render expert interface
-    ├─ Display chat history
-    ├─ Show provider/model controls
-    └─ Display chat input
+    ├─ Display chat history (avatar per answer from its provider)
+    └─ Display chat input + toolbox in st.bottom (attachments, voice input,
+       clear history, context usage, model row)
 ```
 
 ## Design Principles
@@ -388,12 +402,12 @@ Render expert interface
 - **Icons**: Material Design (via Streamlit)
 
 ### Backend
-- **Language**: Python 3.8+
+- **Language**: Python 3.12+
 - **LLM Clients**: OpenAI Python SDK
 - **Data Formats**: YAML, JSON, TOML
 
 ### External Services
-- **LLM Providers**: DeepSeek, OpenAI, Z.AI
+- **LLM Providers**: DeepSeek, OpenAI, Z.AI, KIMI
 - **APIs**: OpenAI-compatible endpoints
 
 ### Development
@@ -437,19 +451,18 @@ Render expert interface
 
 - Stored in `.streamlit/secrets.toml` (gitignored)
 - File permissions: 600 (owner read/write only)
-- Access via Streamlit secrets API only
+- Read directly from `secrets.toml` by `lib/config/secrets_manager.py` (no environment variable fallback)
 
 ### 2. Input Validation
 
 - Expert names: Sanitized to prevent path traversal
-- API keys: Minimum 20 characters, format validation
-- Temperature: Range validation (0.0-2.0)
+- API keys: Provider-specific format validation (`validate_api_key()`), otherwise minimum 20 characters
+- Temperature: Range validation (0.0-2.0; capped at the provider's `max_temperature`, e.g. Z.AI 1.0)
 
 ### 3. File Permissions
 
 - Secrets file: 600 permissions
 - Automatic permission setting on save
-- Verification on load
 
 ## Scalability
 
@@ -474,9 +487,9 @@ Render expert interface
 ### Adding New LLM Providers
 
 **Steps**:
-1. Add provider configuration to `lib/shared/constants.py`
+1. Add provider configuration to `lib/shared/constants.py` (`LLM_PROVIDERS`, plus `PROVIDER_LINKS` and `PROVIDER_AVATARS`)
 2. Update `_prepare_thinking_param()` in `llm_client.py`
-3. Add API key UI in Settings page
+3. Add an API key format pattern to `validate_api_key()` in `lib/shared/helpers.py` (the Settings page lists all `LLM_PROVIDERS` automatically)
 4. Update secrets template
 
 **Estimated Effort**: ~1 hour

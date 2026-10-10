@@ -75,8 +75,8 @@ expert configs:
 
 | Action | Effect |
 |--------|--------|
-| **Clear data cache** | Drops all `@st.cache_data` results — the cached expert list, theme settings and UI translations. Re-read from disk on next use. Run after editing files in `configs/` outside the app. |
-| **Clear resource cache** | Drops all `@st.cache_resource` singletons — the pooled LLM client connections and the tiktoken encoder. Rebuilt on the next request. Run after changing API keys or if a connection is stale. |
+| **Clear data cache** | Drops all `@st.cache_data` results — the cached expert list, expert configs, available themes and translated expert names. Re-read from disk on next use. Run after editing files in `configs/` outside the app. |
+| **Clear resource cache** | Drops all `@st.cache_resource` singletons — the pooled LLM client connections, the tiktoken encoder, the config manager and the page index. Rebuilt on the next request. Run after changing API keys or if a connection is stale. |
 | **Clean streaming cache** | Deletes finished response files in `streaming_cache/` (completed or errored). In-progress streams are preserved, so a running generation is never interrupted — it just frees leftover disk space. |
 
 ## When to use it

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ExpertGPTs is a multi-expert AI chat application built with Streamlit that provides access to domain-specific AI experts (Python, Data Science, Writing, etc.) with support for multiple LLM providers (DeepSeek, OpenAI, Z.AI), full internationalization (13 languages), template-based page generation, and persistent chat history.
+ExpertGPTs is a multi-expert AI chat application built with Streamlit that provides access to domain-specific AI experts (Python, Data Science, Writing, etc.) with support for multiple LLM providers (DeepSeek, OpenAI, Z.AI, KIMI), full internationalization (14 languages), template-based page generation, and persistent chat history.
 
 ## Working Guidelines
 
@@ -84,7 +84,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Install locked dependencies (pyproject.toml + uv.lock; `uv run` also does this automatically)
 uv sync
 
-# First-time setup (creates 7 example experts)
+# First-time setup (creates 9 example experts)
 uv run python scripts/setup.py
 ```
 
@@ -137,13 +137,13 @@ uv run python scripts/update_translations.py
 
 The application uses a **template-driven architecture** where expert pages are generated from a single template:
 
-- **Permanent pages** (committed to git): `pages/1000_Home.py` and `pages/9998_Settings.py`
+- **Permanent pages** (committed to git): `pages/1000_Home.py`, `pages/9998_Settings.py`, `pages/9999_Help.py` and the hidden `pages/_debug.py`
 - **Generated expert pages** (auto-generated): `pages/1001_*.py` and higher
 - **Template source**: `templates/template.py` with `{{EXPERT_ID}}` and `{{EXPERT_NAME}}` placeholders
 - **Configuration files**: Each expert has a YAML config in `configs/{expert_id}.yaml`
-- **Page numbering scheme**: Home (1000) → Experts (1001+) → Settings (9999)
+- **Page numbering scheme**: Home (1000) → Experts (1001+) → Settings (9998) → Help (9999)
 
-**Key insight**: When modifying expert page UI/UX, edit the template and regenerate all pages (`uv run python scripts/regenerate_pages.py`). When modifying Home/Settings, edit the permanent files directly.
+**Key insight**: When modifying expert page UI/UX, edit the template and regenerate all pages (`uv run python scripts/regenerate_pages.py`). When modifying Home/Settings/Help, edit the permanent files directly.
 
 ### 2. Multi-Provider LLM Abstraction
 
@@ -161,7 +161,7 @@ A unified client interface supports multiple LLM providers through OpenAI-compat
 - **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
 - **Connection pooling**: `lib/llm/client_pool.py` caches client instances for performance
 
-**Key insight**: All three providers use the OpenAI Python client with custom `base_url`. Provider differences are handled in `_prepare_thinking_param()` method.
+**Key insight**: All four providers use the OpenAI Python client with custom `base_url`. Provider differences are handled in `_prepare_thinking_param()` method.
 
 ### 3. State Management
 
@@ -169,16 +169,15 @@ Multi-layered state system with different lifetimes:
 
 - **Shared session state** (initialized once per session):
   - API keys for all providers (`st.session_state["api_keys"]`)
-  - Default LLM settings (provider, model, temperature)
+  - Default LLM settings (provider, model, thinking level)
   - Language preference
   - Navigation state
 
 - **Per-expert session state** (separate for each expert):
   - Messages history: `st.session_state[f"messages_{expert_id}"]`
-  - Provider selection: `st.session_state[f"provider_{expert_id}"]`
-  - Model selection: `st.session_state[f"model_{expert_id}"]`
-  - Temperature: `st.session_state[f"temperature_{expert_id}"]`
-  - Thinking level: `st.session_state[f"thinking_{expert_id}"]`
+  - Config cache version: `st.session_state[f"cache_version_{expert_id}"]` (bumped by `invalidate_expert_cache()`)
+  - Attachment uploader generation: `st.session_state[f"attachments_{expert_id}"]` (incremented after each sent message to clear the toolbox)
+  - Provider, model, temperature and thinking level are not kept in session state: they live in the expert's YAML config and are saved there directly by the toolbox model row
 
 - **Persistent storage** (survives app restarts):
   - Chat history: `chat_history/{expert_id}.json` (1MB file size limit)
@@ -198,7 +197,7 @@ Battery-optimized file-based caching that allows LLM responses to complete in th
 - **Daemon threads**: Background threads write chunks to cache files with `fsync()` for crash resilience
 - **Polling mechanism**: Foreground polls cache files every 100ms (battery-optimized: 2-3% CPU vs 5-10% for session state polling)
 - **Smart cleanup**: Only deletes completed/error streams, preserves in-progress streams
-- **Thread safety**: OS-level file locking prevents corruption
+- **Isolation**: one pair of cache files and one writer thread per expert; previous cache files are cleared before a new stream starts
 
 **Key features:**
 - ✅ Real-time streaming with blinking cursor (`▌`)
@@ -225,7 +224,7 @@ check_and_display_cached_responses(config, messages_key)
 
 ### 5. Three-Layer Internationalization
 
-Clean separation of concerns for 13-language support:
+Clean separation of concerns for 14-language support:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -256,18 +255,19 @@ Clean separation of concerns for 13-language support:
 - **`pages/1000_Home.py`** - Home page with expert list and "Add Chat" functionality (permanent file)
 - **`pages/9998_Settings.py`** - Settings page for API keys, themes, language, provider defaults (permanent file)
 - **`pages/9999_Help.py`** - Help page with documentation and links (permanent file)
+- **`pages/_debug.py`** - Hidden diagnostics page, reachable only via `/debug` (permanent file, not in the navigation)
 
 ### Core Library (`lib/`)
 - **`config_manager.py`** - Expert YAML config operations (load, update, delete, list)
 - **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs; `regenerate_pages()` rewrites existing expert pages from the template (keeps filename, `EXPERT_ID`, `EXPERT_NAME`)
-- **`chat_toolbox.py`** (`lib/ui/`) - Model row (`_render_model_settings()`: dropdown of all models of providers with an API key, thinking/temperature where supported, saved immediately after an `on_change`; replaces the former sidebar "Model settings") and toolbox row below the chat input (`render_chat_toolbox(widget_key, config, expert_id, messages_key)` → `ToolboxInput(attachments, images, voice_prompt)`): "Attach file", "Attach image" (disabled with a tooltip unless `supports_images()`), "Voice input" (scaffold, `_render_voice_input()`), status captions and, right-aligned, "Clear chat history" (confirmation popover) and the context usage popover (`_calculate_context_stats()`, `_render_context_usage()`; replaces the former sidebar metric). `render_user_message()` shows image thumbnails (width 240) and text attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
+- **`chat_toolbox.py`** (`lib/ui/`) - Model row (`_render_model_settings()`: dropdown of all models of providers with an API key, thinking/temperature where supported, saved immediately after an `on_change`; replaces the former sidebar "Model settings") and toolbox row below the chat input (first row: toolbox; second row: model; `render_chat_toolbox(widget_key, config, expert_id, messages_key)` → `ToolboxInput(attachments, images, voice_prompt)`): "Attach file", "Attach image" (disabled with a tooltip unless `supports_images()`), "Voice input" (`_render_voice_input()`: `st.audio_input` in a popover, transcribed via `lib/audio/transcription.py` and sent automatically as `ToolboxInput.voice_prompt`), status captions and, right-aligned, "Clear chat history" (confirmation popover) and the context usage popover (`_calculate_context_stats()`, `_render_context_usage()`; replaces the former sidebar metric). `render_user_message()` shows image thumbnails (width 240) and text attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
 - **`transcription.py`** (`lib/audio/`) - Speech-to-text for voice input: `get_transcription_provider(chat_provider)` (OpenAI → "openai", else "zai"), `TRANSCRIPTION_MODELS` (`gpt-transcribe`, `glm-asr-2512`), `MAX_DURATION_SECONDS` (Z.AI: 30), `get_audio_duration()`, `transcribe(audio, chat_provider, api_key, mime_type, language, context)` → `TranscriptionResult(text, error)` (`language` → OpenAI hint, `context` → GLM-ASR `prompt`)
 - **`attachments.py`** (`lib/shared/`) - Text file attachments (UTF-8, ≤ `ATTACHMENT_MAX_SIZE_KB`, extensions in `ATTACHMENT_FILE_TYPES`) and images (`IMAGE_FILE_TYPES`, ≤ `IMAGE_MAX_SIZE_MB`, `validate_image_attachment()` via Pillow); `build_message_content()` appends `<image name="..." ref="...">` tags and `<attachment name="...">` blocks to the prompt, `split_message_content()` returns `(prompt, attachments, images)`, `to_api_content(content, images_supported)` turns image tags into `image_url` parts (base64) or a text note for text-only models / missing files
 - **`attachment_store.py`** (`lib/storage/`) - Image files under `chat_attachments/{expert_id}/` (`save_image()`, `get_image_path()`, `get_image_data_url()`, `delete_expert_attachments()`); path-traversal safe via `safe_path_join()`, directory resolved from the project root
 - **`llm_client.py`** - Multi-provider LLM client; handles thinking parameter differences via `_prepare_thinking_param()`
 - **`client_pool.py`** - Cached client connections; use `get_cached_client()` instead of direct instantiation
 - **`secrets_manager.py`** - Secure API key management; reads/writes `.streamlit/secrets.toml` with 600 permissions
-- **`app_defaults_manager.py`** - User preferences management (default provider, model, language)
+- **`app_defaults_manager.py`** - User preferences management (default provider/model/thinking level, language, display settings)
 - **`config_toml_manager.py`** - Theme configuration management for `.streamlit/config.toml`
 - **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit; `delete_chat_history()` also deletes the expert's images
 - **`session_state.py`** - Initializes shared session state (API keys, navigation, defaults) - **UPDATED**: Added `ensure_dialog_state()` helper
@@ -301,8 +301,8 @@ Clean separation of concerns for 13-language support:
 
 Do NOT use `reset_application.py` for this: it deletes all configs, pages and chat history.
 
-**To update Home or Settings pages only**:
-- Edit `pages/1000_Home.py` or `pages/9998_Settings.py` directly (these are permanent files)
+**To update Home, Settings or Help pages only**:
+- Edit `pages/1000_Home.py`, `pages/9998_Settings.py` or `pages/9999_Help.py` directly (these are permanent files)
 - No regeneration needed
 
 **Key insight**: The template uses `{{EXPERT_ID}}` and `{{EXPERT_NAME}}` placeholders. The page generator replaces these when creating new expert pages.
@@ -318,8 +318,8 @@ Do NOT use `reset_application.py` for this: it deletes all configs, pages and ch
    - Modify `_prepare_thinking_param()` method if provider uses custom thinking parameters
    - Return format: `(extra_body_dict, direct_params_dict)`
 
-3. **Add API key UI** in `pages/9998_Settings.py`:
-   - Add input field in API Keys tab for new provider
+3. **API key UI** in `pages/9998_Settings.py`:
+   - No change needed: the API Key section lists every provider in `LLM_PROVIDERS`; keys are stored under the provider's `api_key_env` name
 
 4. **Update secrets template**:
    - Add `{PROVIDER}_API_KEY = ""` to `.streamlit/secrets.toml.example`
@@ -335,18 +335,17 @@ Do NOT use `reset_application.py` for this: it deletes all configs, pages and ch
 3. Fill form: name, description, temperature, optional custom system prompt
 4. Page automatically generated and navigated to
 
-**Programmatically**:
+**Programmatically** (creates config + page, like the UI):
 ```python
-from utils.page_generator import PageGenerator
+from lib.ui.dialogs import create_new_expert
 
-generator = PageGenerator()
-expert_id = generator.generate_page(
-    expert_name="My Expert",
+expert_id, page_path = create_new_expert(
+    chat_name="My Expert",
     description="Expert in...",
     temperature=0.7,
-    system_prompt="Custom prompt...",
+    custom_system_prompt="Custom prompt...",  # None = generate via LLM (needs api_key)
     provider="deepseek",
-    model="deepseek-flash"
+    model="deepseek-flash",
 )
 ```
 
@@ -367,16 +366,16 @@ expert_id = generator.generate_page(
 **Expert not appearing in navigation**:
 - Check expert page file exists in `pages/` with correct numbering (1001+)
 - Verify corresponding config exists in `configs/`
-- Streamlit auto-discovers pages; may need momentary wait
+- `app.py` builds the navigation from `PageGenerator.list_pages()` (cached with `st.cache_resource`; `clear_page_cache()` resets it)
 
 **"Configuration not found" error**:
-- Run `python3 scripts/setup.py` to create example experts
+- Run `uv run python scripts/setup.py` to create example experts
 - Verify `configs/{expert_id}.yaml` exists
 
 **API key errors**:
 - Check `.streamlit/secrets.toml` exists and has valid key (min 20 characters)
 - Verify permissions: `ls -la .streamlit/secrets.toml` should show `-rw-------`
-- Set key via Settings page for automatic permission management
+- Set key via Settings → API Key for automatic permission management
 
 **Chat history not persisting**:
 - Check `chat_history/` directory exists
@@ -401,10 +400,10 @@ expert_id = generator.generate_page(
 
 ## Git Workflow Notes
 
-- **Permanent pages**: `pages/1000_Home.py` and `pages/9998_Settings.py` are committed to git
+- **Permanent pages**: `pages/1000_Home.py`, `pages/9998_Settings.py`, `pages/9999_Help.py` and `pages/_debug.py` are committed to git
 - **Generated pages**: `pages/1001_*.py` and higher are auto-generated and gitignored (created by `setup.py` / the UI, refreshed via `regenerate_pages.py`)
 - **Template changes**: Commit `templates/template.py` only; generated pages are gitignored and local. Run `uv run python scripts/regenerate_pages.py` after changing the template, and again on every other machine after pulling a template change
-- **Configurations**: Expert YAML configs in `configs/` are committed to git (contain prompts, not secrets)
+- **Configurations**: Expert YAML configs in `configs/` are gitignored (local per machine, like `chat_history/` and `chat_attachments/`)
 
 ## File Watching During Development
 
@@ -413,7 +412,7 @@ For faster development workflow:
 uv run streamlit run app.py --server.fileWatcherType=watchdog
 ```
 
-Requires `watchdog` package (included in development dependencies). Provides instant reload when Python files change.
+Requires `watchdog` package (in the `dev` dependency group of `pyproject.toml`, installed by `uv sync`). Provides instant reload when Python files change.
 
 ### Current Session (2026-10-10)
 
@@ -433,7 +432,7 @@ Requires `watchdog` package (included in development dependencies). Provides ins
   - Images saved to `chat_attachments/{expert_id}/<uuid>.<ext>` (`lib/storage/attachment_store.py`, gitignored); the message only holds an `<image name="..." ref="...">` tag (before `<attachment>` blocks), so images are not counted in the context usage
   - `to_api_content()` builds `image_url` parts (base64 data URLs) per request; text-only models get "[Image <name> omitted: ...]", missing files "[Image <name> is no longer available]"; user messages show thumbnails, also after reload
   - "Clear chat history" moved from the sidebar into the toolbox (left of the context usage) with a confirmation popover; it also deletes the expert's images; `reset_application.py` deletes `chat_attachments/`
-  - **Voice input**: "🎤 Voice input" popover with `st.audio_input`; `lib/audio/transcription.py` routes OpenAI experts to `gpt-transcribe` and all others to Z.AI `glm-asr-2512` (30 s limit), both via the OpenAI-compatible `/audio/transcriptions` endpoint and the pooled client. The transcript is sent automatically (`ToolboxInput.voice_prompt`); each recording is sent once (cached by audio hash, recorder key resets). GLM-ASR has no language parameter, so the localized sentence `chat_toolbox.voice_asr_context` is sent as `prompt` (without it German came back as Chinese/English). Both paths verified end-to-end; also live-tested GLM-5.3 (low/high/max) and the other Z.AI chat models
+  - **Voice input**: "Voice input" popover (`:material/mic:` icon) with `st.audio_input`; `lib/audio/transcription.py` routes OpenAI experts to `gpt-transcribe` and all others to Z.AI `glm-asr-2512` (30 s limit), both via the OpenAI-compatible `/audio/transcriptions` endpoint and the pooled client. The transcript is sent automatically (`ToolboxInput.voice_prompt`); each recording is sent once (cached by audio hash, recorder key resets). GLM-ASR has no language parameter, so the localized sentence `chat_toolbox.voice_asr_context` is sent as `prompt` (without it German came back as Chinese/English). Both paths verified end-to-end; also live-tested GLM-5.3 (low/high/max) and the other Z.AI chat models
   - **Model settings** moved from the sidebar into a toolbox row: dropdown of all models of providers with an API key (switches provider), thinking/temperature only where the model supports them, saved immediately; provider links ("Chat | Platform") removed
   - **Avatar per answer**: `assistant_message()` stores `provider`/`model` on assistant messages (persisted in the chat history, stream metadata for background streams); older messages fall back to the current provider
   - **Context usage** moved from the sidebar into the toolbox (right side): popover "<emoji> <percent>%" with usage %, total/max, system prompt and chat message tokens; `display_context_usage()` removed from the template

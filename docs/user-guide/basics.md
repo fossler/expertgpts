@@ -15,30 +15,37 @@ The sidebar displays all available experts as navigation items:
 - **:material/home:** Home Page - Expert list and management
 - **:material/psychology: {Expert Name}** - Individual expert pages
 - **:material/settings:** Settings - Configuration
+- **:material/help:** Help - In-app documentation
 
 ### Home Page
 
 The Home page is your central hub for:
 
 - **Viewing all experts** - See all created experts at a glance
-- **Adding new experts** - Use the "➕ Add Chat" button (only available here)
-- **Managing experts** - Edit or delete existing experts
+- **Adding new experts** - Use the "➕ Add Chat" button in the sidebar Toolbox (also available as "➕ Add new Chat" in Settings → Expert Management)
+
+Editing and deleting experts is done in **Settings** → **Expert Management**.
 
 ### Expert Pages
 
 Each expert has a dedicated page with:
 
 - **Chat interface** - Conversate with the expert
-- **Provider selection** - Choose LLM provider per expert
-- **Model selection** - Choose specific model within provider
-- **Temperature control** - Adjust response creativity
-- **Thinking level** - Enable/disable reasoning (for supported models)
+- **Chat toolbox** below the chat input - attachments, voice input, clear chat history, context usage
+- **Model selection** - Choose the model (and with it the provider) per expert, in the toolbox
+- **Temperature control** - Adjust response creativity (where the model allows it)
+- **Thinking level** - Choose the reasoning level (for supported models)
+
+The sidebar of an expert page only contains the navigation and the git branch footer.
 
 ### Settings Page
 
 Access configuration options:
-- **General** - Theme, language, defaults
-- **API Keys** - Manage API keys for all providers
+- **General** - Theme and language
+- **API Key** - Manage API keys for all providers
+- **Default LLM** - Default provider, model and thinking mode for new experts
+- **Expert Management** - Add, edit and delete experts
+- **Danger Zone** - Download all configurations, reset the application
 - **About** - Version information and acknowledgments
 
 ## Chatting with Experts
@@ -58,7 +65,7 @@ Click on any expert in the sidebar to load their page. You'll see:
 
 ### Attaching Files
 
-Below the chat input are two rows: the toolbox row and, below it, the [model selection](#switching-providers). The toolbox row has, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
+Below the chat input are two rows: the toolbox row and, below it, the [model selection](#switching-providers). The toolbox row has, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear Chat History** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
 
 1. Click **Attach file** and choose one or more files in the popover
 2. The toolbox lists the attached files ("📎 Attached: ...")
@@ -100,7 +107,7 @@ For models without image support the button is disabled; hover over it to see "<
 - Images are not included in the context usage shown in the toolbox, although they do use part of the model's context
 - If you later switch the expert to a model without image support, earlier images in the conversation are replaced by a short note ("[Image <name> omitted: the selected model does not support images]") when the conversation is sent; switching back sends them again
 - If an image file was deleted, the message shows "no longer available" and the model receives a note instead of the image
-- **🗑️ Clear chat history** in the toolbox also deletes the expert's images
+- **🗑️ Clear Chat History** in the toolbox also deletes the expert's images
 
 ### Voice Input
 
@@ -175,7 +182,7 @@ Each expert can use a different provider and model. Switch directly below the ch
 Next to the model, only the settings the model actually supports are shown:
 
 - **🧠 Thinking mode**: the model's reasoning levels (e.g. Low/Medium/High), or On/Off for GLM-5, GLM-4.7-Flash and KIMI K2.6. Nothing is shown for KIMI K2.7 Code, which always thinks. If the previous level isn't available for the new model, its default is used
-- **🌡️ Temperature**: only for DeepSeek and Z.AI models. OpenAI and KIMI models use a fixed temperature, so the field is hidden
+- **🌡️ Temperature**: only for DeepSeek and Z.AI models. OpenAI and KIMI models use a fixed temperature, so the field is hidden. Z.AI accepts at most 1.0; for DeepSeek the field is disabled while thinking is enabled (DeepSeek ignores the temperature then; set thinking to "None" to use it)
 
 Switching models mid-conversation keeps the history. Each answer keeps the logo of the provider that wrote it (answers saved before this feature show the current provider's logo).
 
@@ -248,7 +255,7 @@ Enables/disables reasoning capabilities (provider-specific):
 
 If an expert's saved level isn't supported by the newly selected model, the model's default level is preselected.
 
-> **Note**: Some models use a fixed temperature, and the temperature control is disabled for them: all OpenAI models (1.0), KIMI K3 and K2.7 Code (1.0), and KIMI K2.6 (1.0 with thinking, 0.6 without).
+> **Note**: Some models use a fixed temperature, so the temperature control is hidden in the toolbox (and disabled in the expert dialogs) for them: all OpenAI models (1.0), KIMI K3 and K2.7 Code (1.0), and KIMI K2.6 (1.0 with thinking, 0.6 without).
 
 > **Note**: Reasoning increases response time and cost. Use when needed for complex tasks.
 
@@ -282,7 +289,7 @@ When you revisit an expert:
 ### Clearing History
 
 **Option 1: In-App**
-Use **🗑️ Clear chat history** in the toolbox below the chat input (left of the context usage). It opens a confirmation; **Delete permanently** removes the whole conversation of this expert, including attached images. The button is disabled while the history is empty.
+Use **🗑️ Clear Chat History** in the toolbox below the chat input (left of the context usage). It opens a confirmation; **Delete permanently** removes the whole conversation of this expert, including attached images. The button is disabled while the history is empty.
 
 **Option 2: Via File System**
 ```bash
@@ -297,16 +304,14 @@ ExpertGPTs uses multi-layered state management:
 ### Shared Session State
 - Initialized once per session
 - API keys for all providers
-- Default LLM settings (provider, model, temperature)
+- Default LLM settings (provider, model, thinking level)
 - Language preference
 - Navigation state
 
 ### Per-Expert Session State
 - **Messages history**: `st.session_state[f"messages_{expert_id}"]`
-- **Provider selection**: `st.session_state[f"provider_{expert_id}"]`
-- **Model selection**: `st.session_state[f"model_{expert_id}"]`
-- **Temperature**: `st.session_state[f"temperature_{expert_id}"]`
-- **Thinking level**: `st.session_state[f"thinking_{expert_id}"]`
+- **Config cache version**: `st.session_state[f"cache_version_{expert_id}"]` (incremented when the config changes)
+- **Provider, model, temperature and thinking level** are not kept in session state: the toolbox saves them directly to the expert's config (`configs/{expert_id}.yaml`)
 
 ### Persistent Storage
 - **Chat history**: `chat_history/{expert_id}.json`
@@ -397,7 +402,7 @@ While Streamlit doesn't support custom keyboard shortcuts, you can use:
 ### 1. Pin Frequently Used Experts
 
 Streamlit doesn't support pinning, but you can:
-- Rename experts with prefixes (e.g., "★ Python Expert")
+- Rename experts with prefixes (e.g., "0 Python Expert"; names allow only letters, numbers, spaces, `_`, `-` and `.`)
 - Arrange experts by usage frequency in naming
 
 ### 2. Use Custom Experts for Specific Tasks
@@ -426,7 +431,7 @@ Create focused experts:
 **Problem**: No response after sending message
 
 **Solutions**:
-1. Check API key is configured (Settings → API Keys)
+1. Check API key is configured (Settings → API Key)
 2. Verify API key has sufficient credits
 3. Check internet connection
 4. Try switching provider

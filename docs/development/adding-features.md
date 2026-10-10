@@ -8,7 +8,7 @@ This guide explains how to add new features to ExpertGPTs.
 
 **Before writing code**:
 - Search for existing implementations
-- Extract shared functionality to utils
+- Extract shared functionality to `lib/`
 - Update ALL locations using duplicated code
 
 **Example**: Adding a new form field
@@ -33,6 +33,7 @@ This guide explains how to add new features to ExpertGPTs.
 **Add to `lib/` subdirectories** based on functionality:
 
 - **`lib/llm/`** - LLM providers, client management, token counting
+- **`lib/audio/`** - Audio processing (voice input transcription)
 - **`lib/config/`** - Configuration, secrets, app defaults, themes
 - **`lib/i18n/`** - Language detection, translations
 - **`lib/storage/`** - Data persistence, caching
@@ -86,7 +87,7 @@ This guide explains how to add new features to ExpertGPTs.
 
 2. Import and use in pages:
    ```python
-   from utils.helpers import validate_expert_name
+   from lib.shared.helpers import validate_expert_name
 
    if validate_expert_name(name):
        # Create expert
@@ -105,6 +106,7 @@ This guide explains how to add new features to ExpertGPTs.
    ```python
    LLM_PROVIDERS["newprovider"] = {
        "name": "NewProvider",
+       "api_key_env": "NEWPROVIDER_API_KEY",
        "base_url": "https://api.newprovider.com/v1",
        "default_model": "new-model",
        "models": {...}
@@ -115,7 +117,7 @@ This guide explains how to add new features to ExpertGPTs.
    - Add thinking parameter handling
    - Support provider-specific features
 
-3. Add API key UI in `pages/9998_Settings.py`
+3. No Settings change needed: the API key UI in `pages/9998_Settings.py` lists all providers from `LLM_PROVIDERS`
 
 4. Update `.streamlit/secrets.toml.example`
 
@@ -179,7 +181,10 @@ This guide explains how to add new features to ExpertGPTs.
 **lib/**: Business logic and utilities (domain-driven)
 - `lib/config/`: Config operations
 - `lib/llm/`: LLM API calls
-- `lib/shared/`: Page generation, generic helpers
+- `lib/shared/`: Page generation, attachments, generic helpers
+- `lib/storage/`: Chat history, chat images, streaming cache
+- `lib/ui/`: Dialogs, chat toolbox
+- `lib/audio/`: Voice input transcription
 - `lib/i18n/`: Internationalization
 
 **templates/**: Page templates
@@ -189,7 +194,7 @@ This guide explains how to add new features to ExpertGPTs.
 - Expert YAML configs
 
 **scripts/**: Automation
-- Setup, reset, maintenance
+- Setup, page regeneration, reset, maintenance
 
 ## Testing Your Changes
 
@@ -254,7 +259,7 @@ git push
 ### Reading Expert Config
 
 ```python
-from utils.config_manager import ConfigManager
+from lib.config import ConfigManager
 
 config_manager = ConfigManager()
 config = config_manager.load_config(expert_id)
@@ -265,7 +270,7 @@ description = config.get("description")
 ### Using i18n
 
 ```python
-from utils.i18n import i18n
+from lib.i18n import i18n
 
 title = i18n.t("home.title")
 button_text = i18n.t("buttons.add_chat")
@@ -274,11 +279,10 @@ button_text = i18n.t("buttons.add_chat")
 ### Getting Cached Client
 
 ```python
-from utils.client_pool import get_cached_client
-from utils.secrets_manager import SecretsManager
+from lib.llm import get_cached_client
+from lib.config import secrets_manager
 
-secrets_manager = SecretsManager()
-api_key = secrets_manager.get_api_key(provider)
+api_key = secrets_manager.get_provider_api_key(provider)
 client = get_cached_client(provider, api_key)
 ```
 

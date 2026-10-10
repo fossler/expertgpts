@@ -46,10 +46,10 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
                               │
 ┌─────────────────────────────┴───────────────────────────────┐
 │                  Provider APIs                              │
-│  ┌──────────────┐  ┌───────────────┐  ┌──────────────────┐ │
-│  │  DeepSeek    │  │    OpenAI     │  │      Z.AI        │ │
-│  │     API      │  │      API      │  │       API        │ │
-│  └──────────────┘  └───────────────┘  └──────────────────┘ │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐ │
+│  │ DeepSeek  │  │  OpenAI   │  │   Z.AI    │  │   KIMI    │ │
+│  │    API    │  │    API    │  │    API    │  │    API    │ │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -61,7 +61,13 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 
 **Purpose**: Unified interface for all LLM providers
 
-**Key Method**: `generate_response(messages, provider, model, temperature, thinking_level)`
+**Constructor**: `LLMClient(provider, api_key)` (wraps an `OpenAI` client with the provider's `base_url`)
+
+**Key Methods**:
+- `chat(messages, temperature=1.0, model=None, system_prompt=None, thinking_level=None)` - non-streaming request, returns the response text
+- `chat_stream(messages, temperature=1.0, model=None, system_prompt=None, thinking_level=None)` - streaming request, yields text chunks (used by `StreamingCache`)
+- `generate_system_prompt(expert_name, description, temperature=1.0, model=None)` - AI-generated system prompt for new experts
+- `_prepare_thinking_param(model, thinking_level)` / `_effective_temperature(model, temperature, thinking_level)` - provider/model-specific parameters
 
 ### Provider Configuration
 
@@ -72,8 +78,12 @@ ExpertGPTs supports **multiple LLM providers** through OpenAI-compatible APIs, p
 LLM_PROVIDERS = {
     "deepseek": {
         "name": "DeepSeek",
+        "api_key_env": "DEEPSEEK_API_KEY",
         "base_url": "https://api.deepseek.com",
         "default_model": "deepseek-flash",
+        "icon_path": "icons/deepseek_icon_blue.png",
+        # Thinking mode silently ignores temperature
+        "temperature_ignored_with_thinking": True,
         "models": {
             "deepseek-flash": {
                 "vision": True,  # accepts image input
@@ -112,6 +122,7 @@ LLM_PROVIDERS = {
         # ...
         "models": {
             "kimi-k2.7-code": {
+                "vision": True,  # accepts image input
                 "display_name": "KIMI K2.7 Code",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
@@ -119,6 +130,7 @@ LLM_PROVIDERS = {
                 "fixed_temperature": 1.0,
             },
             "kimi-k2.6": {
+                "vision": True,  # accepts image input
                 "display_name": "KIMI K2.6",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
@@ -154,29 +166,18 @@ LLM_PROVIDERS = {
 
 **Pre-computed for performance**:
 
+Generated automatically from `LLM_PROVIDERS` in `lib/shared/constants.py`:
+
 ```python
-# Provider names to IDs
-PROVIDER_NAME_TO_ID = {
-    "DeepSeek": "deepseek",
-    "OpenAI": "openai",
-    "Z.AI": "zai"
-}
-
-# Model availability
-MODELS_BY_PROVIDER = {
-    "deepseek": ["deepseek-flash", "deepseek-v4-pro"],
-    "openai": ["gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5.4-nano"],
-    "zai": ["glm-5.3", "glm-5.2", "glm-5", "glm-4.7-flash"]
-}
-
-# Thinking parameters
-THINKING_PARAMS_BY_MODEL = {
-    "deepseek-flash": "reasoning_effort",
-    "deepseek-v4-pro": "reasoning_effort",
-    "gpt-6.1-sol": "reasoning_effort",
-    # ...
-}
+MODEL_LOOKUP[provider][model]     # -> model config
+PROVIDER_NAMES[provider]          # -> display name ("DeepSeek", "OpenAI", "Z.AI", "KIMI")
+DEFAULT_MODELS[provider]          # -> default model ID
+BASE_URLS[provider]               # -> base URL
+API_KEY_ENVS[provider]            # -> secrets key name (e.g. "MOONSHOT_API_KEY")
+MAX_TOKENS[(provider, model)]     # -> context window
 ```
+
+Access them via the helpers (`get_model_config()`, `get_provider_display_name()`, `get_default_model_for_provider()`, `get_provider_base_url()`, `get_provider_api_key_env()`, `get_max_tokens()`).
 
 **Benefit**: Eliminates nested dictionary access overhead
 
@@ -232,8 +233,8 @@ client.chat.completions.create(
 
 **Implementation**:
 ```python
-def _prepare_thinking_param(provider, model, thinking_level):
-    if provider == "deepseek":
+def _prepare_thinking_param(self, model, thinking_level=None):
+    if self.provider == "deepseek":
         if thinking_level in ("high", "max"):
             return {}, {"reasoning_effort": thinking_level}
         # "none" must explicitly disable, since DeepSeek defaults to enabled
@@ -272,11 +273,11 @@ Detection is by whether the model config defines `reasoning_efforts` (GLM-5.3 an
 
 **Implementation**:
 ```python
-def _prepare_thinking_param(provider, model, thinking_level):
-    if provider == "zai":
-        model_config = get_model_config(provider, model) or {}
+def _prepare_thinking_param(self, model, thinking_level=None):
+    if self.provider == "zai":
+        model_config = get_model_config(self.provider, model) or {}
         if "reasoning_efforts" in model_config:  # glm-5.3 / glm-5.2
-            effort = resolve_reasoning_effort(provider, model, thinking_level)
+            effort = resolve_reasoning_effort(self.provider, model, thinking_level)
             return {"thinking": {"type": "enabled"}}, {"reasoning_effort": effort}
         # glm-5 / glm-4.7-flash: enabled/disabled toggle
         if not thinking_level or thinking_level == "none":
@@ -290,7 +291,7 @@ def _prepare_thinking_param(provider, model, thinking_level):
 
 **Model behavior**:
 - `kimi-k3` — reasons via a **top-level** `reasoning_effort` field: `"low"`, `"high"` or `"max"` (default `"max"`; the model always reasons). It only accepts a fixed `temperature = 1.0`. Do **not** send the K2.x `thinking` parameter.
-- `kimi-k2.7-code`, `kimi-k2.7-code-highspeed` — coding-focused (HighSpeed = faster serving), 262,144-token context. They **always think**: thinking cannot be disabled (the API rejects `thinking.type=disabled`) and `reasoning_effort` is ignored. Config flag `thinking_always_on: True`; the UI shows a fixed, disabled "Enabled" thinking selector. Fixed `temperature = 1.0`.
+- `kimi-k2.7-code`, `kimi-k2.7-code-highspeed` — coding-focused (HighSpeed = faster serving), 262,144-token context. They **always think**: thinking cannot be disabled (the API rejects `thinking.type=disabled`) and `reasoning_effort` is ignored. Config flag `thinking_always_on: True`; the expert dialogs show a fixed, disabled "Enabled" thinking selector (the toolbox model row shows no thinking control). Fixed `temperature = 1.0`.
 - `kimi-k2.6` — enabled/disabled toggle via `thinking.type` in `extra_body`. The API thinks by default, so "none" sends `thinking.type=disabled` **explicitly** (omitting it would leave thinking on). Temperature is fixed per mode: `1.0` with thinking, `0.6` without (`fixed_temperature` / `fixed_temperature_without_thinking`).
 
 Detection is by whether the model config defines `reasoning_efforts` (kimi-k3 does; the K2.x models don't) — the same pattern used for Z.AI's GLM-5.3/5.2.
@@ -317,7 +318,7 @@ def _prepare_thinking_param(self, model, thinking_level):
 > `LLMClient._effective_temperature(model, temperature, thinking_level)` resolves
 > the value via `get_fixed_temperature()` and overrides the user-selected
 > temperature on every call path, so the UI disables the temperature control for
-> such models. Adjustable temperatures are clamped to the provider's
+> such models (the toolbox model row hides it). Adjustable temperatures are clamped to the provider's
 > `max_temperature` (Z.AI `1.0`), and `render_temperature_input()` uses the same
 > bound for its control. DeepSeek (`temperature_ignored_with_thinking`) still
 > sends the value, but the UI disables the control while thinking is on because
@@ -328,37 +329,33 @@ def _prepare_thinking_param(self, model, thinking_level):
 **Location**: `lib/llm/llm_client.py`
 
 ```python
-def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str):
-    """
-    Prepare provider-specific thinking parameters.
+def _prepare_thinking_param(self, model: str, thinking_level: str = None) -> dict:
+    """Prepare provider-specific thinking/reasoning parameter.
 
     Returns:
         tuple: (extra_body_dict, direct_params_dict)
     """
-    extra_body = {}
-    direct_params = {}
-
     # DeepSeek first: API defaults to thinking-enabled, so "none" must explicitly disable.
-    if provider == "deepseek":
+    if self.provider == "deepseek":
         if thinking_level in ("high", "max"):
-            direct_params["reasoning_effort"] = thinking_level
-        else:
-            extra_body["thinking"] = {"type": "disabled"}
-        return extra_body, direct_params
+            return {}, {"reasoning_effort": thinking_level}
+        return {"thinking": {"type": "disabled"}}, {}
 
     # Z.AI / KIMI: per-model handling (reasoning_effort vs. thinking.type
     # toggle) — see the Z.AI and KIMI sections above.
-    if provider in ("zai", "kimi"):
+    if self.provider == "zai":
+        ...
+    if self.provider == "kimi":
         ...
 
     # OpenAI: reasoning_effort always sent explicitly (including "none");
     # unsupported levels fall back to the model's default effort.
-    if provider == "openai":
-        direct_params["reasoning_effort"] = resolve_reasoning_effort(
-            provider, model, thinking_level
-        )
+    if self.provider == "openai":
+        effort = resolve_reasoning_effort(self.provider, model, thinking_level)
+        return {}, {"reasoning_effort": effort}
 
-    return extra_body, direct_params
+    # Other providers: no thinking parameter
+    return {}, {}
 ```
 
 ## Connection Pooling
@@ -371,7 +368,7 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
 
 **Key Function**: `get_cached_client(provider, api_key)`
 
-**Cache Key**: `{provider}_{api_key_hash}`
+**Cache Key**: the function arguments `(provider, api_key)` (Streamlit `@st.cache_resource`)
 
 **Benefits**:
 - ~50% reduction in client creation overhead
@@ -381,24 +378,17 @@ def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str
 ### Implementation
 
 ```python
-from functools import lru_cache
-from openai import OpenAI
+import streamlit as st
+from lib.llm.llm_client import LLMClient
 
-@lru_cache(maxsize=32)
-def get_cached_client(provider: str, api_key: str) -> OpenAI:
-    """
-    Get cached LLM client instance.
 
-    Args:
-        provider: Provider name (deepseek, openai, zai)
-        api_key: API key for the provider
-
-    Returns:
-        Cached OpenAI client instance
-    """
-    base_url = get_provider_config(provider)["base_url"]
-    return OpenAI(api_key=api_key, base_url=base_url)
+@st.cache_resource
+def get_cached_client(provider: str, api_key: str) -> LLMClient:
+    """Streamlit-cached client getter with resource-level caching."""
+    return LLMClient(provider=provider, api_key=api_key)
 ```
+
+The underlying `OpenAI` client is available as `LLMClient.client` (used e.g. by `lib/audio/transcription.py` for `audio.transcriptions.create`).
 
 **Cache Invalidation**:
 - Automatic when API key changes
@@ -408,58 +398,47 @@ def get_cached_client(provider: str, api_key: str) -> OpenAI:
 
 ### Per-Expert Provider Selection
 
-**UI Controls** (in expert page sidebar):
-```python
-provider = st.selectbox(
-    "Provider",
-    ["deepseek", "openai", "zai"],
-    index=["deepseek", "openai", "zai"].index(
-        st.session_state[f"provider_{EXPERT_ID}"]
-    )
-)
-st.session_state[f"provider_{EXPERT_ID}"] = provider
-```
+Provider, model, thinking level and temperature are stored per expert in `configs/{expert_id}.yaml` (`metadata.provider`, `metadata.model`, `metadata.thinking_level`, `temperature`) and read with `get_llm_metadata(config)`.
 
-### Model Selection
+**UI Controls** (model row of the chat toolbox, `_render_model_settings()` in `lib/ui/chat_toolbox.py`):
+- One dropdown with `"provider/model"` options for every provider that has an API key (`_model_options()`); choosing a model of another provider switches the expert's provider
+- Thinking control (`_render_thinking_select()`) and temperature input only where the model supports them
+- Changes are saved immediately via `update_config()` + `invalidate_expert_cache()`
 
-**Dynamic model list based on provider**:
-```python
-provider = st.session_state[f"provider_{EXPERT_ID}"]
-available_models = get_models_for_provider(provider)
-
-model = st.selectbox(
-    "Model",
-    available_models,
-    index=available_models.index(
-        st.session_state[f"model_{EXPERT_ID}"]
-    )
-)
-st.session_state[f"model_{EXPERT_ID}"] = model
-```
+The expert dialogs (create/edit, `lib/ui/dialogs.py`) offer the same settings via `render_provider_selection()`, `render_thinking_mode_ui()` and `render_temperature_input()`.
 
 ### Generating Responses
 
-**Unified interface regardless of provider**:
+**Unified interface regardless of provider** (simplified from `handle_user_input()` in `templates/template.py`):
 ```python
-from utils.llm_client import LLMClient
-from utils.client_pool import get_cached_client
-from utils.secrets_manager import SecretsManager
+from lib.config.config_manager import get_llm_metadata
+from lib.llm.client_pool import get_cached_client
+from lib.storage import StreamingCache
 
-# Get API key for provider
-secrets_manager = SecretsManager()
-api_key = secrets_manager.get_api_key(provider)
+provider, model, thinking_level = get_llm_metadata(config)
+api_key = st.session_state["api_keys"][provider]
 
 # Get cached client
-client = get_cached_client(provider, api_key)
+client = get_cached_client(provider=provider, api_key=api_key)
 
-# Generate response
-llm_client = LLMClient(client)
-response = llm_client.generate_response(
-    messages=messages,
-    provider=provider,
+# Stream the response in a background thread (calls client.chat_stream())
+cache = StreamingCache(EXPERT_ID)
+cache.start_streaming_to_file(
+    client=client,
+    messages=api_messages,
+    temperature=config.get("temperature", 1.0),
     model=model,
+    system_prompt=system_prompt_with_lang,
+    thinking_level=thinking_level,
+)
+
+# Non-streaming alternative
+response = client.chat(
+    messages=api_messages,
     temperature=temperature,
-    thinking_level=thinking_level
+    model=model,
+    system_prompt=system_prompt,
+    thinking_level=thinking_level,
 )
 ```
 
@@ -475,18 +454,24 @@ LLM_PROVIDERS = {
 
     "newprovider": {
         "name": "New Provider",
+        "api_key_env": "NEWPROVIDER_API_KEY",
         "base_url": "https://api.newprovider.com/v1",
         "default_model": "new-model",
+        "icon_path": "icons/newprovider_logo.png",
         "models": {
             "new-model": {
                 "display_name": "New Model",
-                "max_tokens": 4096,
-                "thinking_param": None  # or specific parameter
+                "max_tokens": 128000,
+                "thinking_param": {"thinking": {"type": "enabled"}},
+                # optional: "vision": True, "reasoning_efforts": [...],
+                # "fixed_temperature": 1.0, ...
             }
         }
     }
 }
 ```
+
+Also add the provider to `PROVIDER_LINKS` and `PROVIDER_AVATARS` (same file) and to the `Provider` enum / `ProviderKey` in `lib/shared/types.py`.
 
 ### Step 2: Update Thinking Parameter Handling
 
@@ -494,38 +479,23 @@ LLM_PROVIDERS = {
 
 **Add to `_prepare_thinking_param()`**:
 ```python
-def _prepare_thinking_param(self, provider: str, model: str, thinking_level: str):
+def _prepare_thinking_param(self, model: str, thinking_level: str = None) -> dict:
     # ... existing logic ...
 
     # New provider thinking parameter
-    elif provider == "newprovider" and thinking_level != "none":
-        # Add provider-specific thinking logic
-        if model == "thinking-model":
-            extra_body["thinking"] = {"enabled": True}
+    if self.provider == "newprovider":
+        if not thinking_level or thinking_level == "none":
+            return {"thinking": {"type": "disabled"}}, {}
+        return {"thinking": {"type": "enabled"}}, {}
 
-    return extra_body, direct_params
+    return {}, {}
 ```
 
-### Step 3: Add API Key UI
+### Step 3: API Key Validation
 
-**File**: `pages/9998_Settings.py`
+**File**: `lib/shared/helpers.py`
 
-**Add tab in API Keys section**:
-```python
-# In Settings page, API Keys tab
-with st.tabs(["DeepSeek", "OpenAI", "Z.AI", "New Provider"]):
-    # ... existing tabs ...
-
-    with tab_new_provider:
-        st.subheader("New Provider API Key")
-        new_provider_key = st.text_input(
-            "New Provider API Key",
-            type="password",
-            help="Enter your New Provider API key"
-        )
-        if st.button("Save New Provider Key"):
-            secrets_manager.save_api_key("NEW_PROVIDER", new_provider_key)
-```
+The Settings page (`pages/9998_Settings.py`) lists every provider in `LLM_PROVIDERS` in its provider selectbox automatically and saves the key under `api_key_env` via `save_provider_api_key()`. Add a format pattern for the new provider to `PROVIDER_KEY_PATTERNS` in `validate_api_key()`; without one, only the generic minimum length (20 characters) is checked.
 
 ### Step 4: Update Secrets Template
 
@@ -534,32 +504,14 @@ with st.tabs(["DeepSeek", "OpenAI", "Z.AI", "New Provider"]):
 ```toml
 # ... existing keys ...
 
-NEW_PROVIDER_API_KEY = ""
+NEWPROVIDER_API_KEY = ""
 ```
 
-### Step 5: Update Lookup Tables
+### Step 5: Lookup Tables
 
 **File**: `lib/shared/constants.py`
 
-```python
-# Provider names to IDs
-PROVIDER_NAME_TO_ID = {
-    # ... existing ...
-    "New Provider": "newprovider"
-}
-
-# Models by provider
-MODELS_BY_PROVIDER = {
-    # ... existing ...
-    "newprovider": ["new-model", "thinking-model"]
-}
-
-# Thinking parameters
-THINKING_PARAMS_BY_MODEL = {
-    # ... existing ...
-    "thinking-model": "enabled"  # if applicable
-}
-```
+No changes needed: `MODEL_LOOKUP`, `PROVIDER_NAMES`, `DEFAULT_MODELS`, `BASE_URLS`, `API_KEY_ENVS` and `MAX_TOKENS` are generated from `LLM_PROVIDERS`.
 
 ## Provider Comparison
 
@@ -573,12 +525,13 @@ THINKING_PARAMS_BY_MODEL = {
 
 ### Features
 
-| Feature | DeepSeek | OpenAI | Z.AI |
-|---------|----------|--------|------|
-| **Reasoning** | Model-dependent | Yes (o3 series) | Model-dependent |
-| **Thinking Levels** | 2 (on/off) | 4 (none/low/med/high) | 2 (on/off) |
-| **Max Tokens** | 4K-8K | Up to 65K | Varies |
-| **Language Strength** | English | Multilingual | Chinese |
+| Feature | DeepSeek | OpenAI | Z.AI | KIMI |
+|---------|----------|--------|------|------|
+| **Reasoning** | Both models, optional | All models (GPT-6.1 Sol / GPT-6 Astra always) | GLM-5.3 / GLM-5.2 always; others optional | K3 / K2.7 Code always; K2.6 optional |
+| **Thinking Levels** | none/high/max | none/low/medium/high/xhigh (model-dependent) | low/high/max (GLM-5.3), high/max (GLM-5.2), on/off (others) | low/high/max (K3), on/off (K2.6) |
+| **Context Window** | 1M | 400K–1.05M | 200K–1M | 262K–1M |
+| **Image Input** | deepseek-flash | All models | No | All models |
+| **Language Strength** | English | Multilingual | Chinese | — |
 
 ### Use Case Recommendations
 
@@ -609,7 +562,7 @@ THINKING_PARAMS_BY_MODEL = {
 
 | Provider | Typical Response Time | Reasoning Impact |
 |----------|---------------------|------------------|
-| **DeepSeek** | Fast | +50% with reasoner |
+| **DeepSeek** | Fast | +50% with thinking |
 | **OpenAI** | Medium | +100-200% with reasoning |
 | **Z.AI** | Fast | +50% with thinking |
 
@@ -636,7 +589,7 @@ THINKING_PARAMS_BY_MODEL = {
 
 **Good**:
 ```python
-from utils.client_pool import get_cached_client
+from lib.llm.client_pool import get_cached_client
 
 client = get_cached_client(provider, api_key)
 ```
@@ -654,9 +607,9 @@ client = OpenAI(api_key=api_key, base_url=base_url)
 **Implementation**:
 ```python
 try:
-    response = llm_client.generate_response(...)
-except APIError as e:
-    st.error(f"Provider error: {e}")
+    response = client.chat(messages=messages, model=model)
+except Exception as e:  # LLMClient re-raises API errors as Exception("Error calling <provider> API: ...")
+    st.error(f"Provider error: {sanitize_error_message(str(e))}")
     # Fallback to different provider
 ```
 
@@ -664,7 +617,9 @@ except APIError as e:
 
 **Check availability**:
 ```python
-if model not in get_models_for_provider(provider):
+try:
+    get_model_config(provider, model)  # raises ValueError for unknown combinations
+except ValueError:
     st.error(f"Model {model} not available for provider {provider}")
     return
 ```

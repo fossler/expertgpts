@@ -20,10 +20,8 @@ ExpertGPTs uses a **multi-layered state system** with different lifetimes and pu
 │  2. PER-EXPERT SESSION STATE                                │
 │  Separate for each expert                                    │
 │  - Messages history: messages_{expert_id}                   │
-│  - Provider selection: provider_{expert_id}                 │
-│  - Model selection: model_{expert_id}                       │
-│  - Temperature: temperature_{expert_id}                     │
-│  - Thinking level: thinking_{expert_id}                     │
+│  - Config cache version: cache_version_{expert_id}          │
+│  - Attachment uploader generation: attachments_{expert_id}  │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -32,6 +30,7 @@ ExpertGPTs uses a **multi-layered state system** with different lifetimes and pu
 │  - Chat history: chat_history/{expert_id}.json              │
 │  - Chat images: chat_attachments/{expert_id}/               │
 │  - Expert configs: configs/{expert_id}.yaml                 │
+│    (incl. provider, model, temperature, thinking level)     │
 │  - User preferences: .streamlit/app_defaults.toml           │
 │  - Theme settings: .streamlit/config.toml                   │
 └─────────────────────────────────────────────────────────────┘
@@ -50,24 +49,26 @@ ExpertGPTs uses a **multi-layered state system** with different lifetimes and pu
 **State Variables**:
 
 ```python
-# API Keys (loaded from secrets.toml)
+# API Keys (loaded from secrets.toml, only providers with a key)
 st.session_state.api_keys = {
     "deepseek": "sk-...",
     "openai": "sk-...",
-    "zai": "..."
+    "zai": "...",
+    "kimi": "sk-..."
 }
 
-# Default LLM Settings (loaded from app_defaults.toml)
+# Default LLM Settings (loaded from app_defaults.toml via get_llm_defaults())
 st.session_state.default_provider = "deepseek"
 st.session_state.default_model = "deepseek-flash"
-st.session_state.default_temperature = 0.7
 st.session_state.default_thinking_level = "none"
+st.session_state.default_thinking_enabled = True  # DEFAULT_THINKING_ENABLED
 
 # Language Preference (loaded from app_defaults.toml)
 st.session_state.language = "en"  # Auto-detected on first run
 
-# Navigation State
-st.session_state.navigation_initialized = True
+# Navigation / Dialog State (set by app.py and the pages)
+st.session_state.pending_expert_page = None   # handle_pending_navigation()
+st.session_state.show_add_chat_dialog = False  # ensure_dialog_state("add_chat")
 ```
 
 **Initialization Flow**:
@@ -75,15 +76,15 @@ st.session_state.navigation_initialized = True
 ```
 App starts
     ↓
-initialize_shared_session_state() called
+initialize_shared_session_state() called (every page run; each step only runs if its key is missing)
     ↓
-Load API keys from SecretsManager
+Ensure .streamlit/config.toml exists (ensure_config_file_exists)
     ↓
-Load defaults from AppDefaultsManager
+Initialize language (get_language_preference, or detect_system_language + save)
     ↓
-Initialize language (auto-detect or load)
+Load API keys (get_all_provider_api_keys from secrets.toml)
     ↓
-Mark initialization complete
+Load LLM defaults (get_llm_defaults from app_defaults.toml)
 ```
 
 ### 2. Per-Expert Session State
@@ -99,82 +100,44 @@ Mark initialization complete
 ```python
 # For each expert with ID "1001_python_expert"
 
-# Messages History
-st.session_state.messages_1001_python_expert = [
+# Messages History (assistant messages also carry provider/model)
+st.session_state["messages_1001_python_expert"] = [
     {"role": "user", "content": "..."},
-    {"role": "assistant", "content": "..."}
+    {"role": "assistant", "content": "...", "provider": "deepseek", "model": "deepseek-flash"}
 ]
 
-# Provider Selection
-st.session_state.provider_1001_python_expert = "deepseek"
+# Cache Version (for config cache invalidation)
+st.session_state["cache_version_1001_python_expert"] = 1
 
-# Model Selection
-st.session_state.model_1001_python_expert = "deepseek-flash"
-
-# Temperature
-st.session_state.temperature_1001_python_expert = 0.7
-
-# Thinking Level
-st.session_state.thinking_1001_python_expert = "none"
-
-# Cache Version (for invalidation)
-st.session_state.cache_version_1001_python_expert = 1
+# Attachment uploader generation (incremented after each sent message,
+# which clears the toolbox uploaders)
+st.session_state["attachments_1001_python_expert"] = 3
 ```
 
-**Dynamic Variable Names**:
+The chat toolbox also keeps widget state under expert-specific keys (e.g. `{expert_id}_toolbox_model_v{version}`, `{expert_id}_model_settings_changed`, cached voice transcripts per recording).
 
-Using f-strings to create expert-specific keys:
+**Provider, model, temperature and thinking level are not session state**: they are stored in the expert config (`configs/{expert_id}.yaml`) and read on every run via `get_llm_metadata(config)` and `config.get("temperature")`. The toolbox model row (`_render_model_settings()` in `lib/ui/chat_toolbox.py`) saves changes directly with `update_config()` and then calls `invalidate_expert_cache()`.
+
+**Initialization in Expert Pages** (`templates/template.py`):
 
 ```python
 EXPERT_ID = "1001_python_expert"
 
-# Messages history
-key = f"messages_{EXPERT_ID}"
-if key not in st.session_state:
-    st.session_state[key] = []
 
-# Provider selection
-key = f"provider_{EXPERT_ID}"
-if key not in st.session_state:
-    st.session_state[key] = config.get("metadata", {}).get("provider", "deepseek")
+def initialize_session_state():
+    # Initialize shared state first (API key, navigation, etc.)
+    initialize_shared_session_state()
+
+    # Initialize messages key for this specific expert
+    messages_key = f"messages_{EXPERT_ID}"
+    if messages_key not in st.session_state:
+        # Load from file if exists, otherwise start empty
+        st.session_state[messages_key] = load_chat_history(EXPERT_ID)
+
+    return messages_key
 ```
 
-**Initialization in Expert Pages**:
-
-```python
-# pages/1001_python_expert.py
-
-EXPERT_ID = "1001_python_expert"
-
-# Load expert config
-config = config_manager.load_config(EXPERT_ID)
-
-# Initialize messages history
-if f"messages_{EXPERT_ID}" not in st.session_state:
-    # Load from persistent storage
-    chat_history = chat_history_manager.load_chat_history(EXPERT_ID)
-    st.session_state[f"messages_{EXPERT_ID}"] = chat_history or []
-
-# Initialize provider
-if f"provider_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"provider_{EXPERT_ID}"] = config.get("metadata", {}).get("provider", "deepseek")
-
-# Initialize model
-if f"model_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"model_{EXPERT_ID}"] = config.get("metadata", {}).get("model", "deepseek-flash")
-
-# Initialize temperature
-if f"temperature_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"temperature_{EXPERT_ID}"] = config.get("temperature", 0.7)
-
-# Initialize thinking level
-if f"thinking_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"thinking_{EXPERT_ID}"] = config.get("thinking_level", "none")
-
-# Initialize cache version
-if f"cache_version_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"cache_version_{EXPERT_ID}"] = 0
-```
+`cache_version_{expert_id}` is read with a default (`st.session_state.get(f"cache_version_{EXPERT_ID}", 0)`) and only created when the cache is invalidated.
 
 ## Persistent Storage
 
@@ -186,24 +149,35 @@ if f"cache_version_{EXPERT_ID}" not in st.session_state:
 
 **Example**:
 ```json
-[
-  {
-    "role": "user",
-    "content": "How do I read a file in Python?"
-  },
-  {
-    "role": "assistant",
-    "content": "You can use the open() function..."
-  }
-]
+{
+  "expert_id": "1001_python_expert",
+  "created_at": "2026-10-10T12:00:00.000000",
+  "last_updated": "2026-10-10T12:05:00.000000",
+  "messages": [
+    {
+      "role": "user",
+      "content": "How do I read a file in Python?",
+      "timestamp": "2026-10-10T12:04:50.000000"
+    },
+    {
+      "role": "assistant",
+      "content": "You can use the open() function...",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "timestamp": "2026-10-10T12:05:00.000000"
+    }
+  ]
+}
 ```
 
 **Manager**: `lib/storage/chat_history_manager.py`
 
 **Operations**:
-- `load_chat_history(expert_id)` - Load from file
-- `save_chat_history(expert_id, messages)` - Save to file
-- Enforces 1MB file size limit
+- `load_chat_history(expert_id)` - Load the messages from file (empty list if missing or invalid)
+- `save_chat_history(expert_id, messages)` - Save to file (adds timestamps)
+- `delete_chat_history(expert_id)` - Delete the file and the expert's images
+- `assistant_message(content, provider, model)` - Build an assistant message that records the producing LLM (used for its avatar)
+- Enforces 1MB file size limit (`truncate_messages_by_size()` drops the oldest messages, keeping at least 10)
 
 **Persistence Flow**:
 
@@ -214,7 +188,7 @@ Expert page: Generate response
     ↓
 Add to session state messages
     ↓
-ChatHistoryManager.save_chat_history()
+save_chat_history()
     ↓
 Write to chat_history/{expert_id}.json
 ```
@@ -226,7 +200,7 @@ User navigates to expert page
     ↓
 Expert page: Initialize session state
     ↓
-ChatHistoryManager.load_chat_history()
+load_chat_history()
     ↓
 Read from chat_history/{expert_id}.json
     ↓
@@ -268,17 +242,21 @@ system_prompt: |
   You are Python Expert...
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
-  version: "1.0"
+  version: "2.0"
+  provider: "deepseek"
   model: "deepseek-flash"
+  thinking_level: "none"
 ```
 
-**Manager**: `lib/config/config_manager.py`
+**Manager**: `lib/config/config_manager.py` (`ConfigManager`, use the cached `get_config_manager()`)
 
 **Operations**:
+- `create_config(expert_name, description, page_number, ...)` - Create YAML file, returns the expert ID
 - `load_config(expert_id)` - Load YAML file
-- `save_config(expert_id, config)` - Save/update YAML file
+- `update_config(expert_id, updates)` - Update fields (incl. `provider`, `model`, `thinking_level`)
 - `delete_config(expert_id)` - Delete YAML file
-- `list_experts()` - List all expert IDs
+- `list_experts_lightweight()` - List all experts (without system prompts, cached)
+- `get_llm_metadata(config)` - Module function: `(provider, model, thinking_level)` with defaults
 
 ### 4. User Preferences
 
@@ -291,23 +269,24 @@ metadata:
 [llm]
 provider = "deepseek"
 model = "deepseek-flash"
-temperature = 0.7
 thinking_level = "none"
 
 [language]
 code = "en"
+
+[display]
+git_branch = true
 ```
 
 **Manager**: `lib/config/app_defaults_manager.py`
 
 **Operations**:
-- `get_provider_preference()` - Get default provider
-- `get_model_preference()` - Get default model
-- `get_temperature_preference()` - Get default temperature
-- `get_thinking_level_preference()` - Get default thinking level
+- `get_llm_defaults()` - Get default provider, model and thinking level
+- `save_llm_defaults(provider, model, thinking_level)` - Save LLM defaults
 - `get_language_preference()` - Get language code
-- `save_provider_preference()` - Save default provider
-- `save_language_preference()` - Save language code
+- `save_language_preference(lang_code)` - Save language code
+- `get_display_defaults()` - Get display settings (`git_branch`)
+- `save_display_setting(key, value)` - Save a display setting
 
 ### 5. Theme Settings
 
@@ -318,18 +297,17 @@ code = "en"
 **Example**:
 ```toml
 [theme]
-primaryColor = "#6366F1"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F3F4F6"
-textColor = "#1F2937"
-font = "sans serif"
+base = ".streamlit/themes/dark_gray.toml"
 ```
+
+The colors live in the referenced theme file under `.streamlit/themes/`.
 
 **Manager**: `lib/config/config_toml_manager.py`
 
 **Operations**:
-- `load_theme()` - Load theme settings
-- `save_theme(theme_dict)` - Save theme settings
+- `get_theme_settings()` - Load theme settings
+- `save_theme_settings(base)` - Save the theme file path (`base`)
+- `get_current_theme_name()` / `load_available_themes()` - Current and available themes
 
 ## Cache Invalidation
 
@@ -339,14 +317,14 @@ font = "sans serif"
 
 **Mechanism**: `cache_version_{expert_id}` in session state
 
-**When Config is Edited** (via Settings page):
+**When Config is Edited** (via Settings page, or the toolbox model row on the expert page):
 
 ```python
 # User edits expert config
-config_manager.update_config(expert_id, new_config)
+get_config_manager().update_config(expert_id=expert_id, updates={...})
 
-# Increment cache version
-st.session_state[f"cache_version_{expert_id}"] += 1
+# Increment cache version (lib/shared/session_state.py)
+invalidate_expert_cache(expert_id)
 
 # Next page load will use new config
 ```
@@ -354,15 +332,15 @@ st.session_state[f"cache_version_{expert_id}"] += 1
 **In Expert Page** (with caching):
 
 ```python
-@st.cache_data(ttl=300)
-def load_config_with_cache(expert_id, cache_version):
-    return config_manager.load_config(expert_id)
+@st.cache_data(ttl=CONFIG_CACHE_TTL, show_spinner="Loading expert configuration...")
+def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
+    ...  # get_config_manager().load_config(expert_id)
 
 # Get current cache version
 cache_version = st.session_state.get(f"cache_version_{EXPERT_ID}", 0)
 
 # Load config (cached if version unchanged)
-config = load_config_with_cache(EXPERT_ID, cache_version)
+config = load_expert_config_cached(EXPERT_ID, cache_version)
 ```
 
 **When Version Changes**:
@@ -391,9 +369,9 @@ initialize_shared_session_state()
 User navigates to expert page
     ↓
 Expert page: Initialize per-expert state
-    ├─ Load expert config
     ├─ Load chat history
-    └─ Initialize provider/model/temperature
+    ├─ Load expert config (cached)
+    └─ Read provider/model/thinking level from config metadata
     ↓
 Ready for user interaction
 ```
@@ -404,13 +382,12 @@ Ready for user interaction
 User interacts with expert
     ↓
 Update per-expert session state
-    ├─ Add messages to history
-    ├─ Update provider/model selection
-    └─ Update temperature/thinking
+    └─ Add messages to history
     ↓
 Save to persistent storage
     ├─ Save chat history
-    └─ (Config changes saved separately)
+    └─ Model row changes (provider/model/thinking/temperature) are
+       saved to the expert config immediately + invalidate_expert_cache()
     ↓
 Update UI
 ```
@@ -514,12 +491,12 @@ messages = st.session_state[f"messages_{EXPERT_ID}"]
 
 **Good**:
 ```python
-st.session_state[f"provider_{EXPERT_ID}"] = "deepseek"
+st.session_state[f"messages_{EXPERT_ID}"] = []
 ```
 
 **Bad**:
 ```python
-st.session_state.provider = "deepseek"  # Not per-expert
+st.session_state.messages = []  # Not per-expert
 ```
 
 ### 3. Persist Important Data
@@ -539,10 +516,10 @@ st.session_state.provider = "deepseek"  # Not per-expert
 **When config changes**:
 ```python
 # Update config
-config_manager.update_config(expert_id, new_config)
+get_config_manager().update_config(expert_id=expert_id, updates=updates)
 
 # Invalidate cache
-st.session_state[f"cache_version_{expert_id}"] += 1
+invalidate_expert_cache(expert_id)
 ```
 
 ### 5. Use Appropriate Storage
@@ -582,7 +559,7 @@ st.session_state[f"cache_version_{expert_id}"] += 1
 **Solution**:
 ```python
 # Verify save is called
-chat_history_manager.save_chat_history(EXPERT_ID, messages)
+save_chat_history(EXPERT_ID, messages)
 
 # Check file exists
 ls chat_history/
@@ -595,12 +572,12 @@ ls -la chat_history/
 
 **Problem**: Edited expert config but old values used
 
-**Cause**: Config cached in session state
+**Cause**: Config cached by `st.cache_data` (keyed by `cache_version_{expert_id}`, TTL `CONFIG_CACHE_TTL` = 300 s)
 
 **Solution**:
 ```python
 # Invalidate cache
-st.session_state[f"cache_version_{EXPERT_ID}"] += 1
+invalidate_expert_cache(EXPERT_ID)
 
 # Or restart app
 ```
@@ -625,30 +602,17 @@ st.session_state[f"cache_version_{EXPERT_ID}"] += 1
 # Bad: Load all chat histories at startup
 all_histories = {id: load(id) for id in expert_ids}
 
-# Good: Load on demand
-def get_chat_history(expert_id):
-    return chat_history_manager.load_chat_history(expert_id)
+# Good: Load on demand (the template loads only its own expert's history)
+messages = load_chat_history(EXPERT_ID)
 ```
 
 ### 2. Config Caching
 
 **Cache expert configs with TTL**:
 ```python
-@st.cache_data(ttl=300)  # 5 minutes
-def load_config_cached(expert_id):
-    return config_manager.load_config(expert_id)
-```
-
-### 3. Efficient State Updates
-
-**Batch updates**:
-```python
-# Bad: Multiple writes
-save_chat_history(expert_id, messages)
-save_config(expert_id, config)
-
-# Good: Single write (if related)
-save_all(expert_id, messages, config)
+@st.cache_data(ttl=CONFIG_CACHE_TTL)  # 300 s = 5 minutes
+def load_expert_config_cached(expert_id: str, cache_version: int = 0) -> dict:
+    ...
 ```
 
 ## Related Documentation

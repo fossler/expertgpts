@@ -5,10 +5,9 @@ This guide explains how to customize ExpertGPTs to match your preferences, inclu
 ## Overview
 
 ExpertGPTs offers extensive customization options:
-- **Theme customization** - Colors, fonts, appearance
+- **Theme customization** - Preset themes and custom colors
 - **Language settings** - UI language and expert response language
-- **Provider defaults** - Default LLM provider and model
-- **App preferences** - Various application defaults
+- **Provider defaults** - Default LLM provider, model and thinking mode
 
 All settings are managed through the **Settings** page and persisted in configuration files.
 
@@ -17,10 +16,13 @@ All settings are managed through the **Settings** page and persisted in configur
 Navigate to **Settings** from the sidebar:
 - Click on **:material/settings:** in the navigation menu
 
-The Settings page has three tabs:
-1. **General** - Theme, language, and app defaults
-2. **API Keys** - Manage API keys for all providers
-3. **About** - Version information and acknowledgments
+The Settings page has six tabs:
+1. **General** - Theme and language
+2. **API Key** - Manage API keys for all providers
+3. **Default LLM** - Default provider, model and thinking mode for new experts
+4. **Expert Management** - Add, edit and delete experts
+5. **Danger Zone** - Download all configurations (ZIP), reset the application
+6. **About** - Version information and acknowledgments
 
 ## Theme Customization
 
@@ -31,18 +33,18 @@ ExpertGPTs uses Streamlit's theming system, which allows you to customize:
 - **Background Color** - Main content area background
 - **Secondary Background Color** - Sidebar and secondary areas
 - **Text Color** - Main text color
-- **Font Family** - Text font (sans-serif, serif, monospace)
 
 ### Customizing Colors
 
 1. Go to **Settings** → **General** tab
 2. Find the **Theme Customization** section
-3. Use the color pickers to adjust:
-   - **Buttons and Interactive Elements**
+3. Select **🎨 Custom** (the color pickers are only editable for the Custom theme)
+4. Use the color pickers in **Color Preview** to adjust:
+   - **Buttons and interactive Elements**
    - **Background Color**
    - **Secondary Background** (sidebar)
    - **Text Color**
-4. Click **"Apply Changes"** to save
+5. Click **"💾 Save & Apply Theme"** to save (the page reloads)
 
 **Tips**:
 - Use high contrast for text readability
@@ -54,39 +56,33 @@ ExpertGPTs uses Streamlit's theming system, which allows you to customize:
 ExpertGPTs includes preset themes for quick customization:
 
 **Light Themes**:
-- 🎨 **Red** - Warm red accents
-- 🎨 **Blue** - Professional blue
-- 🎨 **Green** - Calming green
-- 🎨 **Purple** - Creative purple
+- 🔴 **Modern Red**
+- 🔵 **Ocean Blue**
+- 🟢 **Forest Green**
+- 🟣 **Royal Purple**
 
 **Dark Themes**:
-- 🌙 **Dark Blue** - Dark blue with bright accents
-- 🌙 **Dark Gray** - Minimalist dark theme
+- 🌑 **Dark Blue**
+- 🖤 **Dark Gray**
 
 **Applying a Preset**:
 1. Go to **Settings** → **General** tab
-2. Click on any preset theme button
-3. Theme applies immediately
+2. Select a theme under **Select a theme to preview** (the Color Preview updates)
+3. Click **"💾 Save & Apply Theme"**; the page reloads with the new theme
+
+The theme files live in `.streamlit/themes/` (one `.toml` file per theme, `custom.toml` for the Custom theme).
 
 ### Default Theme
 
-The app comes with a modern **Indigo** theme by default:
-- **Buttons**: Indigo (#6366F1)
-- **Background**: White (#FFFFFF)
-- **Sidebar**: Light Gray (#F3F4F6)
-- **Text**: Dark Gray (#1F2937)
+If no `.streamlit/config.toml` exists, it is created from `.streamlit/config.toml.example`, which uses the **Dark Gray** theme.
 
 ### Where Theme Settings Are Stored
 
-Theme settings are saved to `.streamlit/config.toml`:
+The selected theme is saved to `.streamlit/config.toml` as a reference to its theme file:
 
 ```toml
 [theme]
-primaryColor = "#6366F1"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F3F4F6"
-textColor = "#1F2937"
-font = "sans serif"
+base = ".streamlit/themes/dark_gray.toml"
 ```
 
 **File location**: `.streamlit/config.toml`
@@ -97,7 +93,7 @@ font = "sans serif"
 
 ### Supported Languages
 
-ExpertGPTs supports **13 languages** with full UI translations:
+ExpertGPTs supports **14 languages** with full UI translations:
 
 | Language | Code | Script Family |
 |----------|------|---------------|
@@ -119,10 +115,9 @@ ExpertGPTs supports **13 languages** with full UI translations:
 ### Changing Language
 
 1. Go to **Settings** → **General** tab
-2. Find the **Language** dropdown
-3. Select your preferred language
-4. Click outside the dropdown to save
-5. App restarts automatically in selected language
+2. Find the **Language** section (languages are grouped by script)
+3. Click the button of your preferred language
+4. The preference is saved and the app reloads in the selected language
 
 ### Language Behavior
 
@@ -164,15 +159,14 @@ code = "de"  # German
 ### Creating Multilingual Experts
 
 You can create experts in any language:
-1. Use name and description in your language (e.g., "Datenexperte")
+1. Use a description in your language; the name may only contain ASCII letters, numbers, spaces, `_`, `-` and `.` (e.g., "Datenexperte")
 2. Expert responds in user's selected language automatically
-3. Expert name translates if it's a default expert
+3. Expert names are only translated for the default (example) experts
 
 **Example**:
-- Create "Datenexperte" (German name)
-- English user sees "Data Expert" (translated)
-- German user sees "Datenexperte" (original)
-- Both users get responses in their selected language
+- The default expert "Data Scientist" is shown with its translated name in the navigation when German is selected
+- A custom expert "Datenexperte" keeps its name in every UI language
+- Both get responses in the user's selected language
 
 **See also**: [Internationalization Guide](../internationalization/I18N_GUIDE.md) for detailed i18n documentation
 
@@ -182,10 +176,10 @@ You can create experts in any language:
 
 Choose your preferred LLM provider:
 
-1. Go to **Settings** → **General** tab
-2. Find **Default Provider** dropdown
-3. Select provider (DeepSeek, OpenAI, Z.AI)
-4. Click outside dropdown to save
+1. Go to **Settings** → **Default LLM** tab
+2. Find **Default Provider** dropdown (only providers with an API key are listed)
+3. Select provider (DeepSeek, OpenAI, Z.AI, KIMI)
+4. Click **"💾 Save Defaults"**
 
 **Impact**:
 - New experts use this provider by default
@@ -196,10 +190,10 @@ Choose your preferred LLM provider:
 
 Choose the default model for your provider:
 
-1. Go to **Settings** → **General** tab
+1. Go to **Settings** → **Default LLM** tab
 2. Find **Default Model** dropdown
 3. Select model from available options
-4. Click outside dropdown to save
+4. Click **"💾 Save Defaults"**
 
 **Available Models**:
 - **DeepSeek**: `deepseek-flash`, `deepseek-v4-pro`
@@ -212,14 +206,9 @@ Choose the default model for your provider:
 - Can override per-expert
 - Current experts unaffected
 
-### Setting Default Temperature
+### Temperature for New Experts
 
-Set the default temperature for new experts:
-
-1. Go to **Settings** → **General** tab
-2. Find **Default Temperature** slider
-3. Adjust to desired value (0.0 - 2.0)
-4. Click outside slider to save
+There is no default temperature setting. The temperature is set per expert in the **Add Chat** form (default 1.0) and can be changed later below the chat input. Z.AI accepts at most 1.0; OpenAI and KIMI models use a fixed temperature.
 
 **Temperature Guide**:
 - **0.0 - 0.3**: Focused, deterministic (coding, math)
@@ -229,24 +218,20 @@ Set the default temperature for new experts:
 
 **See also**: [Temperature Guide](temperature-guide.md) for detailed explanations
 
-**Impact**:
-- New experts use this temperature by default
-- Can override per-expert
-- Current experts unaffected
-
 ### Setting Default Thinking Level
 
 Enable/disable reasoning for new experts by default:
 
-1. Go to **Settings** → **General** tab
-2. Find **Default Thinking Level** dropdown
-3. Select level (None, Low, Medium, High)
-4. Click outside dropdown to save
+1. Go to **Settings** → **Default LLM** tab
+2. Find the **Thinking Mode** selector below the default model
+3. Select a level (the options depend on the selected model)
+4. Click **"💾 Save Defaults"**
 
 **Availability**:
-- **OpenAI**: All levels supported
-- **DeepSeek**: Enabled/disabled based on model
-- **Z.AI**: Enabled/disabled via extra_body
+- **OpenAI**: GPT-6.1 Sol / GPT-6 Astra: low/medium/high/xhigh; other models: none/low/medium/high/xhigh
+- **DeepSeek**: none/high/max
+- **Z.AI**: GLM-5.3: low/high/max; GLM-5.2: high/max; GLM-5 / GLM-4.7-Flash: enabled/disabled
+- **KIMI**: K3: low/high/max; K2.7 Code: always on; K2.6: enabled/disabled
 
 **Impact**:
 - New experts use this thinking level by default
@@ -263,10 +248,10 @@ ExpertGPTs supports multiple LLM providers, each requiring an API key.
 
 **Via Settings Page** (Recommended):
 
-1. Go to **Settings** → **API Keys** tab
-2. Select provider from tabs (DeepSeek, OpenAI, Z.AI)
+1. Go to **Settings** → **API Key** tab
+2. Select the provider under **Select LLM Provider** (DeepSeek, OpenAI, Z.AI, KIMI)
 3. Enter API key in the input field
-4. Click **"Save API Key"**
+4. Click **"Save API Key"** (**Clear** removes the saved key)
 5. Key automatically saved to `.streamlit/secrets.toml`
 
 **Manual Configuration**:
@@ -281,6 +266,7 @@ ExpertGPTs supports multiple LLM providers, each requiring an API key.
    DEEPSEEK_API_KEY = "your_actual_api_key_here"
    OPENAI_API_KEY = "your_actual_api_key_here"
    ZAI_API_KEY = "your_actual_api_key_here"
+   MOONSHOT_API_KEY = "your_actual_api_key_here"  # KIMI
    ```
 
 ### API Key Sources
@@ -289,13 +275,14 @@ Get API keys from:
 - **DeepSeek**: [https://platform.deepseek.com/](https://platform.deepseek.com/)
 - **OpenAI**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 - **Z.AI**: [https://z.ai/](https://z.ai/)
+- **KIMI**: [https://platform.kimi.ai/console](https://platform.kimi.ai/console)
 
 ### API Key Security
 
 **Security Measures**:
 - **File location**: `.streamlit/secrets.toml` (gitignored)
 - **File permissions**: Automatically set to 600 (owner read/write only)
-- **Validation**: Minimum 20 characters required
+- **Validation**: Provider-specific key format check (e.g. DeepSeek and KIMI keys start with `sk-`); the error message shows an example of the expected format
 - **UI management**: Use Settings page for secure handling
 
 **Verify Permissions**:
@@ -322,12 +309,10 @@ For advanced users, configuration files can be edited directly:
 
 ```toml
 [theme]
-primaryColor = "#6366F1"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F3F4F6"
-textColor = "#1F2937"
-font = "sans serif"
+base = ".streamlit/themes/ocean_blue.toml"
 ```
+
+Custom colors are stored in `.streamlit/themes/custom.toml`.
 
 #### App Defaults
 
@@ -341,6 +326,9 @@ thinking_level = "high"
 
 [language]
 code = "en"
+
+[display]
+git_branch = true   # show the git branch in the sidebar footer
 ```
 
 #### API Keys
@@ -351,6 +339,7 @@ code = "en"
 DEEPSEEK_API_KEY = "your_key_here"
 OPENAI_API_KEY = "your_key_here"
 ZAI_API_KEY = "your_key_here"
+MOONSHOT_API_KEY = "your_key_here"
 ```
 
 **Warning**: Manual editing requires caution. Use UI when possible.
@@ -359,8 +348,8 @@ ZAI_API_KEY = "your_key_here"
 
 **Reset Theme**:
 1. Go to **Settings** → **General** tab
-2. Click on a preset theme (e.g., Indigo default)
-3. Or delete `.streamlit/config.toml` and restart
+2. Select a preset theme (e.g., Dark Gray, the default) and click **"💾 Save & Apply Theme"**
+3. Or delete `.streamlit/config.toml` and restart (it is recreated from `config.toml.example`)
 
 **Reset App Defaults**:
 1. Delete `.streamlit/app_defaults.toml`
@@ -389,9 +378,9 @@ Choose defaults based on your typical use:
 - **Quality-focused**: OpenAI (advanced reasoning)
 - **Multilingual**: Z.AI (Chinese language optimization)
 
-### 3. Choose Appropriate Temperature Defaults
+### 3. Choose Appropriate Temperatures
 
-Set based on your primary use case:
+Set per expert based on its primary use case:
 - **Technical work**: 0.3 - 0.5
 - **General advisory**: 0.6 - 0.8
 - **Creative work**: 0.9 - 1.2
@@ -410,7 +399,7 @@ Always preview theme changes:
 **Problem**: Changed colors but theme doesn't update
 
 **Solutions**:
-1. Click **"Apply Changes"** button
+1. Click **"💾 Save & Apply Theme"** button
 2. Refresh browser (F5 or Cmd+R)
 3. Clear browser cache
 4. Check `.streamlit/config.toml` for correct values
@@ -430,7 +419,7 @@ Always preview theme changes:
 **Problem**: Entered API key but getting "invalid key" error
 
 **Solutions**:
-1. Verify key is at least 20 characters
+1. Verify the key matches the provider's format (the error message shows an example)
 2. Check for extra spaces (copy-paste carefully)
 3. Confirm key is correct from provider dashboard
 4. Check `.streamlit/secrets.toml` permissions (should be 600)

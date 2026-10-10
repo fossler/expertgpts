@@ -15,12 +15,13 @@ expertgpts/
 │   ├── 1001_python_expert.py      # Expert pages (generated)
 │   ├── 1002_data_scientist.py     # More expert pages...
 │   ├── 9998_Settings.py           # Settings page (permanent, committed)
-│   └── 9999_Help.py               # Help page (permanent, committed)
+│   ├── 9999_Help.py               # Help page (permanent, committed)
+│   └── _debug.py                  # Debug page at /debug (permanent, hidden from navigation)
 │
 ├── templates/
 │   └── template.py                 # Master template for expert pages
 │
-├── configs/                        # Expert configurations (YAML)
+├── configs/                        # Expert configurations (YAML, gitignored)
 │   ├── 1001_python_expert.yaml
 │   ├── 1002_data_scientist.yaml
 │   └── ...
@@ -30,6 +31,8 @@ expertgpts/
 │   │   ├── llm_client.py          # Multi-provider LLM client
 │   │   ├── client_pool.py         # Connection pooling
 │   │   └── token_manager.py       # Token counting and context management
+│   ├── audio/                     # Audio processing
+│   │   └── transcription.py       # Speech-to-text for voice input
 │   ├── config/                    # Configuration management
 │   │   ├── config_manager.py      # Expert config operations
 │   │   ├── secrets_manager.py     # API key management
@@ -59,9 +62,9 @@ expertgpts/
 │       ├── en.json                 # English (source of truth)
 │       ├── de.json                 # German
 │       ├── es.json                 # Spanish
-│       └── ... (13 language files)
+│       └── ... (14 language files)
 │
-├── chat_history/                   # Conversation storage (JSON)
+├── chat_history/                   # Conversation storage (JSON, gitignored)
 │   ├── 1001_python_expert.json
 │   └── ...
 │
@@ -69,27 +72,40 @@ expertgpts/
 │   ├── 1001_python_expert/
 │   └── ...
 │
+├── streaming_cache/                # Background streaming cache files (gitignored)
+│
 ├── .streamlit/                     # Streamlit configuration
 │   ├── secrets.toml               # API keys (gitignored)
 │   ├── secrets.toml.example       # Template for secrets
 │   ├── config.toml                # Theme settings (gitignored)
 │   ├── config.toml.example        # Template for theme
 │   ├── app_defaults.toml          # User preferences (gitignored)
-│   └── app_defaults.toml.example  # Template for defaults
+│   ├── app_defaults.toml.example  # Template for defaults
+│   └── themes/                    # Predefined theme files (*.toml)
 │
 ├── tests/                          # Test suite
+│   ├── README.md
 │   ├── test_agent_generation.py
-│   └── test_i18n.py
+│   ├── test_attachments.py
+│   ├── test_i18n.py
+│   ├── test_llm_params.py
+│   ├── test_message_origin.py
+│   ├── test_page_regeneration.py
+│   ├── test_streaming_cache.py
+│   └── test_transcription.py
 │
 ├── scripts/                        # Administrative scripts
 │   ├── setup.py                   # Create example experts
 │   ├── regenerate_pages.py        # Regenerate expert pages from template (keeps data)
 │   ├── reset_application.py       # Reset to factory defaults (deletes all data)
 │   ├── update_translations.py     # Sync locale files
+│   ├── benchmark_zai.py           # Z.AI performance benchmark
 │   └── run_tests.sh               # Run test suite
 │
 ├── docs/                           # Detailed documentation
 │   ├── README.md
+│   ├── performance-optimization.md
+│   ├── assets/
 │   ├── getting-started/
 │   ├── user-guide/
 │   ├── configuration/
@@ -101,12 +117,13 @@ expertgpts/
 │
 ├── pyproject.toml                  # Project metadata, dependencies and pytest config
 ├── uv.lock                         # Locked dependency versions
+├── ruff.toml                       # Ruff formatter configuration
 └── .gitignore                      # Git ignore patterns
 ```
 
 ## lib/ Domain-Driven Structure
 
-The `lib/` directory is organized into 6 domain-specific subdirectories to group related functionality and improve code discoverability.
+The `lib/` directory is organized into 7 domain-specific subdirectories to group related functionality and improve code discoverability.
 
 ### `lib/llm/` - LLM Operations
 **Purpose**: All LLM provider interactions, client management, and token tracking.
@@ -114,13 +131,26 @@ The `lib/` directory is organized into 6 domain-specific subdirectories to group
 **When to use**: Adding new LLM providers, modifying client behavior, implementing token counting strategies.
 
 **Modules**:
-- `llm_client.py` - Multi-provider LLM client (DeepSeek, OpenAI, Z.AI)
+- `llm_client.py` - Multi-provider LLM client (DeepSeek, OpenAI, Z.AI, KIMI)
 - `client_pool.py` - Connection pooling for performance
 - `token_manager.py` - Token counting and context usage tracking
 
 **Imports**:
 ```python
 from lib.llm import LLMClient, TokenManager, get_cached_client
+```
+
+### `lib/audio/` - Audio Processing
+**Purpose**: Speech-to-text for the "Voice input" entry of the chat toolbox.
+
+**When to use**: Changing transcription providers/models or audio limits.
+
+**Modules**:
+- `transcription.py` - Transcription via the OpenAI-compatible `/audio/transcriptions` endpoint (OpenAI experts → `gpt-transcribe`, all others → Z.AI `glm-asr-2512`)
+
+**Imports**:
+```python
+from lib.audio import transcribe, get_transcription_provider, TranscriptionResult
 ```
 
 ### `lib/config/` - Configuration Management
@@ -209,7 +239,7 @@ from lib.shared.constants import get_provider_config, get_model_config
 
 ## When to Create a New Domain
 
-The current 6-domain structure covers most use cases. Consider adding a new domain (e.g., `lib/api/`, `lib/monitoring/`) when:
+The current 7-domain structure covers most use cases. Consider adding a new domain (e.g., `lib/api/`, `lib/monitoring/`) when:
 
 1. **You're adding a major new capability** with 3+ related modules
 2. **The modules have clear interdependencies** but minimal dependencies on other domains
@@ -228,14 +258,14 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 - `pages/1000_Home.py` - Home page
 - `pages/9998_Settings.py` - Settings page
 - `pages/9999_Help.py` - Help page
+- `pages/_debug.py` - Debug page
 - `templates/template.py` - Expert page template
-- `lib/*.py` - All utility modules
-- `configs/*.yaml` - Expert configurations
+- `lib/**/*.py` - All library modules
 - `tests/*.py` - Test files
 - `locales/ui/*.json` - UI translations
 - `scripts/*.py` - Administrative scripts
 - `.streamlit/*.example` - Template files
-- `requirements*.txt` - Dependencies
+- `pyproject.toml`, `uv.lock` - Dependencies
 - `CLAUDE.md` - Project instructions
 - `README.md` - Project overview
 - `docs/**` - Documentation
@@ -243,7 +273,8 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 ### Generated Files (Typically Gitignored)
 
 **Auto-generated**:
-- `pages/1001_*.py` to `pages/9998_*.py` - Expert pages (generated from template)
+- `pages/1001_*.py` and higher - Expert pages (generated from template)
+- `configs/*.yaml` - Expert configurations (created by `scripts/setup.py` or the UI)
 
 ### User-Specific Files (Gitignored)
 
@@ -253,6 +284,7 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 - `.streamlit/app_defaults.toml` - User preferences
 - `chat_history/*.json` - Conversation history
 - `chat_attachments/` - Images attached in the chat
+- `streaming_cache/` - Background streaming cache
 
 ## File Purposes
 
@@ -268,6 +300,8 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 - Home: Expert management UI
 - Expert pages: Generated from template
 - Settings: Configuration UI
+- Help: Documentation and links
+- Debug (`_debug.py`): Diagnostics (environment, dependencies, app health, session state) at `/debug`
 
 ### Business Logic Files
 
@@ -343,8 +377,9 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 ### Page Numbers
 
 - **1000**: Home page
-- **1001-9998**: Expert pages
-- **9999**: Settings page
+- **1001+**: Expert pages
+- **9998**: Settings page
+- **9999**: Help page
 
 ### Config Files
 
@@ -370,10 +405,10 @@ The current 6-domain structure covers most use cases. Consider adding a new doma
 
 **In expert pages**:
 ```python
-from utils.config_manager import ConfigManager
-from utils.llm_client import LLMClient
-from utils.chat_history_manager import ChatHistoryManager
-from utils.i18n import i18n
+from lib.config.config_manager import get_config_manager
+from lib.llm import LLMClient
+from lib.storage import load_chat_history, save_chat_history
+from lib.i18n import i18n
 ```
 
 ### Circular Import Prevention
@@ -403,7 +438,7 @@ from utils.i18n import i18n
 **Application manages**:
 - Expert pages (generated from template)
 - Template (`templates/template.py`)
-- Utilities (`lib/*.py`)
+- Library modules (`lib/**/*.py`)
 
 ## Permissions
 

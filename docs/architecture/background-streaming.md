@@ -11,7 +11,7 @@ This document explains ExpertGPTs' battery-optimized background streaming featur
 - ✅ Displays the full response when users return to the page
 - ✅ Optimized for battery life on notebooks (2-3% CPU vs 5-10% for polling)
 - ✅ Survives app crashes and restarts
-- ✅ Thread-safe with OS-level file locking
+- ✅ Isolated per expert: one cache file pair and one writer thread per expert
 - ✅ Easy debugging (inspect `.txt` cache files manually)
 
 ## Architecture
@@ -123,9 +123,11 @@ streaming_cache/
 {
   "thread_id": 12345,
   "start_time": 1737490000.123,
-  "status": "complete",           // "in_progress" | "complete" | "error"
-  "end_time": 1737490015.456,
-  "error": null                   // Error message if status="error"
+  "provider": "deepseek",         // LLM that produces the answer (for its avatar)
+  "model": "deepseek-flash",
+  "status": "complete",           // missing while in progress | "complete" | "error"
+  "end_time": 1737490015.456,     // only when status="complete"
+  "error": "..."                  // only when status="error"
 }
 ```
 
@@ -145,13 +147,13 @@ streaming_cache/
 3. start_streaming_to_file():
    - Cleans up old completed cache files
    - Starts daemon thread
-   - Writes metadata with thread_id and start_time
+   - Writes metadata with thread_id, start_time, provider and model
 4. Background thread writes chunks to cache file
 5. Polling loop reads cache every 100ms
 6. Display updates in real-time with ▌ cursor
 7. Thread marks status="complete" in metadata
 8. Polling detects completion
-9. Response added to chat history
+9. Response added to chat history (assistant_message(response, provider, model))
 10. Cache files cleaned up
 11. Page reruns to show updated context usage
 ```
@@ -167,13 +169,13 @@ streaming_cache/
 6. check_and_display_cached_responses() runs:
    - Finds cache file
    - Checks metadata status
-   - If status="complete": Add to chat history, cleanup
+   - If status="complete": Add to chat history (provider/model from the metadata), cleanup
    - If status not set: Resume polling
 7. poll_incomplete_stream() resumes polling:
    - Reads existing cache content
    - Continues polling for new chunks
    - Displays updates in real-time
-   - Adds to chat history when complete
+   - Adds to chat history when complete (provider/model via cache.get_llm_origin())
 ```
 
 ### Scenario 3: App Crash During Streaming
@@ -186,7 +188,7 @@ streaming_cache/
 5. User restarts app
 6. User navigates back to expert page
 7. check_and_display_cached_responses() finds partial response
-8. Resumes polling (if thread still running) or shows partial response
+8. Resumes polling; without a running thread no status is ever set, so polling ends after the 5-minute timeout and the partial response is added to the chat history
 ```
 
 ## Battery Optimization
@@ -239,7 +241,7 @@ while streaming:
 
 ## Thread Safety
 
-### OS-Level File Locking
+### Single Writer per Expert
 
 ```python
 # Background thread writes
@@ -252,7 +254,7 @@ with open(cache_file, 'a', encoding='utf-8') as f:
 **Protection mechanisms:**
 - `flush()`: Ensures data is written from Python buffer to OS buffer
 - `fsync()`: Ensures data is written from OS buffer to disk
-- OS-level file locking prevents concurrent write corruption
+- No explicit file locks: only the background thread writes the `.txt` file (append mode); the foreground only reads it
 - Fixed filenames prevent race conditions
 
 ### Fixed Filename Strategy
@@ -305,7 +307,7 @@ except Exception as e:
 # Check for errors
 if cache.has_error():
     error_msg = cache.get_error()
-    st.error(f"Streaming error: {error_msg}")
+    st.error(f"Streaming error: {sanitize_error_message(error_msg)}")
     break
 ```
 
@@ -354,8 +356,8 @@ def _cleanup_old_cache_files(self):
    - Frees disk space
 
 3. **On error** (in `check_and_display_cached_responses()`)
-   - Cleans up corrupt or error files
-   - Prevents retry loops
+   - Cleans up corrupt files (read errors) and completed caches containing a `[STREAMING ERROR: ...]` marker
+   - Prevents retry loops (caches with `status="error"` are removed by the next stream's `_cleanup_old_cache_files()`)
 
 4. **Application reset** (`scripts/reset_application.py`)
    - Deletes entire `streaming_cache/` directory
@@ -382,8 +384,8 @@ os.fsync(f.fileno())     # OS buffer → disk
 - Background thread dies (daemon thread)
 - Partial response in cache file
 - No "status=complete" in metadata
-- On restart: `check_and_display_cached_responses()` finds partial response
-- User sees partial response (can resubmit if needed)
+- On restart: `check_and_display_cached_responses()` finds partial response and resumes polling
+- After the 5-minute polling timeout the partial response is saved (user can resubmit if needed)
 
 **Power failure:**
 - fsync() ensures data is on disk
@@ -412,11 +414,15 @@ class TestStreamingCache:
     def test_metadata_tracking()
     def test_multiple_cache_files_coexist()
     def test_concurrent_streaming_different_experts()
+    def test_background_stream_continues_during_page_navigation()
+    def test_partial_stream_resumable_after_page_navigation()
+    def test_cache_file_survives_new_instance_creation()
+    def test_background_stream_crash_resilience()
 ```
 
 **Run tests:**
 ```bash
-.venv/bin/python -m pytest tests/test_streaming_cache.py -v
+uv run pytest tests/test_streaming_cache.py -v
 ```
 
 ### Manual Testing
@@ -472,7 +478,7 @@ class TestStreamingCache:
 | Battery life | ✅ Better (2-3% CPU) | ❌ Worse (5-10% CPU) |
 | Crash resilience | ✅ Survives restarts | ❌ Lost on crash |
 | Debugging | ✅ Inspect .txt files | ❌ In-memory only |
-| Thread safety | ✅ OS file locking | ❌ Manual locks needed |
+| Thread safety | ✅ Single writer thread, readers only read | ❌ Manual locks needed |
 | Complexity | ✅ Simple | ❌ Complex locking |
 | Follows DRY | ✅ Like chat_history | ❌ Different pattern |
 

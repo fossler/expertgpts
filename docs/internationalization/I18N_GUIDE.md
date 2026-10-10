@@ -4,7 +4,7 @@ This guide explains ExpertGPTs' internationalization architecture, how it works,
 
 ## 🌍 Supported Languages
 
-ExpertGPTs supports 13 languages with full UI translations:
+ExpertGPTs supports 14 languages with full UI translations:
 
 | Language | Code | Script Family |
 |----------|------|---------------|
@@ -78,14 +78,14 @@ The language prefix is generated dynamically based on user's language preference
 
 ### 2. Runtime Injection
 
-**File**: `templates/template.py` - Lines ~180-182, ~370-372
+**File**: `templates/template.py` (via `i18n.get_system_prompt_with_language()` in `lib/i18n/i18n.py`)
 
 The language prefix is prepended to system prompts before every API call:
 
 ```python
 raw_system_prompt = config.get("system_prompt", "")
-language_prefix = i18n.get_language_prefix()
-system_prompt_with_lang = f"{language_prefix}\n\n{raw_system_prompt}"
+system_prompt_with_lang = i18n.get_system_prompt_with_language(raw_system_prompt)
+# = f"{i18n.get_language_prefix()}\n\n{raw_system_prompt}"
 ```
 
 **Result sent to API**:
@@ -128,11 +128,11 @@ Custom expert names (user-created) are displayed as-is without translation.
 
 **File**: `.streamlit/app_defaults.toml` - Managed by `lib/config/app_defaults_manager.py`
 
-Language preference is automatically saved when changed through the Settings page:
+Language preference is automatically saved when changed through the Settings page (`i18n.set_language()` calls `save_language_preference()`):
 
 ```python
 # When user selects language in Settings
-from utils.app_defaults_manager import save_language_preference
+from lib.config.app_defaults_manager import save_language_preference
 
 save_language_preference("de")  # Saves to app_defaults.toml
 ```
@@ -141,7 +141,7 @@ On app startup, language is loaded automatically:
 
 ```python
 # lib/shared/session_state.py - initialize_shared_session_state()
-from utils.app_defaults_manager import get_language_preference
+from lib.config.app_defaults_manager import get_language_preference
 
 saved_lang = get_language_preference()
 if saved_lang:
@@ -164,6 +164,9 @@ thinking_level = "none"
 
 [language]
 code = "en"
+
+[display]
+git_branch = true
 ```
 
 **Benefits**:
@@ -217,6 +220,7 @@ locales/ui/
   "success": { "expert_created": "..." },
   "info": { "language_prefix_auto": "..." },
   "dialogs": { "add_chat": {...}, "edit_expert": {...} },
+  "chat_toolbox": { "attach_file": "...", "voice_input": "..." },
   "experts": {
     "management": {
       "title": "Expert Management",
@@ -266,12 +270,13 @@ def invalidate_cache(self):
 All i18n imports have been consolidated to module level:
 
 ```python
-# ✅ GOOD - Module level (lib/i18n/i18n.py)
-from utils.i18n import i18n
+# ✅ GOOD - Module level (e.g. lib/ui/chat_toolbox.py)
+from lib.i18n import i18n
 
-# ❌ BAD - Inline import (removed)
+# ❌ AVOID - Inline import (still used in a few modules, e.g.
+# lib/shared/helpers.py, to avoid circular imports)
 def some_function():
-    from utils.i18n import i18n  # Don't do this!
+    from lib.i18n import i18n  # Only if a module-level import would be circular
 ```
 
 **Benefits**:
@@ -329,7 +334,7 @@ Manually translate the new key in each locale file, or use translation tools/ser
 ### Using Translations in Code
 
 ```python
-from utils.i18n import i18n
+from lib.i18n import i18n
 
 # Simple translation
 text = i18n.t('my_new_section.my_new_key')
@@ -344,7 +349,7 @@ st.markdown(i18n.t('about.title'))
 ### Testing I18n Implementation
 
 ```bash
-python3 scripts/test_i18n_refactoring.py
+uv run pytest -v tests/test_i18n.py
 ```
 
 This verifies:
@@ -387,7 +392,7 @@ This verifies:
 ✅ Error messages and success notifications
 ✅ Help text and tooltips
 ✅ Documentation examples
-✅ Default expert names (7 experts × 13 languages)
+✅ Default expert names (9 experts × 14 languages)
 
 ### What is NOT Translated
 
@@ -419,9 +424,9 @@ LANGUAGE_METADATA = {
 
 Copy `en.json` as template and translate all strings.
 
-3. **Add Language Names Translation** in each locale file's `language.available_languages` section.
+3. **Add to the Language Selector**: add the code to the matching script group (`latin_langs`, `cyrillic_langs` or `han_langs`) in `render_general_settings_section()` in `pages/9998_Settings.py`. The button label comes from `flag` and `native_name` in `LANGUAGE_METADATA`, which also needs `script` and `locale`.
 
-4. **Test**: Run `python3 scripts/test_i18n_refactoring.py`
+4. **Test**: Run `uv run pytest -v tests/test_i18n.py`
 
 ---
 
@@ -445,7 +450,7 @@ Copy `en.json` as template and translate all strings.
 1. Check `lib/i18n/i18n.py:get_language_prefix()` returns correct prefix
 2. Verify `templates/template.py` is calling `get_language_prefix()`
 3. Check `lib/llm/llm_client.py` includes language prefix in generation prompt
-4. Test with `python3 scripts/test_i18n_refactoring.py`
+4. Test with `uv run pytest -v tests/test_i18n.py`
 
 ### Missing Translation Keys
 
@@ -471,7 +476,7 @@ This syncs all locale files with `en.json`.
 | `lib/llm/llm_client.py` | Language prefix in AI-powered generation |
 | `pages/9998_Settings.py` | Settings page with language selector |
 | `scripts/update_translations.py` | Sync locales with en.json |
-| `scripts/test_i18n_refactoring.py` | Test i18n implementation |
+| `tests/test_i18n.py` | Test i18n implementation |
 
 ---
 
@@ -481,7 +486,7 @@ This syncs all locale files with `en.json`.
 
 - ✅ Add new keys to `en.json` first (source of truth)
 - ✅ Run `update_translations.py` after adding keys
-- ✅ Test with `test_i18n_refactoring.py` before committing
+- ✅ Test with `tests/test_i18n.py` before committing
 - ✅ Use dot notation for nested keys: `'section.subsection.key'`
 - ✅ Keep expert content in English (YAML configs)
 - ✅ Translate UI elements only (locale files)
@@ -495,7 +500,7 @@ This syncs all locale files with `en.json`.
 - ❌ Hardcode strings in pages/components (use `i18n.t()`)
 - ❌ Skip testing after i18n changes
 - ❌ Mix expert content with UI translations
-- ❌ Forget to update all 13 locale files
+- ❌ Forget to update all 14 locale files
 - ❌ Use inconsistent key naming
 - ❌ Import `i18n` inline in functions (use module-level imports)
 - ❌ Create duplicate expert name mappings (use dynamic generation)
@@ -507,7 +512,7 @@ This syncs all locale files with `en.json`.
 
 ### Scripts
 
-See `scripts/README.md` for detailed documentation of available scripts.
+See [Scripts Reference](../reference/scripts.md) for detailed documentation of available scripts.
 
 ### Development
 
@@ -518,7 +523,7 @@ See `CLAUDE.md` for project overview and development guidelines.
 Run tests with:
 ```bash
 ./scripts/run_tests.sh          # Run all tests
-python3 scripts/test_i18n_refactoring.py  # Test i18n specifically
+uv run pytest -v tests/test_i18n.py     # Test i18n specifically
 ```
 
 ---

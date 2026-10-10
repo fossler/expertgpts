@@ -4,7 +4,7 @@ This guide covers setting up a development environment for ExpertGPTs.
 
 ## Prerequisites
 
-- Python 3.11 or higher
+- Python 3.12 or higher (`requires-python = ">=3.12"` in `pyproject.toml`)
 - uv (Python package manager)
 - Git (for version control)
 - Code editor or IDE (VSCode, PyCharm, etc.)
@@ -39,7 +39,7 @@ cd expertgpts
 uv sync
 ```
 
-This creates a virtual environment and installs all dependencies.
+This creates a virtual environment (`.venv`) and installs all dependencies from `pyproject.toml` / `uv.lock` (including the `dev` dependency group).
 
 **Development dependencies include**:
 - All production dependencies
@@ -89,6 +89,7 @@ expertgpts/
 │   ├── 1000_Home.py           # Home (permanent)
 │   ├── 9998_Settings.py       # Settings (permanent)
 │   ├── 9999_Help.py           # Help (permanent)
+│   ├── _debug.py              # Debug page at /debug (permanent)
 │   └── 1XXX_*.py             # Expert pages (generated)
 ├── templates/
 │   └── template.py            # Expert page template
@@ -96,7 +97,8 @@ expertgpts/
 ├── configs/                   # Expert configurations
 ├── locales/                   # UI translations
 ├── tests/                     # Test suite
-└── scripts/                   # Administrative scripts
+├── scripts/                   # Administrative scripts
+└── pyproject.toml             # Dependencies and pytest config (with uv.lock)
 ```
 
 ### Running Tests
@@ -230,7 +232,7 @@ Or use VSCode/PyCharm debugger.
 
 Before writing code:
 - Search for existing implementations
-- Extract shared functionality to utils
+- Extract shared functionality to `lib/`
 - Update all locations using the code
 
 ### 2. Template-First Development
@@ -266,7 +268,7 @@ git commit -m "Description"
 
 ### Adding a New Utility
 
-1. Create file in `lib/`
+1. Create file in the matching `lib/` subdirectory (see [Project Structure](project-structure.md))
 2. Add functionality
 3. Write tests in `tests/`
 4. Run `uv run pytest` to verify

@@ -23,10 +23,10 @@ This guide documents all administrative scripts in ExpertGPTs.
 
 **Usage**:
 ```bash
-python3 scripts/update_translations.py
+uv run python scripts/update_translations.py
 ```
 
-**Note**: This is the primary tool for maintaining translation consistency across all 13 supported languages.
+**Note**: This is the primary tool for maintaining translation consistency across all 14 supported languages.
 
 ---
 
@@ -37,9 +37,9 @@ python3 scripts/update_translations.py
 **Purpose**: Initial application setup
 
 **What it does**:
-- Creates 9 default example experts
-- Sets up initial configuration
-- Creates expert pages from templates
+- Creates 9 default example experts (only if no expert pages exist yet)
+- Creates their YAML configs in `configs/`
+- Creates expert pages from `templates/template.py`
 
 **When to use**:
 - First time running the application
@@ -47,7 +47,7 @@ python3 scripts/update_translations.py
 
 **Usage**:
 ```bash
-python3 scripts/setup.py
+uv run python scripts/setup.py
 ```
 
 **Creates Experts**:
@@ -103,7 +103,7 @@ uv run python scripts/regenerate_pages.py
 
 **Usage**:
 ```bash
-echo "yes" | python3 scripts/reset_application.py
+echo "yes" | uv run python scripts/reset_application.py
 ```
 
 **⚠️ Warning**: Always use `echo "yes" |` prefix to auto-confirm in non-interactive environments.
@@ -119,8 +119,8 @@ echo "yes" | python3 scripts/reset_application.py
 **Purpose**: Run the test suite
 
 **What it does**:
-- Activates virtual environment
-- Executes all pytest tests
+- Activates the virtual environment (`.venv`)
+- Executes all pytest tests (configured in `[tool.pytest.ini_options]` in `pyproject.toml`)
 - Provides verbose output
 
 **When to use**:
@@ -136,13 +136,13 @@ echo "yes" | python3 scripts/reset_application.py
 **Direct pytest alternatives**:
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run specific test file
-pytest tests/test_agent_generation.py
+uv run pytest tests/test_agent_generation.py
 
 # Run with coverage
-pytest --cov=utils --cov-report=html
+uv run pytest --cov=lib --cov-report=html
 ```
 
 ### Benchmark Scripts
