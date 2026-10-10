@@ -205,7 +205,7 @@ from lib.storage import load_chat_history, save_chat_history, StreamingCache
 
 **Modules**:
 - `chat_toolbox.py` - Toolbox row below the chat input ("Attach file", "Attach image", context usage popover on the right) and rendering of user messages with image thumbnails and text attachments
-- `dialogs.py` - Add Chat dialog (`open_add_chat_dialog()`, a real `st.dialog` modal), expert creation (`create_new_expert()`) and shared LLM configuration widgets. The Edit, Delete and Reset dialogs live in `pages/9998_Settings.py` (`open_edit_expert_dialog()`, `open_delete_expert_dialog()`, `open_reset_dialog()`)
+- `dialogs.py` - Add Chat dialog (`open_add_chat_dialog()`, a blocking `st.dialog` modal that closes only via its own buttons), expert creation (`create_new_expert()`) and shared LLM configuration widgets. The Edit, Delete and Reset dialogs live in `pages/9998_Settings.py` (`open_edit_expert_dialog()`, `open_delete_expert_dialog()`, `open_reset_dialog()`)
 
 **Imports**:
 ```python

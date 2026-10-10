@@ -621,12 +621,16 @@ def create_new_expert(
 def open_add_chat_dialog() -> None:
     """Open the Add Chat dialog as a modal.
 
-    Call it when the "Add Chat" button is clicked. The dialog closes on
-    cancel, on dismissal and after the expert was created.
+    Call it when the "Add Chat" button is clicked. The dialog is blocking
+    (not dismissible): it closes only on cancel or after the expert was
+    created.
     """
-    st.dialog(i18n.t("buttons.add_chat"), width="large", icon=":material/add:")(
-        _render_add_chat_dialog
-    )()
+    st.dialog(
+        i18n.t("buttons.add_chat"),
+        width="large",
+        icon=":material/add:",
+        dismissible=False,
+    )(_render_add_chat_dialog)()
 
 
 def _render_add_chat_dialog() -> None:
@@ -651,8 +655,15 @@ def _render_add_chat_dialog() -> None:
         {i18n.t("dialogs.add_chat.api_key_required_desc")}
         """)
 
-        if st.button(f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"):
+        with st.container(horizontal=True):
+            go_to_settings = st.button(
+                f"🔧 {i18n.t('buttons.go_to_settings')}", type="primary"
+            )
+            cancel = st.button(i18n.t("buttons.cancel"))
+        if go_to_settings:
             st.switch_page("pages/9998_Settings.py")
+        if cancel:
+            st.rerun()
 
         return
 

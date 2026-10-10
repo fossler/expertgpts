@@ -624,6 +624,7 @@ def open_edit_expert_dialog(expert_id: str) -> None:
         i18n.t("dialogs.edit_expert.title", name=translated_name),
         width="large",
         icon=":material/edit:",
+        dismissible=False,
     )(_render_edit_expert_dialog)(expert_id, expert_config)
 
 
@@ -930,7 +931,7 @@ def open_delete_expert_dialog(expert: dict) -> None:
     """
     from lib.i18n import i18n
 
-    st.dialog(i18n.t("buttons.delete"), icon=":material/delete:")(
+    st.dialog(i18n.t("buttons.delete"), icon=":material/delete:", dismissible=False)(
         _render_delete_expert_dialog
     )(expert)
 
@@ -1046,9 +1047,11 @@ def open_reset_dialog() -> None:
     """Open the final confirmation dialog for resetting the application."""
     from lib.i18n import i18n
 
-    st.dialog(i18n.t("danger_zone.reset_button"), icon=":material/warning:")(
-        _render_reset_dialog
-    )()
+    st.dialog(
+        i18n.t("danger_zone.reset_button"),
+        icon=":material/warning:",
+        dismissible=False,
+    )(_render_reset_dialog)()
 
 
 def _render_reset_dialog() -> None:

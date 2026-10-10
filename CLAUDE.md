@@ -439,7 +439,7 @@ Requires `watchdog` package (in the `dev` dependency group of `pyproject.toml`, 
   - New i18n keys in `chat_toolbox` (all 14 locales): `attach_image`, `attach_image_help`, `image_not_supported`, `attached_images`, `error_image_too_large`, `error_not_image`, `image_unavailable`
 - **`scripts/regenerate_pages.py`** (`PageGenerator.regenerate_pages()`): rewrites existing expert pages from the template without touching configs or chat history; replaces `reset_application.py` as the way to apply template changes
 - **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
-- **Real dialogs**: "Add Chat" (`open_add_chat_dialog()`), "Edit Expert", delete and reset confirmations are modal `st.dialog`s opened from the button click (title built at call time for i18n); the `show_*_dialog` / `editing_expert_*` / `confirm_*` flags and `ensure_dialog_state()` were removed, success messages use `st.toast`. The edit dialog now also validates the expert name
+- **Real dialogs**: "Add Chat" (`open_add_chat_dialog()`), "Edit Expert", delete and reset confirmations are blocking modal `st.dialog`s (`dismissible=False`: no X, ESC or outside click; they close only via their own Cancel/confirm buttons) opened from the button click (title built at call time for i18n); the `show_*_dialog` / `editing_expert_*` / `confirm_*` flags and `ensure_dialog_state()` were removed, success messages use `st.toast`. The edit dialog now also validates the expert name
 
 ### Previous Session (2026-07-18)
 
