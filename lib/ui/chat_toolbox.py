@@ -1,11 +1,10 @@
 """Chat toolbox below the chat input, and rendering of user messages.
 
 The toolbox is rendered inside ``st.bottom`` right after ``st.chat_input``, so
-it stays pinned below the input. A first row selects the model (all models of
-providers with an API key) and its thinking mode / temperature. The second row
-offers "Attach file", "Attach image" and
-"Voice input" on the left, and "Clear chat history" and the context usage on
-the right.
+it stays pinned below the input. The first row offers "Attach file", "Attach
+image" and "Voice input" on the left, and "Clear chat history" and the context
+usage on the right. The second row selects the model (all models of providers
+with an API key) and its thinking mode / temperature.
 """
 
 import hashlib
@@ -107,8 +106,6 @@ def render_chat_toolbox(
     messages = st.session_state.get(messages_key, [])
     attachments, images, notes = [], [], []
 
-    _render_model_settings(config, expert_id)
-
     with st.container(horizontal=True, vertical_alignment="center"):
         # --- Attach file (text) ---
         with st.popover(
@@ -190,6 +187,9 @@ def render_chat_toolbox(
         st.space("stretch")
         _render_clear_history(expert_id, messages_key, has_messages=bool(messages))
         _render_context_usage(config, messages)
+
+    # Second row: model, thinking mode, temperature
+    _render_model_settings(config, expert_id)
 
     return ToolboxInput(attachments, images, voice_prompt)
 

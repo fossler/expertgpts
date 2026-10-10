@@ -58,7 +58,7 @@ Click on any expert in the sidebar to load their page. You'll see:
 
 ### Attaching Files
 
-Below the chat input are two rows: the [model selection](#switching-providers) and the toolbox row with, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
+Below the chat input are two rows: the toolbox row and, below it, the [model selection](#switching-providers). The toolbox row has, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
 
 1. Click **Attach file** and choose one or more files in the popover
 2. The toolbox lists the attached files ("📎 Attached: ...")
@@ -169,7 +169,7 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 Each expert can use a different provider and model. Switch directly below the chat input:
 
 1. Go to the expert's page
-2. Open the **model dropdown** in the first row below the chat input. It lists all models of every provider that has an API key, in this order: DeepSeek, OpenAI, Z.AI, KIMI
+2. Open the **model dropdown** in the second row below the chat input. It lists all models of every provider that has an API key, in this order: DeepSeek, OpenAI, Z.AI, KIMI
 3. Select a model — the change is saved for this expert immediately (no save button)
 
 Next to the model, only the settings the model actually supports are shown:
