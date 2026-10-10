@@ -391,7 +391,7 @@
     "error_image_too_large": "{name} lebih besar dari {size} MB dan tidak dilampirkan.",
     "error_not_image": "{name} bukan gambar yang valid dan tidak dilampirkan.",
     "image_unavailable": "tidak tersedia lagi",
-    "clear_confirm": "Seluruh riwayat obrolan pakar ini, termasuk gambar yang dilampirkan, akan dihapus.",
+    "clear_confirm": "Seluruh riwayat chat ahli ini, termasuk gambar yang dilampirkan, akan dihapus.",
     "clear_button": "Hapus permanen",
     "voice_input": "Input suara",
     "voice_help": "Rekam pesan suara. Setelah berhenti, pesan diubah menjadi teks dan dikirim otomatis.",
@@ -400,7 +400,7 @@
     "error_audio_too_large": "Rekaman lebih besar dari {size} MB dan tidak dapat ditranskripsi.",
     "voice_model": "Transkripsi: {model}",
     "voice_key_missing": "Input suara memerlukan kunci API untuk {provider} ({model}). Anda dapat menambahkannya di Pengaturan.",
-    "error_audio_too_long": "Rekaman lebih dari {seconds} detik, batas dari {model}.",
+    "error_audio_too_long": "Rekaman lebih dari {seconds} detik, batas {model}.",
     "voice_asr_context": "Ini adalah pesan suara dalam bahasa Indonesia."
   }
 }
