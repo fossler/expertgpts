@@ -383,6 +383,13 @@
     "attach_help": "Text files up to {size} KB. They are added to your next message.",
     "attached": "📎 Attached: {files}",
     "error_too_large": "{name} is larger than {size} KB and was not attached.",
-    "error_not_text": "{name} is not a UTF-8 text file and was not attached."
+    "error_not_text": "{name} is not a UTF-8 text file and was not attached.",
+    "attach_image": "Attach image",
+    "attach_image_help": "Images (PNG, JPEG, WebP, GIF) up to {size} MB. They are sent to the model with your next message.",
+    "image_not_supported": "{model} does not support images.",
+    "attached_images": "🖼️ Images: {files}",
+    "error_image_too_large": "{name} is larger than {size} MB and was not attached.",
+    "error_not_image": "{name} is not a valid image and was not attached.",
+    "image_unavailable": "no longer available"
   }
 }

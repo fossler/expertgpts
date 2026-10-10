@@ -383,6 +383,13 @@
     "attach_help": "Fichiers texte jusqu'à {size} Ko. Ils sont ajoutés à votre prochain message.",
     "attached": "📎 Joint : {files}",
     "error_too_large": "{name} dépasse {size} Ko et n'a pas été joint.",
-    "error_not_text": "{name} n'est pas un fichier texte UTF-8 et n'a pas été joint."
+    "error_not_text": "{name} n'est pas un fichier texte UTF-8 et n'a pas été joint.",
+    "attach_image": "Joindre une image",
+    "attach_image_help": "Images (PNG, JPEG, WebP, GIF) jusqu'à {size} Mo. Elles sont envoyées au modèle avec votre prochain message.",
+    "image_not_supported": "{model} ne prend pas en charge les images.",
+    "attached_images": "🖼️ Images : {files}",
+    "error_image_too_large": "{name} dépasse {size} Mo et n'a pas été jointe.",
+    "error_not_image": "{name} n'est pas une image valide et n'a pas été jointe.",
+    "image_unavailable": "n'est plus disponible"
   }
 }

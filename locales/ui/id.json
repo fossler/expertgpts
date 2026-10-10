@@ -383,6 +383,13 @@
     "attach_help": "File teks hingga {size} KB. File ditambahkan ke pesan Anda berikutnya.",
     "attached": "📎 Terlampir: {files}",
     "error_too_large": "{name} lebih besar dari {size} KB dan tidak dilampirkan.",
-    "error_not_text": "{name} bukan file teks UTF-8 dan tidak dilampirkan."
+    "error_not_text": "{name} bukan file teks UTF-8 dan tidak dilampirkan.",
+    "attach_image": "Lampirkan gambar",
+    "attach_image_help": "Gambar (PNG, JPEG, WebP, GIF) hingga {size} MB. Gambar dikirim ke model bersama pesan Anda berikutnya.",
+    "image_not_supported": "{model} tidak mendukung gambar.",
+    "attached_images": "🖼️ Gambar: {files}",
+    "error_image_too_large": "{name} lebih besar dari {size} MB dan tidak dilampirkan.",
+    "error_not_image": "{name} bukan gambar yang valid dan tidak dilampirkan.",
+    "image_unavailable": "tidak tersedia lagi"
   }
 }

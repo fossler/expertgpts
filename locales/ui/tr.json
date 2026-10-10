@@ -383,6 +383,13 @@
     "attach_help": "{size} KB'a kadar metin dosyaları. Bir sonraki mesajınıza eklenir.",
     "attached": "📎 Eklendi: {files}",
     "error_too_large": "{name} {size} KB'tan büyük olduğu için eklenmedi.",
-    "error_not_text": "{name} bir UTF-8 metin dosyası olmadığı için eklenmedi."
+    "error_not_text": "{name} bir UTF-8 metin dosyası olmadığı için eklenmedi.",
+    "attach_image": "Görsel ekle",
+    "attach_image_help": "{size} MB'a kadar görseller (PNG, JPEG, WebP, GIF). Bir sonraki mesajınızla birlikte modele gönderilir.",
+    "image_not_supported": "{model} görselleri desteklemiyor.",
+    "attached_images": "🖼️ Görseller: {files}",
+    "error_image_too_large": "{name} {size} MB'tan büyük olduğu için eklenmedi.",
+    "error_not_image": "{name} geçerli bir görsel olmadığı için eklenmedi.",
+    "image_unavailable": "artık mevcut değil"
   }
 }

@@ -17,7 +17,8 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 - **📝 Template-Based Architecture** - Consistent UI/UX across all experts with easy customization
 - **🎨 Theme Customization** - Personalize colors and appearance with preset themes
 - **💾 Persistent Chat History** - Conversations saved automatically per expert
-- **📎 File Attachments** - Attach text files (code, Markdown, CSV, JSON, logs, ...) to a message via the toolbox below the chat input
+- **📎 File & Image Attachments** - Attach text files (code, Markdown, CSV, JSON, logs, ...) and images (PNG, JPEG, WebP, GIF, up to 5 MB; for models with image support) to a message via the toolbox below the chat input
+- **📊 Context Usage** - See how much of the model's context window a chat uses, right in the toolbox below the chat input
 - **⚙️ Adjustable Temperature** - Control response creativity (0.0-2.0) for each expert
 - **🚀 Modern Navigation** - Material Design icons using Streamlit's st.navigation() API
 - **📂 File-Based Configuration** - Each expert has its own YAML config for easy management
@@ -135,7 +136,7 @@ expertgpts/
 │   ├── llm/                      # LLM client, connection pooling, token management
 │   ├── config/                   # Expert config, secrets, app defaults, theme config
 │   ├── i18n/                     # Internationalization
-│   ├── storage/                  # Chat history, streaming cache
+│   ├── storage/                  # Chat history, chat image files, streaming cache
 │   ├── ui/                       # Dialogs and UI components
 │   └── shared/                   # Constants, helpers, file ops, types, session state
 └── locales/ui/*.json             # UI translations (13 languages)
@@ -200,6 +201,8 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 | **KIMI** | `kimi-k3` | 1M context, always-on reasoning (`low`/`high`/`max`), multimodal; K2.7 Code for coding |
 
 **Per-Expert Selection**: Each expert can use a different provider/model. Switch via the sidebar dropdown.
+
+**Image Input**: `deepseek-flash`, all OpenAI models and all KIMI models accept images; `deepseek-v4-pro` and the Z.AI GLM models are text-only. See [Attaching Images](docs/user-guide/basics.md#attaching-images).
 
 **Connection Pooling**: Client instances cached for ~50% performance improvement.
 

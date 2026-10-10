@@ -383,6 +383,13 @@
     "attach_help": "文本之件，限 {size} KB，附於次言。",
     "attached": "📎 已附：{files}",
     "error_too_large": "{name} 逾 {size} KB，未附。",
-    "error_not_text": "{name} 非 UTF-8 文本之件，未附。"
+    "error_not_text": "{name} 非 UTF-8 文本之件，未附。",
+    "attach_image": "附圖",
+    "attach_image_help": "圖（PNG、JPEG、WebP、GIF），限 {size} MB，隨次言送於模型。",
+    "image_not_supported": "{model} 不識圖。",
+    "attached_images": "🖼️ 圖：{files}",
+    "error_image_too_large": "{name} 逾 {size} MB，未附。",
+    "error_not_image": "{name} 非有效之圖，未附。",
+    "image_unavailable": "已不存"
   }
 }

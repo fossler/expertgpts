@@ -183,7 +183,7 @@ uv run python scripts/regenerate_pages.py
 
 ### `scripts/reset_application.py`
 
-Reset to factory defaults: deletes all configs, expert pages, chat history and streaming cache, then recreates the example experts.
+Reset to factory defaults: deletes all configs, expert pages, chat history, chat images and streaming cache, then recreates the example experts.
 
 ```bash
 echo "yes" | uv run python scripts/reset_application.py

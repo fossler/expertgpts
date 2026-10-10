@@ -79,12 +79,13 @@ expertgpts/
 │   │   └── i18n.py                 # Language/translation
 │   ├── storage/                   # Data persistence
 │   │   ├── chat_history_manager.py # Chat history
+│   │   ├── attachment_store.py     # Chat image files (chat_attachments/)
 │   │   └── streaming_cache.py      # Response caching
 │   ├── ui/                        # UI components
-│   │   ├── chat_toolbox.py        # Chat toolbox ("Attach file")
+│   │   ├── chat_toolbox.py        # Chat toolbox (attach file/image, context usage)
 │   │   └── dialogs.py             # Shared dialogs
 │   └── shared/                    # Shared utilities
-│       ├── attachments.py         # Chat file attachments
+│       ├── attachments.py         # Chat file and image attachments
 │       ├── page_generator.py      # Page generation
 │       ├── session_state.py       # Session state
 │       ├── constants.py           # Config constants
@@ -98,6 +99,9 @@ expertgpts/
 │       └── ... (13 language files)
 ├── chat_history/                   # Conversation storage
 │   ├── 1001_python_expert.json
+│   └── ...
+├── chat_attachments/               # Images attached in the chat (gitignored)
+│   ├── 1001_python_expert/
 │   └── ...
 ├── .streamlit/                     # Streamlit configuration
 │   ├── secrets.toml                # API keys (gitignored)
@@ -254,6 +258,18 @@ expertgpts/
 - 1MB file size limit per expert
 - Auto-trimming when limit exceeded
 - Load/save operations
+- `delete_chat_history()` also deletes the expert's images
+
+### 9. Attachment Store (`lib/storage/attachment_store.py`)
+
+**Purpose**: File storage for images attached in the chat
+
+**Storage**: `chat_attachments/{expert_id}/<uuid>.<ext>` (gitignored, local per machine)
+
+**Features**:
+- Messages only contain an `<image name="..." ref="...">` reference, keeping the chat history small
+- Images become base64 data URLs only when a request is sent (`to_api_content()` in `lib/shared/attachments.py`)
+- Path-traversal safe via `safe_path_join()`
 
 ## Data Flow
 
@@ -289,6 +305,8 @@ Load chat history (if any)
 Inject language prefix (runtime i18n)
     ↓
 Construct system prompt
+    ↓
+Convert message content (to_api_content: image references → image parts, or a text note for text-only models)
     ↓
 LLMClient.generate_response()
     ├─ Get cached client (client_pool.py)

@@ -123,8 +123,8 @@ uv run ruff format --check .
 # Regenerate expert pages from templates/template.py (keeps configs and chat history)
 uv run python scripts/regenerate_pages.py
 
-# Reset application - DELETES all configs, pages, chat history and streaming cache,
-# then recreates the example experts
+# Reset application - DELETES all configs, pages, chat history, chat images and
+# streaming cache, then recreates the example experts
 echo "yes" | uv run python scripts/reset_application.py
 
 # Update translations - syncs English source with all locale files
@@ -181,6 +181,7 @@ Multi-layered state system with different lifetimes:
 
 - **Persistent storage** (survives app restarts):
   - Chat history: `chat_history/{expert_id}.json` (1MB file size limit)
+  - Chat images: `chat_attachments/{expert_id}/<uuid>.<ext>` (gitignored, local per machine; messages only hold `<image ... ref="...">` references)
   - Expert configurations: `configs/{expert_id}.yaml`
   - User preferences: `.streamlit/app_defaults.toml`
   - Theme settings: `.streamlit/config.toml`
@@ -258,14 +259,15 @@ Clean separation of concerns for 13-language support:
 ### Core Library (`lib/`)
 - **`config_manager.py`** - Expert YAML config operations (load, update, delete, list)
 - **`page_generator.py`** - Creates new expert pages from template; generates unique expert IDs; `regenerate_pages()` rewrites existing expert pages from the template (keeps filename, `EXPERT_ID`, `EXPERT_NAME`)
-- **`chat_toolbox.py`** (`lib/ui/`) - Toolbox row below the chat input (`render_chat_toolbox()`, currently "Attach file"); `render_user_message()` shows embedded attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
-- **`attachments.py`** (`lib/shared/`) - Text file attachments (UTF-8, ≤ `ATTACHMENT_MAX_SIZE_KB`, extensions in `ATTACHMENT_FILE_TYPES`); `build_message_content()` embeds them into the user message as `<attachment name="...">` blocks, `split_message_content()` reverses it for display
+- **`chat_toolbox.py`** (`lib/ui/`) - Toolbox row below the chat input (`render_chat_toolbox(widget_key, config, messages)` → `(attachments, images)`): "Attach file", "Attach image" (disabled with a tooltip unless `supports_images()`), status captions and, right-aligned, the context usage popover (`_calculate_context_stats()`, `_render_context_usage()`; replaces the former sidebar metric). `render_user_message()` shows image thumbnails (width 240) and text attachments as "📎 <filename>" expanders. Rendered inside `with st.bottom:` right after `st.chat_input` in `handle_user_input()`
+- **`attachments.py`** (`lib/shared/`) - Text file attachments (UTF-8, ≤ `ATTACHMENT_MAX_SIZE_KB`, extensions in `ATTACHMENT_FILE_TYPES`) and images (`IMAGE_FILE_TYPES`, ≤ `IMAGE_MAX_SIZE_MB`, `validate_image_attachment()` via Pillow); `build_message_content()` appends `<image name="..." ref="...">` tags and `<attachment name="...">` blocks to the prompt, `split_message_content()` returns `(prompt, attachments, images)`, `to_api_content(content, images_supported)` turns image tags into `image_url` parts (base64) or a text note for text-only models / missing files
+- **`attachment_store.py`** (`lib/storage/`) - Image files under `chat_attachments/{expert_id}/` (`save_image()`, `get_image_path()`, `get_image_data_url()`, `delete_expert_attachments()`); path-traversal safe via `safe_path_join()`, directory resolved from the project root
 - **`llm_client.py`** - Multi-provider LLM client; handles thinking parameter differences via `_prepare_thinking_param()`
 - **`client_pool.py`** - Cached client connections; use `get_cached_client()` instead of direct instantiation
 - **`secrets_manager.py`** - Secure API key management; reads/writes `.streamlit/secrets.toml` with 600 permissions
 - **`app_defaults_manager.py`** - User preferences management (default provider, model, language)
 - **`config_toml_manager.py`** - Theme configuration management for `.streamlit/config.toml`
-- **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit
+- **`chat_history_manager.py`** - Persistent conversation storage; enforces 1MB file size limit; `delete_chat_history()` also deletes the expert's images
 - **`session_state.py`** - Initializes shared session state (API keys, navigation, defaults) - **UPDATED**: Added `ensure_dialog_state()` helper
 - **`streaming_cache.py`** - Background streaming with file-based caching; battery-optimized polling for LLM responses
 - **`token_manager.py`** - Token counting and context usage tracking; calculates percentage of context used
@@ -308,6 +310,7 @@ Do NOT use `reset_application.py` for this: it deletes all configs, pages and ch
 1. **Add provider configuration** in `lib/shared/constants.py`:
    - Add entry to `LLM_PROVIDERS` dict with name, base_url, default_model, models dict
    - Models must include: display_name, max_tokens, thinking_param
+   - Add `"vision": True` only if the model accepts image input (verify live; some models silently ignore images)
 
 2. **Update thinking parameter handling** in `lib/llm/llm_client.py`:
    - Modify `_prepare_thinking_param()` method if provider uses custom thinking parameters
@@ -423,7 +426,13 @@ Requires `watchdog` package (included in development dependencies). Provides ins
 - UI preselects the model's default effort for unsupported stored levels; expert dialog shows effort selectors for every model with `reasoning_efforts` (incl. GLM-5.2/5.3)
 - Updated README, this file and `docs/`
 - **Chat toolbox**: toolbox row pinned below the chat input (`st.chat_input` + `render_chat_toolbox()` inside `with st.bottom:`); first entry "Attach file" (`lib/ui/chat_toolbox.py`, `lib/shared/attachments.py`, i18n section `chat_toolbox`)
-  - Text files only (UTF-8, ≤ 200 KB each); embedded into the user message as `<attachment name="...">` blocks, so LLM request, token counting and chat history work unchanged; shown as "📎 <filename>" expanders
+  - **Attach file**: text files only (UTF-8, ≤ 200 KB each); embedded into the user message as `<attachment name="...">` blocks, so LLM request, token counting and chat history work unchanged; shown as "📎 <filename>" expanders
+  - **Attach image**: PNG/JPEG/WebP/GIF, ≤ 5 MB each (`IMAGE_FILE_TYPES`, `IMAGE_MAX_SIZE_MB`, Pillow validation); only for models with `"vision": True` (`supports_images()`), otherwise disabled with tooltip. Verified live via Chat Completions: deepseek-flash, all 8 OpenAI and all 4 KIMI models accept images; deepseek-v4-pro silently ignores them (no flag); Z.AI text-only per docs (no flag, not live-tested)
+  - Images saved to `chat_attachments/{expert_id}/<uuid>.<ext>` (`lib/storage/attachment_store.py`, gitignored); the message only holds an `<image name="..." ref="...">` tag (before `<attachment>` blocks), so images are not counted in the context usage
+  - `to_api_content()` builds `image_url` parts (base64 data URLs) per request; text-only models get "[Image <name> omitted: ...]", missing files "[Image <name> is no longer available]"; user messages show thumbnails, also after reload
+  - "Clear chat history" also deletes the expert's images; `reset_application.py` deletes `chat_attachments/`
+  - **Context usage** moved from the sidebar into the toolbox (right side): popover "<emoji> <percent>%" with usage %, total/max, system prompt and chat message tokens; `display_context_usage()` removed from the template
+  - New i18n keys in `chat_toolbox` (all 14 locales): `attach_image`, `attach_image_help`, `image_not_supported`, `attached_images`, `error_image_too_large`, `error_not_image`, `image_unavailable`
 - **`scripts/regenerate_pages.py`** (`PageGenerator.regenerate_pages()`): rewrites existing expert pages from the template without touching configs or chat history; replaces `reset_application.py` as the way to apply template changes
 - **Pytest config** moved from `tests/pytest.ini` to `[tool.pytest.ini_options]` in `pyproject.toml` (`uv run pytest -m unit` works from the project root)
 

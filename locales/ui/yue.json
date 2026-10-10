@@ -383,6 +383,13 @@
     "attach_help": "最多 {size} KB 嘅文字檔案，會附加喺你下一條訊息度。",
     "attached": "📎 已附加：{files}",
     "error_too_large": "{name} 超過 {size} KB，冇附加到。",
-    "error_not_text": "{name} 唔係 UTF-8 文字檔案，冇附加到。"
+    "error_not_text": "{name} 唔係 UTF-8 文字檔案，冇附加到。",
+    "attach_image": "附加圖片",
+    "attach_image_help": "最多 {size} MB 嘅圖片（PNG、JPEG、WebP、GIF），會同你下一條訊息一齊send俾模型。",
+    "image_not_supported": "{model} 唔支援圖片。",
+    "attached_images": "🖼️ 圖片：{files}",
+    "error_image_too_large": "{name} 超過 {size} MB，冇附加到。",
+    "error_not_image": "{name} 唔係有效嘅圖片，冇附加到。",
+    "image_unavailable": "已經冇咗"
   }
 }

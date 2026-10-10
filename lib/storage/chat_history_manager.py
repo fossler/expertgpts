@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
+from lib.storage.attachment_store import delete_expert_attachments
 from lib.shared.file_ops import ensure_directory_exists, get_project_root
 from lib.shared.format_ops import read_json, write_json
 
@@ -242,6 +243,7 @@ def delete_chat_history(expert_id: str) -> bool:
     try:
         if chat_path.exists():
             chat_path.unlink()
+        delete_expert_attachments(expert_id)
         return True
     except Exception as e:
         print(f"Warning: Error deleting chat history for {expert_id}: {e}")

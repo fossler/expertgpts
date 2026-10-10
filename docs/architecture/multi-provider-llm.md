@@ -76,6 +76,7 @@ LLM_PROVIDERS = {
         "default_model": "deepseek-flash",
         "models": {
             "deepseek-flash": {
+                "vision": True,  # accepts image input
                 "display_name": "DeepSeek V4.1 Flash",
                 "max_tokens": 1000000,
                 "reasoning_efforts": ["none", "high", "max"],
@@ -97,6 +98,7 @@ LLM_PROVIDERS = {
         "fixed_temperature": 1.0,
         "models": {
             "gpt-6.1-sol": {
+                "vision": True,  # accepts image input
                 "display_name": "GPT-6.1 Sol",
                 "max_tokens": 1050000,
                 "reasoning_efforts": ["low", "medium", "high", "xhigh"],  # always reasons
@@ -135,11 +137,13 @@ LLM_PROVIDERS = {
 - `fixed_temperature` (provider or model) — the only temperature the API accepts; a model-level value overrides the provider-level one
 - `fixed_temperature_without_thinking` (model) — fixed temperature used when thinking is disabled (kimi-k2.6)
 - `thinking_always_on` (model) — the model always thinks and the thinking toggle is shown fixed/disabled (kimi-k2.7-code, kimi-k2.7-code-highspeed)
+- `vision` (model) — the model accepts image input; enables "Attach image" in the chat toolbox and sends images as `image_url` parts. Set for deepseek-flash, all OpenAI models and all KIMI models; not for deepseek-v4-pro (ignores images) or the Z.AI models (text-only). See [Image Input](../api/providers.md#image-input)
 
 **Helpers** (`lib/shared/constants.py`):
 - `get_default_reasoning_effort(provider, model)` — the model's `reasoning_effort_default` (or first effort), `None` if the model has no efforts
 - `resolve_reasoning_effort(provider, model, thinking_level)` — returns `thinking_level` if supported, otherwise the model's default effort
 - `get_fixed_temperature(provider, model=None, thinking=True)` — the enforced temperature, or `None` if adjustable
+- `supports_images(provider, model)` — `True` if the model config declares `"vision": True`
 
 ### O(1) Lookup Tables
 

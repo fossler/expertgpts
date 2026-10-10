@@ -383,6 +383,13 @@
     "attach_help": "Ficheiros de texto até {size} KB. São adicionados à sua próxima mensagem.",
     "attached": "📎 Anexado: {files}",
     "error_too_large": "{name} excede {size} KB e não foi anexado.",
-    "error_not_text": "{name} não é um ficheiro de texto UTF-8 e não foi anexado."
+    "error_not_text": "{name} não é um ficheiro de texto UTF-8 e não foi anexado.",
+    "attach_image": "Anexar imagem",
+    "attach_image_help": "Imagens (PNG, JPEG, WebP, GIF) até {size} MB. São enviadas ao modelo com a sua próxima mensagem.",
+    "image_not_supported": "{model} não suporta imagens.",
+    "attached_images": "🖼️ Imagens: {files}",
+    "error_image_too_large": "{name} excede {size} MB e não foi anexada.",
+    "error_not_image": "{name} não é uma imagem válida e não foi anexada.",
+    "image_unavailable": "já não está disponível"
   }
 }

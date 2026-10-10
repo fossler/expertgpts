@@ -3,7 +3,7 @@
 This script completely resets the application by:
 1. Deleting all expert configurations from configs/
 2. Deleting all expert pages from pages/
-3. Deleting all chat history files from chat_history/
+3. Deleting all chat history files from chat_history/ and images from chat_attachments/
 4. Deleting all streaming cache files from streaming_cache/
 5. Running setup.py to recreate the example experts
 
@@ -33,6 +33,7 @@ def confirm_reset():
     print("  • Delete all YAML config files in configs/")
     print("  • Delete all expert page files in pages/")
     print("  • Delete all chat history files in chat_history/")
+    print("  • Delete all chat images in chat_attachments/")
     print("  • Delete all streaming cache files in streaming_cache/")
     print(f"  • Recreate {EXAMPLE_EXPERTS_COUNT} example experts from scratch")
     print("-" * 60)
@@ -127,6 +128,23 @@ def delete_streaming_cache():
         return False
 
 
+def delete_chat_attachments():
+    """Delete all chat image attachments."""
+    attachments_dir = Path("chat_attachments")
+
+    if not attachments_dir.exists():
+        print("ℹ️  No chat attachments to delete.")
+        return True
+
+    try:
+        shutil.rmtree(attachments_dir)
+        print("\n🗑️  Deleted chat attachments directory (and all contents).")
+        return True
+    except Exception as e:
+        print(f"❌ Error deleting chat attachments directory: {e}")
+        return False
+
+
 def run_setup():
     """Run the setup.py script to perform application setup."""
     print("\n🔄 Running scripts/setup.py to set up the application...\n")
@@ -187,6 +205,11 @@ def main():
     # Delete chat history
     if not delete_chat_history():
         print("\n❌ Failed to delete chat history. Aborting.")
+        return 1
+
+    # Delete chat image attachments
+    if not delete_chat_attachments():
+        print("\n❌ Failed to delete chat attachments. Aborting.")
         return 1
 
     # Delete streaming cache

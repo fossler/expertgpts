@@ -58,7 +58,7 @@ Click on any expert in the sidebar to load their page. You'll see:
 
 ### Attaching Files
 
-Below the chat input is a toolbox row. Use **📎 Attach file** to add text files to your next message:
+Below the chat input is a toolbox row with, from left to right, **📎 Attach file**, **🖼️ Attach image**, status notes about your attachments and, on the right, the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
 
 1. Click **Attach file** and choose one or more files in the popover
 2. The toolbox lists the attached files ("📎 Attached: ...")
@@ -73,6 +73,38 @@ Below the chat input is a toolbox row. Use **📎 Attach file** to add text file
 - Each attachment appears in your message as a collapsible "📎 <filename>" section, also after reloading the page
 - The file content becomes part of your message, so it counts toward the model's context and the chat history size limit
 - Attachments are cleared after the message is sent; attach them again for later messages if needed (the expert still sees earlier attachments as part of the conversation)
+
+### Attaching Images
+
+Use **🖼️ Attach image** to send screenshots, photos or diagrams with your next message:
+
+1. Click **Attach image** and choose one or more images in the popover
+2. The toolbox lists the attached images ("🖼️ Images: ...")
+3. Type your prompt and send it; the images are sent to the model together with the message
+
+**Supported images:**
+- PNG, JPEG, WebP and GIF, up to **5 MB** each
+- Files that are too large or not valid images are reported in the toolbox and skipped
+
+**Which models support images:**
+- **DeepSeek**: `deepseek-flash` (not `deepseek-v4-pro`)
+- **OpenAI**: all models
+- **KIMI**: all models
+- **Z.AI**: none (the GLM models are text-only)
+
+For models without image support the button is disabled; hover over it to see "<model> does not support images". Switch the expert to a model that supports images to use it.
+
+**Good to know:**
+- Images appear as thumbnails in your message, also after reloading the page
+- Images are stored locally in `chat_attachments/{expert_id}/` (not committed to git); the chat history only keeps a reference to them
+- Images are not included in the context usage shown in the toolbox, although they do use part of the model's context
+- If you later switch the expert to a model without image support, earlier images in the conversation are replaced by a short note ("[Image <name> omitted: the selected model does not support images]") when the conversation is sent; switching back sends them again
+- If an image file was deleted, the message shows "no longer available" and the model receives a note instead of the image
+- **🗑️ Clear Chat History** in the sidebar also deletes the expert's images
+
+### Context Usage
+
+The right side of the toolbox shows how much of the model's context window the conversation uses, as a compact button with a severity emoji and the percentage (e.g. "🟢 3.2%"; 🟢 below 50%, 🟡 below 75%, 🟠 below 90%, 🔴 from 90%). Click it for details: usage percentage, total and maximum tokens, and the tokens used by the system prompt and by the chat messages. Text attachments are counted; images are not.
 
 ### Conversation Context
 
@@ -224,13 +256,14 @@ When you revisit an expert:
 
 ### Clearing History
 
-**Option 1: Via File System**
+**Option 1: In-App**
+Use the **🗑️ Clear Chat History** button in the expert's sidebar. It also deletes the expert's attached images.
+
+**Option 2: Via File System**
 ```bash
 rm chat_history/{expert_id}.json
+rm -r chat_attachments/{expert_id}/   # attached images, if any
 ```
-
-**Option 2: In-App** (if implemented)
-Use the "Clear Chat" button in the chat interface.
 
 ## Session State Management
 
@@ -252,6 +285,7 @@ ExpertGPTs uses multi-layered state management:
 
 ### Persistent Storage
 - **Chat history**: `chat_history/{expert_id}.json`
+- **Image attachments**: `chat_attachments/{expert_id}/` (local only, gitignored)
 - **Expert configurations**: `configs/{expert_id}.yaml`
 - **User preferences**: `.streamlit/app_defaults.toml`
 - **Theme settings**: `.streamlit/config.toml`
@@ -356,7 +390,7 @@ Create focused experts:
 
 ### 4. Manage Token Usage
 
-- Monitor token counts in chat interface
+- Monitor the context usage on the right of the toolbox below the chat input
 - Lower temperature for shorter, focused responses
 - Switch to cost-effective providers (DeepSeek) for simple tasks
 
