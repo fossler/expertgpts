@@ -1,0 +1,6 @@
+{
+  "username": "<username from the acme-dns registration>",
+  "password": "<password from the acme-dns registration>",
+  "subdomain": "<subdomain from the acme-dns registration>",
+  "server_url": "https://auth.acme-dns.io"
+}

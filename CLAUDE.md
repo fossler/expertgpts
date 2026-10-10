@@ -68,6 +68,7 @@ Read these documents when working on specific areas:
 | `docs/internationalization/I18N_GUIDE.md` | Adding translations, language handling |
 | `docs/configuration/overview.md` | Configuration files structure |
 | `docs/configuration/api-keys.md` | API key management, secrets |
+| `docs/configuration/tls.md` | HTTPS with a Caddy reverse proxy (`deploy/caddy/`); keep it generic, no host- or domain-specific values |
 | `docs/configuration/expert-configs.md` | Expert YAML configuration format |
 | `docs/development/adding-features.md` | Step-by-step feature development |
 | `docs/development/testing.md` | Writing and running tests |

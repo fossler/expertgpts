@@ -52,6 +52,7 @@ Technical configuration documentation:
 - **[Expert Configs](configuration/expert-configs.md)** - YAML expert configurations
 - **[API Keys](configuration/api-keys.md)** - API key management
 - **[App Defaults](configuration/app-defaults.md)** - User preferences
+- **[HTTPS with Caddy](configuration/tls.md)** - TLS reverse proxy for a server deployment
 
 ### Architecture
 

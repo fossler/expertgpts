@@ -190,6 +190,7 @@ ExpertGPTs supports **14 languages** with automatic detection:
 - **[Template System](docs/architecture/template-system.md)** - Page generation
 - **[Scripts Reference](docs/reference/scripts.md)** - Administrative scripts
 - **[Debug Page](docs/reference/debug-page.md)** - Hidden `/debug` diagnostics page
+- **[HTTPS with Caddy](docs/configuration/tls.md)** - TLS reverse proxy for a server deployment
 
 **Full documentation**: [docs/](docs/)
 
