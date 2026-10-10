@@ -341,13 +341,15 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
     attachments_generation = st.session_state.get(attachments_key, 0)
     with st.bottom:
         prompt = st.chat_input(i18n.t("home.chat_input_placeholder"))
-        attachments, images = render_chat_toolbox(
+        toolbox = render_chat_toolbox(
             f"{attachments_key}_{attachments_generation}",
             config,
             EXPERT_ID,
             messages_key,
         )
 
+    # A transcribed voice message is sent like a typed prompt
+    prompt = prompt or toolbox.voice_prompt
     if prompt:
         # Validate API key format with provider-specific validation
         is_valid, error_msg = validate_api_key(api_key, provider=provider)
@@ -357,9 +359,9 @@ def handle_user_input(api_key: str, config: dict, messages_key: str):
 
         # Store images, embed attachments into the message, clear the toolbox
         image_refs = [
-            (name, save_image(EXPERT_ID, name, data)) for name, data in images
+            (name, save_image(EXPERT_ID, name, data)) for name, data in toolbox.images
         ]
-        content = build_message_content(prompt, attachments, image_refs)
+        content = build_message_content(prompt, toolbox.attachments, image_refs)
         st.session_state[attachments_key] = attachments_generation + 1
 
         # Add user message to chat history

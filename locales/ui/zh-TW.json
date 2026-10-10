@@ -392,6 +392,14 @@
     "error_not_image": "{name} 不是有效的圖片，未附加。",
     "image_unavailable": "已無法使用",
     "clear_confirm": "將刪除此專家的全部聊天記錄，包括附加的圖片。",
-    "clear_button": "永久刪除"
+    "clear_button": "永久刪除",
+    "voice_input": "語音輸入",
+    "voice_help": "錄製一則語音訊息，它將轉換為文字，您可以在傳送前編輯。",
+    "voice_not_available": "語音轉文字尚未接入，因此錄音暫不處理。此功能將在後續步驟中提供。",
+    "voice_transcribing": "正在轉寫…",
+    "voice_transcript": "轉寫文字",
+    "voice_send": "作為訊息傳送",
+    "voice_error": "轉寫失敗：{error}",
+    "error_audio_too_large": "錄音超過 {size} MB，無法轉寫。"
   }
 }

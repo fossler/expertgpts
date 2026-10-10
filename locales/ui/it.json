@@ -392,6 +392,14 @@
     "error_not_image": "{name} non è un'immagine valida e non è stata allegata.",
     "image_unavailable": "non più disponibile",
     "clear_confirm": "L'intera cronologia chat di questo esperto, comprese le immagini allegate, verrà eliminata.",
-    "clear_button": "Elimina definitivamente"
+    "clear_button": "Elimina definitivamente",
+    "voice_input": "Input vocale",
+    "voice_help": "Registra un messaggio vocale. Viene convertito in testo che puoi modificare prima dell'invio.",
+    "voice_not_available": "La trascrizione non è ancora collegata, quindi la registrazione non viene elaborata. Seguirà in un passaggio successivo.",
+    "voice_transcribing": "Trascrizione in corso…",
+    "voice_transcript": "Trascrizione",
+    "voice_send": "Invia come messaggio",
+    "voice_error": "Trascrizione non riuscita: {error}",
+    "error_audio_too_large": "La registrazione supera i {size} MB e non può essere trascritta."
   }
 }

@@ -392,6 +392,14 @@
     "error_not_image": "{name} is not a valid image and was not attached.",
     "image_unavailable": "no longer available",
     "clear_confirm": "The entire chat history of this expert, including attached images, will be deleted.",
-    "clear_button": "Delete permanently"
+    "clear_button": "Delete permanently",
+    "voice_input": "Voice input",
+    "voice_help": "Record a voice message. It is converted to text that you can edit before sending.",
+    "voice_not_available": "Speech-to-text is not connected yet, so the recording is not processed. This follows in a later step.",
+    "voice_transcribing": "Transcribing…",
+    "voice_transcript": "Transcript",
+    "voice_send": "Send as message",
+    "voice_error": "Transcription failed: {error}",
+    "error_audio_too_large": "The recording is larger than {size} MB and cannot be transcribed."
   }
 }

@@ -1,15 +1,19 @@
 """Chat toolbox below the chat input, and rendering of user messages.
 
 The toolbox is rendered inside ``st.bottom`` right after ``st.chat_input``, so
-it stays pinned below the input. It offers "Attach file" and "Attach image"
-on the left, and "Clear chat history" and the context usage on the right.
+it stays pinned below the input. It offers "Attach file", "Attach image" and
+"Voice input" on the left, and "Clear chat history" and the context usage on
+the right.
 """
 
+import hashlib
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import streamlit as st
 
+from lib.audio import is_transcription_available, transcribe
 from lib.config.config_manager import get_llm_metadata
 from lib.i18n.i18n import i18n
 from lib.llm import TokenManager
@@ -22,6 +26,7 @@ from lib.shared.attachments import (
 from lib.shared.constants import (
     ATTACHMENT_FILE_TYPES,
     ATTACHMENT_MAX_SIZE_KB,
+    AUDIO_MAX_SIZE_MB,
     IMAGE_FILE_TYPES,
     IMAGE_MAX_SIZE_MB,
     get_max_tokens,
@@ -34,6 +39,22 @@ from lib.storage.attachment_store import get_image_path
 
 # (file name, image bytes) of an image attached but not yet sent
 PendingImage = Tuple[str, bytes]
+
+
+@dataclass
+class ToolboxInput:
+    """What the toolbox contributes to the next message.
+
+    Attributes:
+        attachments: Text attachments as (file name, file text)
+        images: Images as (file name, image bytes), not yet stored
+        voice_prompt: Transcribed voice message to send, if the user sent one
+    """
+
+    attachments: List[Attachment] = field(default_factory=list)
+    images: List[PendingImage] = field(default_factory=list)
+    voice_prompt: Optional[str] = None
+
 
 # File extensions whose st.code language name differs from the extension
 _CODE_LANGUAGES = {
@@ -52,8 +73,8 @@ _CODE_LANGUAGES = {
 
 def render_chat_toolbox(
     widget_key: str, config: dict, expert_id: str, messages_key: str
-) -> Tuple[List[Attachment], List[PendingImage]]:
-    """Render the toolbox row and return the attachments for the next message.
+) -> ToolboxInput:
+    """Render the toolbox row and return its input for the next message.
 
     Must be called inside ``with st.bottom:`` after ``st.chat_input`` so the
     toolbox appears below the input. Invalid files are reported and skipped.
@@ -66,7 +87,7 @@ def render_chat_toolbox(
         messages_key: Session state key of the expert's messages
 
     Returns:
-        tuple: (text attachments as (name, text), images as (name, bytes))
+        ToolboxInput: Attachments, images and an optional voice prompt
     """
     provider, model, _ = get_llm_metadata(config)
     messages = st.session_state.get(messages_key, [])
@@ -128,6 +149,9 @@ def render_chat_toolbox(
                 except ValueError as e:
                     notes.append(_error_note(e, file.name))
 
+        # --- Voice input (speech-to-text model connection follows later) ---
+        voice_prompt = _render_voice_input(widget_key)
+
         # --- Status: skipped files and current attachments ---
         for note in notes:
             st.caption(f"⚠️ {note}")
@@ -151,7 +175,76 @@ def render_chat_toolbox(
         _render_clear_history(expert_id, messages_key, has_messages=bool(messages))
         _render_context_usage(config, messages)
 
-    return attachments, images
+    return ToolboxInput(attachments, images, voice_prompt)
+
+
+def _render_voice_input(widget_key: str) -> Optional[str]:
+    """Render "Voice input": record audio, transcribe it, send the text.
+
+    The transcript is shown in an editable text area; "Send as message"
+    returns it so it is sent like a typed prompt. Until a speech-to-text model
+    is connected (see ``lib.audio.transcription``), only a notice is shown
+    after recording.
+
+    Args:
+        widget_key: Key prefix; changes after each sent message, which also
+            resets the recorder
+
+    Returns:
+        str | None: The text to send, or None
+    """
+    with st.popover(
+        i18n.t("chat_toolbox.voice_input"),
+        icon=":material/mic:",
+        type="tertiary",
+    ):
+        audio = st.audio_input(
+            i18n.t("chat_toolbox.voice_input"),
+            key=f"{widget_key}_voice",
+            label_visibility="collapsed",
+        )
+        st.caption(i18n.t("chat_toolbox.voice_help"))
+        if audio is None:
+            return None
+
+        if not is_transcription_available():
+            st.info(i18n.t("chat_toolbox.voice_not_available"))
+            return None
+
+        data = audio.getvalue()
+        if len(data) > AUDIO_MAX_SIZE_MB * 1024 * 1024:
+            st.warning(
+                i18n.t("chat_toolbox.error_audio_too_large", size=AUDIO_MAX_SIZE_MB)
+            )
+            return None
+
+        # Transcribe each recording once; reruns must not call the model again
+        result_key = f"{widget_key}_voice_{hashlib.sha256(data).hexdigest()[:16]}"
+        if result_key not in st.session_state:
+            with st.spinner(i18n.t("chat_toolbox.voice_transcribing")):
+                st.session_state[result_key] = transcribe(
+                    data,
+                    mime_type=audio.type or "audio/wav",
+                    language=st.session_state.get("language"),
+                )
+        result = st.session_state[result_key]
+        if not result.success:
+            st.error(i18n.t("chat_toolbox.voice_error", error=result.error))
+            return None
+
+        text = st.text_area(
+            i18n.t("chat_toolbox.voice_transcript"),
+            value=result.text,
+            key=f"{result_key}_text",
+        )
+        if st.button(
+            i18n.t("chat_toolbox.voice_send"),
+            type="primary",
+            key=f"{widget_key}_voice_send",
+            disabled=not text.strip(),
+        ):
+            return text.strip()
+    return None
 
 
 def _error_note(error: ValueError, name: str) -> str:

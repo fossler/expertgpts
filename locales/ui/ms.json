@@ -392,6 +392,14 @@
     "error_not_image": "{name} bukan imej yang sah dan tidak dilampirkan.",
     "image_unavailable": "tidak lagi tersedia",
     "clear_confirm": "Keseluruhan sejarah sembang pakar ini, termasuk imej yang dilampirkan, akan dipadam.",
-    "clear_button": "Padam secara kekal"
+    "clear_button": "Padam secara kekal",
+    "voice_input": "Input suara",
+    "voice_help": "Rakam mesej suara. Ia ditukar kepada teks yang boleh anda sunting sebelum dihantar.",
+    "voice_not_available": "Penukaran suara kepada teks belum disambungkan, jadi rakaman belum diproses. Ini akan menyusul dalam langkah seterusnya.",
+    "voice_transcribing": "Sedang mentranskripsi…",
+    "voice_transcript": "Transkrip",
+    "voice_send": "Hantar sebagai mesej",
+    "voice_error": "Transkripsi gagal: {error}",
+    "error_audio_too_large": "Rakaman melebihi {size} MB dan tidak boleh ditranskripsi."
   }
 }

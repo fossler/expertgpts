@@ -392,6 +392,14 @@
     "error_not_image": "{name} 不是有效的图片，未附加。",
     "image_unavailable": "已不可用",
     "clear_confirm": "将删除此专家的全部聊天记录，包括附加的图片。",
-    "clear_button": "永久删除"
+    "clear_button": "永久删除",
+    "voice_input": "语音输入",
+    "voice_help": "录制一条语音消息，它将转换为文本，您可以在发送前编辑。",
+    "voice_not_available": "语音转文字尚未接入，因此录音暂不处理。此功能将在后续步骤中提供。",
+    "voice_transcribing": "正在转写…",
+    "voice_transcript": "转写文本",
+    "voice_send": "作为消息发送",
+    "voice_error": "转写失败：{error}",
+    "error_audio_too_large": "录音超过 {size} MB，无法转写。"
   }
 }

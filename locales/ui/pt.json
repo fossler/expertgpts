@@ -392,6 +392,14 @@
     "error_not_image": "{name} não é uma imagem válida e não foi anexada.",
     "image_unavailable": "já não está disponível",
     "clear_confirm": "Todo o histórico de conversa deste especialista, incluindo as imagens anexadas, será eliminado.",
-    "clear_button": "Eliminar definitivamente"
+    "clear_button": "Eliminar definitivamente",
+    "voice_input": "Entrada de voz",
+    "voice_help": "Grave uma mensagem de voz. É convertida em texto que pode editar antes de enviar.",
+    "voice_not_available": "A transcrição ainda não está ligada, por isso a gravação não é processada. Isto chegará num passo posterior.",
+    "voice_transcribing": "A transcrever…",
+    "voice_transcript": "Transcrição",
+    "voice_send": "Enviar como mensagem",
+    "voice_error": "A transcrição falhou: {error}",
+    "error_audio_too_large": "A gravação excede {size} MB e não pode ser transcrita."
   }
 }

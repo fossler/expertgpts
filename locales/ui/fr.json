@@ -392,6 +392,14 @@
     "error_not_image": "{name} n'est pas une image valide et n'a pas été jointe.",
     "image_unavailable": "n'est plus disponible",
     "clear_confirm": "Tout l'historique de discussion de cet expert, y compris les images jointes, sera supprimé.",
-    "clear_button": "Supprimer définitivement"
+    "clear_button": "Supprimer définitivement",
+    "voice_input": "Saisie vocale",
+    "voice_help": "Enregistrez un message vocal. Il est converti en texte que vous pouvez modifier avant l'envoi.",
+    "voice_not_available": "La transcription n'est pas encore connectée, l'enregistrement n'est donc pas traité. Cela suivra dans une prochaine étape.",
+    "voice_transcribing": "Transcription en cours…",
+    "voice_transcript": "Transcription",
+    "voice_send": "Envoyer comme message",
+    "voice_error": "Échec de la transcription : {error}",
+    "error_audio_too_large": "L'enregistrement dépasse {size} Mo et ne peut pas être transcrit."
   }
 }

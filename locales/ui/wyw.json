@@ -392,6 +392,14 @@
     "error_not_image": "{name} 非有效之圖，未附。",
     "image_unavailable": "已不存",
     "clear_confirm": "此專家之言錄，連所附之圖，盡將刪去。",
-    "clear_button": "永刪"
+    "clear_button": "永刪",
+    "voice_input": "語入",
+    "voice_help": "錄言為音，化為文，可修而後發。",
+    "voice_not_available": "音轉文之術未接，所錄暫不理，後當續成。",
+    "voice_transcribing": "正轉錄…",
+    "voice_transcript": "錄文",
+    "voice_send": "發為言",
+    "voice_error": "轉錄未成：{error}",
+    "error_audio_too_large": "所錄逾 {size} MB，不能轉錄。"
   }
 }

@@ -58,7 +58,7 @@ Click on any expert in the sidebar to load their page. You'll see:
 
 ### Attaching Files
 
-Below the chat input is a toolbox row with, from left to right, **📎 Attach file**, **🖼️ Attach image**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
+Below the chat input is a toolbox row with, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
 
 1. Click **Attach file** and choose one or more files in the popover
 2. The toolbox lists the attached files ("📎 Attached: ...")
@@ -101,6 +101,12 @@ For models without image support the button is disabled; hover over it to see "<
 - If you later switch the expert to a model without image support, earlier images in the conversation are replaced by a short note ("[Image <name> omitted: the selected model does not support images]") when the conversation is sent; switching back sends them again
 - If an image file was deleted, the message shows "no longer available" and the model receives a note instead of the image
 - **🗑️ Clear chat history** in the toolbox also deletes the expert's images
+
+### Voice Input
+
+**🎤 Voice input** in the toolbox records a voice message with your microphone (your browser asks for permission the first time).
+
+> **Note**: Speech-to-text is not connected yet. You can already record, but the recording is not processed; the popover shows a notice instead. Once a speech-to-text model is connected, the transcript will appear in an editable field, and **Send as message** sends it like a typed message (together with any attached files and images).
 
 ### Context Usage
 

@@ -267,6 +267,9 @@ ATTACHMENT_FILE_TYPES = [
 IMAGE_MAX_SIZE_MB = 5
 IMAGE_FILE_TYPES = ["png", "jpg", "jpeg", "webp", "gif"]
 
+# Voice input: maximum recording size passed to speech-to-text
+AUDIO_MAX_SIZE_MB = 25
+
 # Model Context Limits
 DEEPSEEK_MAX_CONTEXT_TOKENS = 1000000
 

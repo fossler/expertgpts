@@ -392,6 +392,14 @@
     "error_not_image": "{name} geçerli bir görsel olmadığı için eklenmedi.",
     "image_unavailable": "artık mevcut değil",
     "clear_confirm": "Bu uzmanın tüm sohbet geçmişi, eklenen görseller dahil, silinecek.",
-    "clear_button": "Kalıcı olarak sil"
+    "clear_button": "Kalıcı olarak sil",
+    "voice_input": "Sesli giriş",
+    "voice_help": "Sesli bir mesaj kaydedin. Göndermeden önce düzenleyebileceğiniz metne dönüştürülür.",
+    "voice_not_available": "Konuşmadan metne dönüştürme henüz bağlı değil, bu nedenle kayıt işlenmiyor. Bu, sonraki bir adımda gelecek.",
+    "voice_transcribing": "Metne dönüştürülüyor…",
+    "voice_transcript": "Metin",
+    "voice_send": "Mesaj olarak gönder",
+    "voice_error": "Metne dönüştürme başarısız: {error}",
+    "error_audio_too_large": "Kayıt {size} MB'tan büyük olduğu için metne dönüştürülemiyor."
   }
 }

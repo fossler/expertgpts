@@ -392,6 +392,14 @@
     "error_not_image": "{name} bukan gambar yang valid dan tidak dilampirkan.",
     "image_unavailable": "tidak tersedia lagi",
     "clear_confirm": "Seluruh riwayat obrolan pakar ini, termasuk gambar yang dilampirkan, akan dihapus.",
-    "clear_button": "Hapus permanen"
+    "clear_button": "Hapus permanen",
+    "voice_input": "Input suara",
+    "voice_help": "Rekam pesan suara. Pesan diubah menjadi teks yang dapat Anda edit sebelum dikirim.",
+    "voice_not_available": "Konversi suara ke teks belum terhubung, sehingga rekaman belum diproses. Ini akan menyusul di langkah berikutnya.",
+    "voice_transcribing": "Mentranskripsi…",
+    "voice_transcript": "Transkrip",
+    "voice_send": "Kirim sebagai pesan",
+    "voice_error": "Transkripsi gagal: {error}",
+    "error_audio_too_large": "Rekaman lebih besar dari {size} MB dan tidak dapat ditranskripsi."
   }
 }
