@@ -10,6 +10,40 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
 from lib.storage.attachment_store import delete_expert_attachments
+
+# Optional per-message fields kept alongside role/content: which provider and
+# model produced an assistant answer (used for its avatar)
+OPTIONAL_MESSAGE_FIELDS = ("provider", "model")
+
+
+def assistant_message(content: str, provider: str, model: str) -> Dict:
+    """Build an assistant message that records which LLM produced it.
+
+    Args:
+        content: Message text
+        provider: Provider key (e.g. "openai")
+        model: Model ID (e.g. "gpt-6.1-sol")
+
+    Returns:
+        dict: Message for the chat history
+    """
+    return {
+        "role": "assistant",
+        "content": content,
+        "provider": provider,
+        "model": model,
+    }
+
+
+def _copy_message(msg: Dict) -> Dict:
+    """Copy role, content and the optional fields of a message."""
+    copied = {"role": msg["role"], "content": msg["content"]}
+    for field in OPTIONAL_MESSAGE_FIELDS:
+        if msg.get(field):
+            copied[field] = msg[field]
+    return copied
+
+
 from lib.shared.file_ops import ensure_directory_exists, get_project_root
 from lib.shared.format_ops import read_json, write_json
 
@@ -98,7 +132,7 @@ def load_chat_history(expert_id: str) -> List[Dict]:
     validated_messages = []
     for msg in messages:
         if isinstance(msg, dict) and "role" in msg and "content" in msg:
-            validated_messages.append({"role": msg["role"], "content": msg["content"]})
+            validated_messages.append(_copy_message(msg))
 
     return validated_messages
 
@@ -126,11 +160,10 @@ def save_chat_history(expert_id: str, messages: List[Dict]) -> bool:
         timestamped_messages = []
         for msg in messages:
             if isinstance(msg, dict) and "role" in msg and "content" in msg:
-                timestamped_msg = {
-                    "role": msg["role"],
-                    "content": msg["content"],
-                    "timestamp": msg.get("timestamp", datetime.now().isoformat()),
-                }
+                timestamped_msg = _copy_message(msg)
+                timestamped_msg["timestamp"] = msg.get(
+                    "timestamp", datetime.now().isoformat()
+                )
                 timestamped_messages.append(timestamped_msg)
 
         # Create file structure

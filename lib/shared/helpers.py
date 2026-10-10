@@ -307,7 +307,9 @@ def sanitize_markdown_content(content: str) -> str:
     return sanitized
 
 
-def add_error_to_history(expert_id: str, messages_key: str, error_msg: str) -> None:
+def add_error_to_history(
+    expert_id: str, messages_key: str, error_msg: str, provider: str, model: str
+) -> None:
     """Add error message to chat history and persist to file.
 
     This helper centralizes the error persistence pattern used across
@@ -317,11 +319,14 @@ def add_error_to_history(expert_id: str, messages_key: str, error_msg: str) -> N
         expert_id: Expert identifier (e.g., "1001_python_expert")
         messages_key: Session state key for messages (e.g., "messages_1001_python_expert")
         error_msg: Error message to add (should already be translated/sanitized)
+        provider: Provider of the failed request (for the message avatar)
+        model: Model of the failed request
     """
     from lib.storage import save_chat_history
+    from lib.storage.chat_history_manager import assistant_message
 
     st.session_state[messages_key].append(
-        {"role": "assistant", "content": f"❌ {error_msg}"}
+        assistant_message(f"❌ {error_msg}", provider, model)
     )
     save_chat_history(expert_id, st.session_state[messages_key])
 

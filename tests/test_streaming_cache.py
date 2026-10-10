@@ -28,6 +28,7 @@ class MockLLMClient:
             chunks: List of chunks to yield
             delay: Delay between chunks in seconds
         """
+        self.provider = "deepseek"  # like LLMClient.provider
         self.chunks = chunks
         self.delay = delay
 
@@ -84,6 +85,8 @@ class TestStreamingCache:
 
         assert thread.is_alive()
         assert isinstance(thread, threading.Thread)
+        # The producing LLM is recorded for the answer's avatar
+        assert cache.get_llm_origin() == ("deepseek", "test-model")
 
         # Clean up
         cache.cleanup()

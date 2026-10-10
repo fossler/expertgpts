@@ -58,7 +58,7 @@ Click on any expert in the sidebar to load their page. You'll see:
 
 ### Attaching Files
 
-Below the chat input is a toolbox row with, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
+Below the chat input are two rows: the [model selection](#switching-providers) and the toolbox row with, from left to right, **📎 Attach file**, **🖼️ Attach image**, **🎤 Voice input**, status notes about your attachments and, on the right, **🗑️ Clear chat history** and the [context usage](#context-usage). Use **📎 Attach file** to add text files to your next message:
 
 1. Click **Attach file** and choose one or more files in the popover
 2. The toolbox lists the attached files ("📎 Attached: ...")
@@ -166,11 +166,18 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 
 ### Selecting a Provider
 
-Each expert can use a different provider:
+Each expert can use a different provider and model. Switch directly below the chat input:
 
 1. Go to the expert's page
-2. Use the "Provider" dropdown in the sidebar
-3. Select your preferred provider
+2. Open the **model dropdown** in the first row below the chat input. It lists all models of every provider that has an API key, in this order: DeepSeek, OpenAI, Z.AI, KIMI
+3. Select a model — the change is saved for this expert immediately (no save button)
+
+Next to the model, only the settings the model actually supports are shown:
+
+- **🧠 Thinking mode**: the model's reasoning levels (e.g. Low/Medium/High), or On/Off for GLM-5, GLM-4.7-Flash and KIMI K2.6. Nothing is shown for KIMI K2.7 Code, which always thinks. If the previous level isn't available for the new model, its default is used
+- **🌡️ Temperature**: only for DeepSeek and Z.AI models. OpenAI and KIMI models use a fixed temperature, so the field is hidden
+
+Switching models mid-conversation keeps the history. Each answer keeps the logo of the provider that wrote it (answers saved before this feature show the current provider's logo).
 
 **Use case examples**:
 - Use **DeepSeek** for cost-effective daily tasks

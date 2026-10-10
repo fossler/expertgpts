@@ -1,7 +1,9 @@
 """Chat toolbox below the chat input, and rendering of user messages.
 
 The toolbox is rendered inside ``st.bottom`` right after ``st.chat_input``, so
-it stays pinned below the input. It offers "Attach file", "Attach image" and
+it stays pinned below the input. A first row selects the model (all models of
+providers with an API key) and its thinking mode / temperature. The second row
+offers "Attach file", "Attach image" and
 "Voice input" on the left, and "Clear chat history" and the context usage on
 the right.
 """
@@ -20,7 +22,7 @@ from lib.audio import (
     get_transcription_provider,
     transcribe,
 )
-from lib.config.config_manager import get_llm_metadata
+from lib.config.config_manager import get_config_manager, get_llm_metadata
 from lib.i18n.i18n import i18n
 from lib.llm import TokenManager
 from lib.shared.attachments import (
@@ -35,12 +37,17 @@ from lib.shared.constants import (
     AUDIO_MAX_SIZE_MB,
     IMAGE_FILE_TYPES,
     IMAGE_MAX_SIZE_MB,
+    LLM_PROVIDERS,
+    get_fixed_temperature,
     get_max_tokens,
+    get_model_config,
     get_model_display_name,
     get_provider_display_name,
+    resolve_reasoning_effort,
     supports_images,
 )
 from lib.shared.helpers import sanitize_markdown_content
+from lib.shared.session_state import invalidate_expert_cache
 from lib.storage import delete_chat_history
 from lib.storage.attachment_store import get_image_path
 
@@ -99,6 +106,8 @@ def render_chat_toolbox(
     provider, model, _ = get_llm_metadata(config)
     messages = st.session_state.get(messages_key, [])
     attachments, images, notes = [], [], []
+
+    _render_model_settings(config, expert_id)
 
     with st.container(horizontal=True, vertical_alignment="center"):
         # --- Attach file (text) ---
@@ -183,6 +192,146 @@ def render_chat_toolbox(
         _render_context_usage(config, messages)
 
     return ToolboxInput(attachments, images, voice_prompt)
+
+
+def _model_options(current_provider: str, current_model: str) -> List[str]:
+    """List "provider/model" options for all providers with an API key.
+
+    Keeps the catalog order of ``LLM_PROVIDERS``. The expert's current model
+    is always included so the selection stays valid.
+    """
+    api_keys = st.session_state.get("api_keys", {})
+    options = [
+        f"{provider}/{model}"
+        for provider, provider_config in LLM_PROVIDERS.items()
+        if api_keys.get(provider)
+        for model in provider_config["models"]
+    ]
+    current = f"{current_provider}/{current_model}"
+    if current not in options:
+        options.insert(0, current)
+    return options
+
+
+def _mark_model_settings_changed(expert_id: str) -> None:
+    """on_change callback: remember that the user changed a model setting."""
+    st.session_state[f"{expert_id}_model_settings_changed"] = True
+
+
+def _render_thinking_select(
+    provider: str, model: str, current: Optional[str], key: str, expert_id: str
+) -> str:
+    """Render the thinking control that fits the model and return its level.
+
+    - Models with reasoning efforts: effort selectbox (unsupported stored
+      levels fall back to the model's default)
+    - Models that always think (kimi-k2.7-code): nothing to choose
+    - Older Z.AI models and KIMI K2.6: enabled/disabled
+    """
+    model_config = get_model_config(provider, model)
+    label = i18n.t("sidebar.thinking_mode")
+    efforts = model_config.get("reasoning_efforts")
+    if efforts:
+        return st.selectbox(
+            label,
+            efforts,
+            index=efforts.index(resolve_reasoning_effort(provider, model, current)),
+            format_func=lambda effort: f"🧠 {effort.capitalize()}",
+            label_visibility="collapsed",
+            width=140,
+            key=key,
+            on_change=_mark_model_settings_changed,
+            args=(expert_id,),
+        )
+    if model_config.get("thinking_always_on"):
+        return "medium"
+    if provider in ("zai", "kimi"):
+        enabled = st.selectbox(
+            label,
+            [False, True],
+            index=int(bool(current) and current != "none"),
+            format_func=lambda on: (
+                "🧠 "
+                + (i18n.t("sidebar.enabled") if on else i18n.t("sidebar.disabled"))
+            ),
+            label_visibility="collapsed",
+            width=140,
+            key=key,
+            on_change=_mark_model_settings_changed,
+            args=(expert_id,),
+        )
+        return "medium" if enabled else "none"
+    return current or "none"
+
+
+def _render_model_settings(config: dict, expert_id: str) -> None:
+    """Render the model row and save changes to the expert config right away.
+
+    Shows a dropdown with all models of providers that have an API key and,
+    next to it, the thinking mode and temperature where the model allows
+    them (fixed temperatures are hidden). Selecting a model of another
+    provider switches the expert's provider.
+
+    Args:
+        config: Expert configuration dictionary
+        expert_id: Unique expert identifier
+    """
+    provider, model, thinking_level = get_llm_metadata(config)
+    temperature = float(config.get("temperature", 1.0))
+    version = st.session_state.get(f"cache_version_{expert_id}", 0)
+    options = _model_options(provider, model)
+
+    with st.container(horizontal=True, vertical_alignment="center"):
+        choice = st.selectbox(
+            i18n.t("sidebar.model"),
+            options,
+            index=options.index(f"{provider}/{model}"),
+            format_func=lambda option: get_model_display_name(*option.split("/", 1)),
+            label_visibility="collapsed",
+            width=220,
+            key=f"{expert_id}_toolbox_model_v{version}",
+            on_change=_mark_model_settings_changed,
+            args=(expert_id,),
+        )
+        new_provider, new_model = choice.split("/", 1)
+        new_thinking = _render_thinking_select(
+            new_provider,
+            new_model,
+            thinking_level,
+            key=f"{expert_id}_toolbox_thinking_{choice}_v{version}",
+            expert_id=expert_id,
+        )
+        new_temperature = temperature
+        if get_fixed_temperature(new_provider, new_model) is None:
+            st.markdown(":material/device_thermostat:", width="content")
+            new_temperature = st.number_input(
+                i18n.t("forms.temperature"),
+                min_value=0.0,
+                max_value=2.0,
+                value=temperature,
+                step=0.1,
+                format="%.1f",
+                label_visibility="collapsed",
+                width=120,
+                key=f"{expert_id}_toolbox_temperature_v{version}",
+                on_change=_mark_model_settings_changed,
+                args=(expert_id,),
+            )
+
+    # Save only after a real user change (not when a stored level that the
+    # model doesn't support is merely displayed as the model's default)
+    if st.session_state.pop(f"{expert_id}_model_settings_changed", False):
+        get_config_manager().update_config(
+            expert_id=expert_id,
+            updates={
+                "provider": new_provider,
+                "model": new_model,
+                "thinking_level": new_thinking,
+                "temperature": new_temperature,
+            },
+        )
+        invalidate_expert_cache(expert_id)
+        st.rerun()
 
 
 def _render_voice_input(widget_key: str, chat_provider: str) -> Optional[str]:

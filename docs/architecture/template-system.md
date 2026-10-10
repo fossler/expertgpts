@@ -374,23 +374,17 @@ if prompt:
 - **Context usage**: `_render_context_usage()` shows a compact popover button "<severity emoji> <percent>%" on the right of the toolbox; it opens the details (usage %, total/max tokens, system prompt tokens, chat message tokens), calculated by `_calculate_context_stats()` via `TokenManager.calculate_usage_statistics()`. It replaces the former sidebar metric card and breakdown expander (`display_context_usage()` in the template, removed).
 - The uploader keys include a counter that is incremented after each sent message, which clears the attachments.
 
-### Sidebar Controls
+### Model Settings (toolbox, first row)
 
-```python
-with st.sidebar:
-    st.title(f"{EXPERT_NAME}")
+The former sidebar "Model settings" (model, thinking mode, temperature, provider links, save button) were replaced by a row in the toolbox, rendered by `_render_model_settings()` in `lib/ui/chat_toolbox.py` before the toolbox row:
 
-    # Provider selection
-    provider = st.selectbox(
-        "Provider",
-        ["deepseek", "openai", "zai"],
-        index=["deepseek", "openai", "zai"].index(st.session_state[f"provider_{EXPERT_ID}"])
-    )
-    st.session_state[f"provider_{EXPERT_ID}"] = provider
+- **Model dropdown**: options are `"provider/model"` for every provider with an API key (`_model_options()`, catalog order of `LLM_PROVIDERS`; the current model is always included). Choosing a model of another provider switches the expert's provider.
+- **Thinking**: `_render_thinking_select()` shows an effort selectbox for models with `reasoning_efforts` (unsupported stored levels → model default via `resolve_reasoning_effort()`), nothing for `thinking_always_on` models, and enabled/disabled for older Z.AI models and KIMI K2.6.
+- **Temperature**: a number input only if `get_fixed_temperature()` is None (DeepSeek, Z.AI).
+- **Saving**: immediately via `ConfigManager.update_config()` (provider, model, thinking_level, temperature) + `invalidate_expert_cache()` + rerun — but only after a real user change, signalled by the widgets' `on_change` callback (`_mark_model_settings_changed()`), so merely displaying a normalized default never writes the config.
+- **Avatars per answer**: assistant messages are created with `assistant_message(content, provider, model)` (`lib/storage/chat_history_manager.py`); the chat history persists `provider`/`model` per message, background streams store them in the stream metadata (`StreamingCache.get_llm_origin()`), and `render_chat_interface()` picks the avatar per message (fallback: current provider for older messages).
 
-    # Model selection
-    # ... similar for model, temperature, thinking level ...
-```
+The sidebar now only contains the page navigation and the Git branch footer.
 
 ## Advantages of Template System
 

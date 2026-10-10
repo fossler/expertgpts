@@ -141,7 +141,7 @@ ExpertGPTs supports multiple LLM providers:
 - **Z.AI** - GLM models
 - **KIMI** - Moonshot KIMI models
 
-Switch providers per expert using the dropdown in the sidebar.
+Switch the model (and with it the provider) per expert using the model dropdown below the chat input; only providers with an API key are listed.
 
 ### Model Selection
 

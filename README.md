@@ -200,7 +200,7 @@ ExpertGPTs integrates with multiple LLM providers through OpenAI-compatible APIs
 | **Z.AI** | `glm-5.3` | GLM models, 1M context, Chinese optimization, includes free tier |
 | **KIMI** | `kimi-k3` | 1M context, always-on reasoning (`low`/`high`/`max`), multimodal; K2.7 Code for coding |
 
-**Per-Expert Selection**: Each expert can use a different provider/model. Switch via the sidebar dropdown.
+**Per-Expert Selection**: Each expert can use a different provider/model. Switch via the model dropdown below the chat input (all models of providers with an API key); thinking mode and temperature appear next to it where the model supports them, and changes are saved immediately.
 
 **Image Input**: `deepseek-flash`, all OpenAI models and all KIMI models accept images; `deepseek-v4-pro` and the Z.AI GLM models are text-only. See [Attaching Images](docs/user-guide/basics.md#attaching-images).
 
