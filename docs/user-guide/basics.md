@@ -91,9 +91,10 @@ ExpertGPTs supports multiple LLM providers through OpenAI-compatible APIs:
 
 | Provider | Base URL | Default Model | Characteristics |
 |----------|----------|---------------|-----------------|
-| **DeepSeek** | api.deepseek.com | deepseek-v4-flash | Cost-effective, 1M context, dual thinking modes |
-| **OpenAI** | api.openai.com/v1 | gpt-5.6-terra | Advanced reasoning |
-| **Z.AI** | api.z.ai/api/paas/v4 | glm-5.2 | GLM models |
+| **DeepSeek** | api.deepseek.com | deepseek-flash | Cost-effective, 1M context, dual thinking modes |
+| **OpenAI** | api.openai.com/v1 | gpt-6.1-sol | Advanced reasoning |
+| **Z.AI** | api.z.ai/api/paas/v4 | glm-5.3 | GLM models |
+| **KIMI** | api.moonshot.ai/v1 | kimi-k3 | 1M context, always-on reasoning |
 
 ### Selecting a Provider
 
@@ -113,20 +114,30 @@ Each expert can use a different provider:
 Each provider offers multiple models:
 
 **DeepSeek**:
-- `deepseek-v4-flash` - Cost-effective, 1M context, dual thinking modes (default)
+- `deepseek-flash` - Cost-effective, 1M context, dual thinking modes (default)
 - `deepseek-v4-pro` - Premium flagship, 1M context, dual thinking modes
 
 **OpenAI**:
+- `gpt-6.1-sol` - GPT-6.1 Sol, 1.05M context, always reasons (default)
+- `gpt-6-astra` - GPT-6 Astra, top tier, 1.05M context, always reasons
+- `gpt-6-luna` - GPT-6 Luna, cost-effective, 1.05M context
 - `gpt-5.6-sol` - Frontier flagship, 1.05M context
-- `gpt-5.6-terra` - Balanced performance/price, 1.05M context (default)
+- `gpt-5.6-terra` - Balanced performance/price, 1.05M context
 - `gpt-5.6-luna` - Efficient, high-volume, 1.05M context
 - `gpt-5.4-mini` - Cost-effective option, 400K context
 - `gpt-5.4-nano` - High-throughput option, 400K context
 
 **Z.AI**:
-- `glm-5.2` - Flagship model (default), 1M context, adjustable reasoning effort (high/max)
+- `glm-5.3` - Flagship model (default), 1M context, always reasons, adjustable reasoning effort (low/high/max)
+- `glm-5.2` - 1M context, adjustable reasoning effort (high/max)
 - `glm-5` - 200K context
 - `glm-4.7-flash` - Free model, 200K context
+
+**KIMI**:
+- `kimi-k3` - Flagship model (default), 1M context, always reasons, adjustable reasoning effort (low/high/max)
+- `kimi-k2.7-code` - Coding-focused, 256K context, thinking always on
+- `kimi-k2.7-code-highspeed` - Faster variant of K2.7 Code, 256K context, thinking always on
+- `kimi-k2.6` - 256K context, thinking can be enabled/disabled
 
 ## Temperature and Thinking Level
 
@@ -147,17 +158,22 @@ Controls response creativity and randomness:
 
 Enables/disables reasoning capabilities (provider-specific):
 
-- **None** - Standard generation (default)
+- **None** - Standard generation
 - **Low** - Light reasoning
 - **Medium** - Balanced reasoning
 - **High** - Deep reasoning
-- **Xhigh** - Extended reasoning (all current OpenAI models)
-- **Max** - Maximum reasoning (DeepSeek and Z.AI GLM only)
+- **Xhigh** - Extended reasoning (OpenAI only)
+- **Max** - Maximum reasoning (DeepSeek, Z.AI GLM-5.3/5.2 and KIMI K3)
 
-**Availability**:
-- **OpenAI**: `none`/`low`/`medium`/`high`/`xhigh` (reasoning_effort parameter)
-- **DeepSeek**: Enabled/disabled based on model selection
-- **Z.AI**: Enabled/disabled via extra_body parameter
+**Availability** (the options shown depend on the selected model):
+- **OpenAI**: `gpt-6.1-sol` / `gpt-6-astra` always reason: `low`/`medium`/`high`/`xhigh` (default `medium`); other models: `none`/`low`/`medium`/`high`/`xhigh` (default `none`)
+- **DeepSeek**: `none`/`high`/`max` (default `high`)
+- **Z.AI**: GLM-5.3: `low`/`high`/`max` (default `max`); GLM-5.2: `high`/`max`; GLM-5 / GLM-4.7-Flash: enabled/disabled
+- **KIMI**: K3: `low`/`high`/`max` (default `max`); K2.7 Code: always enabled; K2.6: enabled/disabled
+
+If an expert's saved level isn't supported by the newly selected model, the model's default level is preselected.
+
+> **Note**: Some models use a fixed temperature, and the temperature control is disabled for them: all OpenAI models (1.0), KIMI K3 and K2.7 Code (1.0), and KIMI K2.6 (1.0 with thinking, 0.6 without).
 
 > **Note**: Reasoning increases response time and cost. Use when needed for complex tasks.
 

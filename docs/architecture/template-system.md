@@ -299,7 +299,7 @@ if f"provider_{EXPERT_ID}" not in st.session_state:
 
 # Model selection
 if f"model_{EXPERT_ID}" not in st.session_state:
-    st.session_state[f"model_{EXPERT_ID}"] = config.get("metadata", {}).get("model", "deepseek-v4-flash")
+    st.session_state[f"model_{EXPERT_ID}"] = config.get("metadata", {}).get("model", "deepseek-flash")
 
 # Temperature
 if f"temperature_{EXPERT_ID}" not in st.session_state:

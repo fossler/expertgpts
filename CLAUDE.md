@@ -147,11 +147,12 @@ A unified client interface supports multiple LLM providers through OpenAI-compat
 
 - **Client implementation**: `lib/llm/llm_client.py` - `LLMClient` class
 - **Provider-specific thinking parameters**:
-  - **OpenAI**: `reasoning_effort` (none/low/medium/high/xhigh) - passed as direct parameter
-  - **DeepSeek**: `reasoning_effort` (high/max) as direct param + `thinking.type=disabled` in extra_body to turn off. Both `deepseek-v4-flash` and `deepseek-v4-pro` support dual thinking modes; API defaults to enabled.
-  - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter
-  - **KIMI**: generation-dependent. `kimi-k3` uses a top-level `reasoning_effort` (only `max` today; always reasons) and enforces a fixed `temperature=1.0`. `kimi-k2.6` uses the `thinking.type` (enabled/disabled) extra_body toggle. Detected by whether the model config defines `reasoning_efforts` (same pattern as Z.AI's GLM-5.2).
-- **Fixed temperature**: models may declare `fixed_temperature` in their config (kimi-k3 = 1.0). `LLMClient._effective_temperature()` overrides the user-selected temperature on every call path; `render_temperature_input()` disables the control for such models.
+  - **OpenAI**: `reasoning_effort` - passed as direct parameter and **always sent explicitly, including `none`** (if omitted, the API applies its own default and GPT-6 reasons anyway). Per-model levels: `gpt-6.1-sol` (default) / `gpt-6-astra` low/medium/high/xhigh (always reason, default medium); `gpt-6-luna`, GPT-5.6, GPT-5.4 none/low/medium/high/xhigh (default none). No `max` (Responses API only; the app uses Chat Completions). Unsupported levels fall back to the model's default via `resolve_reasoning_effort()`.
+  - **DeepSeek**: `reasoning_effort` (high/max) as direct param + `thinking.type=disabled` in extra_body to turn off. Both `deepseek-flash` (V4.1 Flash, app-wide default) and `deepseek-v4-pro` support dual thinking modes; API defaults to enabled.
+  - **Z.AI**: `thinking.type` (enabled/disabled) - set via extra_body parameter. `glm-5.3` (default; low/high/max, default max) and `glm-5.2` (high/max) always think and add a direct `reasoning_effort`.
+  - **KIMI**: generation-dependent. `kimi-k3` uses a top-level `reasoning_effort` (low/high/max, default max; always reasons). `kimi-k2.7-code` / `kimi-k2.7-code-highspeed` always think (`thinking_always_on: True`; reasoning_effort ignored; UI shows a fixed, disabled "Enabled" selector). `kimi-k2.6` uses the `thinking.type` (enabled/disabled) extra_body toggle; "none" sends `type=disabled` explicitly because the API thinks by default. Detected by whether the model config defines `reasoning_efforts` (same pattern as Z.AI's GLM-5.2/5.3).
+- **Fixed temperature**: `fixed_temperature` may be declared provider-wide (OpenAI = 1.0, since OpenAI rejects temperature != 1 while reasoning) or per model (kimi-k3, kimi-k2.7-code* = 1.0); `fixed_temperature_without_thinking` covers per-mode values (kimi-k2.6: 1.0 thinking / 0.6 without). Resolved by `get_fixed_temperature(provider, model=None, thinking=True)`; `LLMClient._effective_temperature()` overrides the user-selected temperature on every call path; `render_temperature_input()` disables the control for such models.
+- **Effort helpers**: `get_default_reasoning_effort(provider, model)` and `resolve_reasoning_effort(provider, model, thinking_level)` in `constants.py`. The UI preselects the model's default effort when a stored level isn't supported, and shows effort selectors for every model with `reasoning_efforts`.
 - **Provider configuration**: Centralized in `lib/shared/constants.py` with O(1) lookup tables
 - **Connection pooling**: `lib/llm/client_pool.py` caches client instances for performance
 
@@ -332,7 +333,7 @@ expert_id = generator.generate_page(
     temperature=0.7,
     system_prompt="Custom prompt...",
     provider="deepseek",
-    model="deepseek-v4-flash"
+    model="deepseek-flash"
 )
 ```
 
@@ -401,7 +402,20 @@ uv run streamlit run app.py --server.fileWatcherType=watchdog
 
 Requires `watchdog` package (included in development dependencies). Provides instant reload when Python files change.
 
-### Current Session (2026-07-18)
+### Current Session (2026-10-10)
+
+**Completed:**
+- **OpenAI GPT-6**: added `gpt-6.1-sol` (new default), `gpt-6-astra` (top tier), `gpt-6-luna` (cheap); all 1.05M context. Sol/Astra always reason (low/medium/high/xhigh, default medium); Luna none..xhigh (default none). GPT-5.6 / GPT-5.4 kept
+  - **reasoning_effort fix**: now always sent explicitly for OpenAI, including `none` (omitting it let GPT-6 reason anyway); unsupported levels fall back to the model's default via `resolve_reasoning_effort()`
+  - **Temperature fix**: provider-level `fixed_temperature: 1.0` for OpenAI, resolved by `get_fixed_temperature()`
+- **DeepSeek rename**: `deepseek-v4-flash` → `deepseek-flash` ("DeepSeek V4.1 Flash"); now the DeepSeek and app-wide default
+- **Z.AI GLM-5.3**: new default (1M context, 128K output, always reasons, low/high/max, default max)
+- **KIMI**: `kimi-k3` efforts now low/high/max (default max); added `kimi-k2.7-code` / `kimi-k2.7-code-highspeed` (262K context, always think via `thinking_always_on`, temperature 1.0)
+  - **K2.6 fix**: "none" now sends `thinking.type=disabled` explicitly; temperature fixed per mode (1.0 thinking / 0.6 without, `fixed_temperature_without_thinking`)
+- UI preselects the model's default effort for unsupported stored levels; expert dialog shows effort selectors for every model with `reasoning_efforts` (incl. GLM-5.2/5.3)
+- Updated README, this file and `docs/`
+
+### Previous Session (2026-07-18)
 
 **Completed:**
 - **KIMI K3 support**: added the `kimi-k3` flagship model (Moonshot / `MOONSHOT_API_KEY`)

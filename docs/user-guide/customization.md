@@ -202,9 +202,10 @@ Choose the default model for your provider:
 4. Click outside dropdown to save
 
 **Available Models**:
-- **DeepSeek**: `deepseek-v4-flash`, `deepseek-v4-pro`
-- **OpenAI**: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.4-mini`, `gpt-5.4-nano`
-- **Z.AI**: `glm-5.2`, `glm-5`, `glm-4.7-flash`
+- **DeepSeek**: `deepseek-flash`, `deepseek-v4-pro`
+- **OpenAI**: `gpt-6.1-sol`, `gpt-6-astra`, `gpt-6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.4-mini`, `gpt-5.4-nano`
+- **Z.AI**: `glm-5.3`, `glm-5.2`, `glm-5`, `glm-4.7-flash`
+- **KIMI**: `kimi-k3`, `kimi-k2.7-code`, `kimi-k2.7-code-highspeed`, `kimi-k2.6`
 
 **Impact**:
 - New experts use this model by default
@@ -335,7 +336,7 @@ font = "sans serif"
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-v4-flash"
+model = "deepseek-flash"
 thinking_level = "high"
 
 [language]

@@ -161,7 +161,7 @@ expertgpts/
 - Connection pooling via `client_pool.py`
 
 **Key Innovation**: `_prepare_thinking_param()` method handles provider differences:
-- OpenAI: `reasoning_effort` (none/low/medium/high/xhigh)
+- OpenAI: `reasoning_effort` (none/low/medium/high/xhigh, model-dependent; always sent explicitly)
 - DeepSeek: `thinking.type` (model-dependent)
 - Z.AI: `thinking.type` (via extra_body)
 

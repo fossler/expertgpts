@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import streamlit as st
 from lib.shared.helpers import sanitize_name
-from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE
+from lib.shared.constants import SYSTEM_PROMPT_TEMPLATE, get_default_model_for_provider
 from lib.config.app_defaults_manager import get_llm_defaults
 from lib.shared.format_ops import read_yaml, write_yaml
 from lib.shared.file_ops import ensure_directory_exists
@@ -51,9 +51,6 @@ class ConfigManager:
         Returns:
             expert_id: Unique ID for the created expert (matches filename without extension)
         """
-        # Import here for provider defaults
-        from lib.shared.constants import get_default_model_for_provider
-
         # Use user's default provider if not specified
         if provider is None:
             provider = get_llm_defaults()["provider"]
@@ -339,9 +336,10 @@ def get_llm_metadata(config: dict) -> tuple[str, str, str]:
         tuple: (provider, model, thinking_level) with defaults
     """
     metadata = config.get("metadata", {})
+    provider = metadata.get("provider", "deepseek")
     return (
-        metadata.get("provider", "deepseek"),
-        metadata.get("model", "deepseek-v4-flash"),
+        provider,
+        metadata.get("model", get_default_model_for_provider(provider)),
         metadata.get("thinking_level", "none"),
     )
 

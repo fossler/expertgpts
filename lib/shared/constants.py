@@ -10,11 +10,11 @@ LLM_PROVIDERS = {
         "name": "DeepSeek",
         "api_key_env": "DEEPSEEK_API_KEY",
         "base_url": "https://api.deepseek.com",
-        "default_model": "deepseek-v4-flash",
+        "default_model": "deepseek-flash",
         "icon_path": "icons/deepseek_icon_blue.png",
         "models": {
-            "deepseek-v4-flash": {
-                "display_name": "DeepSeek V4 Flash",
+            "deepseek-flash": {
+                "display_name": "DeepSeek V4.1 Flash",
                 "max_tokens": 1000000,
                 "reasoning_efforts": ["none", "high", "max"],
                 "reasoning_effort_default": "high",
@@ -33,9 +33,35 @@ LLM_PROVIDERS = {
         "name": "OpenAI",
         "api_key_env": "OPENAI_API_KEY",
         "base_url": "https://api.openai.com/v1",
-        "default_model": "gpt-5.6-terra",
+        "default_model": "gpt-6.1-sol",
         "icon_path": "icons/openai_logo.png",
+        # OpenAI rejects temperature != 1 whenever reasoning is active, so the
+        # app pins it for every OpenAI model.
+        "fixed_temperature": 1.0,
         "models": {
+            # GPT-6.1 Sol / Astra always reason: no "none". "max" exists only in
+            # the Responses API, not in Chat Completions (which the app uses).
+            "gpt-6.1-sol": {
+                "display_name": "GPT-6.1 Sol",
+                "max_tokens": 1050000,  # 1.05M context window
+                "reasoning_efforts": ["low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "medium",
+                "thinking_param": {"reasoning": {"effort": "medium"}},
+            },
+            "gpt-6-astra": {
+                "display_name": "GPT-6 Astra",
+                "max_tokens": 1050000,  # 1.05M context window
+                "reasoning_efforts": ["low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "medium",
+                "thinking_param": {"reasoning": {"effort": "medium"}},
+            },
+            "gpt-6-luna": {
+                "display_name": "GPT-6 Luna",
+                "max_tokens": 1050000,  # 1.05M context window
+                "reasoning_efforts": ["none", "low", "medium", "high", "xhigh"],
+                "reasoning_effort_default": "none",
+                "thinking_param": {"reasoning": {"effort": "none"}},
+            },
             "gpt-5.6-sol": {
                 "display_name": "GPT-5.6 Sol",
                 "max_tokens": 1050000,  # 1.05M context window
@@ -77,9 +103,16 @@ LLM_PROVIDERS = {
         "name": "Z.AI",
         "api_key_env": "ZAI_API_KEY",
         "base_url": "https://api.z.ai/api/paas/v4",
-        "default_model": "glm-5.2",
+        "default_model": "glm-5.3",
         "icon_path": "icons/zai_logo.svg",
         "models": {
+            "glm-5.3": {
+                "display_name": "GLM-5.3",
+                "max_tokens": 1000000,
+                "reasoning_efforts": ["low", "high", "max"],
+                "reasoning_effort_default": "max",
+                "thinking_param": {"thinking": {"type": "enabled"}},
+            },
             "glm-5.2": {
                 "display_name": "GLM-5.2",
                 "max_tokens": 1000000,
@@ -110,17 +143,36 @@ LLM_PROVIDERS = {
                 "display_name": "KIMI K3",
                 "max_tokens": 1048576,  # 1M context window
                 # K3 reasons via a top-level reasoning_effort field.
-                # "max" is the only supported level today (more coming).
-                "reasoning_efforts": ["max"],
+                "reasoning_efforts": ["low", "high", "max"],
                 "reasoning_effort_default": "max",
                 "thinking_param": {"reasoning": {"effort": "max"}},
                 # K3 only accepts temperature=1.0 (fixed by the API).
+                "fixed_temperature": 1.0,
+            },
+            # K2.7 Code always thinks: thinking can't be disabled and
+            # reasoning_effort is ignored.
+            "kimi-k2.7-code": {
+                "display_name": "KIMI K2.7 Code",
+                "max_tokens": 262144,
+                "thinking_param": {"thinking": {"type": "enabled"}},
+                "thinking_always_on": True,
+                "fixed_temperature": 1.0,
+            },
+            "kimi-k2.7-code-highspeed": {
+                "display_name": "KIMI K2.7 Code HighSpeed",
+                "max_tokens": 262144,
+                "thinking_param": {"thinking": {"type": "enabled"}},
+                "thinking_always_on": True,
                 "fixed_temperature": 1.0,
             },
             "kimi-k2.6": {
                 "display_name": "KIMI K2.6",
                 "max_tokens": 262144,
                 "thinking_param": {"thinking": {"type": "enabled"}},
+                # K2.6 accepts a single temperature per mode: 1.0 while
+                # thinking, 0.6 with thinking disabled.
+                "fixed_temperature": 1.0,
+                "fixed_temperature_without_thinking": 0.6,
             },
         },
     },
@@ -185,7 +237,7 @@ MAX_TOKENS = {
 
 # Global Defaults (stored in session state)
 DEFAULT_LLM_PROVIDER = "deepseek"
-DEFAULT_LLM_MODEL = "deepseek-v4-flash"
+DEFAULT_LLM_MODEL = LLM_PROVIDERS[DEFAULT_LLM_PROVIDER]["default_model"]
 DEFAULT_THINKING_ENABLED = True
 
 # Model Context Limits
@@ -350,7 +402,7 @@ def get_model_config(provider: str, model: str) -> dict:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5.6-terra", "glm-5.2")
+        model: Model ID (e.g., "deepseek-flash", "gpt-6.1-sol", "glm-5.3")
 
     Returns:
         dict: Model configuration with display_name, max_tokens, thinking_param
@@ -376,7 +428,7 @@ def get_max_tokens(provider: str, model: str) -> int:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5.6-terra", "glm-5.2")
+        model: Model ID (e.g., "deepseek-flash", "gpt-6.1-sol", "glm-5.3")
 
     Returns:
         int: Maximum context length for the model
@@ -416,7 +468,7 @@ def get_model_display_name(provider: str, model: str) -> str:
 
     Args:
         provider: Provider key (e.g., "deepseek", "openai", "zai")
-        model: Model ID (e.g., "deepseek-v4-flash", "gpt-5.6-terra", "glm-5.2")
+        model: Model ID (e.g., "deepseek-flash", "gpt-6.1-sol", "glm-5.3")
 
     Returns:
         str: Display name (e.g., "DeepSeek V4 Flash", "GPT-5", "GLM-5.2")
@@ -530,7 +582,7 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
 
     Args:
         provider: Provider key (e.g., "openai")
-        model: Model ID (e.g., "gpt-5.6-terra", "glm-5.2")
+        model: Model ID (e.g., "gpt-6.1-sol", "glm-5.3")
 
     Returns:
         list: List of supported reasoning effort levels for the model
@@ -542,16 +594,64 @@ def get_reasoning_efforts(provider: str, model: str) -> list:
     return model_config.get("reasoning_efforts", ["none", "low", "medium", "high"])
 
 
-def get_fixed_temperature(provider: str, model: str):
+def get_default_reasoning_effort(provider: str, model: str):
+    """Get a model's default reasoning effort.
+
+    Args:
+        provider: Provider key (e.g., "openai")
+        model: Model ID (e.g., "gpt-6.1-sol")
+
+    Returns:
+        str | None: The model's ``reasoning_effort_default`` (or its first
+        supported effort), or None if the model has no reasoning efforts
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    model_config = get_model_config(provider, model)
+    efforts = model_config.get("reasoning_efforts")
+    if not efforts:
+        return None
+    return model_config.get("reasoning_effort_default", efforts[0])
+
+
+def resolve_reasoning_effort(provider: str, model: str, thinking_level: str):
+    """Map a requested thinking level onto an effort the model supports.
+
+    Returns ``thinking_level`` if the model supports it, otherwise the model's
+    default effort (e.g. "none" requested for gpt-6.1-sol, which always reasons).
+
+    Args:
+        provider: Provider key (e.g., "openai")
+        model: Model ID (e.g., "gpt-6.1-sol")
+        thinking_level: Requested level (may be None or unsupported)
+
+    Returns:
+        str | None: Supported effort, or None if the model has no reasoning efforts
+
+    Raises:
+        ValueError: If provider or model is not found
+    """
+    efforts = get_model_config(provider, model).get("reasoning_efforts", [])
+    if thinking_level in efforts:
+        return thinking_level
+    return get_default_reasoning_effort(provider, model)
+
+
+def get_fixed_temperature(provider: str, model: str = None, thinking: bool = True):
     """Get the enforced temperature for a model, if it only accepts a fixed value.
 
     Some models (e.g. kimi-k3) reject any temperature other than a single fixed
-    value. This returns that value so callers can override user-selected
-    temperatures, or None when the model accepts an adjustable temperature.
+    value, and some providers (OpenAI) pin it for all their models. This returns
+    that value so callers can override user-selected temperatures, or None when
+    the temperature is adjustable.
 
     Args:
         provider: Provider key (e.g., "kimi")
-        model: Model ID (e.g., "kimi-k3")
+        model: Model ID (e.g., "kimi-k3"); if None, only the provider-wide
+            value is considered
+        thinking: Whether thinking is enabled for the request (kimi-k2.6
+            requires a different fixed value without thinking)
 
     Returns:
         float | None: The fixed temperature, or None if temperature is adjustable
@@ -559,4 +659,10 @@ def get_fixed_temperature(provider: str, model: str):
     Raises:
         ValueError: If provider or model is not found
     """
-    return get_model_config(provider, model).get("fixed_temperature")
+    provider_value = get_provider_config(provider).get("fixed_temperature")
+    if model is None:
+        return provider_value
+    model_config = get_model_config(provider, model)
+    if not thinking and "fixed_temperature_without_thinking" in model_config:
+        return model_config["fixed_temperature_without_thinking"]
+    return model_config.get("fixed_temperature", provider_value)

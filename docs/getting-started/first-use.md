@@ -139,6 +139,7 @@ ExpertGPTs supports multiple LLM providers:
 - **DeepSeek** (default) - Cost-effective, high-quality
 - **OpenAI** - GPT models with reasoning
 - **Z.AI** - GLM models
+- **KIMI** - Moonshot KIMI models
 
 Switch providers per expert using the dropdown in the sidebar.
 
@@ -146,9 +147,10 @@ Switch providers per expert using the dropdown in the sidebar.
 
 Each provider offers multiple models:
 
-- **DeepSeek**: `deepseek-v4-flash`, `deepseek-v4-pro`
-- **OpenAI**: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.4-mini`, `gpt-5.4-nano`
-- **Z.AI**: `glm-5.2`, `glm-5`, `glm-4.7-flash`
+- **DeepSeek**: `deepseek-flash`, `deepseek-v4-pro`
+- **OpenAI**: `gpt-6.1-sol`, `gpt-6-astra`, `gpt-6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.4-mini`, `gpt-5.4-nano`
+- **Z.AI**: `glm-5.3`, `glm-5.2`, `glm-5`, `glm-4.7-flash`
+- **KIMI**: `kimi-k3`, `kimi-k2.7-code`, `kimi-k2.7-code-highspeed`, `kimi-k2.6`
 
 ### Temperature Adjustment
 

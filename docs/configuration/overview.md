@@ -57,7 +57,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.123456"
 metadata:
   version: "1.0"
-  model: "deepseek-v4-flash"
+  model: "deepseek-flash"
 ```
 
 **Naming Convention**: `{expert_id}.yaml`
@@ -83,7 +83,7 @@ metadata:
 ```toml
 [llm]
 provider = "deepseek"
-model = "deepseek-v4-flash"
+model = "deepseek-flash"
 temperature = 0.7
 thinking_level = "none"
 
@@ -95,7 +95,7 @@ code = "en"
 - **provider**: Default LLM provider (deepseek, openai, zai)
 - **model**: Default model for the provider
 - **temperature**: Default temperature for new experts
-- **thinking_level**: Default reasoning level (none, low, medium, high)
+- **thinking_level**: Default reasoning level (model-dependent: none, low, medium, high, xhigh, max; unsupported levels fall back to the model's default)
 - **language.code**: UI language code
 
 **Management**:
@@ -488,7 +488,7 @@ system_prompt: |
 created_at: "2025-01-17T12:00:00.000000"
 metadata:
   version: "1.0"
-  model: "deepseek-v4-flash"
+  model: "deepseek-flash"
 ```
 
 ## Troubleshooting
