@@ -252,7 +252,7 @@ New experts start with the provider/model from `app_defaults.toml` (fallback: `d
 - **Danger Zone Tab**: Reset application
 - **About Tab**: Version information
 
-**Home Page** (`:material/home:`):
+**Home Page** (`:material/smart_toy:`):
 - Add experts ("Add Chat" in the sidebar)
 
 **Expert Page** (chat toolbox below the chat input):
@@ -321,7 +321,7 @@ These provide reference for manual configuration.
 
 **Expert Configs**:
 - Deleted via UI (Settings → Expert Management)
-- Removes: YAML config, expert page (the chat history file in `chat_history/` is kept on disk)
+- Removes: YAML config, expert page, chat history, attached images and a leftover streaming cache
 - Irreversible
 
 **Other Configs**:
