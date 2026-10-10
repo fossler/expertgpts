@@ -596,11 +596,11 @@ if __name__ == "__main__":
             print(
                 f"⚠️  Warning: Expected {EXAMPLE_EXPERTS_COUNT} experts, but created {len(created)}"
             )
-            print("   Please update EXAMPLE_EXPERTS_COUNT in utils/constants.py")
+            print("   Please update EXAMPLE_EXPERTS_COUNT in lib/shared/constants.py")
 
         print(f"\n✅ Successfully created {len(created)} expert(s)!")
     else:
         print("ℹ️  Expert pages already exist. Skipping example expert creation.")
-        print("   To recreate experts, use: python3 scripts/reset_application.py")
+        print("   To recreate experts, use: uv run python scripts/reset_application.py")
 
-    print("\n🎉 You can now run the app with: streamlit run app.py")
+    print("\n🎉 You can now run the app with: uv run streamlit run app.py")

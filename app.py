@@ -74,7 +74,7 @@ def run_first_time_setup():
 
         {e.stderr}
 
-        Please run manually: `python3 scripts/setup.py`
+        Please run manually: `uv run python scripts/setup.py`
         """)
 
 
