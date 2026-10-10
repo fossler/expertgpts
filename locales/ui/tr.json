@@ -399,7 +399,7 @@
     "voice_error": "Metne dönüştürme başarısız: {error}",
     "error_audio_too_large": "Kayıt {size} MB'tan büyük olduğu için metne dönüştürülemiyor.",
     "voice_model": "Metne dönüştürme: {model}",
-    "voice_key_missing": "Sesli giriş için {provider} API anahtarı gerekir ({model}). Ayarlar'dan ekleyebilirsiniz.",
+    "voice_key_missing": "Sesli giriş için {provider} API anahtarı gerekir ({model}). Ayarlardan ekleyebilirsiniz.",
     "error_audio_too_long": "Kayıt {seconds} saniyeden uzun; bu, {model} sınırıdır.",
     "voice_asr_context": "Bu Türkçe bir sesli mesajdır."
   }

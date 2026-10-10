@@ -294,7 +294,7 @@
     "temperature": {
       "fixed_for_openai": "Fix auf 1.0 für OpenAI-Modelle",
       "openai_warning": "OpenAI-Modelle unterstützen nur einen Temperaturwert von 1.0",
-      "ignored_with_thinking": "DeepSeek ignoriert die Temperatur im Denkmodus. Setze das Denken auf „none“, um sie zu nutzen.",
+      "ignored_with_thinking": "DeepSeek ignoriert die Temperatur im Denkmodus. Setzen Sie das Denken auf „none“, um sie zu nutzen.",
       "help_creativity": "Steuert Antwort-Kreativität und Fokus",
       "recommended_values": "Empfohlene Werte",
       "use_case_guidelines": "Anwendungsfall-Richtlinien:",
@@ -391,7 +391,7 @@
     "error_image_too_large": "{name} ist größer als {size} MB und wurde nicht angehängt.",
     "error_not_image": "{name} ist kein gültiges Bild und wurde nicht angehängt.",
     "image_unavailable": "nicht mehr verfügbar",
-    "clear_confirm": "Der gesamte Chatverlauf dieses Experten wird gelöscht, einschließlich angehängter Bilder.",
+    "clear_confirm": "Der gesamte Chat-Verlauf dieses Experten wird gelöscht, einschließlich angehängter Bilder.",
     "clear_button": "Endgültig löschen",
     "voice_input": "Spracheingabe",
     "voice_help": "Nehmen Sie eine Sprachnachricht auf. Nach dem Stoppen wird sie in Text umgewandelt und automatisch gesendet.",
