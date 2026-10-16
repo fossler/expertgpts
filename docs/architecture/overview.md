@@ -402,7 +402,7 @@ Render expert interface
 - **Icons**: Material Design (via Streamlit)
 
 ### Backend
-- **Language**: Python 3.14+
+- **Language**: Python 3.13+
 - **LLM Clients**: OpenAI Python SDK
 - **Data Formats**: YAML, JSON, TOML
 
