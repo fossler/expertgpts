@@ -6,7 +6,7 @@ This guide covers common issues and solutions for ExpertGPTs.
 
 ### "Python version too old"
 
-**Problem**: uv finds no interpreter matching `requires-python = ">=3.14"` (from `pyproject.toml`)
+**Problem**: uv finds no interpreter matching `requires-python = ">=3.13"` (from `pyproject.toml`)
 
 **Solution**:
 ```bash
@@ -14,11 +14,11 @@ This guide covers common issues and solutions for ExpertGPTs.
 python3 --version
 
 # Let uv install a matching Python
-uv python install 3.14
+uv python install 3.13
 
 # Or install it system-wide
-# macOS: brew install python@3.14
-# Ubuntu: sudo apt-get install python3.14
+# macOS: brew install python@3.13
+# Debian 13 / Ubuntu 26.04: sudo apt-get install python3 (3.13 / 3.14)
 ```
 
 ---
@@ -33,7 +33,7 @@ uv python install 3.14
 uv sync
 ```
 
-If this happens right after a Python upgrade (e.g. an OS upgrade from Python 3.12
+If this happens right after a Python upgrade (e.g. an OS upgrade from Python 3.13
 to 3.14), the existing `.venv` was built for the old interpreter. `uv run` and
 `uv sync` normally detect this and rebuild it; if not, recreate it:
 
@@ -116,7 +116,7 @@ uv sync
 uv run streamlit run app.py --server.port 8502
 
 # Check Python version
-uv run python --version  # Must be 3.14+
+uv run python --version  # Must be 3.13+
 ```
 
 ---
