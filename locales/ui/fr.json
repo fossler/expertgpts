@@ -269,7 +269,7 @@
     "zai_chat": "https://chat.z.ai/",
     "zai_platform": "https://z.ai/manage-apikey/subscription",
     "zai_referral": "https://z.ai/subscribe?ic=JGTYCX7ZO7",
-    "github_codespaces": "https://codespaces.new/fossler/expertgpts"
+    "github_codespaces": "https://codespaces.new/fossler/expertgpts-legacy"
   },
   "dialogs": {
     "add_chat": {

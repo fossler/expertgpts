@@ -471,7 +471,7 @@ Requires `watchdog` package (in the `dev` dependency group of `pyproject.toml`, 
 **Completed:**
 - Regenerated expert pages from template (Git branch footer now visible)
 - **Dead code cleanup**: Removed ~525 lines of unused code across 10 files
-- **PR created & merged**: https://github.com/fossler/expertgpts/pull/4
+- **PR created & merged**: https://github.com/fossler/expertgpts-legacy/pull/4
 
 ### Current Session (2026-03-22)
 

@@ -39,7 +39,7 @@ pip install uv
 
 ```bash
 git clone <repository-url>
-cd expertgpts
+cd expertgpts-legacy
 ```
 
 ### 2. Run the Application
@@ -196,7 +196,7 @@ Configuration files in `.streamlit/`, `chat_history/` and `chat_attachments/` wi
 If you encounter issues not covered here:
 
 - Check the **[Troubleshooting Guide](../reference/troubleshooting.md)**
-- Visit the [GitHub repository](https://github.com/fossler/expertgpts)
+- Visit the [GitHub repository](https://github.com/fossler/expertgpts-legacy)
 - Open an issue with your error message and environment details
 
 ---

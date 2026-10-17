@@ -1189,7 +1189,7 @@ def render_about_section():
     ### {i18n.t("about.resources")}
     """)
     st.markdown(
-        "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts)"
+        "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/fossler/expertgpts-legacy)"
     )
 
     st.markdown(f"""

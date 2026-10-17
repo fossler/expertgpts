@@ -155,7 +155,7 @@ All documentation uses relative links:
 
 ## External Resources
 
-- **GitHub Repository**: [https://github.com/fossler/expertgpts](https://github.com/fossler/expertgpts)
+- **GitHub Repository**: [https://github.com/fossler/expertgpts-legacy](https://github.com/fossler/expertgpts-legacy)
 - **CLAUDE.md**: Project instructions for AI development
 - **README.md**: Project overview and quick start
 
