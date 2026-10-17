@@ -230,7 +230,7 @@ chmod 600 .streamlit/secrets.toml
 If issues persist:
 
 1. **Check documentation**: [Documentation Home](../README.md)
-2. **Search existing issues**: [GitHub Repository](https://github.com/fossler/expertgpts)
+2. **Search existing issues**: [GitHub Repository](https://github.com/fossler/expertgpts-legacy)
 3. **Open new issue**: Include error message and environment details
 
 **Environment Information to Provide**:

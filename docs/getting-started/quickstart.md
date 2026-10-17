@@ -24,7 +24,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 ```bash
 git clone <repository-url>
-cd expertgpts
+cd expertgpts-legacy
 uv run streamlit run app.py
 ```
 
@@ -141,7 +141,7 @@ uv sync
 
 ## Support
 
-For issues or questions, visit the [GitHub repository](https://github.com/fossler/expertgpts).
+For issues or questions, visit the [GitHub repository](https://github.com/fossler/expertgpts-legacy).
 
 ---
 

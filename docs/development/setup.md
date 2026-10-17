@@ -30,7 +30,7 @@ pip install uv
 
 ```bash
 git clone <repository-url>
-cd expertgpts
+cd expertgpts-legacy
 ```
 
 ### 2. Sync Dependencies

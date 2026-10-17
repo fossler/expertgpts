@@ -274,7 +274,7 @@ If you encounter issues:
 
 ### Community Support
 
-- Visit the [GitHub repository](https://github.com/fossler/expertgpts)
+- Visit the [GitHub repository](https://github.com/fossler/expertgpts-legacy)
 - Open an issue with your error message and environment details
 
 ## Next Steps

@@ -34,7 +34,7 @@ ExpertGPTs is a powerful AI chat interface that lets you create and interact wit
 
 ## Code Hosting
 
-- **GitHub**: [https://github.com/fossler/expertgpts](https://github.com/fossler/expertgpts) (primary)
+- **GitHub**: [https://github.com/fossler/expertgpts-legacy](https://github.com/fossler/expertgpts-legacy) (primary)
 
 ## Pay Only for What You Use: The Economic and Strategic Advantages of API-Based AI Chats
 
@@ -99,7 +99,7 @@ Get ExpertGPTs up and running in 5 minutes:
 ```bash
 # Clone and navigate
 git clone <repository-url>
-cd expertgpts
+cd expertgpts-legacy
 
 # Install uv (if not already installed)
 # macOS/Linux:
@@ -310,7 +310,7 @@ Would I choose Streamlit again? For data dashboards and simple prototypes, absol
 
 ## Support
 
-For issues, questions, or contributions, visit the [GitHub repository](https://github.com/fossler/expertgpts).
+For issues, questions, or contributions, visit the [GitHub repository](https://github.com/fossler/expertgpts-legacy).
 
 ---
 
